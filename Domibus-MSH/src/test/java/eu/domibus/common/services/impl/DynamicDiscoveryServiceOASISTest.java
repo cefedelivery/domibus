@@ -191,7 +191,7 @@ public class DynamicDiscoveryServiceOASISTest {
             result = "192.168.0.0";
 
             domibusProxy.getHttpProxyPort();
-            result = "1234";
+            result = 1234;
 
             domibusProxy.getHttpProxyUser();
             result = "proxyUser";
@@ -233,7 +233,7 @@ public class DynamicDiscoveryServiceOASISTest {
             result = "192.168.0.0";
 
             domibusProxy.getHttpProxyPort();
-            result = "1234";
+            result = 1234;
 
             domibusProxy.getHttpProxyUser();
             result = "proxyUser";

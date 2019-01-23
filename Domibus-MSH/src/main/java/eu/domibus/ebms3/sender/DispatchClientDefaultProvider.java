@@ -116,14 +116,14 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
         if(!domibusProxy.isEnabled()) {
-            LOG.info("Usage of Proxy not required");
+            LOG.debug("Usage of proxy not required");
             return ;
         }
 
         LOG.debug("Configuring proxy [{}] [{}] [{}] [{}] ", domibusProxy.getHttpProxyHost(),
                 domibusProxy.getHttpProxyPort(), domibusProxy.getHttpProxyUser(), domibusProxy.getNonProxyHosts());
         httpClientPolicy.setProxyServer(domibusProxy.getHttpProxyHost());
-        httpClientPolicy.setProxyServerPort(Integer.valueOf(domibusProxy.getHttpProxyPort()));
+        httpClientPolicy.setProxyServerPort(domibusProxy.getHttpProxyPort());
         httpClientPolicy.setProxyServerType(org.apache.cxf.transports.http.configuration.ProxyServerType.HTTP);
 
         if (!StringUtils.isBlank(domibusProxy.getNonProxyHosts())) {

@@ -6,6 +6,7 @@ import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.apache.wss4j.dom.WSConstants;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;

@@ -158,9 +158,9 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             return null;
         }
         if(StringUtils.isBlank(domibusProxy.getHttpProxyUser())) {
-            return new DefaultProxy(domibusProxy.getHttpProxyHost(), Integer.parseInt(domibusProxy.getHttpProxyPort()));
+            return new DefaultProxy(domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort());
         }
-        return new DefaultProxy(domibusProxy.getHttpProxyHost(), Integer.parseInt(domibusProxy.getHttpProxyPort()), domibusProxy.getHttpProxyUser(), domibusProxy.getHttpProxyPassword(), domibusProxy.getNonProxyHosts());
+        return new DefaultProxy(domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort(), domibusProxy.getHttpProxyUser(), domibusProxy.getHttpProxyPassword(), domibusProxy.getNonProxyHosts());
     }
 
     @Override

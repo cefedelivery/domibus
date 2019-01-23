@@ -37,7 +37,7 @@ public class CRLServiceImpl implements CRLService {
     public boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException {
         List<String> crlDistributionPoints = crlUtil.getCrlDistributionPoints(cert);
 
-        LOG.info("CRL check for certificate: [{}]", getSubjectDN(cert));
+        LOG.debug("CRL check for certificate: [{}]", getSubjectDN(cert));
         if (crlDistributionPoints == null || crlDistributionPoints.isEmpty()) {
             LOG.debug("No CRL distribution points found for certificate: [{}]", getSubjectDN(cert));
             return false;

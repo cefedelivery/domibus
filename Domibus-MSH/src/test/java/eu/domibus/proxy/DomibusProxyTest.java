@@ -59,8 +59,8 @@ public class DomibusProxyTest {
             domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_HOST);
             result = "12.13.14.15";
 
-            domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8012";
+            domibusPropertyProvider.getIntegerProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_PORT);
+            result = 8012;
 
         }};
         domibusProxy.initDomibusProxy();
@@ -75,8 +75,8 @@ public class DomibusProxyTest {
             domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_HOST);
             result = "12.13.14.15";
 
-            domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8012";
+            domibusPropertyProvider.getIntegerProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_PORT);
+            result = 8012;
 
             domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_USER);
             result = "idragusa";
@@ -94,8 +94,8 @@ public class DomibusProxyTest {
             domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_HOST);
             result = "12.13.14.15";
 
-            domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8012";
+            domibusPropertyProvider.getIntegerProperty(DomibusProxy.DOMIBUS_PROXY_HTTP_PORT);
+            result = 8012;
 
             domibusPropertyProvider.getProperty(DomibusProxy.DOMIBUS_PROXY_USER);
             result = "idragusa";
@@ -111,7 +111,7 @@ public class DomibusProxyTest {
         domibusProxy.initDomibusProxy();
         Assert.assertTrue(domibusProxy.isEnabled());
         Assert.assertEquals("12.13.14.15", domibusProxy.getHttpProxyHost());
-        Assert.assertEquals("8012", domibusProxy.getHttpProxyPort());
+        Assert.assertEquals(new Integer("8012"), domibusProxy.getHttpProxyPort());
         Assert.assertEquals("idragusa", domibusProxy.getHttpProxyUser());
         Assert.assertEquals("pass", domibusProxy.getHttpProxyPassword());
         Assert.assertEquals("localhost", domibusProxy.getNonProxyHosts());

@@ -16,9 +16,12 @@ import javax.annotation.PostConstruct;
 /**
  * @author idragusa
  * @since 4.1
+ *
+ * Initialize and holds the proxy configuration for Domibus.
+ * Domibus allows one proxy for all requests on all domains.
+ *
  */
 @Component
-@Scope(BeanDefinition.SCOPE_SINGLETON)
 public class DomibusProxy {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusProxy.class);
@@ -32,7 +35,7 @@ public class DomibusProxy {
 
     protected Boolean enabled;
     protected String httpProxyHost;
-    protected String httpProxyPort;
+    protected Integer httpProxyPort;
     protected String httpProxyUser;
     protected String httpProxyPassword;
     protected String nonProxyHosts;
@@ -50,8 +53,8 @@ public class DomibusProxy {
         }
 
         this.httpProxyHost = domibusPropertyProvider.getProperty(DOMIBUS_PROXY_HTTP_HOST);
-        this.httpProxyPort = domibusPropertyProvider.getProperty(DOMIBUS_PROXY_HTTP_PORT);
-        if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)) {
+        this.httpProxyPort = domibusPropertyProvider.getIntegerProperty(DOMIBUS_PROXY_HTTP_PORT);
+        if (StringUtils.isEmpty(httpProxyHost) || httpProxyPort == 0) {
             LOG.error("Proxy is enabled but the configuration is invalid: host = [{}] port = [{}]", httpProxyHost, httpProxyPort);
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_006, "Proxy is enabled but the configuration is invalid.");
         }
@@ -84,11 +87,11 @@ public class DomibusProxy {
         this.httpProxyHost = httpProxyHost;
     }
 
-    public String getHttpProxyPort() {
+    public Integer getHttpProxyPort() {
         return httpProxyPort;
     }
 
-    public void setHttpProxyPort(String httpProxyPort) {
+    public void setHttpProxyPort(Integer httpProxyPort) {
         this.httpProxyPort = httpProxyPort;
     }
 

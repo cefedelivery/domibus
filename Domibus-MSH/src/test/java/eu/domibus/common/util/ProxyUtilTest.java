@@ -39,7 +39,7 @@ public class ProxyUtilTest {
             result = "somehost";
 
             domibusProxy.getHttpProxyPort();
-            result = "8280";
+            result = 8280;
 
             domibusProxy.getHttpProxyUser();
             result = "someuser";
@@ -62,7 +62,7 @@ public class ProxyUtilTest {
             result = "somehost";
 
             domibusProxy.getHttpProxyPort();
-            result = "8280";
+            result = 8280;
 
             domibusProxy.getHttpProxyUser();
             result = "someuser";
@@ -86,7 +86,7 @@ public class ProxyUtilTest {
             result = "somehost";
 
             domibusProxy.getHttpProxyPort();
-            result = "8280";
+            result = 8280;
 
             domibusProxy.getHttpProxyUser();
             result = "someuser";

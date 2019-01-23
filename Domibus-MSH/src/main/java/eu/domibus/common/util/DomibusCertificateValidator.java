@@ -15,6 +15,8 @@ import java.security.cert.X509Certificate;
 /**
  * @author idragusa
  * @since 4.1
+ * Provide our own certificate validator to be used by difi client for SMP certificate validation.
+ * Default difi certificate validator does not have a way to configure proxy for CRL verification
  */
 public class DomibusCertificateValidator implements CertificateValidator {
 
@@ -27,7 +29,7 @@ public class DomibusCertificateValidator implements CertificateValidator {
 
     // validate the SMP certificate
     public void validate(Service service, X509Certificate certificate) throws PeppolSecurityException {
-        LOG.info("Certificate validator for certificate: [{}]", getSubjectDN(certificate));
+        LOG.debug("Certificate validator for certificate: [{}]", getSubjectDN(certificate));
         if (!certificateService.isCertificateValid(certificate)) {
             throw new PeppolSecurityException("Lookup certificate validator failed for " + getSubjectDN(certificate));
         }

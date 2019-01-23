@@ -30,7 +30,7 @@ public class ProxyUtil {
     public HttpHost getConfiguredProxy() {
         if (domibusProxy.isEnabled()) {
             LOG.debug("Proxy enabled, get configured proxy [{}] [{}]", domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort());
-            return new HttpHost(domibusProxy.getHttpProxyHost(), Integer.parseInt(domibusProxy.getHttpProxyPort()));
+            return new HttpHost(domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort());
         }
         LOG.debug("Proxy not enabled, configured proxy is null");
         return null;
@@ -40,7 +40,7 @@ public class ProxyUtil {
         if(domibusProxy.isEnabled() && !StringUtils.isBlank(domibusProxy.getHttpProxyUser())) {
             LOG.debug("Proxy enabled, configure credentials provider for [{}]", domibusProxy.getHttpProxyUser());
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(domibusProxy.getHttpProxyHost(), Integer.parseInt(domibusProxy.getHttpProxyPort())),
+            credsProvider.setCredentials(new AuthScope(domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort()),
                     new UsernamePasswordCredentials(domibusProxy.getHttpProxyUser(), domibusProxy.getHttpProxyPassword()));
 
             return credsProvider;

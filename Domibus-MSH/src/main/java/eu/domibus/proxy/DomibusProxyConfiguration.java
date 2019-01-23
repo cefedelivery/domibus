@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Scope;
 /**
  * @author idragusa
  * @since 4.1
+ *
+ * Configuration of DomibusProxy.
+ * Domibus takes one proxy for all requests (and domains)
  */
 @Configuration
 public class DomibusProxyConfiguration {
@@ -17,7 +20,6 @@ public class DomibusProxyConfiguration {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusProxyConfiguration.class);
 
     @Bean(name = "domibusProxy")
-    @Scope(BeanDefinition.SCOPE_SINGLETON)
     public DomibusProxy domibusProxy() {
         return new DomibusProxy();
     }
