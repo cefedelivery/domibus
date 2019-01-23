@@ -2,6 +2,7 @@ package eu.domibus.plugin.webService.impl;
 
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.ext.services.MessageAcknowledgeExtService;
+import eu.domibus.plugin.handler.MessagePuller;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.webService.generated.LargePayloadType;
@@ -13,7 +14,6 @@ import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,9 @@ public class BackendWebServiceImplTest {
 
     @Injectable
     protected MessageSubmitter messageSubmitter;
+
+    @Injectable
+    MessagePuller messagePuller;
 
     @Injectable
     String name;
