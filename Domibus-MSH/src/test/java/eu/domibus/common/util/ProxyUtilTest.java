@@ -45,6 +45,9 @@ public class ProxyUtilTest {
 
                 domibusProxyService.isProxyUserSet();
                 result = true;
+
+                domibusProxyService.isNonProxyHostsSet();
+                result = false;
             }};
     }
 

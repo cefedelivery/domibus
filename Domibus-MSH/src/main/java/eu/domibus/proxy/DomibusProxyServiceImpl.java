@@ -57,6 +57,11 @@ public class DomibusProxyServiceImpl implements DomibusProxyService {
         return !StringUtils.isBlank(getDomibusProxy().getHttpProxyUser());
     }
 
+    @Override
+    public Boolean isNonProxyHostsSet() {
+        return !StringUtils.isBlank(getDomibusProxy().getNonProxyHosts());
+    }
+
     protected void initDomibusProxy() {
         domibusProxy = new DomibusProxy();
         LOG.info("Initialize Domibus proxy.");

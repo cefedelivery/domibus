@@ -291,6 +291,9 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusProxyService.isProxyUserSet();
             result = false;
 
+            domibusProxyService.isNonProxyHostsSet();
+            result = false;
+
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
