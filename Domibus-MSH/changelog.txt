@@ -14,7 +14,7 @@ Domibus 4.0.2
 - Allow sending an XML payload in the Soap body
 - Adapt the configuration for the connection pooling in Tomcat
 - Fixed the caching for the downloaded CRLs
-- Allow proxy configuration in without user/password
+- Allow proxy configuration without user/password
 - Improved the duplicate detection
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
