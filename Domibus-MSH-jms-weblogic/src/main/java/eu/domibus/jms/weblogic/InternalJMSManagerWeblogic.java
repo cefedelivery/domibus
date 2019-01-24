@@ -31,7 +31,6 @@ import weblogic.messaging.runtime.MessageInfo;
 
 import javax.annotation.Resource;
 import javax.jms.Destination;
-import javax.jms.Queue;
 import javax.jms.Topic;
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
@@ -332,7 +331,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         InternalJMSDestination internalJmsDestination = null;
         Map<String, InternalJMSDestination> internalDestinations = findDestinationsGroupedByFQName();
         for (Map.Entry<String, InternalJMSDestination> entry : internalDestinations.entrySet()) {
-            if (entry.getKey().contains(destName)) {
+            // the key is not always the same as the jndi name so we try them both
+            if (matchesQueue(destName, entry)) {
                 LOG.debug("Internal destination found for source [" + destName + "]");
                 internalJmsDestination = entry.getValue();
             }
@@ -343,6 +343,17 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         String destinationJndi = internalJmsDestination.getProperty(PROPERTY_JNDI_NAME);
         LOG.debug("Found JNDI [" + destinationJndi + "] for destination [" + destName + "]");
         return InitialContext.doLookup(destinationJndi);
+    }
+
+    protected boolean matchesQueue(String destName, Map.Entry<String, InternalJMSDestination> entry) {
+        if (entry.getKey().contains(destName)) {
+            return true;
+        }
+        String jndiName = entry.getValue().<String>getProperty(PROPERTY_JNDI_NAME);
+        if (jndiName == null) {
+            return false;
+        }
+        return jndiName.contains(destName);
     }
 
     @Override

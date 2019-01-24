@@ -226,7 +226,6 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             final int numPayloads = messageIn.getIntProperty(TOTAL_NUMBER_OF_PAYLOADS);
 
-
             Enumeration<String> allProps = messageIn.getPropertyNames();
             while (allProps.hasMoreElements()) {
                 String key = allProps.nextElement();
@@ -235,8 +234,9 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
                 }
             }
 
+            String bodyloadEnabled = getPropertyWithFallback(messageIn, JMSMessageConstants.P1_IN_BODY);
             for (int i = 1; i <= numPayloads; i++) {
-                transformToSubmissionHandlePayload(messageIn, target, i);
+                transformToSubmissionHandlePayload(messageIn, target, bodyloadEnabled, i);
             }
         } catch (final JMSException ex) {
             LOG.error("Error while getting properties from MapMessage", ex);
@@ -268,13 +268,13 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
         target.addFromParty(fromPartyID, fromPartyType);
     }
 
-    private void transformToSubmissionHandlePayload(MapMessage messageIn, Submission target, int i) throws JMSException {
+    private void transformToSubmissionHandlePayload(MapMessage messageIn, Submission target, String bodyloadEnabled, int i) throws JMSException {
         final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, i));
 
         final String contentId;
         final String mimeType;
         final String fileName;
-        String description = null;
+
         final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, i));
         mimeType = trim(messageIn.getStringProperty(payMimeTypeProp));
         final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, i));
@@ -299,8 +299,9 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
                 throw new IllegalArgumentException(propPayload + " neither available as byte[] or URL, aborting transformation");
             }
         }
+        boolean inBody = (i == 1 && "true".equalsIgnoreCase(bodyloadEnabled));
 
-        target.addPayload(contentId, payloadDataHandler, partProperties, false, null, null);
+        target.addPayload(contentId, payloadDataHandler, partProperties, inBody, null, null);
     }
 
 }

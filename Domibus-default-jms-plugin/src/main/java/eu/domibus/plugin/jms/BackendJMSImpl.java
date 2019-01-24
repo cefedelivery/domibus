@@ -11,6 +11,7 @@ import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -89,10 +90,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      *
      * @param map The incoming JMS Message
      */
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     @Transactional
     public void receiveMessage(final MapMessage map) {
         try {
             String messageID = map.getStringProperty(MESSAGE_ID);
+            if (StringUtils.isNotBlank(messageID)) {
+                LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageID);
+            }
             final String jmsCorrelationID = map.getJMSCorrelationID();
             final String messageType = map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY);
 
@@ -129,12 +134,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     protected void sendReplyMessage(final String messageId, final String errorMessage, final String correlationId) {
+        LOG.debug("Sending reply message");
         final JmsMessageDTO jmsMessageDTO = new ReplyMessageCreator(messageId, errorMessage, correlationId).createMessage();
         sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_REPLY);
     }
 
     @Override
     public void deliverMessage(final String messageId) {
+        LOG.debug("Delivering message");
         final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
         final String queueValue = domibusPropertyExtService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_OUT);
         if (StringUtils.isEmpty(queueValue)) {
@@ -146,6 +153,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
+        LOG.debug("Handling messageReceiveFailed");
         final JmsMessageDTO jmsMessageDTO = new ErrorMessageCreator(messageReceiveFailureEvent.getErrorResult(),
                 messageReceiveFailureEvent.getEndpoint(),
                 NotificationType.MESSAGE_RECEIVED_FAILURE).createMessage();
@@ -161,6 +169,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void messageSendSuccess(String messageId) {
+        LOG.debug("Handling messageSendSuccess");
         final JmsMessageDTO jmsMessageDTO = new SignalMessageCreator(messageId, NotificationType.MESSAGE_SEND_SUCCESS).createMessage();
         sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_REPLY);
     }
@@ -177,6 +186,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public MapMessage downloadMessage(String messageId, MapMessage target) throws MessageNotFoundException {
+        LOG.debug("Downloading message");
         return this.getMessageRetrievalTransformer().transformFromSubmission(this.messageRetriever.downloadMessage(messageId), target);
     }
 
