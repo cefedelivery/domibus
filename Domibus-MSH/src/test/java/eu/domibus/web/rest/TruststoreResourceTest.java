@@ -63,7 +63,7 @@ public class TruststoreResourceTest {
     private CsvServiceImpl csvServiceImpl;
 
     @Test
-    public void testUploadTruststoreFileSuccess() {
+    public void testUploadTruststoreFileSuccess() throws IOException {
         // Given
         MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[] {1,0,1});
 
@@ -77,7 +77,7 @@ public class TruststoreResourceTest {
     }
 
     @Test
-    public void testUploadTruststoreEmpty() {
+    public void testUploadTruststoreEmpty() throws IOException {
         // Given
         MultipartFile emptyFile = new MockMultipartFile("emptyfile", new byte[] {});
 

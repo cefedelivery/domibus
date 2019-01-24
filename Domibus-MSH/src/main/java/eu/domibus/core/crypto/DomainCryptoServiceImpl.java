@@ -104,7 +104,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             throw new CryptoException("Could not replace truststore", exc);
         }
         try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
-            certificateService.validateLoadOperation(newTrustStoreBytes, password);
+            certificateService.validateLoadOperation(newTrustStoreBytes, password, getTrustStoreType());
             truststore.load(newTrustStoreBytes, password.toCharArray());
             LOG.debug("Truststore successfully loaded");
             persistTrustStore();
@@ -117,7 +117,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             } catch (CertificateException | NoSuchAlgorithmException | IOException exc) {
                 throw new CryptoException("Could not replace truststore and old truststore was not reverted properly. Please correct the error before continuing.", exc);
             }
-            throw new CryptoException("Could not replace truststore, using old truststore", e);
+            throw new CryptoException(e.getMessage(), e);
         } finally {
             closeOutputStream(oldTrustStoreBytes);
         }
@@ -148,6 +148,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         LOG.debug("TrustStoreFile is: [{}]", trustStoreFile.getAbsolutePath());
         try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
             truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
+            fileOutputStream.flush();
         } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e) {
             throw new CryptoException("Could not persist truststore:", e);
         }

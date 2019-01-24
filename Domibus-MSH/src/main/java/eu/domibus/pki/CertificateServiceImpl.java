@@ -185,13 +185,13 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) {
+    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password, String type) {
         try {
-            KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore tempTrustStore = KeyStore.getInstance(type);
             tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
             newTrustStoreBytes.reset();
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-            throw new DomibusCertificateException("Could not load key store", e);
+            throw new DomibusCertificateException("Could not load key store: " + e.getMessage(), e);
         }
     }
 
