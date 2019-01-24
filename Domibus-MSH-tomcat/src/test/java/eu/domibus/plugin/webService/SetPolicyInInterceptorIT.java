@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import static org.junit.Assert.fail;
+
 
 /**
  * @author draguio
@@ -87,7 +89,7 @@ public class SetPolicyInInterceptorIT extends AbstractBackendWSIT {
             Assert.assertTrue(reply.contains("Build-Time"));
 
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Assert.fail();
         }
     }
 }
