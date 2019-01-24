@@ -64,10 +64,12 @@ public class PullReceiptSender {
         }
         Set<Error> errors = errorMessage.getSignalMessage().getError();
         for (Error error : errors) {
-            LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
-            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
-            ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-            throw ebMS3Ex;
+            if(error.getErrorCode() != null) {
+                LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
+                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+                ebMS3Ex.setMshRole(MSHRole.RECEIVING);
+                throw ebMS3Ex;
+            }
         }
     }
 }
