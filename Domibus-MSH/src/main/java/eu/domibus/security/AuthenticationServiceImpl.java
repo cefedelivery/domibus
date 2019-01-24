@@ -34,7 +34,6 @@ public class AuthenticationServiceImpl extends AuthenticationServiceBase impleme
     @Autowired
     private UserService userService;
 
-
     @Override
     @Transactional(noRollbackFor = AuthenticationException.class)
     public UserDetail authenticate(String username, String password, String domain) {

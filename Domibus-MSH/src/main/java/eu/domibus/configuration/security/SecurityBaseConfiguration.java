@@ -17,7 +17,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  * @since 4.1
  */
 @Configuration
-public class BaseSecurityConfiguration {
+public class SecurityBaseConfiguration {
 
     @Bean
     public CsrfTokenRepository tokenRepository(){
