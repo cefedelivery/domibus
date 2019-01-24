@@ -12,13 +12,13 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.binding.soap.saaj.SAAJInInterceptor;
-import org.apache.cxf.common.util.StringUtils;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
@@ -96,7 +96,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     public void handleMessage(final SoapMessage message) throws Fault {
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
-        if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(httpMethod, HttpMethod.GET)) {
+        if (StringUtils.containsIgnoreCase(httpMethod, HttpMethod.GET)) {
             LOG.debug("Detected GET request on MSH: aborting the interceptor chain");
             message.getInterceptorChain().abort();
 
