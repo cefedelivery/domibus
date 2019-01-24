@@ -16,6 +16,7 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import junit.framework.Assert;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
@@ -412,11 +413,11 @@ public class UpdateRetryLoggingServiceTest {
 
 
     @Test
-    public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
-        final long currentTime = System.currentTimeMillis();
+    public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) throws InterruptedException {
         final int timeOut = 10;
         final long timeOutInMillis = 60000 * timeOut;
-        final Date expectedDate = new Date(currentTime + timeOutInMillis);
+        final long currentTime = System.currentTimeMillis() - timeOutInMillis ;
+        final Date expectedDate = new Date(currentTime+timeOutInMillis);
         new NonStrictExpectations() {{
             userMessageLog.getRestored();
             result = currentTime;
@@ -425,6 +426,9 @@ public class UpdateRetryLoggingServiceTest {
 
         }};
         assertEquals(expectedDate, updateRetryLoggingService.getMessageExpirationDate(userMessageLog, legConfiguration));
+
+        Thread.sleep(RetryStrategy.EXPIRATION_DELAY);
+        Assert.assertTrue(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog));
     }
 
     private static class SystemMockFirstOfJanuary2016 extends MockUp<System> {
