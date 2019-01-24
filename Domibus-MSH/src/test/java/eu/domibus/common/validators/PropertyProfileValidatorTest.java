@@ -34,7 +34,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by idragusa on 7/2/18.
+ * @author idragusa
+ * @since 4.0
  */
 @RunWith(JMockit.class)
 public class PropertyProfileValidatorTest {
@@ -96,49 +97,6 @@ public class PropertyProfileValidatorTest {
 
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
         propertyProfileValidator.validate(messaging, "anyKey");
-    }
-
-    @Test
-    public void validate4CornerModelTest() throws EbMS3Exception, FileNotFoundException, XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
-
-        new Expectations() {{
-            domibusConfigurationService.isFourCornerEnabled();
-            result = true;
-
-        }};
-
-        final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
-        propertyProfileValidator.validateFourCornerModel(messaging);
-    }
-
-    @Test(expected = EbMS3Exception.class)
-    public void validate4CornerModelMissingMessagePropertiesTest() throws EbMS3Exception, FileNotFoundException, XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
-
-        new Expectations() {{
-            domibusConfigurationService.isFourCornerEnabled();
-            result = true;
-
-        }};
-
-        final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
-        messaging.getUserMessage().setMessageProperties(null);
-
-        propertyProfileValidator.validateFourCornerModel(messaging);
-    }
-
-    @Test(expected = EbMS3Exception.class)
-    public void validate4CornerModelMissingOriginalSenderTest() throws EbMS3Exception, FileNotFoundException, XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
-
-        new Expectations() {{
-            domibusConfigurationService.isFourCornerEnabled();
-            result = true;
-
-        }};
-
-        final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
-        messaging.getUserMessage().getMessageProperties().getProperty().clear();
-
-        propertyProfileValidator.validateFourCornerModel(messaging);
     }
 
     private Property createProperty(String name, String key, String dataType, boolean required) {
