@@ -30,6 +30,10 @@ class Domibus{
     def redDomainID = null //"C3Default"
     def greenDomainID = null //"thirdDefault"
     def thirdGateway = "false"; def multitenancyModeC2 = 0; def multitenancyModeC3 = 0;
+
+    static def defaultPluginAdminC2Default = "pluginAdminC2Default"
+    static def defaultAdminDefaultPassword = "adminDefaultPassword"
+
     static def backup_file_sufix = "_backup_for_soapui_tests";
     static def DEFAULT_LOG_LEVEL = 1;
     static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
@@ -527,8 +531,10 @@ class Domibus{
         log.info "  waitForStatus  [][]  params: messageID: " + messageID + " SMSH: " + SMSH + " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
 
         if (bonusTimeForSender) {
-            log.info "  waitForStatus  [][]  Waiting time for Sender extended to 500 seconds"
-            MAX_WAIT_TIME = 500_000
+            if (bonusTimeForSender.isInteger()) MAX_WAIT_TIME = (bonusTimeForSender as Integer) * 1000
+            else MAX_WAIT_TIME = 500_000
+
+            log.info "  waitForStatus  [][]  Waiting time for Sender extended to ${MAX_WAIT_TIME/1000} seconds"
         }
 
         debugLog("  waitForStatus  [][]  senderDomainId=" + senderDomainId + " receiverDomaindId=" + receiverDomanId, log)
@@ -570,8 +576,11 @@ class Domibus{
             assert(messageStatus.toLowerCase() == SMSH.toLowerCase()),locateTest(context) + "Error:waitForStatus: Message in the sender side has status " + messageStatus + " instead of " + SMSH + "."
         }
         if (bonusTimeForReceiver) {
-            log.info "  waitForStatus  [][]  Waiting time for Receiver extended to 500 seconds"
-            MAX_WAIT_TIME = 100_000
+            if (bonusTimeForReceiver.isInteger()) MAX_WAIT_TIME = (bonusTimeForReceiver as Integer) * 1000
+            else MAX_WAIT_TIME = 100_000
+
+            log.info "  waitForStatus  [][]  Waiting time for Receiver extended to ${MAX_WAIT_TIME/1000} seconds"
+
         } else {
             MAX_WAIT_TIME = 30_000
         }
@@ -1278,12 +1287,13 @@ class Domibus{
             debugLog("  addPluginUser  [][]  Fetch users list and verify that user $userPl doesn't already exist.",log)
             usersMap = jsonSlurper.parseText(getPluginUsers(side, context, log))
             if (userExists(usersMap, userPl, log, true)) {
-                log.error "Error:addPluginUser: plugin user $userPl already exist: usernames must be unique.";
+                log.error "Error:addPluginUser: plugin user $userPl already exist: usernames must be unique."
             } else {
                 debugLog("  addPluginUser  [][]  Users list before the update: " + usersMap, log)
                 debugLog("  addPluginUser  [][]  Prepare user $userPl details to be added.", log)
-                curlParams = "[\n  {\n    \"status\": \"NEW\",\n    \"username\": \"$userPl\",\n    \"authenticationType\": \"BASIC\",\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$userRole\",\n    \"passwd\": \"$passwordPl\"\n  }\n]";
+                curlParams = "[\n  {\n    \"status\": \"NEW\",\n    \"username\": \"$userPl\",\n    \"authenticationType\": \"BASIC\",\n" + ((originalUser != null && originalUser != "") ? "    \"originalUser\": \"$originalUser\",\n" : "") + "    \"authRoles\": \"$userRole\",\n    \"passwd\": \"$passwordPl\"\n  }\n]";
                 debugLog("  addPluginUser  [][]  Inserting user $userPl in the list.", log)
+                debugLog("  addPluginUser  [][]  curlParams: " + curlParams, log)
                 commandString = "curl " + urlToDomibus(side, log, context) + "/rest/plugin/users -b " + context.expand('${projectDir}') + "\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: " + returnXsfrToken(side, context, log, authenticationUser, authenticationPwd) + "\" -X PUT -d " + formatJsonForCurl(curlParams, log)
                 commandResult = runCurlCommand(commandString, log)
                 assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:addPluginUser: Error while trying to add a user.";
@@ -1313,7 +1323,7 @@ class Domibus{
         try{
             (authenticationUser, authenticationPwd) = retriveAdminCredentialsForDomain(context, log, side, domainValue, authenticationUser, authenticationPwd)
 
-            debugLog("  removePluginUser  [][]  Fetch users list and verify that user $userPl exists.",log)
+            debugLog("  removePluginUser  [][]  Fetch users list and verify that user $userPl exists.", log)
             usersMap = jsonSlurper.parseText(getPluginUsers(side, context, log))
             debugLog("  removePluginUser  [][]  usersMap:	$usersMap", log)
             if (!userExists(usersMap, userPl, log, true)) {
@@ -1330,9 +1340,9 @@ class Domibus{
                     i++;
                 }
                 assert(rolePl != null),"Error:removePluginUser: Error while fetching the role of user \"$userPl\".";
-                assert(originalUser != null),"Error:removePluginUser: Error while fetching the original user of user \"$userPl\".";
                 assert(entityId != null),"Error:removePluginUser: Error while fetching the \"entityId\" of user \"$userPl\" from the user list.";
-                curlParams = "[\n  {\n    \"entityId\": $entityId,\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
+                curlParams = "[\n  {\n    \"entityId\": $entityId,\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n" + ((originalUser != null && originalUser != "") ? "    \"originalUser\": \"$originalUser\",\n" : "") + "    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
+                debugLog("  removePluginUser  [][]  curlParams: " + curlParams, log)
                 commandString = "curl " + urlToDomibus(side, log, context) + "/rest/plugin/users -b " + context.expand('${projectDir}') + "\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: " + returnXsfrToken(side, context, log, authenticationUser, authenticationPwd) + "\" -X PUT -d " + formatJsonForCurl(curlParams, log)
                 commandResult = runCurlCommand(commandString, log)
                 assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:removePluginUser: Error while trying to remove user $userPl.";
@@ -1527,6 +1537,7 @@ class Domibus{
         case "c2":
         case "blue":
         case "sender":
+        case "c2default":
             if (XSFRTOKEN_C2 == null) {
                 output = fetchCookieHeader(side, context, log, userLogin, passwordLogin)
                 XSFRTOKEN_C2 = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=", "").replace(";", "")
@@ -1536,6 +1547,7 @@ class Domibus{
         case "c3":
         case "red":
         case "receiver":
+        case "c3default":
             if (XSFRTOKEN_C3 == null) {
                 output = fetchCookieHeader(side, context, log, userLogin, passwordLogin)
                 XSFRTOKEN_C3 = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=", "").replace(";", "")
@@ -1543,6 +1555,8 @@ class Domibus{
             return XSFRTOKEN_C3;
             break;
         case "receivergreen":
+        case "green":
+        case "thirddefault":
             if (XSFRTOKEN_C_Other == null) {
                 output = fetchCookieHeader(side, context, log, userLogin, passwordLogin)
                 XSFRTOKEN_C_Other = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=", "").replace(";", "")
@@ -1750,15 +1764,18 @@ static def String urlToDomibus(side, log, context) {
     case "c2":
     case "blue":
     case "sender":
+    case "c2default":
         propName = "localUrl"
         break;
     case "c3":
     case "red":
     case "receiver":
+    case "c3default":
         propName = "remoteUrl"
         break;
     case "green":
     case "receivergreen":
+    case "thirddefault":
         propName  = "greenUrl"
         break;
     case "testEnv":
@@ -1769,7 +1786,20 @@ static def String urlToDomibus(side, log, context) {
     }
     return context.expand("\${#Project#${propName}}")
 }
-//---------------------------------------------------------------------------------------------------------------------------------
+
+static def void addPluginCredentialsIfNeeded(context, log, messageMap, String propPluginUsername = defaultPluginAdminC2Default, String propPluginPassword = defaultAdminDefaultPassword) {
+    debugLog("  ====  Calling \"addPluginCredentialsIfNeeded\".", log)
+    def unsecureLoginAllowed = context.expand("\${#Project#unsecureLoginAllowed}").toLowerCase()
+    if (unsecureLoginAllowed == "false" || unsecureLoginAllowed == 0) {
+        debugLog("  addPluginCredentialsIfNeeded  [][]  passed values are propPluginUsername=${propPluginUsername} propPluginPasswor=${propPluginPassword} ", log)
+        def u = context.expand("\${#Project#${propPluginUsername}}")
+        def p = context.expand("\${#Project#${propPluginPassword}}")
+        debugLog("  addPluginCredentialsIfNeeded  [][]  Username|Password=" + u + "|" + p, log)
+        messageMap.setStringProperty("username", u)
+        messageMap.setStringProperty("password", p)
+    }
 }
 
+//---------------------------------------------------------------------------------------------------------------------------------
+} // Domibus class end
 
