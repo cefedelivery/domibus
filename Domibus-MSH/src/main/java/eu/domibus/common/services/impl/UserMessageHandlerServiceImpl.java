@@ -121,7 +121,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
         handleIncomingMessage(legConfiguration, pmodeKey, request, messaging, selfSendingFlag, messageExists, testMessage);
 
-        return as4ReceiptService.generateReceipt(request, messaging, legConfiguration.getReliability(), legConfiguration.getReliability().isNonRepudiation(), messageExists, selfSendingFlag);
+        return as4ReceiptService.generateReceipt(request, messaging, legConfiguration.getReliability().getReplyPattern(), legConfiguration.getReliability().isNonRepudiation(), messageExists, selfSendingFlag);
     }
 
     @Override
@@ -130,10 +130,11 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         final boolean selfSendingFlag = checkSelfSending(pmodeKey);
         final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
 
-        handleIncomingMessage(legConfiguration, pmodeKey, request, messaging, selfSendingFlag, messageExists, false);
+        handleIncomingMessage(legConfiguration, pmodeKey, request, messaging, selfSendingFlag, messageExists, testMessage);
 
-        return as4ReceiptService.generateReceipt(request, messaging, legConfiguration.getReliability(), false, messageExists, selfSendingFlag);
+        return null;
     }
+
 
     protected void handleIncomingMessage(final LegConfiguration legConfiguration, String pmodeKey, final SOAPMessage request, final Messaging messaging, boolean selfSending, boolean messageExists, boolean testMessage) throws IOException, TransformerException, EbMS3Exception, SOAPException {
         soapUtil.logMessage(request);
@@ -177,8 +178,6 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
             }
         }
     }
-
-
 
 
     /**
@@ -466,7 +465,6 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         result.setErrorDetail(ebm3Exception.getErrorDetail());
         return result;
     }
-
 
 
 }

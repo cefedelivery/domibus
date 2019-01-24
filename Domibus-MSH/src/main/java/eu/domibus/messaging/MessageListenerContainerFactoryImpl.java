@@ -32,4 +32,10 @@ public class MessageListenerContainerFactoryImpl implements MessageListenerConta
         LOG.debug("Creating the SendLargeMessageListenerContainer for domain [{}]", domain);
         return (DefaultMessageListenerContainer) applicationContext.getBean("sendLargeMessageContainer", domain);
     }
+
+    @Override
+    public MessageListenerContainer createSplitAndJoinListenerContainer(Domain domain) {
+        LOG.debug("Creating the SplitAndJoinListenerContainer for domain [{}]", domain);
+        return (DefaultMessageListenerContainer) applicationContext.getBean("splitAndJoinContainer", domain);
+    }
 }

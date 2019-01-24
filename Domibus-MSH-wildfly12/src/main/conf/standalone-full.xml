@@ -510,6 +510,7 @@
                 <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10"/>
                 <address-setting name="jms.queue.DomibusSendMessageQueue" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
                 <address-setting name="jms.queue.DomibusSendLargeMessageQueue" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
+                <address-setting name="jms.queue.DomibusSplitAndJoinQueue" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="60000" max-delivery-attempts="3"/>
                 <address-setting name="jms.queue.DomibusPullMessageQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
                 <address-setting name="jms.queue.DomibusAlertMessageQueue" expiry-address="jms.queue.ExpiryQueue" max-delivery-attempts="1"/>
                 <address-setting name="jms.queue.DomibusUIReplicationQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="10000" max-delivery-attempts="1"/>
@@ -549,6 +550,7 @@
                 <jms-queue name="DomibusPluginToBackendQueue" entries="java:/jms/domibus.backend.jms.replyQueue java:/jms/queue/DomibusPluginToBackendQueue" durable="true"/>
                 <jms-queue name="DomibusSendMessageQueue" entries="java:/jms/domibus.internal.dispatch.queue java:/jms/queue/DomibusSendMessageQueue" durable="true"/>
                 <jms-queue name="DomibusSendLargeMessageQueue" entries="java:/jms/domibus.internal.largeMessage.queue java:/jms/queue/DomibusSendLargeMessageQueue" durable="true"/>
+                <jms-queue name="DomibusSplitAndJoinQueue" entries="java:/jms/domibus.internal.splitAndJoin.queue java:/jms/queue/DomibusSplitAndJoinQueue" durable="true"/>
                 <jms-queue name="DomibusPullMessageQueue" entries="java:/jms/domibus.internal.pull.queue java:/jms/queue/DomibusPullMessageQueue" durable="true"/>
                 <jms-queue name="DomibusAlertMessageQueue" entries="java:/jms/domibus.internal.alert.queue java:/jms/queue/DomibusAlertMessageQueue" durable="true"/>
                 <jms-queue name="DomibusUIReplicationQueue" entries="java:/jms/domibus.internal.ui.replication.queue java:/jms/queue/DomibusUIReplicationQueue" durable="true"/>

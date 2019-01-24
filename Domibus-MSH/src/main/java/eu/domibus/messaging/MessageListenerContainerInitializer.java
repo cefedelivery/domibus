@@ -38,6 +38,7 @@ public class MessageListenerContainerInitializer {
         for (Domain domain : domains) {
             createSendMessageListenerContainer(domain);
             createSendLargeMessageListenerContainer(domain);
+            createSplitAndJoinListenerContainer(domain);
         }
     }
 
@@ -69,4 +70,10 @@ public class MessageListenerContainerInitializer {
     }
 
 
+    public void createSplitAndJoinListenerContainer(Domain domain) {
+        MessageListenerContainer instance = messageListenerContainerFactory.createSplitAndJoinListenerContainer(domain);
+        instance.start();
+        instances.put(domain, instance);
+        LOG.info("SplitAndJoinListenerContainer initialized for domain [{}]", domain);
+    }
 }

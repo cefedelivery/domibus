@@ -39,6 +39,8 @@
                    physicalName="domibus.internal.dispatch.queue"/>
             <queue id="sendLargeMessageQueue"
                    physicalName="domibus.internal.largeMessage.queue"/>
+            <queue id="splitAndJoinQueue"
+                   physicalName="domibus.internal.splitAndJoin.queue"/>
             <queue id="pullMessageQueue"
                    physicalName="domibus.internal.pull.queue"/>
             <queue id="alertMessageQueue"

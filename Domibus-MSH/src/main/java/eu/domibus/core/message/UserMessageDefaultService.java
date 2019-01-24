@@ -25,6 +25,7 @@ import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -61,6 +62,10 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     @Qualifier("sendLargeMessageQueue")
     private Queue sendLargeMessageQueue;
+
+    @Autowired
+    @Qualifier("splitAndJoinQueue")
+    private Queue splitAndJoinQueue;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -229,10 +234,21 @@ public class UserMessageDefaultService implements UserMessageService {
     public void scheduleSourceMessageRejoin(String groupId) {
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()
-                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_USER_MESSAGE_REJOIN)
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)
                 .property(UserMessageService.MSG_GROUP_ID, groupId)
                 .build();
-        jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
+    public void scheduleSourceMessageReceipt(String messageId, String pmodeKey) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)
+                .property(UserMessageService.MSG_SOURCE_MESSAGE_ID, messageId)
+                .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
     }
 
     @Override

@@ -168,7 +168,7 @@ public class PullMessageSender {
 
     private Policy getPolicy(LegConfiguration legConfiguration) throws EbMS3Exception {
         try {
-            return policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            return policyService.getPolicy(legConfiguration);
         } catch (final ConfigurationException e) {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
             ex.setMshRole(MSHRole.SENDING);

@@ -9,10 +9,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Party;
-import eu.domibus.common.model.configuration.Reliability;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
@@ -22,6 +19,9 @@ import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
@@ -223,7 +223,6 @@ public class UserMessageHandlerServiceTest {
     @Test
     public void testInvoke_tc1Process_HappyFlow(@Injectable final BackendFilter matchingBackendFilter,
                                                 @Injectable MessageFragmentType messageFragment,
-                                                @Injectable Reliability reliability,
                                                 @Injectable LegConfiguration legConfiguration,
                                                 @Injectable UserMessage userMessage,
                                                 @Injectable Messaging messaging) throws Exception {
@@ -231,9 +230,6 @@ public class UserMessageHandlerServiceTest {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
         new Expectations(userMessageHandlerService) {{
-            legConfiguration.getReliability();
-            result = reliability;
-
             messaging.getUserMessage();
             result = userMessage;
 
@@ -246,7 +242,7 @@ public class UserMessageHandlerServiceTest {
             compressionService.handleDecompression(userMessage, legConfiguration);
             result = true;
 
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, reliability, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
             result = soapResponseMessage;
 
             userMessageHandlerService.checkSelfSending(pmodeKey);
@@ -304,8 +300,7 @@ public class UserMessageHandlerServiceTest {
                                        @Injectable final LegConfiguration legConfiguration,
                                        @Injectable final Messaging messaging,
                                        @Injectable final UserMessage userMessage,
-                                       @Injectable MessageFragmentType messageFragment,
-                                       @Injectable Reliability reliability) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+                                       @Injectable MessageFragmentType messageFragment) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         new Expectations(userMessageHandlerService) {{
@@ -324,7 +319,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = false;
 
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, reliability, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
             result = soapResponseMessage;
 
             userMessageHandlerService.checkSelfSending(pmodeKey);
@@ -340,7 +335,7 @@ public class UserMessageHandlerServiceTest {
             times = 1;
 //            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
 //            times = 0;
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, reliability, anyBoolean, false, false);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, false, false);
         }};
     }
 
@@ -718,7 +713,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkSelfSending(pmodeKey);
             result = false;
 
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, reliability, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
             result = soapResponseMessage;
         }};
 
@@ -731,7 +726,7 @@ public class UserMessageHandlerServiceTest {
             times = 0;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, reliability, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
             backendNotificationService.notifyMessageReceivedFailure(withAny(new UserMessage()), (ErrorResult) any);
             times = 0;
         }};
@@ -774,7 +769,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, reliability, anyBoolean, false, false);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, false, false);
             times = 0;
         }};
     }

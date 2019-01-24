@@ -13,7 +13,6 @@ import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.Reliability;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.SignalMessageLog;
@@ -26,13 +25,16 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
@@ -104,17 +106,37 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
     @Autowired
     protected UserMessageHandlerService userMessageHandlerService;
 
+    @Autowired
+    protected SoapUtil soapUtil;
+
+    @Override
+    public SOAPMessage generateReceipt(String messageId, final Boolean nonRepudiation) throws EbMS3Exception {
+        final RawEnvelopeDto rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(messageId);
+        SOAPMessage request = null;
+        try {
+            request = soapUtil.createSOAPMessage(rawXmlByMessageId.getRawMessage());
+        } catch (SOAPException | IOException | ParserConfigurationException | SAXException e) {
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0201, "Could not generate Receipt. Check security header and non-repudiation settings", null, e);
+            ex.setMshRole(MSHRole.RECEIVING);
+            throw ex;
+        }
+
+        Messaging messaging = messagingDao.findMessageByMessageId(messageId);
+        return generateReceipt(request, messaging, ReplyPattern.RESPONSE, nonRepudiation, false, false);
+    }
+
     @Override
     public SOAPMessage generateReceipt(final SOAPMessage request,
                                        final Messaging messaging,
-                                       final Reliability reliability,
+                                       final ReplyPattern replyPattern,
                                        final Boolean nonRepudiation,
                                        final Boolean duplicate,
                                        final boolean selfSendingFlag) throws EbMS3Exception {
         SOAPMessage responseMessage = null;
         UserMessage userMessage = messaging.getUserMessage();
 
-        if (ReplyPattern.RESPONSE.equals(reliability.getReplyPattern())) {
+        if (ReplyPattern.RESPONSE.equals(replyPattern)) {
             LOG.debug("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();

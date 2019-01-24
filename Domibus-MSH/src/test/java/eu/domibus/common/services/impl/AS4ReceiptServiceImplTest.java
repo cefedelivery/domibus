@@ -6,7 +6,6 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Reliability;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.SignalMessageLog;
@@ -26,6 +25,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -41,7 +41,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.*;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -140,14 +143,13 @@ public class AS4ReceiptServiceImplTest {
     @Injectable
     protected UserMessageHandlerService userMessageHandlerService;
 
+    @Injectable
+    protected SoapUtil soapUtil;
+
 
     @Test
-    public void testGenerateReceipt_WithReliabilityAndResponseRequired(@Injectable Messaging messaging,
-                                                                       @Injectable Reliability reliability) throws Exception {
+    public void testGenerateReceipt_WithReliabilityAndResponseRequired(@Injectable Messaging messaging) throws Exception {
         new Expectations(as4ReceiptService) {{
-            reliability.getReplyPattern();
-            result = ReplyPattern.RESPONSE;
-
             messageFactory.createMessage();
             result = soapResponseMessage;
 
@@ -157,7 +159,7 @@ public class AS4ReceiptServiceImplTest {
         }};
 
         try {
-            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, reliability, false, false, false);
+            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, ReplyPattern.RESPONSE, false, false, false);
         } catch (Exception e) {
             LOGGER.error("No exception was expected with valid configuration input !!!", e);
             Assert.fail("No exception was expected with valid configuration input !!!");
@@ -170,14 +172,13 @@ public class AS4ReceiptServiceImplTest {
     }
 
     @Test
-    public void testGenerateReceipt_NoResponse(@Injectable final Reliability reliability, @Injectable Messaging messaging) {
+    public void testGenerateReceipt_NoResponse(@Injectable Messaging messaging) {
         new Expectations(as4ReceiptService) {{
-            reliability.getReplyPattern();
-            result = ReplyPattern.CALLBACK;
+
         }};
 
         try {
-            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, reliability, false, false, false);
+            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, ReplyPattern.CALLBACK, false, false, false);
         } catch (Exception e) {
             Assert.fail("No exception was expected with valid configuration input !!!");
         }
@@ -193,13 +194,9 @@ public class AS4ReceiptServiceImplTest {
                                                        @Injectable final Source messageToReceiptTransform,
                                                        @Injectable final Transformer transformer,
                                                        @Injectable final DOMResult domResult,
-                                                       @Injectable Messaging messaging,
-                                                       @Injectable Reliability reliability)
+                                                       @Injectable Messaging messaging)
             throws SOAPException, TransformerException {
         new Expectations(as4ReceiptService) {{
-            reliability.getReplyPattern();
-            result = ReplyPattern.RESPONSE;
-
             messageFactory.createMessage();
             result = soapResponseMessage;
 
@@ -211,7 +208,7 @@ public class AS4ReceiptServiceImplTest {
         }};
 
         try {
-            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, reliability, false, false, false);
+            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, ReplyPattern.RESPONSE, false, false, false);
             Assert.fail("Expected Transformer exception to be raised !!!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0201, e.getErrorCode());
@@ -283,15 +280,12 @@ public class AS4ReceiptServiceImplTest {
     @Test
     public void testGenerateReceipt_NoReliability(@Injectable final LegConfiguration legConfiguration,
                                                   @Injectable Messaging messaging,
-                                                  @Injectable Reliability reliability,
                                                   @Injectable MessageLog messageLog) {
         new Expectations(as4ReceiptService) {{
-            reliability.getReplyPattern();
-            result = ReplyPattern.CALLBACK;
         }};
 
         try {
-            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, reliability, false, false, false);
+            as4ReceiptService.generateReceipt(soapRequestMessage, messaging, ReplyPattern.CALLBACK, false, false, false);
         } catch (Exception e) {
             Assert.fail("No exception was expected with valid configuration input !!!");
         }

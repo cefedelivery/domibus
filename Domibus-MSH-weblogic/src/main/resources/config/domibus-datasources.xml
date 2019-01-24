@@ -23,6 +23,9 @@
     <bean id="sendLargeMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.largeMessage.queue"/>
     </bean>
+    <bean id="splitAndJoinQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.splitAndJoin.queue"/>
+    </bean>
     <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
     </bean>
