@@ -33,7 +33,7 @@ public class DomibusProxyServiceImpl implements DomibusProxyService {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     private DomibusProxy domibusProxy = null;
-    private Object domibusProxyInitLock = new Object();
+    private volatile Object domibusProxyInitLock = new Object();
 
     @Override
     public DomibusProxy getDomibusProxy() {
