@@ -69,7 +69,7 @@ public class TruststoreResource {
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore,
                                                        @RequestParam("password") String password) throws IOException {
-        if (!truststore.isEmpty()) {
+        if (truststore.isEmpty()) {
             return ResponseEntity.badRequest().body("Failed to upload the truststore file since it was empty.");
         }
 
