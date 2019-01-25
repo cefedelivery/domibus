@@ -58,13 +58,13 @@ public class PullReceiptSender {
             return ;
         }
         Messaging errorMessage = MessageUtil.getMessage(acknowledgementResult, jaxbContext);
-        if(errorMessage == null || errorMessage.getSignalMessage() == null) {
+        if (errorMessage == null || errorMessage.getSignalMessage() == null) {
             LOG.debug("acknowledgementResult is not null, but it does not contain a SignalMessage with the reported errors. ");
             return ;
         }
         Set<Error> errors = errorMessage.getSignalMessage().getError();
         for (Error error : errors) {
-            if(error.getErrorCode() != null) {
+            if (error.getErrorCode() != null) {
                 LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
                 EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
                 ebMS3Ex.setMshRole(MSHRole.RECEIVING);
