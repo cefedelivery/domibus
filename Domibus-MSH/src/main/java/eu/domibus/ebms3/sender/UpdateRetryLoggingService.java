@@ -139,10 +139,12 @@ public class UpdateRetryLoggingService {
                 userMessageLog.getSendAttempts(), userMessageLog.getSendAttemptsMax(),
                 getScheduledStartTime(userMessageLog), legConfiguration.getReceptionAwareness().getRetryTimeout());
         // retries start after the first send attempt
-        Boolean result = userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
-                && (getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis();
-        LOG.debug("Verify if has attempts left: [{}]", result);
-        return result;
+        Boolean hasMoreAttempts = userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax();
+        long retryTimeout = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
+        Boolean hasMoreTime = (getScheduledStartTime(userMessageLog) + retryTimeout) > System.currentTimeMillis();
+
+        LOG.debug("Verify if has more attempts: [{}] and has more time: [{}]", hasMoreAttempts, hasMoreTime);
+        return hasMoreAttempts && hasMoreTime;
     }
 
     /**
@@ -188,7 +190,10 @@ public class UpdateRetryLoggingService {
         if (userMessageLog.getNextAttempt() !=null) {
             nextAttempt = new Date(userMessageLog.getNextAttempt().getTime());
         }
-        Date newNextAttempt = legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, legConfiguration.getReceptionAwareness().getRetryCount(), legConfiguration.getReceptionAwareness().getRetryTimeout());
+        RetryStrategy.AttemptAlgorithm algorithm = legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm();
+        int retryCount = legConfiguration.getReceptionAwareness().getRetryCount();
+        int retryTimeout = legConfiguration.getReceptionAwareness().getRetryTimeout();
+        Date newNextAttempt = algorithm.compute(nextAttempt, retryCount, retryTimeout);
         LOG.debug("Updating next attempt from [{}] to [{}]", nextAttempt, newNextAttempt);
         userMessageLog.setNextAttempt(newNextAttempt);
     }
