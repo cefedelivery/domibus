@@ -3,7 +3,6 @@ package eu.domibus.web.rest;
 import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.csv.CsvCustomColumns;
@@ -46,9 +45,6 @@ public class TruststoreResource {
     protected DomainContextProvider domainProvider;
 
     @Autowired
-    private DomibusCacheService domibusCacheService;
-
-    @Autowired
     private CertificateService certificateService;
 
     @Autowired
@@ -75,7 +71,6 @@ public class TruststoreResource {
 
         byte[] bytes = truststore.getBytes();
         multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), bytes, password);
-        domibusCacheService.clearCache("certValidationByAlias");
         return ResponseEntity.ok("Truststore file has been successfully replaced.");
     }
 

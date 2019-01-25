@@ -72,7 +72,6 @@ public class CustomAuthenticationProviderTest {
         new Expectations() {{
             securityAuthenticationDAO.getRolesForCertificateId(anyString);
             result = createAuthRoles();
-            ;
         }};
 
         securityCustomAuthenticationProvider.authenticate(authentication);
@@ -85,7 +84,6 @@ public class CustomAuthenticationProviderTest {
         new Expectations() {{
             securityAuthenticationDAO.getRolesForCertificateId(anyString);
             result = createAuthRoles();
-            ;
         }};
 
         securityCustomAuthenticationProvider.authenticate(authentication);
@@ -106,7 +104,6 @@ public class CustomAuthenticationProviderTest {
 
             securityAuthenticationDAO.getRolesForUser(anyString);
             result = createAuthRoles();
-            ;
         }};
 
         securityCustomAuthenticationProvider.authenticate(authentication);

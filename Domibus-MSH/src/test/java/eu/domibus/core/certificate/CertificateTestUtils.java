@@ -11,8 +11,20 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+/**
+ * Utility methods class used in tests that need to work with certificates
+ *
+ * @author Ion Perpegel
+ * @since 4.1
+ */
 public class CertificateTestUtils {
 
+    /**
+     * Loads a certificate from a JKS file
+     * @param filePath path to the file representing the keystore
+     * @param password the password to open the keystore
+     * @param alias the name of the certificate
+     */
     public static X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
         try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
 
