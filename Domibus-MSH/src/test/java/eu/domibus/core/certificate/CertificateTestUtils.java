@@ -11,7 +11,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-public class UnitTestUtils {
+public class CertificateTestUtils {
 
     public static X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
         try (FileInputStream fileInputStream = new FileInputStream(filePath)) {

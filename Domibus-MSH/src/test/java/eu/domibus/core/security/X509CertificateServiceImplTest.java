@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 
 import java.security.cert.X509Certificate;
 
-import static eu.domibus.core.certificate.UnitTestUtils.loadCertificateFromJKSFile;
+import static eu.domibus.core.certificate.CertificateTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.assertNotNull;
 
 

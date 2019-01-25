@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.domibus.core.certificate.UnitTestUtils.loadCertificateFromJKSFile;
+import static eu.domibus.core.certificate.CertificateTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

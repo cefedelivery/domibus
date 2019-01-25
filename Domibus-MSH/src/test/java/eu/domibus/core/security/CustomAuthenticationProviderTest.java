@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static eu.domibus.core.certificate.UnitTestUtils.loadCertificateFromJKSFile;
+import static eu.domibus.core.certificate.CertificateTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.assertNotNull;
 
 /**
