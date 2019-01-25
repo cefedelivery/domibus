@@ -38,9 +38,6 @@ public class SetPolicyInInterceptorIT extends AbstractBackendWSIT {
     @Autowired
     MessageLegConfigurationFactory serverInMessageLegConfigurationFactory;
 
-//    @Mock
-//    HttpServletResponse response;
-
     @Before
     public void before() throws IOException, XmlProcessingException {
         uploadPmode(wireMockRule.port());
