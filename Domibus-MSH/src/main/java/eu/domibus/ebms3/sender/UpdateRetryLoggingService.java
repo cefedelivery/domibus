@@ -29,6 +29,7 @@ import java.util.Date;
 public class UpdateRetryLoggingService {
 
     public static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
+    public static final String MESSAGE_EXPIRATION_DELAY = "domibus.msh.retry.messageExpirationDelay";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UpdateRetryLoggingService.class);
 
@@ -176,7 +177,8 @@ public class UpdateRetryLoggingService {
     }
 
     public boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        Boolean isExpired =  (getMessageExpirationDate(userMessageLog, legConfiguration).getTime() + RetryStrategy.EXPIRATION_DELAY) < System.currentTimeMillis();
+        int delay = domibusPropertyProvider.getIntegerProperty(MESSAGE_EXPIRATION_DELAY);
+        Boolean isExpired =  (getMessageExpirationDate(userMessageLog, legConfiguration).getTime() + delay) < System.currentTimeMillis();
         LOG.debug("Verify if message expired: [{}]", isExpired);
         return isExpired;
     }

@@ -80,6 +80,8 @@ public class UpdateRetryLoggingServiceTest {
             result = RETRY_TIMEOUT_IN_MINUTES;
             legConfiguration.getReceptionAwareness().getRetryCount();
             result = RETRY_COUNT;
+            domibusPropertyProvider.getIntegerProperty(updateRetryLoggingService.MESSAGE_EXPIRATION_DELAY);
+            result = 6000;
         }};
     }
 
@@ -416,7 +418,8 @@ public class UpdateRetryLoggingServiceTest {
     public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) throws InterruptedException {
         final int timeOut = 10;
         final long timeOutInMillis = 60000 * timeOut ;
-        final long currentTime = System.currentTimeMillis() - (timeOutInMillis + RetryStrategy.EXPIRATION_DELAY) ;
+        int delay = domibusPropertyProvider.getIntegerProperty(updateRetryLoggingService.MESSAGE_EXPIRATION_DELAY);
+        final long currentTime = System.currentTimeMillis() - (timeOutInMillis + delay) ;
         final Date expectedDate = new Date(currentTime+timeOutInMillis);
         new NonStrictExpectations() {{
             userMessageLog.getRestored();

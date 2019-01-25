@@ -11,7 +11,6 @@ public enum RetryStrategy {
 
     CONSTANT("CONSTANT", RetryStrategy.ConstantAttemptAlgorithm.ALGORITHM), SEND_ONCE("SEND_ONCE", RetryStrategy.SendOnceAttemptAlgorithm.ALGORITHM);
 
-    public static final int EXPIRATION_DELAY = 5000;  // We grant 5 extra seconds to avoid not sending the last attempt
     private final String name;
     private final RetryStrategy.AttemptAlgorithm algorithm;
 
@@ -43,7 +42,7 @@ public enum RetryStrategy {
                 }
                 final long now = System.currentTimeMillis();
                 long retry = received.getTime();
-                final long stopTime = received.getTime() + ( (long)timeoutInMinutes * MULTIPLIER_MINUTES_TO_SECONDS ) + EXPIRATION_DELAY;
+                final long stopTime = received.getTime() + ( (long)timeoutInMinutes * MULTIPLIER_MINUTES_TO_SECONDS ) + 5000; // We grant 5 extra seconds to avoid not sending the last attempt
                 while (retry <= (stopTime)) {
                     retry += (long)timeoutInMinutes * MULTIPLIER_MINUTES_TO_SECONDS / maxAttempts;
                     if (retry > now && retry < stopTime) {
