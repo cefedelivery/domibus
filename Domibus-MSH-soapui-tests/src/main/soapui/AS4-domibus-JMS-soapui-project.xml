@@ -970,24 +970,30 @@ test.closeConnection();
 log.info "CONNECTION CLOSED";
 test.finalize();</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="882ee6da-dc3d-41b7-a560-c259e3833c9e" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Start default configuration" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Set custom properties" id="570e3f4f-7d5f-4e93-96f1-39ec3eacd314"><con:settings/><con:config><script>// blue: tomcat (localhost)
 testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://localhost:8080/domibus");
-testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
-testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:3306/domibus_blue");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbUser", "root");
-testRunner.testCase.testSuite.project.setPropertyValue("blueDbPassword", "root");
 
 // red: tomcat (localhost)
 testRunner.testCase.testSuite.project.setPropertyValue("remoteUrl", "http://localhost:8180/domibus");
-testRunner.testCase.testSuite.project.setPropertyValue("databaseRed", "mysql");
-testRunner.testCase.testSuite.project.setPropertyValue("driverRed", "com.mysql.jdbc.Driver");
-testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:3306/domibus_red");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
-testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
 
+// Set DB configurations
+testRunner.testCase.testSuite.project.setPropertyValue("allDomainsProperties",'''\
+{"C2Default":{"site":"C2","domainName":"default","domNo":0,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_blue","dbUser":"root","dbPassword":"root"}, 
+"C3Default":{"site":"C3","domainName":"default","domNo":0,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_red","dbUser":"root","dbPassword":"root"}, 
+"thirdDefault":{"site":"third","domainName":"default","domNo":0,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_green","dbUser":"root","dbPassword":"root"}, 
+"C2Dom1":{"site":"C2","domainName":"domibus_C2Dom1","domNo":1,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C2Dom1","dbUser":"root","dbPassword":"root"}, 
+"C2Dom2":{"site":"C2","domainName":"domibus_C2Dom2","domNo":2,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C2Dom2","dbUser":"root","dbPassword":"root"}, 
+"C2Dom3":{"site":"C2","domainName":"domibus_C2Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C2Dom3","dbUser":"root","dbPassword":"root"},  
+"C3Dom1":{"site":"C3","domainName":"domibus_C3Dom1","domNo":1,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom1","dbUser":"root","dbPassword":"root"},  
+"C3Dom2":{"site":"C3","domainName":"domibus_C3Dom2","domNo":2,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom2","dbUser":"root","dbPassword":"root"},  
+"C3Dom3":{"site":"C3","domainName":"domibus_C3Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom3","dbUser":"root","dbPassword":"root"} }''');
+
+// Set third gateway option
 testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
 
-log.info "Update done.";
+// Set Multitenancy Modes
+testRunner.testCase.testSuite.project.setPropertyValue("multitenancyModeC2", "0");
+testRunner.testCase.testSuite.project.setPropertyValue("multitenancyModeC3", "0");
 
+log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Start Blue-Red" id="5e5ec351-fd1f-48bf-8164-c51974c2e3e7"><con:settings/><con:config><script>// Start 2 Domibus: sender and receiver
 Domibus.startSetMSHs(1,1,0,context,log);
 </script></con:config></con:testStep><con:testStep type="delay" name="D1" id="83a7dce8-242a-4042-92b2-4916c34fb291"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="574cdbea-2d13-498b-a7f1-282b1ab1e4f2"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
@@ -1141,18 +1147,7 @@ if (unsecureLoginAllowed == "false" || unsecureLoginAllowed == 0) {
 		
 		Domibus.removePluginUser("C3",context,log,domainValue,userC3U)
 		Domibus.addPluginUser("C3", context, log, domainValue, userRole, userC3U, passwordPl, "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4")
- }</script></con:config></con:testStep><con:testStep type="groovy" name="Groovy Script" id="4a7f8adc-0994-4805-8ec2-e87f282733cf"><con:settings/><con:config><script>def bonus = "12"
-def MAX_WAIT_TIME=80_000
-
- if (bonus) {
-            log.info "  waitForStatus  [][]  Waiting time for Sender extended to 500 seconds"
-            if (bonus.isInteger()) 
-   			MAX_WAIT_TIME = (bonus as Integer) * 1000
-		else 
-             MAX_WAIT_TIME = 500
-        }
-
-log.info MAX_WAIT_TIME</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)
+ }</script></con:config></con:testStep><con:tearDownScript>ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS001-Submit Message-Basic Flow" searchProperties="true" id="c6bc93e6-660e-4e5d-966e-e2802676d91a">
             <con:settings/>
@@ -3336,7 +3331,7 @@ producer.send(messageMap);
 log.info "message sent"
 
 connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="a31ec502-5c9b-41ff-9588-8ce654c21ca5"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("ACKNOWLEDGED","DELETED","-DomJMS051-", "", "Extra time to wait")
+test.waitForStatus("ACKNOWLEDGED","DELETED","-DomJMS051-", "", "110")
 test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
 test.cleanDBMessageID("-DomJMS051-");
 test.finalize();
@@ -3413,7 +3408,259 @@ test.finalize()
 
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="889a6cde-2346-488a-b9e6-882db54ba222" name="JMS-oneway Push-Auto Not for Bamboo"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS003-Submit Message-Exceptional flow-No receipt" searchProperties="true" id="43bf9d34-f13f-4453-8eae-de0ecb066013">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS057-Security Enabled-Incorrect password of plugin user" searchProperties="true" id="6840b8cc-ab8c-4ef8-a22e-37fb52277bcd" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Submit Message" id="46eb0868-5791-4f4b-a448-f72b820a3e27"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+def u = context.expand('${#Project#pluginAdminC2Default}')
+def p = context.expand('${#Project#adminDefaultPassword}')
+Domibus.addPluginCredentialsIfNeeded(context, log, messageMap, u, p + "incorect" )
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS057-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="e4e9ad4b-1441-4e7d-b1b2-85d5e3382431"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(0,0,"-DomJMS057-");
+test.finalize();</script></con:config></con:testStep><con:setupScript/><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS057-")
+test.finalize()
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS058-Security Enabled-Not existing plugin user" searchProperties="true" id="7e984caa-35a6-49d5-a918-1aa84b5ed932" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Submit Message" id="2ad4662e-8198-48de-8926-323beb535a8a"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+def u = context.expand('${#Project#pluginAdminC2Default}')
+def p = context.expand('${#Project#adminDefaultPassword}')
+Domibus.addPluginCredentialsIfNeeded(context, log, messageMap, u + "not existing", p)
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS058-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="6081eb02-a919-4704-a0d3-306d3acc2990"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(0,0,"-DomJMS058-");
+test.finalize();</script></con:config></con:testStep><con:setupScript/><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS058-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS059-Security Enabled-Authentication properties not provided" searchProperties="true" id="a165db7d-13ae-46d0-850b-eae0e83e769c" disabled="true">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Submit Message" id="092312eb-4a86-41ab-b550-6779988b20e5"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+// Authentication information not added to message properties
+// Domibus.addPluginCredentialsIfNeeded(context, log, messageMap)
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS058-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="31affd46-d3b6-4df5-bafc-865b77afd3c0"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.verifyMessagePresence(0,0,"-DomJMS059-");
+test.finalize();</script></con:config></con:testStep><con:setupScript/><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageID("-DomJMS058-");
+test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:setupScript>def unsecureLoginAllowed = context.expand('${#Project#unsecureLoginAllowed}')
+def inputList = [ "DomJMS057", "DomJMS058", "DomJMS059"]
+	
+if (unsecureLoginAllowed == "true" || unsecureLoginAllowed == "1" || unsecureLoginAllowed == "y" || unsecureLoginAllowed == "yes") {
+	log.info "As project property unsecureLoginAllowed value is: " + unsecureLoginAllowed + " try to disable test cases for authentication: ${inputList}"
+	inputList.each { tcName ->
+		def tcList = testSuite.testCaseList.findAll {it.name =~ /${tcName}/ }
+		if (tcList.size() == 0) 	log.error "Incorrect name of test case for disabling: ${tcName}"
+		else {	
+			tcList.each { tc -> 
+				if (!tc.isDisabled()) {
+					log.warn "Disabling test case as includs authentication check: ${tc.name} "
+					tc.setDisabled(true)
+				}
+			}
+		}
+	}
+}</con:setupScript><con:tearDownScript>def inputList = [ "DomJMS057", "DomJMS058", "DomJMS059"]
+	
+inputList.each { tcName ->
+		def tcList = testSuite.testCaseList.findAll {it.name =~ /${tcName}/ }
+		if (tcList.size() == 0) 	log.error "Incorrect name of test case for enabling: ${tcName}"
+		else {	
+			tcList.each { tc -> 
+				if (tc.isDisabled()) {
+					log.warn "Enable back test case as includs authentication check: ${tc.name} "
+					tc.setDisabled(false)
+				}
+			}
+		}
+	}
+</con:tearDownScript><con:reportParameters/></con:testSuite><con:testSuite id="889a6cde-2346-488a-b9e6-882db54ba222" name="JMS-oneway Push-Auto Not for Bamboo"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS003-Submit Message-Exceptional flow-No receipt" searchProperties="true" id="43bf9d34-f13f-4453-8eae-de0ecb066013">
             <con:settings/>
             
             
@@ -6825,4 +7072,4 @@ ExcelReporting.reportTestCase(testRunner, log)
 "C2Dom3":{"site":"C2","domainName":"domibus_C2Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C2Dom3","dbUser":"root","dbPassword":"root"},  
 "C3Dom1":{"site":"C3","domainName":"domibus_C3Dom1","domNo":1,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom1","dbUser":"root","dbPassword":"root"},  
 "C3Dom2":{"site":"C3","domainName":"domibus_C3Dom2","domNo":2,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom2","dbUser":"root","dbPassword":"root"},  
-"C3Dom3":{"site":"C3","domainName":"domibus_C3Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom3","dbUser":"root","dbPassword":"root"} }</con:value></con:property><con:property><con:name>multitenancyModeC2</con:name><con:value>1</con:value></con:property><con:property><con:name>multitenancyModeC3</con:name><con:value>1</con:value></con:property><con:property><con:name>defaultBlueDomainID</con:name><con:value>C2Default</con:value></con:property><con:property><con:name>defaultRedDomainId</con:name><con:value>C3Default</con:value></con:property><con:property><con:name>defaultGreenDomainID</con:name><con:value>thirdDefault</con:value></con:property><con:property><con:name>adminDefaultPassword</con:name><con:value>Domibus-123</con:value></con:property><con:property><con:name>pluginAdminC2Default</con:name><con:value>a4</con:value></con:property><con:property><con:name>unsecureLoginAllowed</con:name><con:value>false</con:value></con:property><con:property><con:name>pluginAdminC3Default</con:name><con:value>c3_a1</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+"C3Dom3":{"site":"C3","domainName":"domibus_C3Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom3","dbUser":"root","dbPassword":"root"} }</con:value></con:property><con:property><con:name>multitenancyModeC2</con:name><con:value>1</con:value></con:property><con:property><con:name>multitenancyModeC3</con:name><con:value>1</con:value></con:property><con:property><con:name>defaultBlueDomainID</con:name><con:value>C2Default</con:value></con:property><con:property><con:name>defaultRedDomainId</con:name><con:value>C3Default</con:value></con:property><con:property><con:name>defaultGreenDomainID</con:name><con:value>thirdDefault</con:value></con:property><con:property><con:name>adminDefaultPassword</con:name><con:value>Domibus-123</con:value></con:property><con:property><con:name>pluginAdminC2Default</con:name><con:value>a4</con:value></con:property><con:property><con:name>unsecureLoginAllowed</con:name><con:value>1</con:value></con:property><con:property><con:name>pluginAdminC3Default</con:name><con:value>c3_a1</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
