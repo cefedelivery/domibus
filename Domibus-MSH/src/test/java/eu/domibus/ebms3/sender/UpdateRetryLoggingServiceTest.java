@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import static eu.domibus.ebms3.sender.UpdateRetryLoggingService.DELETE_PAYLOAD_ON_SEND_FAILURE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JMockit.class)
 public class UpdateRetryLoggingServiceTest {
@@ -411,12 +412,11 @@ public class UpdateRetryLoggingServiceTest {
 
     }
 
-
     @Test
     public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) throws InterruptedException {
         final int timeOut = 10;
-        final long timeOutInMillis = 60000 * timeOut;
-        final long currentTime = System.currentTimeMillis() - timeOutInMillis ;
+        final long timeOutInMillis = 60000 * timeOut ;
+        final long currentTime = System.currentTimeMillis() - (timeOutInMillis + RetryStrategy.EXPIRATION_DELAY) ;
         final Date expectedDate = new Date(currentTime+timeOutInMillis);
         new NonStrictExpectations() {{
             userMessageLog.getRestored();
@@ -426,9 +426,7 @@ public class UpdateRetryLoggingServiceTest {
 
         }};
         assertEquals(expectedDate, updateRetryLoggingService.getMessageExpirationDate(userMessageLog, legConfiguration));
-
-        Thread.sleep(RetryStrategy.EXPIRATION_DELAY);
-        Assert.assertTrue(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog));
+        assertTrue(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog));
     }
 
     private static class SystemMockFirstOfJanuary2016 extends MockUp<System> {
