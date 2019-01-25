@@ -73,7 +73,12 @@ public class DomibusProxyServiceImpl implements DomibusProxyService {
         domibusProxy.setEnabled(true);
 
         String httpProxyHost = domibusPropertyProvider.getProperty(DOMIBUS_PROXY_HTTP_HOST);
-        Integer httpProxyPort = domibusPropertyProvider.getIntegerProperty(DOMIBUS_PROXY_HTTP_PORT);
+        Integer httpProxyPort;
+        try {
+            httpProxyPort = domibusPropertyProvider.getIntegerProperty(DOMIBUS_PROXY_HTTP_PORT);
+        } catch (NumberFormatException e) {
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_006, "Proxy port is invalid.");
+        }
         if (StringUtils.isEmpty(httpProxyHost) || httpProxyPort == 0) {
             LOG.error("Proxy is enabled but the configuration is invalid: host = [{}] port = [{}]", httpProxyHost, httpProxyPort);
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_006, "Proxy is enabled but the configuration is invalid.");
