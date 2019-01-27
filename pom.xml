@@ -174,13 +174,11 @@
                 <artifactId>slf4j-ext</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-            <!-- ECAS start -->
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.14</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
-            <!-- ECAS end -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>

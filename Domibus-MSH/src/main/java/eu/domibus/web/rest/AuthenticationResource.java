@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -135,7 +136,7 @@ public class AuthenticationResource {
 
     @RequestMapping(value = "username", method = RequestMethod.GET)
     public String getUsername() {
-        return getLoggedUser().getUsername();
+        return getLoggedUser() != null ? getLoggedUser().getUsername() : null;
     }
 
     @RequestMapping(value = "user", method = RequestMethod.GET)
@@ -186,7 +187,11 @@ public class AuthenticationResource {
     }
 
     UserDetail getLoggedUser() {
-        return  (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (SecurityContextHolder.getContext().getAuthentication() != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        }
+        return null;
     }
 
     UserService getUserService() {

@@ -14,9 +14,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -33,7 +31,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Configuration
 @EnableWebSecurity (debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityAdminConsoleConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityAdminConsoleConfiguration extends AbstractWebSecurityConfigurerAdapter {
 
     @Autowired
     CsrfTokenRepository tokenRepository;
@@ -73,7 +71,7 @@ public class SecurityAdminConsoleConfiguration extends WebSecurityConfigurerAdap
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configureHttpSecurity(HttpSecurity http) throws Exception {
         http
                 .csrf().csrfTokenRepository(tokenRepository).requireCsrfProtectionMatcher(csrfURLMatcher)
                 .and()
@@ -85,21 +83,23 @@ public class SecurityAdminConsoleConfiguration extends WebSecurityConfigurerAdap
                 .antMatchers("/rest/application/fourcornerenabled").permitAll()
                 .antMatchers("/rest/application/extauthproviderenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
-                .antMatchers("/rest/application/domains").hasRole("AP_ADMIN")
-                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
-                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole("AP_ADMIN")
-                .antMatchers("/rest/pmode/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/party/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/truststore/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/messagefilters/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/jms/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/user/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/plugin/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/audit/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/alerts/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/testservice/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/logging/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/**").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/application/domains").hasRole(SUPER_ROLE)
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole(SUPER_ROLE)
+                .antMatchers(HttpMethod.GET, "/rest/security/username").permitAll()
+                .antMatchers(HttpMethod.GET, "/rest/security/user").authenticated()
+                .antMatchers("/rest/pmode/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/party/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/truststore/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/messagefilters/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/jms/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/user/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/plugin/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/audit/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/alerts/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/testservice/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/logging/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/**").authenticated()
                 .and()
                 .exceptionHandling().and()
                 .headers().frameOptions().deny().contentTypeOptions().and().xssProtection().xssProtectionEnabled(true).and()
@@ -109,19 +109,9 @@ public class SecurityAdminConsoleConfiguration extends WebSecurityConfigurerAdap
                 .addFilterBefore(setDomainFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web
-                .ignoring().antMatchers("/services/**")
-                .and()
-                .ignoring().antMatchers("/ext/**")
-                .and()
-                .debug(true);
-    }
-
     @Autowired
     @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configureAuthenticationManagerBuilder(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(daoAuthenticationProvider());
     }
 

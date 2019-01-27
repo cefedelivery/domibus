@@ -1,5 +1,6 @@
 package eu.domibus.weblogic.security;
 
+import eu.domibus.configuration.security.AbstractWebSecurityConfigurerAdapter;
 import eu.domibus.configuration.security.SecurityExternalAuthProviderCondition;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.filter.SetDomainFilter;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
@@ -29,11 +29,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
-public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    static final String[] ALL_ROLES = {"USER", "ADMIN", "AP_ADMIN"};
-    static final String[] ADMIN_ROLES = {"ADMIN", "AP_ADMIN"};
-    static final String SUPER_ROLE = "AP_ADMIN";
+public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdapter {
 
     @Autowired
     CsrfTokenRepository tokenRepository;
@@ -50,6 +46,12 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     ECASUserDetailsService ecasUserDetailsService;
 
+
+    @Bean(name = "authenticationService")
+    public AuthenticationService authenticationService() {
+        return new ECASAuthenticationServiceImpl();
+    }
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         web
@@ -63,7 +65,7 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configureHttpSecurity(HttpSecurity http) throws Exception {
         http
                 .csrf().csrfTokenRepository(tokenRepository).requireCsrfProtectionMatcher(csrfURLMatcher)
                 .and()
@@ -76,10 +78,8 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/application/extauthproviderenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
                 .antMatchers("/rest/application/domains").hasRole(SUPER_ROLE)
-                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole(ALL_ROLES)
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole(SUPER_ROLE)
-                .antMatchers(HttpMethod.GET, "/rest/security/username").hasAnyRole(ALL_ROLES)
-                .antMatchers(HttpMethod.GET, "/rest/security/user").hasAnyRole(ALL_ROLES)
                 .antMatchers("/rest/pmode/**").hasAnyRole(ADMIN_ROLES)
                 .antMatchers("/rest/party/**").hasAnyRole(ADMIN_ROLES)
                 .antMatchers("/rest/truststore/**").hasAnyRole(ADMIN_ROLES)
@@ -91,7 +91,7 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/alerts/**").hasAnyRole(ADMIN_ROLES)
                 .antMatchers("/rest/testservice/**").hasAnyRole(ADMIN_ROLES)
                 .antMatchers("/rest/logging/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/**").hasAnyRole(ALL_ROLES)
+                .antMatchers("/rest/**").authenticated()
                 .and()
                 .jee().authenticatedUserDetailsService(ecasUserDetailsService)
                 .and()
@@ -106,13 +106,11 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    protected void configureAuthenticationManagerBuilder(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(ecasUserDetailsService);
     }
 
-    @Bean(name = "authenticationService")
-    public AuthenticationService authenticationService() {
-        return new ECASAuthenticationServiceImpl();
-    }
+
 
 }

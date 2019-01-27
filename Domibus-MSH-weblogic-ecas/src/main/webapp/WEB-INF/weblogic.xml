@@ -45,6 +45,7 @@
             <resource-name>com.sun.faces.*</resource-name>
             <resource-name>com.bea.faces.*</resource-name>
             <resource-name>META-INF/services/javax.servlet.ServletContainerInitializer</resource-name>
+            <resource-name>org/slf4j/impl/StaticLoggerBinder.class</resource-name>
         </prefer-application-resources>
         <allow-all-roles>true</allow-all-roles>
     </container-descriptor>
