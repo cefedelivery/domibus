@@ -9,6 +9,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.AS4ReceiptService;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
 import eu.domibus.logging.DomibusLogger;
@@ -93,9 +94,11 @@ public class SplitAndJoinListener implements MessageListener {
                 final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
                 final SOAPMessage request = splitAndJoinService.rejoinSourceMessage(groupId);
                 Messaging messaging = messageUtil.getMessage(request);
-                String pmodeKey = null;
+
+                MessageExchangeConfiguration userMessageExchangeContext = null;
                 try {
-                    pmodeKey = pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey();
+                    userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING);
+                    String pmodeKey = userMessageExchangeContext.getPmodeKey();
                     request.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
                 } catch (EbMS3Exception | SOAPException e) {
                     //TODO return a signal error to C2 and notify the backend
@@ -104,7 +107,7 @@ public class SplitAndJoinListener implements MessageListener {
                 }
 
                 incomingSourceMessageHandler.processMessage(request, messaging);
-                userMessageService.scheduleSourceMessageReceipt(messaging.getUserMessage().getMessageInfo().getMessageId(), pmodeKey);
+                userMessageService.scheduleSourceMessageReceipt(messaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
             } else if (StringUtils.equals(messageType, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)) {
                 final String sourceMessageId = message.getStringProperty(UserMessageService.MSG_SOURCE_MESSAGE_ID);
                 final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
