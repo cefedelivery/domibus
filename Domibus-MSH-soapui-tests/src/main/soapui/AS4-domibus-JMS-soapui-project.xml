@@ -1117,7 +1117,7 @@ Domibus.restoreDomibusPropertiesFromBackup("RED",  log, context, testRunner)
 
 </script></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="ebbda453-91e0-4412-95b8-f0113996b9e6" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Set Third gateway property" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Set true" id="f59553ac-179e-45d7-8c76-d83c0da815e2"><con:settings/><con:config><script>testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "true");
 log.info "thirdGateway custom property set to true."</script></con:config></con:testStep><con:testStep type="groovy" name="Set false" id="facebea7-b498-44a7-80c8-a2aeded260ed"><con:settings/><con:config><script>testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
-log.info "thirdGateway custom property set to false."</script></con:config></con:testStep><con:properties/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="fed27991-dbd5-4fb3-ae9e-424b3ad9a813" name="JMS-oneway Push-Auto for Bamboo"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS000-Setup Environment and Database" searchProperties="true" id="b56b6acf-eb4c-4913-8757-3714c15529c4" disabled="true">
+log.info "thirdGateway custom property set to false."</script></con:config></con:testStep><con:properties/></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="fed27991-dbd5-4fb3-ae9e-424b3ad9a813" name="JMS-oneway Push-Auto for Bamboo"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS000-Setup Environment and Database" searchProperties="true" id="b56b6acf-eb4c-4913-8757-3714c15529c4">
             <con:settings/>
             
             
@@ -3408,7 +3408,7 @@ test.finalize()
 
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS057-Security Enabled-Incorrect password of plugin user" searchProperties="true" id="6840b8cc-ab8c-4ef8-a22e-37fb52277bcd" disabled="true">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS057-Security Enabled-Incorrect password of plugin user" searchProperties="true" id="6840b8cc-ab8c-4ef8-a22e-37fb52277bcd">
             <con:settings/>
             
             
@@ -3482,7 +3482,7 @@ test.cleanDBMessageID("-DomJMS057-")
 test.finalize()
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS058-Security Enabled-Not existing plugin user" searchProperties="true" id="7e984caa-35a6-49d5-a918-1aa84b5ed932" disabled="true">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS058-Security Enabled-Not existing plugin user" searchProperties="true" id="7e984caa-35a6-49d5-a918-1aa84b5ed932">
             <con:settings/>
             
             
@@ -3556,7 +3556,7 @@ test.cleanDBMessageID("-DomJMS058-");
 test.finalize();
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS059-Security Enabled-Authentication properties not provided" searchProperties="true" id="a165db7d-13ae-46d0-850b-eae0e83e769c" disabled="true">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS059-Security Enabled-Authentication properties not provided" searchProperties="true" id="a165db7d-13ae-46d0-850b-eae0e83e769c">
             <con:settings/>
             
             
@@ -3627,6 +3627,88 @@ test.verifyMessagePresence(0,0,"-DomJMS059-");
 test.finalize();</script></con:config></con:testStep><con:setupScript/><con:tearDownScript>def test = new Domibus(log,null,context)
 test.cleanDBMessageID("-DomJMS058-");
 test.finalize();
+ExcelReporting.reportTestCase(testRunner, log)
+</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="DomJMS060-Submit Message-send larger payload" searchProperties="true" id="2879ef39-8897-4b3d-84b2-183845ed520c">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Submit Message 1" id="2b4f2dfb-2a04-49a5-82d3-df6da6c13a19"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-red");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+Domibus.addPluginCredentialsIfNeeded(context, log, messageMap)
+
+// Optional
+messageMap.setStringProperty("messageId", "-DomJMS060-");
+
+
+messageMap.setStringProperty("totalNumberOfPayloads", "2");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+//send the payload as a file system reference
+messageMap.setStringProperty("payload_2_mimeContentId", "cid:attachment");
+messageMap.setStringProperty("payload_2_mimeType", "application/pdf");
+messageMap.setStringProperty("payload_2_description", "message");
+
+def attachmentPath = context.expand("\${#Project#pdfAttachment}")
+log.info "Try to use file from hard drive as attachment: ${attachmentPath}"
+File file = new File(attachmentPath)
+assert file.exists() : "Attachment/file not found"
+assert file.canRead() : "Attachment/file cannot be read"
+
+messageMap.setStringProperty("payload_2_fileName", file.getName());
+messageMap.setString("payload_2", "file:////${attachmentPath}");
+
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test" id="ccb3c375-558f-464f-9e19-9a90fe1aa2a4"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-DomJMS060-");
+test.finalize();</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.cleanDBMessageIDStartsWith("-DomJMS060-")
+test.finalize()
 ExcelReporting.reportTestCase(testRunner, log)
 </con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:setupScript>def unsecureLoginAllowed = context.expand('${#Project#unsecureLoginAllowed}')
@@ -7072,4 +7154,4 @@ ExcelReporting.reportTestCase(testRunner, log)
 "C2Dom3":{"site":"C2","domainName":"domibus_C2Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C2Dom3","dbUser":"root","dbPassword":"root"},  
 "C3Dom1":{"site":"C3","domainName":"domibus_C3Dom1","domNo":1,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom1","dbUser":"root","dbPassword":"root"},  
 "C3Dom2":{"site":"C3","domainName":"domibus_C3Dom2","domNo":2,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom2","dbUser":"root","dbPassword":"root"},  
-"C3Dom3":{"site":"C3","domainName":"domibus_C3Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom3","dbUser":"root","dbPassword":"root"} }</con:value></con:property><con:property><con:name>multitenancyModeC2</con:name><con:value>1</con:value></con:property><con:property><con:name>multitenancyModeC3</con:name><con:value>1</con:value></con:property><con:property><con:name>defaultBlueDomainID</con:name><con:value>C2Default</con:value></con:property><con:property><con:name>defaultRedDomainId</con:name><con:value>C3Default</con:value></con:property><con:property><con:name>defaultGreenDomainID</con:name><con:value>thirdDefault</con:value></con:property><con:property><con:name>adminDefaultPassword</con:name><con:value>Domibus-123</con:value></con:property><con:property><con:name>pluginAdminC2Default</con:name><con:value>a4</con:value></con:property><con:property><con:name>unsecureLoginAllowed</con:name><con:value>1</con:value></con:property><con:property><con:name>pluginAdminC3Default</con:name><con:value>c3_a1</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+"C3Dom3":{"site":"C3","domainName":"domibus_C3Dom3","domNo":3,"dbType":"mysql","dbDriver":"com.mysql.jdbc.Driver","dbJdbcUrl":"jdbc:mysql://localhost:3306/domibus_C3Dom3","dbUser":"root","dbPassword":"root"} }</con:value></con:property><con:property><con:name>multitenancyModeC2</con:name><con:value>1</con:value></con:property><con:property><con:name>multitenancyModeC3</con:name><con:value>1</con:value></con:property><con:property><con:name>defaultBlueDomainID</con:name><con:value>C2Default</con:value></con:property><con:property><con:name>defaultRedDomainId</con:name><con:value>C3Default</con:value></con:property><con:property><con:name>defaultGreenDomainID</con:name><con:value>thirdDefault</con:value></con:property><con:property><con:name>adminDefaultPassword</con:name><con:value>Domibus-123</con:value></con:property><con:property><con:name>pluginAdminC2Default</con:name><con:value>a4</con:value></con:property><con:property><con:name>unsecureLoginAllowed</con:name><con:value>false</con:value></con:property><con:property><con:name>pluginAdminC3Default</con:name><con:value>c3_a1</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
