@@ -148,7 +148,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         LOG.debug("TrustStoreFile is: [{}]", trustStoreFile.getAbsolutePath());
         try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
             truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
-            fileOutputStream.flush();
         } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e) {
             throw new CryptoException("Could not persist truststore:", e);
         }
