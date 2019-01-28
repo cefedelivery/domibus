@@ -81,6 +81,7 @@ export class AppComponent implements OnInit {
 
   logout(event: Event): void {
     event.preventDefault();
+    console.log('do the logout');
     this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']).then((ok) => {
       if (ok) {
         this.securityService.logout();

@@ -46,7 +46,6 @@ public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdap
     @Autowired
     ECASUserDetailsService ecasUserDetailsService;
 
-
     @Bean(name = "authenticationService")
     public AuthenticationService authenticationService() {
         return new ECASAuthenticationServiceImpl();

@@ -66,6 +66,7 @@ export class SecurityService {
   }
 
   logout() {
+    console.log('security service - logout');
     this.alertService.close();
 
     this.clearSession();
