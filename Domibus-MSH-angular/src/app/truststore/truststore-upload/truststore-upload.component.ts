@@ -2,13 +2,10 @@ import {Component, EventEmitter, Inject, ViewChild} from "@angular/core";
 import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
 import {TrustStoreService} from "../trustore.service";
 import {AlertService} from "../../common/alert/alert.service";
-import {isNullOrUndefined, isString} from "util";
-import {isEmpty} from "rxjs/operator/isEmpty";
 
 @Component({
   selector: 'app-trustore-upload',
   templateUrl: './truststore-upload.component.html',
-  styleUrls: ['./truststore-upload.component.css'],
   providers: [TrustStoreService]
 })
 export class TrustStoreUploadComponent {

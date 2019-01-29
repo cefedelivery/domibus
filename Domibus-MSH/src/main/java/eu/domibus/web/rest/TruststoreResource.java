@@ -1,24 +1,28 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.csv.CsvException;
-import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvExcludedItems;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
+import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.KeyStore;
 import java.util.List;
 
@@ -41,9 +45,6 @@ public class TruststoreResource {
     protected DomainContextProvider domainProvider;
 
     @Autowired
-    private DomibusCacheService domibusCacheService;
-
-    @Autowired
     private CertificateService certificateService;
 
     @Autowired
@@ -52,22 +53,25 @@ public class TruststoreResource {
     @Autowired
     private CsvServiceImpl csvServiceImpl;
 
-    @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore, @RequestParam("password") String password) {
 
-        if (!truststore.isEmpty()) {
-            try {
-                byte[] bytes = truststore.getBytes();
-                multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), bytes, password);
-                domibusCacheService.clearCache("certValidationByAlias");
-                return ResponseEntity.ok("Truststore file has been successfully replaced.");
-            } catch (Exception e) {
-                LOG.error("Failed to upload the truststore file", e);
-                return ResponseEntity.badRequest().body("Failed to upload the truststore file due to => " + e.getMessage());
-            }
-        } else {
+    @Autowired
+    private ErrorHandlerService errorHandlerService;
+
+    @ExceptionHandler({CryptoException.class})
+    public ResponseEntity<ErrorRO> handleCryptoException(CryptoException ex) {
+        return errorHandlerService.createResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    public ResponseEntity<String> uploadTruststoreFile(@RequestPart("truststore") MultipartFile truststore,
+                                                       @RequestParam("password") String password) throws IOException {
+        if (truststore.isEmpty()) {
             return ResponseEntity.badRequest().body("Failed to upload the truststore file since it was empty.");
         }
+
+        byte[] bytes = truststore.getBytes();
+        multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), bytes, password);
+        return ResponseEntity.ok("Truststore file has been successfully replaced.");
     }
 
     @RequestMapping(value = {"/list"}, method = GET)

@@ -28,7 +28,6 @@ import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -153,30 +152,6 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     /**
-     * Load certificate with alias from JKS file and return as {@code X509Certificate}.
-     *
-     * @param filePath the path to the JKS file
-     * @param alias    the certificate alias
-     * @param password the key store certificate
-     * @return a X509 certificate
-     */
-    @Override
-    public X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
-        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fileInputStream, password.toCharArray());
-
-            Certificate cert = keyStore.getCertificate(alias);
-
-            return (X509Certificate) cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
-            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias, e);
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -210,13 +185,13 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) {
+    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password, String type) {
         try {
-            KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore tempTrustStore = KeyStore.getInstance(type);
             tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
             newTrustStoreBytes.reset();
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-            throw new DomibusCertificateException("Could not load key store", e);
+            throw new DomibusCertificateException("Could not load key store: " + e.getMessage(), e);
         }
     }
 
