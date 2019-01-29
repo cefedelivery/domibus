@@ -140,7 +140,7 @@ public class UpdateRetryLoggingService {
                 getScheduledStartTime(userMessageLog), legConfiguration.getReceptionAwareness().getRetryTimeout());
         // retries start after the first send attempt
         Boolean hasMoreAttempts = userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax();
-        long retryTimeout = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
+        long retryTimeout = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000L;
         Boolean hasMoreTime = (getScheduledStartTime(userMessageLog) + retryTimeout) > System.currentTimeMillis();
 
         LOG.debug("Verify if has more attempts: [{}] and has more time: [{}]", hasMoreAttempts, hasMoreTime);
