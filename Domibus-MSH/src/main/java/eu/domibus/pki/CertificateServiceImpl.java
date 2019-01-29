@@ -115,7 +115,7 @@ public class CertificateServiceImpl implements CertificateService {
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {
-            LOG.warn("Certificate is not valid:[{}] ",cert);
+            LOG.warn("Certificate is not valid:[{}] ", cert);
             return false;
         }
         try {
@@ -141,7 +141,7 @@ public class CertificateServiceImpl implements CertificateService {
     public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
         final String dn = certificate.getSubjectDN().getName();
-        LOG.debug("DN is:[{}]",dn);
+        LOG.debug("DN is:[{}]", dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
             if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
@@ -156,7 +156,7 @@ public class CertificateServiceImpl implements CertificateService {
      * Load certificate with alias from JKS file and return as {@code X509Certificate}.
      *
      * @param filePath the path to the JKS file
-     * @param alias the certificate alias
+     * @param alias    the certificate alias
      * @param password the key store certificate
      * @return a X509 certificate
      */
@@ -252,7 +252,6 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
 
-
     protected void sendCertificateExpiredAlerts() {
         final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
         final boolean activeModule = expiredCertificateConfiguration.isActive();
@@ -268,7 +267,7 @@ public class CertificateServiceImpl implements CertificateService {
         Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
 
         LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
-        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
+        certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification).forEach(certificate -> {
             certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
@@ -287,12 +286,14 @@ public class CertificateServiceImpl implements CertificateService {
 
 
     /**
-     * Create or update certificate in the db.
+     * Create or update all keystore certificates in the db.
+     *
      * @param trustStore the trust store
-     * @param keyStore the key store
+     * @param keyStore   the key store
      */
     protected void saveCertificateData(KeyStore trustStore, KeyStore keyStore) {
         List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates(trustStore, keyStore);
+        certificateDao.removeUnusedCertificates(certificates);
         for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
             certificateDao.saveOrUpdate(certificate);
         }
@@ -320,7 +321,7 @@ public class CertificateServiceImpl implements CertificateService {
      * Group keystore and trustStore certificates in a list.
      *
      * @param trustStore the trust store
-     * @param keyStore the key store
+     * @param keyStore   the key store
      * @return a list of certificate.
      */
     protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates(KeyStore trustStore, KeyStore keyStore) {
