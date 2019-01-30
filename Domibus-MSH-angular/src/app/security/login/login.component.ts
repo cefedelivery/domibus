@@ -1,5 +1,5 @@
 ﻿import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {SecurityService} from '../security.service';
 import {AlertService} from '../../common/alert/alert.service';
 import {SecurityEventService} from '../security.event.service';

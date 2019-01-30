@@ -1,4 +1,4 @@
-﻿import {Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild} from '@angular/core';
+﻿import {Component, TemplateRef, ViewChild, Renderer2, ElementRef, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Http, Response, URLSearchParams} from '@angular/http';
 import {ErrorLogResult} from './errorlogresult';

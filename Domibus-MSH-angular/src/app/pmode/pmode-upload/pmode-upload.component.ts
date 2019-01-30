@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
+import {MdDialogRef, MD_DIALOG_DATA} from '@angular/material';
 import {Http} from '@angular/http';
 import {AlertService} from '../../common/alert/alert.service';
 

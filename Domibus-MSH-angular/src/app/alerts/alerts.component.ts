@@ -5,7 +5,7 @@ import {DownloadService} from '../common/download.service';
 import {AlertComponent} from '../common/alert/alert.component';
 import {Observable} from 'rxjs/Observable';
 import {AlertsResult} from './alertsresult';
-import {Headers, Http, Response, URLSearchParams} from '@angular/http';
+import {Http, URLSearchParams, Response, Headers} from '@angular/http';
 import {AlertService} from '../common/alert/alert.service';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {MdDialog} from '@angular/material';

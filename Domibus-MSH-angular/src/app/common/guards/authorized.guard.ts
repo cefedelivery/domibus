@@ -1,5 +1,5 @@
 ﻿import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot} from "@angular/router";
+import {CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot} from "@angular/router";
 import {SecurityService} from "../../security/security.service";
 import {ReplaySubject} from "rxjs";
 

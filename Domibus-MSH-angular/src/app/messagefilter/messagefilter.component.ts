@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {AlertService} from '../common/alert/alert.service';
-import {Headers, Http, Response} from '@angular/http';
+import {Http, Headers, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {MessageFilterResult} from './messagefilterresult';
 import {BackendFilterEntry} from './backendfilterentry';

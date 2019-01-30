@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Http, URLSearchParams} from '@angular/http';
+import {Headers, Http, URLSearchParams} from '@angular/http';
 import {MessageLogEntry} from '../messagelog/messagelogentry';
 import {isNullOrUndefined} from 'util';
 import {AlertService} from '../common/alert/alert.service';

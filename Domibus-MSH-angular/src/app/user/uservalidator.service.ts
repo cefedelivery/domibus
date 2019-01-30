@@ -1,8 +1,9 @@
-import {UserResponseRO} from './user';
+import {UserResponseRO, UserState} from './user';
 import {AlertService} from '../common/alert/alert.service';
 import {Injectable} from '@angular/core';
 import {AbstractControl} from '@angular/forms';
 import {SecurityService} from '../security/security.service';
+import {ValidationErrors} from '../../../node_modules/@angular/forms/src/directives/validators';
 import {DomainService} from '../security/domain.service';
 
 /**

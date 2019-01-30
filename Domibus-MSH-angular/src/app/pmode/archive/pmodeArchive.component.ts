@@ -1,7 +1,7 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
-import {Http, Response} from '@angular/http';
+import {Http, Headers, Response} from '@angular/http';
 import {AlertService} from 'app/common/alert/alert.service';
 import {MdDialog} from '@angular/material';
 import {isNullOrUndefined} from 'util';

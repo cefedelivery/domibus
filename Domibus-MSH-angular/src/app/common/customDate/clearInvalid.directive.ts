@@ -1,4 +1,4 @@
-import {Directive, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {Directive, ElementRef, OnInit, OnDestroy} from '@angular/core';
 import {Md2Datepicker} from 'md2';
 
 @Directive({
