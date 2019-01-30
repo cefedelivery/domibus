@@ -53,7 +53,7 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
         List<Certificate> persistedCertificates = namedQuery.getResultList();
         persistedCertificates.forEach(persistedCert -> {
             boolean used = trustStoreCertificates.stream().anyMatch(trustStoreCert ->
-                    trustStoreCert.getAlias() == persistedCert.getAlias()
+                    trustStoreCert.getAlias().equals(persistedCert.getAlias())
                             && trustStoreCert.getCertificateType() == persistedCert.getCertificateType());
             if (!used) {
                 em.remove(persistedCert);
