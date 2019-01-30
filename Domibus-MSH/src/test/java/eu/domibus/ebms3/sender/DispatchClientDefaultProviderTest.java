@@ -1,6 +1,8 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -28,6 +30,9 @@ public class DispatchClientDefaultProviderTest {
 
     @Injectable
     protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    protected DomibusProxyService domibusProxyService;
 
     @Tested
     DispatchClientDefaultProvider dispatchClientDefaultProvider;

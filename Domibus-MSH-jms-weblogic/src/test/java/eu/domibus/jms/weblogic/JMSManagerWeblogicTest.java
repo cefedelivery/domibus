@@ -550,4 +550,26 @@ public class JMSManagerWeblogicTest {
         }};
     }
 
+    @Test
+    public void matchesQueueTest(final @Injectable Map.Entry<String, InternalJMSDestination> entry) {
+        String queueName = "DomibusBusinessMessageInQueue";
+
+        new Expectations() {{
+            entry.getKey();
+            returns(queueName, "non-matching-key");
+
+            entry.getValue().<String>getProperty("Jndi");
+            returns(null, queueName);
+        }};
+
+        boolean found = jmsManagerWeblogic.matchesQueue(queueName, entry);
+        assertEquals(true, found);
+
+        boolean found2 = jmsManagerWeblogic.matchesQueue(queueName, entry);
+        assertEquals(false, found2);
+
+        boolean found3 = jmsManagerWeblogic.matchesQueue(queueName, entry);
+        assertEquals(true, found3);
+
+    }
 }

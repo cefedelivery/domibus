@@ -194,7 +194,8 @@ public class UserMessageDefaultService implements UserMessageService {
 
     protected Integer computeNewMaxAttempts(final UserMessageLog userMessageLog, final String messageId) {
         Integer maxAttemptsConfiguration = getMaxAttemptsConfiguration(messageId);
-        return userMessageLog.getSendAttempts() + maxAttemptsConfiguration;
+        // always increase maxAttempts (even when not reached by sendAttempts)
+        return userMessageLog.getSendAttemptsMax() + maxAttemptsConfiguration + 1; // max retries plus initial reattempt
     }
 
     @Override

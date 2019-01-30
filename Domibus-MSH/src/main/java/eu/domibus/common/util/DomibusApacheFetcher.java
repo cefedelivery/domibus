@@ -2,6 +2,8 @@ package eu.domibus.common.util;
 
 import com.google.common.io.ByteStreams;
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
@@ -31,32 +33,31 @@ import java.net.UnknownHostException;
 * */
 public class DomibusApacheFetcher extends AbstractFetcher {
 
-    protected RequestConfig requestConfig;
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusApacheFetcher.class);
 
-    protected DomibusConfigurationService domibusConfigurationService;
+    protected RequestConfig requestConfig;
 
     protected ProxyUtil proxyUtil;
 
-    public DomibusApacheFetcher(Mode mode, DomibusConfigurationService domibusConfigurationService, ProxyUtil proxyUtil) {
+    public DomibusApacheFetcher(Mode mode, ProxyUtil proxyUtil) {
         super(mode);
 
         this.proxyUtil = proxyUtil;
-        this.domibusConfigurationService = domibusConfigurationService;
 
+        LOG.debug("Create RequestConfig");
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)
                 .setSocketTimeout(timeout);
 
-        if(domibusConfigurationService.useProxy()) {
-            builder.setProxy(proxyUtil.getConfiguredProxy());
-        }
+        builder.setProxy(proxyUtil.getConfiguredProxy());
 
         requestConfig = builder.build();
     }
 
     @Override
     public FetcherResponse fetch(URI uri) throws LookupException, FileNotFoundException {
+        LOG.debug("Fetch response from URI [{}]", uri);
         try (CloseableHttpClient httpClient = createClient()) {
             HttpGet httpGet = new HttpGet(uri);
 
@@ -86,12 +87,11 @@ public class DomibusApacheFetcher extends AbstractFetcher {
     }
 
     protected CloseableHttpClient createClient() {
+        LOG.debug("Create http client");
         HttpClientBuilder builder = HttpClients.custom()
                 .setDefaultRequestConfig(requestConfig);
 
-        if(domibusConfigurationService.useProxy()) {
-            builder.setDefaultCredentialsProvider(proxyUtil.getConfiguredCredentialsProvider());
-        }
+        builder.setDefaultCredentialsProvider(proxyUtil.getConfiguredCredentialsProvider());
 
         return builder.build();
     }

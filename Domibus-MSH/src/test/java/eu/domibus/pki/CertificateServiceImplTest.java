@@ -25,10 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.Security;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +41,9 @@ import java.util.List;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by Cosmin Baciu on 07-Jul-16.
@@ -417,7 +421,7 @@ public class CertificateServiceImplTest {
 
     @Test
     public void sendCertificateImminentExpirationAlerts(final @Mocked ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration,
-                                                        @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+                                                        @Mocked LocalDateTime dateTime, @Mocked final Certificate certificate) throws ParseException {
 
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
         Date offset = parser.parse("25/10/1977 00:00:00");
@@ -431,10 +435,10 @@ public class CertificateServiceImplTest {
         new Expectations() {{
 
             pModeProvider.isConfigurationLoaded();
-            result=true;
+            result = true;
 
             pModeProvider.getGatewayParty().getName();
-            result= accesPoint;
+            result = accesPoint;
 
             multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
             result = imminentExpirationCertificateConfiguration;
@@ -454,29 +458,32 @@ public class CertificateServiceImplTest {
 
             final LocalDateTime now1 = dateTime.now();
             now1.minusDays(imminentExpirationFrequency).toDate();
-            result=notificationDate;
+            result = notificationDate;
 
             certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);
-            result=Lists.newArrayList(certificate);
+            result = Lists.newArrayList(certificate);
 
             certificate.getAlias();
-            result= alias;
+            result = alias;
 
             certificate.getNotAfter();
-            result=notAfter;
+            result = notAfter;
 
         }};
         certificateService.sendCertificateImminentExpirationAlerts();
-        new VerificationsInOrder(){{
-            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);times=1;
-            certificateDao.saveOrUpdate(certificate);times=1;
-            eventService.enqueueImminentCertificateExpirationEvent(accesPoint, alias, notAfter);times=1;
+        new VerificationsInOrder() {{
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);
+            times = 1;
+            certificateDao.saveOrUpdate(certificate);
+            times = 1;
+            eventService.enqueueImminentCertificateExpirationEvent(accesPoint, alias, notAfter);
+            times = 1;
         }};
     }
 
     @Test
     public void sendCertificateExpiredAlerts(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
-                                                        @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+                                             @Mocked LocalDateTime dateTime, @Mocked final Certificate certificate) throws ParseException {
 
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
         Date endNotification = parser.parse("25/10/1977 00:00:00");
@@ -490,10 +497,10 @@ public class CertificateServiceImplTest {
         new Expectations() {{
 
             pModeProvider.isConfigurationLoaded();
-            result=true;
+            result = true;
 
             pModeProvider.getGatewayParty().getName();
-            result= accesPoint;
+            result = accesPoint;
 
             multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
             result = expiredCertificateConfiguration;
@@ -513,49 +520,77 @@ public class CertificateServiceImplTest {
 
             final LocalDateTime now1 = dateTime.now();
             now1.minusDays(revokedFrequency).toDate();
-            result=notificationDate;
+            result = notificationDate;
 
             certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);
-            result=Lists.newArrayList(certificate);
+            result = Lists.newArrayList(certificate);
 
             certificate.getAlias();
-            result= alias;
+            result = alias;
 
             certificate.getNotAfter();
-            result=notAfter;
+            result = notAfter;
 
         }};
         certificateService.sendCertificateExpiredAlerts();
-        new VerificationsInOrder(){{
-            certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);times=1;
-            certificateDao.saveOrUpdate(certificate);times=1;
-            eventService.enqueueCertificateExpiredEvent(accesPoint, alias, notAfter);times=1;
+        new VerificationsInOrder() {{
+            certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);
+            times = 1;
+            certificateDao.saveOrUpdate(certificate);
+            times = 1;
+            eventService.enqueueCertificateExpiredEvent(accesPoint, alias, notAfter);
+            times = 1;
         }};
     }
 
     @Test
     public void sendCertificateExpiredAlertsModuleInactive(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
-                                             @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+                                                           @Mocked LocalDateTime dateTime, @Mocked final Certificate certificate) throws ParseException {
         new Expectations() {{
             multiDomainAlertConfigurationService.getExpiredCertificateConfiguration().isActive();
             result = false;
         }};
         certificateService.sendCertificateExpiredAlerts();
-        new VerificationsInOrder(){{
-            pModeProvider.isConfigurationLoaded();times=0;
+        new VerificationsInOrder() {{
+            pModeProvider.isConfigurationLoaded();
+            times = 0;
         }};
     }
 
     @Test
     public void sendCertificateImminentExpirationAlertsModuleInactive(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
-                                                           @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+                                                                      @Mocked LocalDateTime dateTime, @Mocked final Certificate certificate) throws ParseException {
         new Expectations() {{
             multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration().isActive();
             result = false;
         }};
         certificateService.sendCertificateImminentExpirationAlerts();
-        new VerificationsInOrder(){{
-            pModeProvider.isConfigurationLoaded();times=0;
+        new VerificationsInOrder() {{
+            pModeProvider.isConfigurationLoaded();
+            times = 0;
         }};
     }
+
+//    @Test
+//    public void validateLoadOperation(final @Mocked ByteArrayInputStream newTrustStoreBytes) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableKeyException {
+//        final String password = "test123";
+//        final String type = "jks";
+//
+//        KeyStoreSpi keyStoreSpiMock = mock(KeyStoreSpi.class);
+//        KeyStore keyStore = new KeyStore(keyStoreSpiMock, null, type) {};
+//        keyStore.load(null);  // this is important to put the internal state "initialized" to true
+//
+//        when(keyStoreSpiMock.engineGetKey(any(), any())).thenReturn(mock(Key.class));
+//
+//        new Expectations() {{
+//            KeyStore.getInstance(type);
+//            result = keyStore;
+//        }};
+//        certificateService.validateLoadOperation(newTrustStoreBytes, password, type);
+//        new VerificationsInOrder() {{
+//            keyStore.load(newTrustStoreBytes, password.toCharArray());
+//            times = 1;
+//        }};
+//    }
+
 }

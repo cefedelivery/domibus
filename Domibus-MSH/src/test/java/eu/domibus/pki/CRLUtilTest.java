@@ -116,21 +116,6 @@ public class CRLUtilTest {
     }
 
     //@Test
-    public void testDownloadCRLViaProxy() throws Exception {
-        String url = "http://onsitecrl.verisign.com/offlineca/NATIONALITANDTELECOMAGENCYPEPPOLRootCA.crl";
-        ByteArrayInputStream inputStream = new HttpUtilImpl().downloadURLDirect(url);
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509CRL x509CRL = (X509CRL) cf.generateCRL(inputStream);
-        System.out.println(x509CRL);
-
-        inputStream = new HttpUtilImpl().downloadURLViaProxy(url, "158.169.9.13", 8012, "baciuco", "pass");
-        System.out.println(inputStream);
-        x509CRL = (X509CRL) cf.generateCRL(inputStream);
-        System.out.println(x509CRL);
-
-    }
-
-    //@Test
     public void testDownloadCRLFromLDAP() throws Exception {
         final String ldapURL = "ldap://ldap.sbca.telesec.de/CN=Shared%20Business%20CA%204,OU=T-Systems%20Trust%20Center,O=T-Systems%20International%20GmbH,C=DE?CertificateRevocationList";
 

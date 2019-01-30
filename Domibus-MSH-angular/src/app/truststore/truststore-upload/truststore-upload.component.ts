@@ -6,7 +6,6 @@ import {AlertService} from "../../common/alert/alert.service";
 @Component({
   selector: 'app-trustore-upload',
   templateUrl: './truststore-upload.component.html',
-  styleUrls: ['./truststore-upload.component.css'],
   providers: [TrustStoreService]
 })
 export class TrustStoreUploadComponent {
