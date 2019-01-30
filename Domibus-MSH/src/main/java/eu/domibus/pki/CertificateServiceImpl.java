@@ -261,13 +261,14 @@ public class CertificateServiceImpl implements CertificateService {
 
 
     /**
-     * Create or update certificate in the db.
+     * Create or update all keystore certificates in the db.
      *
      * @param trustStore the trust store
      * @param keyStore   the key store
      */
     protected void saveCertificateData(KeyStore trustStore, KeyStore keyStore) {
         List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates(trustStore, keyStore);
+        certificateDao.removeUnusedCertificates(certificates);
         for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
             certificateDao.saveOrUpdate(certificate);
         }
