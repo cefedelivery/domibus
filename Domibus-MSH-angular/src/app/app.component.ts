@@ -33,7 +33,6 @@ export class AppComponent implements OnInit {
     this.domainService.setAppTitle();
   }
 
-
   ngOnInit () {
     this.readFourCornerEnabled();
     this.readExtAuthProviderEnabled();
@@ -89,8 +88,6 @@ export class AppComponent implements OnInit {
     this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']).then((ok) => {
       if (ok) {
         this.securityService.logout();
-      } else {
-        console.log('is not ok');
       }
     }).catch((error) => {
       console.log('navigate error: ' + error);
