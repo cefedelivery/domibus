@@ -40,6 +40,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.*;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -108,10 +109,10 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         messageGroupEntity.setGroupId(UUID.randomUUID().toString());
         final File sourceMessageFile = new File(sourceMessageFileName);
         if (compression) {
-            messageGroupEntity.setCompressedMessageSize(sourceMessageFile.length());
+            messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
             messageGroupEntity.setCompressionAlgorithm("application/gzip");
         } else {
-            messageGroupEntity.setMessageSize(sourceMessageFile.length());
+            messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
         }
 
         messageGroupEntity.setSoapAction("");
@@ -128,17 +129,14 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             throw new WebServiceException(e);
         }
 
-        final int fragmentSize = legConfiguration.getSplitting().getFragmentSize();
-        long fragmentCount = getFragmentCount(sourceMessageFile, fragmentSize);
-
-        messageGroupEntity.setFragmentCount(fragmentCount);
         List<String> fragmentFiles = null;
         try {
-            fragmentFiles = splitSourceMessage(sourceMessageFile, fragmentCount);
+            fragmentFiles = splitSourceMessage(sourceMessageFile, legConfiguration.getSplitting().getFragmentSize());
         } catch (IOException e) {
             LOG.error("Could not split source message", e);
             throw new WebServiceException(e);
         }
+        messageGroupEntity.setFragmentCount(Long.valueOf(fragmentFiles.size()));
         LOG.debug("Deleting source file [{}]", sourceMessageFile);
         sourceMessageFile.delete();
         LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
@@ -156,7 +154,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
                 final String fragmentFile = fragmentFiles.get(index);
                 createMessagingForFragment(userMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
             } catch (MessagingProcessingException e) {
-                LOG.error("Could not create messagin for fragment [{}]", index);
+                LOG.error("Could not create Messaging for fragment [{}]", index);
                 throw new WebServiceException(e);
             }
         }
@@ -181,22 +179,30 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
 
-    protected long getFragmentCount(File sourceMessageFile, int fragmentSizeInMB) {
+    protected List<String> splitSourceMessage(File sourceMessageFile, int fragmentSizeInMB) throws IOException {
+        LOG.debug("Source file [{}] will be split into fragments", sourceMessageFile);
+
         final long sourceSize = sourceMessageFile.length();
         long fragmentSizeInBytes = fragmentSizeInMB * MB_IN_BYTES;
-        long numberOfFragments = sourceSize / fragmentSizeInBytes;
-        long remainingFragment = sourceSize % fragmentSizeInBytes;
-        long totalNumberOfFragments = numberOfFragments;
-        if (remainingFragment > 0) {
-            totalNumberOfFragments = numberOfFragments + 1;
+
+        long bytesPerSplit;
+        long fragmentCount = 1;
+        long remainingBytes = 0;
+        if (sourceSize > fragmentSizeInBytes) {
+            fragmentCount = sourceSize / fragmentSizeInBytes;
+            bytesPerSplit = fragmentSizeInBytes;
+
+            if (fragmentCount > 0) {
+                remainingBytes = sourceSize % (fragmentCount * fragmentSizeInBytes);
+            }
+        } else {
+            bytesPerSplit = sourceSize;
         }
-        return totalNumberOfFragments;
+        final File storageDirectory = getFragmentStorageDirectory();
+        return splitSourceFileIntoFragments(sourceMessageFile, storageDirectory, fragmentCount, bytesPerSplit, remainingBytes);
     }
 
-    protected List<String> splitSourceMessage(File sourceMessageFile, long fragmentCount) throws IOException {
-        List<String> result = new ArrayList<>();
-
-        LOG.debug("File [{}] will be split into [{}] fragments ", sourceMessageFile, fragmentCount);
+    protected File getFragmentStorageDirectory() {
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
         LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
@@ -206,24 +212,27 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not store fragment payload. Please configure " + Storage.ATTACHMENT_STORAGE_LOCATION + " when using SplitAndJoin");
         }
+        return currentStorage.getStorageDirectory();
+    }
+
+    protected List<String> splitSourceFileIntoFragments(File sourceMessageFile, File storageDirectory, long fragmentCount, long bytesPerSplit, long remainingBytes) throws IOException {
+        List<String> result = new ArrayList<>();
+
+        LOG.debug("Splitting SourceMessage [{}] into [{}] fragments, bytesPerSplit [{}], remainingBytes [{}]", sourceMessageFile, fragmentCount, bytesPerSplit, remainingBytes);
 
         int maxReadBufferSize = 8 * 1024; //8KB
-        final long sourceSize = sourceMessageFile.length();
-        long bytesPerSplit = sourceSize / fragmentCount;
-        long remainingBytes = sourceSize % fragmentCount;
-
         try (RandomAccessFile raf = new RandomAccessFile(sourceMessageFile, "r")) {
             for (int index = 1; index <= fragmentCount; index++) {
-                final String fragmentFileName = getFragmentFileName(currentStorage.getStorageDirectory(), sourceMessageFile.getName(), index);
+                final String fragmentFileName = getFragmentFileName(storageDirectory, sourceMessageFile.getName(), index);
                 result.add(fragmentFileName);
                 saveFragmentPayload(bytesPerSplit, maxReadBufferSize, raf, fragmentFileName);
             }
             if (remainingBytes > 0) {
-                final String remainingFragmentFileName = getFragmentFileName(currentStorage.getStorageDirectory(), sourceMessageFile.getName(), (fragmentCount + 1));
+                final String remainingFragmentFileName = getFragmentFileName(storageDirectory, sourceMessageFile.getName(), (fragmentCount + 1));
                 result.add(remainingFragmentFileName);
 
                 try (final FileOutputStream outputStream = new FileOutputStream(remainingFragmentFileName);
-                     BufferedOutputStream bw = new BufferedOutputStream(outputStream)) {
+                     final BufferedOutputStream bw = new BufferedOutputStream(outputStream)) {
                     readWrite(raf, bw, remainingBytes);
                 }
             }
@@ -232,6 +241,8 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
     protected void saveFragmentPayload(long bytesPerSplit, int maxReadBufferSize, RandomAccessFile raf, final String fragmentFileName) throws IOException {
+        LOG.debug("Saving fragment file [{}]", fragmentFileName);
+
         try (final FileOutputStream fileOutputStream = new FileOutputStream(fragmentFileName);
              BufferedOutputStream bw = new BufferedOutputStream(fileOutputStream)) {
             if (bytesPerSplit > maxReadBufferSize) {

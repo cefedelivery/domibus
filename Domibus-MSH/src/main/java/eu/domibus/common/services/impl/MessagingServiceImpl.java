@@ -121,8 +121,6 @@ public class MessagingServiceImpl implements MessagingService {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
         }
 
-
-
         if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
             InputStream is = partInfo.getPayloadDatahandler().getInputStream();
             byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);

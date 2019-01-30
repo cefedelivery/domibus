@@ -33,6 +33,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.Locale;
 
@@ -216,11 +217,11 @@ public class EbMS3MessageBuilder {
 
         result.setAction(messageGroupEntity.getSoapAction());
 
-        final Long compressedMessageSize = messageGroupEntity.getCompressedMessageSize();
+        final BigInteger compressedMessageSize = messageGroupEntity.getCompressedMessageSize();
         if (compressedMessageSize != null) {
             result.setCompressedMessageSize(compressedMessageSize);
         }
-        final Long messageSize = messageGroupEntity.getMessageSize();
+        final BigInteger messageSize = messageGroupEntity.getMessageSize();
         if (messageSize != null) {
             result.setMessageSize(messageSize);
         }

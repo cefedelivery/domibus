@@ -66,7 +66,7 @@ public class MessageFragmentType {
     protected String groupId;
     @XmlElement(name = "MessageSize")
     @XmlSchemaType(name = "positiveInteger")
-    protected Long messageSize;
+    protected BigInteger messageSize;
     @XmlElement(name = "FragmentCount")
     @XmlSchemaType(name = "positiveInteger")
     protected Long fragmentCount;
@@ -82,7 +82,7 @@ public class MessageFragmentType {
     protected String compressionAlgorithm;
     @XmlElement(name = "CompressedMessageSize")
     @XmlSchemaType(name = "positiveInteger")
-    protected Long compressedMessageSize;
+    protected BigInteger compressedMessageSize;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAttribute(name = "href")
@@ -133,7 +133,7 @@ public class MessageFragmentType {
      *     {@link Long }
      *     
      */
-    public Long getMessageSize() {
+    public BigInteger getMessageSize() {
         return messageSize;
     }
 
@@ -145,7 +145,7 @@ public class MessageFragmentType {
      *     {@link Long }
      *     
      */
-    public void setMessageSize(Long value) {
+    public void setMessageSize(BigInteger value) {
         this.messageSize = value;
     }
 
@@ -277,7 +277,7 @@ public class MessageFragmentType {
      *     {@link Long }
      *     
      */
-    public Long getCompressedMessageSize() {
+    public BigInteger getCompressedMessageSize() {
         return compressedMessageSize;
     }
 
@@ -289,7 +289,7 @@ public class MessageFragmentType {
      *     {@link Long }
      *     
      */
-    public void setCompressedMessageSize(Long value) {
+    public void setCompressedMessageSize(BigInteger value) {
         this.compressedMessageSize = value;
     }
 

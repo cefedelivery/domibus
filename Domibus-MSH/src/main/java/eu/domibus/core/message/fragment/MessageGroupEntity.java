@@ -4,6 +4,7 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang3.BooleanUtils;
 
 import javax.persistence.*;
+import java.math.BigInteger;
 
 /**
  * @author Cosmin Baciu
@@ -23,7 +24,7 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     protected String sourceMessageId;
 
     @Column(name = "MESSAGE_SIZE")
-    protected Long messageSize;
+    protected BigInteger messageSize;
 
     @Column(name = "FRAGMENT_COUNT")
     protected Long fragmentCount;
@@ -32,7 +33,7 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     protected String compressionAlgorithm;
 
     @Column(name = "COMPRESSED_MESSAGE_SIZE")
-    protected Long compressedMessageSize;
+    protected BigInteger compressedMessageSize;
 
     @Column(name = "SOAP_ACTION")
     protected String soapAction;
@@ -52,11 +53,11 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.groupId = groupId;
     }
 
-    public Long getMessageSize() {
+    public BigInteger getMessageSize() {
         return messageSize;
     }
 
-    public void setMessageSize(Long messageSize) {
+    public void setMessageSize(BigInteger messageSize) {
         this.messageSize = messageSize;
     }
 
@@ -76,11 +77,11 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.compressionAlgorithm = compressionAlgorithm;
     }
 
-    public Long getCompressedMessageSize() {
+    public BigInteger getCompressedMessageSize() {
         return compressedMessageSize;
     }
 
-    public void setCompressedMessageSize(Long compressedMessageSize) {
+    public void setCompressedMessageSize(BigInteger compressedMessageSize) {
         this.compressedMessageSize = compressedMessageSize;
     }
 
