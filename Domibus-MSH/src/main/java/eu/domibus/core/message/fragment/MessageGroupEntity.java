@@ -29,6 +29,9 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     @Column(name = "FRAGMENT_COUNT")
     protected Long fragmentCount;
 
+    @Column(name = "RECEIVED_FRAGMENTS")
+    protected Long receivedFragments = 0L;
+
     @Column(name = "COMPRESSION_ALGORITHM")
     protected String compressionAlgorithm;
 
@@ -116,4 +119,20 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     public void setRejected(Boolean rejected) {
         this.rejected = rejected;
     }
+
+    public Long getReceivedFragments() {
+        return receivedFragments;
+    }
+
+    public void setReceivedFragments(Long receivedFragments) {
+        this.receivedFragments = receivedFragments;
+    }
+
+    public synchronized void incrementReceivedFragments() {
+        if (receivedFragments == null) {
+            receivedFragments = 0L;
+        }
+        receivedFragments++;
+    }
+
 }

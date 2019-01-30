@@ -112,6 +112,7 @@
             <column name="SOURCE_MESSAGE_ID" type="VARCHAR(255)"/>
             <column name="MESSAGE_SIZE" type="BIGINT"/>
             <column name="FRAGMENT_COUNT" type="INT"/>
+            <column name="RECEIVED_FRAGMENTS" type="INT"/>
             <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)"/>
             <column name="COMPRESSED_MESSAGE_SIZE" type="BIGINT"/>
             <column name="SOAP_ACTION" type="VARCHAR(255)"/>

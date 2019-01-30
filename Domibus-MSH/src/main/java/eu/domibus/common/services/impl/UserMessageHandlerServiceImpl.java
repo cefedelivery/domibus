@@ -170,7 +170,10 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
                 if (messageFragmentType != null) {
                     final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
-                    if (messageFragmentType.getFragmentNum() == groupEntity.getFragmentCount()) {
+                    groupEntity.incrementReceivedFragments();
+                    messageGroupDao.update(groupEntity);
+
+                    if (groupEntity.getReceivedFragments() == groupEntity.getFragmentCount()) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
                         userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId());
                     }
