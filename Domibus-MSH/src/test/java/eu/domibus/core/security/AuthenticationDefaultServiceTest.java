@@ -29,13 +29,14 @@ import java.util.Locale;
 
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
+import static eu.domibus.core.certificate.CertificateTestUtils.loadCertificateFromJKSFile;
 
 /**
  * @author idragusa
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class AuthenticationDefaultServiceTest {
+public class AuthenticationDefaultServiceTest{
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationDefaultServiceTest.class);
 
     private static final String DOMIBUS_URL = "https://localhost:8080/domibus/services/backend";
@@ -223,7 +224,7 @@ public class AuthenticationDefaultServiceTest {
     }
 
     private X509Certificate createCertificate(String keystore, String alias, String password) {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore, alias, password);
+        X509Certificate certificate = loadCertificateFromJKSFile(keystore, alias, password);
         assertNotNull(certificate);
         return certificate;
     }
@@ -254,4 +255,5 @@ public class AuthenticationDefaultServiceTest {
 
         return request;
     }
+
 }

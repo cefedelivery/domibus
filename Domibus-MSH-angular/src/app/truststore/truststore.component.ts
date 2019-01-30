@@ -4,7 +4,7 @@ import 'rxjs/add/operator/catch';
 import {TrustStoreService} from './trustore.service';
 import {TrustStoreEntry} from './trustore.model';
 import {TruststoreDialogComponent} from './truststore-dialog/truststore-dialog.component';
-import {MdDialog, MdDialogRef} from '@angular/material';
+import {MdDialog} from '@angular/material';
 import {TrustStoreUploadComponent} from './truststore-upload/truststore-upload.component';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';

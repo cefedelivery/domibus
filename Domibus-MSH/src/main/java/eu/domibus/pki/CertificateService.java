@@ -23,8 +23,6 @@ public interface CertificateService {
 
     String extractCommonName(final X509Certificate certificate) throws InvalidNameException;
 
-    X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password);
-
     /**
      * Return the detail of the truststore entries.
      *
@@ -40,8 +38,13 @@ public interface CertificateService {
      */
     void saveCertificateAndLogRevocation(Domain domain);
 
-
-    void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
+    /**
+     * Validates that the bytes represent a valid truststore
+     * @param newTrustStoreBytes the content
+     * @param password the password to open the truststore
+     * @param type the type of the truststore: jks, PKCS12
+     */
+    void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password, String type);
 
     /**
      * Check if alerts need to be send for expired or soon expired certificate. Send if true.

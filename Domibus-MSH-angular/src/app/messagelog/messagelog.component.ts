@@ -4,7 +4,7 @@ import {MessageLogResult} from './messagelogresult';
 import {Observable} from 'rxjs';
 import {AlertService} from '../common/alert/alert.service';
 import {MessagelogDialogComponent} from 'app/messagelog/messagelog-dialog/messagelog-dialog.component';
-import {MdDialog} from '@angular/material';
+import {MdDialog, MdSelectChange} from '@angular/material';
 import {MessagelogDetailsComponent} from 'app/messagelog/messagelog-details/messagelog-details.component';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
@@ -60,6 +60,9 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
 
   messageResent: EventEmitter<boolean>;
 
+  canSearchByConversationId: boolean;
+  conversationIdValue: String;
+
   constructor(private http: Http, private alertService: AlertService, private domibusInfoService: DomibusInfoService,
               public dialog: MdDialog, private elementRef: ElementRef) {
     super();
@@ -85,6 +88,8 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
     this.asc = false;
 
     this.messageResent = new EventEmitter(false);
+
+    this.canSearchByConversationId = true;
 
     this.fourCornerEnabled = await this.domibusInfoService.isFourCornerEnabled();
     this.configureColumnPicker();
@@ -340,30 +345,28 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
   }
 
   search() {
-    console.log('Searching using filter:' + this.filter);
     super.setActiveFilter();
+    console.log('search by:',this.activeFilter);
     this.page(0, this.rowLimiter.pageSize);
   }
 
   resendDialog() {
-    const dialogRef = this.dialog.open(MessagelogDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result == 'Resend') {
-        this.resend(this.selected[0].messageId);
-        this.selected = [];
-        this.messageResent.subscribe(() => {
-          this.page(0, this.rowLimiter.pageSize);
-        });
-      }
-    });
+    this.dialog.open(MessagelogDialogComponent).afterClosed()
+      .subscribe(result => {
+        if (result == 'Resend') {
+          this.resend(this.selected[0].messageId);
+          this.selected = [];
+          this.messageResent.subscribe(() => {
+            this.page(0, this.rowLimiter.pageSize);
+          });
+        }
+      });
   }
 
   resend(messageId: string) {
     console.log('Resending message with id ', messageId);
 
     let url = MessageLogComponent.RESEND_URL.replace('${messageId}', encodeURIComponent(messageId));
-
-    console.log('URL is  ', url);
 
     this.http.put(url, {}, {}).subscribe(res => {
       this.alertService.success('The operation resend message completed successfully');
@@ -447,6 +450,8 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
     this.filter.receivedFrom = null;
     this.filter.receivedTo = null;
     this.filter.isTestMessage = null;
+
+    this.conversationIdValue = null;
   }
 
   onTimestampFromChange(event) {
@@ -465,7 +470,16 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
 
   public scrollLeft() {
     const dataTableBodyDom = this.elementRef.nativeElement.querySelector('.datatable-body');
-
     dataTableBodyDom.scrollLeft = 0;
+  }
+
+  onMessageTypeChanged($event: MdSelectChange) {
+    this.canSearchByConversationId = (this.filter.messageType == 'USER_MESSAGE');
+    if (this.canSearchByConversationId) {
+      this.filter.conversationId = this.conversationIdValue;
+    } else {
+      this.conversationIdValue = this.filter.conversationId;
+      this.filter.conversationId = null;
+    }
   }
 }

@@ -16,6 +16,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.proxy.DomibusProxyService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -91,6 +92,9 @@ public abstract class AbstractIT {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusProxyService domibusProxyService;
 
     @BeforeClass
     public static void init() throws IOException {
