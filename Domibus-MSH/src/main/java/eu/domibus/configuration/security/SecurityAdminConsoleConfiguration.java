@@ -76,17 +76,17 @@ public class SecurityAdminConsoleConfiguration extends AbstractWebSecurityConfig
                 .csrf().csrfTokenRepository(tokenRepository).requireCsrfProtectionMatcher(csrfURLMatcher)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/").permitAll()
-                .antMatchers("/rest/security/authentication").permitAll()
-                .antMatchers("/rest/application/info").permitAll()
-                .antMatchers("/rest/application/name").permitAll()
-                .antMatchers("/rest/application/fourcornerenabled").permitAll()
-                .antMatchers("/rest/application/extauthproviderenabled").permitAll()
-                .antMatchers("/rest/application/multitenancy").permitAll()
+                .antMatchers("/", "/index.html", "/login",
+                        "/rest/security/authentication",
+                        "/rest/application/info",
+                        "/rest/application/name",
+                        "/rest/application/fourcornerenabled",
+                        "/rest/application/extauthproviderenabled",
+                        "/rest/application/multitenancy",
+                        "/rest/security/username").permitAll()
                 .antMatchers("/rest/application/domains").hasRole(SUPER_ROLE)
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole(SUPER_ROLE)
-                .antMatchers(HttpMethod.GET, "/rest/security/username").permitAll()
                 .antMatchers(HttpMethod.GET, "/rest/security/user").authenticated()
                 .antMatchers("/rest/pmode/**").hasAnyRole(ADMIN_ROLES)
                 .antMatchers("/rest/party/**").hasAnyRole(ADMIN_ROLES)

@@ -139,10 +139,11 @@ export class SecurityService {
       // we get the username from the server to trigger the redirection to the login screen in case the user is not authenticated
       this.getCurrentUsernameFromServer()
         .subscribe((user: string) => {
-          console.log('isAuthenticated: getCurrentUsernameFromServer [' + user + ']');
-          subject.next(user !== null);
-        }, (user: string) => {
-          console.log('isAuthenticated error' + user);
+          let userUndefined = (user == null || user == "");
+          console.log('user empty or undefined: ' + userUndefined);
+          subject.next(!userUndefined);
+        }, (error: any) => {
+          console.log('isAuthenticated error' + error);
           subject.next(false);
         });
 

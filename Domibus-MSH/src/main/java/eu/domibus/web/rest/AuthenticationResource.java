@@ -186,10 +186,17 @@ public class AuthenticationResource {
         loggedUser.setDefaultPasswordUsed(false);
     }
 
+    /**
+     * It will return the Principal from {@link SecurityContextHolder}
+     * if different from {@link AnonymousAuthenticationToken}
+     * @return
+     */
     UserDetail getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (SecurityContextHolder.getContext().getAuthentication() != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            LOG.debug("Principal found on SecurityContextHolder: {}", userDetail);
+            return userDetail;
         }
         return null;
     }

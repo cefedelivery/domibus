@@ -50,13 +50,17 @@ export class AppComponent implements OnInit {
         this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']);
       });
 
+    //TODO to be addressed by UI refactoring
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        if (event.url == '/login') {
+        if (event.url.startsWith('/login')) {
           const currentUser = this.securityService.getCurrentUser();
-          if (!!currentUser) {
-            this.router.navigate(['/']);
-          }
+          this.securityService.isAuthenticated(true).subscribe((isAuthenticated: boolean) => {
+            if (isAuthenticated) {
+              console.log('going to /');
+              this.router.navigate(['/']);
+            }
+          });
         }
       }
     });
@@ -85,7 +89,11 @@ export class AppComponent implements OnInit {
     this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']).then((ok) => {
       if (ok) {
         this.securityService.logout();
+      } else {
+        console.log('is not ok');
       }
+    }).catch((error) => {
+      console.log('navigate error: ' + error);
     })
   }
 
@@ -131,7 +139,6 @@ export class AppComponent implements OnInit {
         console.log('readExtAuthProviderEnabled error' + appProperty);
       });
   }
-
 
   readApplicationProperty(propertyName: string): Observable<boolean> {
     const subject = new ReplaySubject();

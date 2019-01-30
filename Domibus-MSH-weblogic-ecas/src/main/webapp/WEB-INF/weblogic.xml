@@ -9,8 +9,6 @@
         <cookie-path>/domibus</cookie-path>
     </session-descriptor>
 
-
-
     <container-descriptor>
         <prefer-application-packages>
             <package-name>com.google.*</package-name>
