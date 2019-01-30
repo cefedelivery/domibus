@@ -18,7 +18,8 @@ import java.util.Objects;
         @NamedQuery(name = "Certificate.findImminentExpirationToNotifyCertificate", query = "FROM Certificate c where (c.alertImminentNotificationDate is null OR c.alertImminentNotificationDate<=:NEXT_NOTIFICATION) AND c.certificateStatus!='REVOKED' AND c.notAfter<=:OFFSET_DATE"),
         @NamedQuery(name = "Certificate.findByAlias", query = "FROM Certificate c where c.alias=:ALIAS"),
         @NamedQuery(name = "Certificate.findByAliasAndType", query = "FROM Certificate c where c.alias=:ALIAS AND c.certificateType=:CERTIFICATE_TYPE"),
-        @NamedQuery(name = "Certificate.findByStatusAndNotificationDate", query = "FROM Certificate c where c.certificateStatus=:CERTIFICATE_STATUS AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)")
+        @NamedQuery(name = "Certificate.findByStatusAndNotificationDate", query = "FROM Certificate c where c.certificateStatus=:CERTIFICATE_STATUS AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)"),
+        @NamedQuery(name = "Certificate.findAll", query = "FROM Certificate c"),
 })
 public class Certificate extends AbstractBaseEntity {
 

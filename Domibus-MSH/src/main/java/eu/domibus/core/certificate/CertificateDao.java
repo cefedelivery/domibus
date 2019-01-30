@@ -22,4 +22,6 @@ public interface CertificateDao {
     List<Certificate> getUnNotifiedRevoked();
 
     void updateRevocation(Certificate certificate);
+
+    void removeUnusedCertificates(List<Certificate> usedCertificates);
 }
