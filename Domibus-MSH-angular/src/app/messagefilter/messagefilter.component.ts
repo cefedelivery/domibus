@@ -155,7 +155,8 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
   private findRowsIndex (backendEntry: BackendFilterEntry): number {
     for (let i = 0; i < this.rows.length; i++) {
       let currentRow = this.rows[i];
-      if (currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
+      if (currentRow.backendName === backendEntry.backendName 
+        && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
         return i;
       }
     }
@@ -163,11 +164,14 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
   }
 
   private compareRoutingCriterias (criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
-    let result: boolean = true;
+    let found: boolean = true;
     for (let entry of criteriasA) {
-      result = result && this.findRoutingCriteria(entry, criteriasB);
+      found = found && this.findRoutingCriteria(entry, criteriasB);
     }
-    return result;
+    for (let entry of criteriasB) {
+      found = found && this.findRoutingCriteria(entry, criteriasA);
+    }
+    return found;
   }
 
   private findRoutingCriteria (toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {
