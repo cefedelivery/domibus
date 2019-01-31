@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 
 
@@ -297,13 +300,15 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         if (StringUtils.isEmpty(alertEmailReceiver) || StringUtils.isEmpty(alertEmailSender)) {
             missConfigured = true;
         } else {
-            try {
-                InternetAddress receiverAddress = new InternetAddress(alertEmailReceiver);
-                InternetAddress senderAddress = new InternetAddress(alertEmailSender);
-                receiverAddress.validate();
-                senderAddress.validate();
-            } catch (AddressException ae) {
-                missConfigured = true;
+            List<String> emailsToValidate = new ArrayList<>(Arrays.asList(alertEmailSender));
+            emailsToValidate.addAll(Arrays.asList(alertEmailReceiver.split(";")));
+            for (String email : emailsToValidate) {
+                try {
+                    InternetAddress address = new InternetAddress(email);
+                    address.validate();
+                } catch (AddressException ae) {
+                    missConfigured = true;
+                }
             }
         }
         if (missConfigured) {

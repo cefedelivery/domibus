@@ -65,7 +65,7 @@ public class MailSender {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         final String sendEmailActivePropertyName = multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
-        final boolean mailActive=Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
+        final boolean mailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
         if (alertModuleEnabled && mailActive) {
             //static properties.
             final String url = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_URL);
@@ -97,12 +97,12 @@ public class MailSender {
 
     //TODO add unit test here.
     public <T extends MailModel> void sendMail(final T model, final String from, final String to) {
-        if(!mailSenderInitiated){
-            mailSenderInitiated=true;
+        if (!mailSenderInitiated) {
+            mailSenderInitiated = true;
             try {
                 initMailSender();
-            }catch (Exception ex){
-                LOG.error("Could not initiate mail sender",ex);
+            } catch (Exception ex) {
+                LOG.error("Could not initiate mail sender", ex);
             }
 
         }
@@ -116,7 +116,10 @@ public class MailSender {
             final Object model1 = model.getModel();
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
-            helper.setTo(to);
+            if (to != null && to.contains(";"))
+                helper.setTo(to.split(";"));
+            else
+                helper.setTo(to);
             helper.setText(html, true);
             helper.setSubject(model.getSubject());
             helper.setFrom(from);
