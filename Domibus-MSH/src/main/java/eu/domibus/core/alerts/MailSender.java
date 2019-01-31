@@ -97,7 +97,6 @@ public class MailSender {
         }
     }
 
-    //TODO add unit test here.
     public <T extends MailModel> void sendMail(final T model, final String from, final String to) {
         if(StringUtils.isBlank(to)) {
             throw new IllegalArgumentException("The 'to' property cannot be null");
@@ -117,9 +116,7 @@ public class MailSender {
         }
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name());
+            MimeMessageHelper helper = getMimeMessageHelper(message);
 
             Template template = freemarkerConfig.getTemplate(model.getTemplatePath());
             final Object model1 = model.getModel();
@@ -139,6 +136,12 @@ public class MailSender {
             LOG.error("Exception while sending mail from[{}] to[{}]", from, to, e);
             throw new AlertDispatchException(e);
         }
+    }
+
+    MimeMessageHelper getMimeMessageHelper(MimeMessage message) throws MessagingException {
+        return new MimeMessageHelper(message,
+                        MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                        StandardCharsets.UTF_8.name());
     }
 
 
