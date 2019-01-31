@@ -25,7 +25,7 @@ public interface DomibusConfigurationService {
     /**
      * Returns true if external authentication provider is enabled
      *
-     * @return
+     * @return boolean - true if an authentication external provider is enabled
      */
     boolean isExtAuthProviderEnabled();
 

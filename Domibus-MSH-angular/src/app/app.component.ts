@@ -2,11 +2,10 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {SecurityService} from './security/security.service';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
-import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
+import {Http} from '@angular/http';
 import {DomainService} from './security/domain.service';
 import {HttpEventService} from './common/http/http.event.service';
-import {ReplaySubject} from "rxjs";
+import {DomibusInfoService} from "./common/appinfo/domibusinfo.service";
 
 @Component({
   selector: 'app-root',
@@ -28,14 +27,18 @@ export class AppComponent implements OnInit {
                private securityEventService: SecurityEventService,
                private http: Http,
                private httpEventService: HttpEventService,
-               private domainService: DomainService) {
+               private domainService: DomainService,
+               private domibusInfoService: DomibusInfoService) {
 
     this.domainService.setAppTitle();
   }
 
-  ngOnInit () {
-    this.readFourCornerEnabled();
-    this.readExtAuthProviderEnabled();
+  async ngOnInit () {
+
+    this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
+    if (this.extAuthProviderEnabled) {
+      this.securityService.login_extauthprovider();
+    }
 
     this.httpEventService.subscribe((error) => {
       if (error && (error.status === 403 || error.status === 401)) {
@@ -109,43 +112,6 @@ export class AppComponent implements OnInit {
 
   changePassword() {
     this.router.navigate(['changePassword']);
-  }
-
-  //read four corner enabled property
-  private readFourCornerEnabled() {
-    this.readApplicationProperty('fourcornerenabled')
-      .subscribe((appProperty: boolean) => {
-        this.fourCornerEnabled = appProperty;
-        console.log('fourCornerEnabled read:' + this.fourCornerEnabled);
-      }, (appProperty: boolean) => {
-        console.log('readFourCornerEnabled error' + appProperty);
-      });
-  }
-
-  //read external authentication provider enabled
-  // property and if true do the login
-  private readExtAuthProviderEnabled() {
-    this.readApplicationProperty('extauthproviderenabled')
-      .subscribe((appProperty: boolean) => {
-        this.extAuthProviderEnabled = appProperty;
-        console.log('extauthproviderenabled read:' + this.extAuthProviderEnabled);
-        if (this.extAuthProviderEnabled) {
-          this.securityService.login_extauthprovider();
-        }
-      }, (appProperty: boolean) => {
-        console.log('readExtAuthProviderEnabled error' + appProperty);
-      });
-  }
-
-  readApplicationProperty(propertyName: string): Observable<boolean> {
-    const subject = new ReplaySubject();
-    this.http.get(`rest/application/${propertyName}`)
-      .subscribe((res: Response) => {
-        subject.next(res.json());
-      }, (error: any) => {
-        subject.next(null);
-      });
-    return subject.asObservable();
   }
 
 }

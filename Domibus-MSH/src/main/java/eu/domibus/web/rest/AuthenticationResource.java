@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Cosmin Baciu, Catalin Enache
@@ -136,12 +137,12 @@ public class AuthenticationResource {
 
     @RequestMapping(value = "username", method = RequestMethod.GET)
     public String getUsername() {
-        return getLoggedUser() != null ? getLoggedUser().getUsername() : null;
+        return Optional.ofNullable(getLoggedUser()).map(UserDetail::getUsername).orElse(null);
     }
 
     @RequestMapping(value = "user", method = RequestMethod.GET)
     public UserRO getUser() {
-        LOG.info("get user - start");
+        LOG.debug("get user - start");
         UserDetail userDetail = getLoggedUser();
 
         return createUserRO(userDetail, userDetail.getUsername());
@@ -193,7 +194,7 @@ public class AuthenticationResource {
      */
     UserDetail getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (SecurityContextHolder.getContext().getAuthentication() != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+        if (authentication!= null && !(authentication instanceof AnonymousAuthenticationToken)) {
             UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             LOG.debug("Principal found on SecurityContextHolder: {}", userDetail);
             return userDetail;

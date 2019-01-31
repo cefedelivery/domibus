@@ -72,7 +72,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        LOG.info("loadUserByUsername - start");
+        LOG.debug("loadUserByUsername - start");
         if (isWeblogicSecurity()) {
             try {
                 return createUserDetails(username);
@@ -89,7 +89,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<String> userGroupsStr = new LinkedList<>();
-        String domainName = null;
+        String domainCode = null;
         final String userRolePrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY);
         final String domainPrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_DOMAIN_PREFIX_KEY);
 
@@ -100,7 +100,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                 if (principal.getName().startsWith(userRolePrefix)) {
                     userGroupsStr.add(principal.getName().replaceAll("^" + userRolePrefix, StringUtils.EMPTY));
                 } else if (principal.getName().startsWith(domainPrefix)) {
-                    domainName = principal.getName().replaceAll("^" + domainPrefix, StringUtils.EMPTY);
+                    domainCode = principal.getName().replaceAll("^" + domainPrefix, StringUtils.EMPTY);
                 }
             } else {
                 if (isUserPrincipal(principal) && !username.equals(principal.getName())) {
@@ -115,19 +115,19 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         userDetail.setDefaultPasswordUsed(false);
         userDetail.setExternalAuthProvider(true);
 
-        setDomainFromECASGroup(domainName, userDetail);
+        setDomainFromECASGroup(domainCode, userDetail);
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
 
         return userDetail;
     }
 
-    private void setDomainFromECASGroup(String domainName, UserDetail userDetail) {
+    private void setDomainFromECASGroup(String domainCode, UserDetail userDetail) {
         if (domibusConfigurationService.isMultiTenantAware()) {
-            Domain domain = domainService.getDomains().stream().filter(d -> domainName.equalsIgnoreCase(d.getCode()))
+            Domain domain = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
                     .findAny()
                     .orElse(null);
             if (null == domain) {
-                throw new DomainException("Could not set current domain: unknown domain (" + domainName + ")");
+                throw new DomainException("Could not set current domain: unknown domain (" + domainCode + ")");
             }
             userDetail.setDomain(domain.getCode());
             domainContextProvider.setCurrentDomain(domain.getCode());
