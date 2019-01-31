@@ -32,6 +32,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Date;
@@ -78,6 +79,20 @@ public class EbMS3MessageBuilder {
 
     public SOAPMessage buildSOAPMessageForFragment(final UserMessage userMessage, MessageGroupEntity messageGroupEntity, final LegConfiguration leg) throws EbMS3Exception {
         return buildSOAPUserMessage(userMessage, messageGroupEntity);
+    }
+
+    public SOAPMessage getSoapMessage(EbMS3Exception ebMS3Exception) {
+        final SignalMessage signalMessage = new SignalMessage();
+        signalMessage.getError().add(ebMS3Exception.getFaultInfoError());
+        try {
+            return buildSOAPMessage(signalMessage, null);
+        } catch (EbMS3Exception e) {
+            try {
+                return buildSOAPFaultMessage(e.getFaultInfoError());
+            } catch (EbMS3Exception e1) {
+                throw new WebServiceException(e1);
+            }
+        }
     }
 
     //TODO: If Leg is used in future releases we have to update this method

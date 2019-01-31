@@ -1,8 +1,10 @@
 package eu.domibus.ebms3.receiver.handler;
 
 import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +28,25 @@ public class IncomingMessageHandlerDefaultFactory implements IncomingMessageHand
     @Autowired
     protected IncomingUserMessageHandler incomingUserMessageHandler;
 
+    @Autowired
+    protected IncomingUserMessageReceiptHandler incomingUserMessageReceiptHandler;
+
     @Override
     public IncomingMessageHandler getMessageHandler(SOAPMessage request, Messaging messaging) {
-        if (messaging.getSignalMessage() != null) {
-            if (messaging.getSignalMessage().getPullRequest() != null) {
+        final SignalMessage signalMessage = messaging.getSignalMessage();
+        if (signalMessage != null) {
+            if (signalMessage.getPullRequest() != null) {
                 LOG.trace("Using incomingMessagePullRequestHandler");
                 return incomingMessagePullRequestHandler;
-            } else if (messaging.getSignalMessage().getReceipt() != null) {
-                LOG.trace("Using incomingMessagePullReceiptHandler");
-                return incomingMessagePullReceiptHandler;
+            } else if (signalMessage.getReceipt() != null) {
+                final String contentsOfReceipt = signalMessage.getReceipt().getAny().get(0);
+                if (StringUtils.contains(contentsOfReceipt, "UserMessage")) {
+                    LOG.trace("Using incomingUserMessageReceiptHandler");
+                    return incomingUserMessageReceiptHandler;
+                } else {
+                    LOG.trace("Using incomingMessagePullReceiptHandler");
+                    return incomingMessagePullReceiptHandler;
+                }
             } else {
                 LOG.warn("No incoming message handler found");
                 return null;

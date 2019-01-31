@@ -98,7 +98,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
         if (MessageStatus.WAITING_FOR_RECEIPT != userMessageLog.getMessageStatus()) {
             LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId(), userMessageLog.getMessageStatus());
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);
-            return pullRequestHandler.getSoapMessage(ebMS3Exception);
+            return messageBuilder.getSoapMessage(ebMS3Exception);
         }
         LOG.debug("[handlePullRequestReceipt]:Message:[{}] delete lock ", messageId);
 
@@ -107,7 +107,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
             LOG.trace("Message[{}] could not acquire lock", messageId);
             LOG.error("[PULL_RECEIPT]:Message:[{}] time to receipt a pull acknowledgement has expired.", messageId);
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("Time to receipt a pull acknowledgement for message:[%s] has expired", messageId), messageId, null);
-            return pullRequestHandler.getSoapMessage(ebMS3Exception);
+            return messageBuilder.getSoapMessage(ebMS3Exception);
         }
 
         try {
