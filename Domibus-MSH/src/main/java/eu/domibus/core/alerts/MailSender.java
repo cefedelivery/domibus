@@ -8,6 +8,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import net.bytebuddy.asm.Advice;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -97,6 +99,13 @@ public class MailSender {
 
     //TODO add unit test here.
     public <T extends MailModel> void sendMail(final T model, final String from, final String to) {
+        if(StringUtils.isBlank(to)) {
+            throw new IllegalArgumentException("The 'to' property cannot be null");
+        }
+        if(StringUtils.isBlank(from)) {
+            throw new IllegalArgumentException("The 'from' property cannot be null");
+        }
+
         if (!mailSenderInitiated) {
             mailSenderInitiated = true;
             try {
@@ -116,10 +125,12 @@ public class MailSender {
             final Object model1 = model.getModel();
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
-            if (to != null && to.contains(";"))
-                helper.setTo(to.split(";"));
-            else
+            if (to.contains(";")) {
+                String[] targets = to.split(";");
+                helper.setTo(targets);
+            } else {
                 helper.setTo(to);
+            }
             helper.setText(html, true);
             helper.setSubject(model.getSubject());
             helper.setFrom(from);
