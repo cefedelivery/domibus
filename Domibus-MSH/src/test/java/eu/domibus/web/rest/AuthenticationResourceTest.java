@@ -13,7 +13,7 @@ import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
-import eu.domibus.security.AuthenticationServiceImpl;
+import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.ChangePasswordRO;
 import eu.domibus.web.rest.ro.DomainRO;
@@ -40,7 +40,7 @@ public class AuthenticationResourceTest {
     AuthenticationResource authenticationResource;
 
     @Injectable
-    AuthenticationServiceImpl authenticationService;
+    AuthenticationService authenticationService;
 
     @Injectable
     UserDomainDao userDomainDao;

@@ -13,7 +13,7 @@
     <includeSiteDirectory>false</includeSiteDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/../Domibus-MSH-weblogic/src/main/conf/domibus</directory>
+            <directory>${project.basedir}/../Domibus-MSH-weblogic-common/src/main/conf/domibus</directory>
             <outputDirectory>/</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
@@ -22,7 +22,7 @@
             <filtered>false</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../Domibus-MSH-weblogic/src/main/conf/scripts</directory>
+            <directory>${project.basedir}/../Domibus-MSH-weblogic-common/src/main/conf/scripts</directory>
             <outputDirectory>/scripts</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <filtered>false</filtered>

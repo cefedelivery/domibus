@@ -9,16 +9,15 @@
         <version>4.1-RC1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>domibus-MSH-weblogic</artifactId>
-    <packaging>war</packaging>
-    <name>Domibus MSH WebLogic</name>
+    <artifactId>domibus-MSH-weblogic-common</artifactId>
+    <packaging>jar</packaging>
+    <name>Domibus MSH WebLogic common</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <weblogic.common.project.folder>${project.basedir}/../Domibus-MSH-weblogic-common</weblogic.common.project.folder>
     </properties>
 
 
@@ -37,11 +36,6 @@
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-taskexecutor-weblogic</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.domibus</groupId>
-            <artifactId>domibus-MSH-weblogic-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -89,14 +83,8 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>${weblogic.common.project.folder}/src/main/resources</directory>
-            </resource>
-        </resources>
-
         <plugins>
-            <plugin>
+         <!--   <plugin>
                 <groupId>net.ju-n.maven.plugins</groupId>
                 <artifactId>checksum-maven-plugin</artifactId>
                 <version>1.2</version>
@@ -114,7 +102,7 @@
                     </algorithms>
                     <fileSets>
                         <fileSet>
-                            <directory>${weblogic.common.project.folder}/src/main/conf/domibus</directory>
+                            <directory>${project.basedir}/../Domibus-MSH-weblogic-common/src/main/conf/domibus</directory>
                             <includes>
                                 <include>domibus.properties</include>
                             </includes>
@@ -122,7 +110,7 @@
                     </fileSets>
                     <individualFilesOutputDirectory>${project.build.outputDirectory}</individualFilesOutputDirectory>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

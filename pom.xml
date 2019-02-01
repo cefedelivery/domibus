@@ -731,6 +731,7 @@
             <modules>
                 <module>Domibus-MSH-taskexecutor-weblogic</module>
                 <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
                 <module>Domibus-MSH-weblogic</module>
             </modules>
         </profile>
@@ -739,6 +740,7 @@
             <modules>
                 <module>Domibus-MSH-taskexecutor-weblogic</module>
                 <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
                 <module>Domibus-MSH-weblogic-ecas</module>
             </modules>
         </profile>
