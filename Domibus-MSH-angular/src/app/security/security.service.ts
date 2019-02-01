@@ -49,20 +49,20 @@ export class SecurityService {
    * It simulates the login function for an external authentication provider
    * Saves current user to local storage, etc
    */
-  login_extauthprovider() {
+  async login_extauthprovider() {
     console.log('login from auth external provider');
 
-    //get the user from server and write it in local storage
-    this.getCurrentUserFromServer()
-      .subscribe((user: User) => {
-        if (user) {
-          this.updateCurrentUser(user);
-          this.domainService.setAppTitle();
-        }
-      }, (error: any) => {
-        console.log('getCurrentUserFromServer error' + error);
-        return error;
-      });
+
+    try {
+      //get the user from server and write it in local storage
+      const user = await this.getCurrentUserFromServer();
+      if (user) {
+        this.updateCurrentUser(user);
+        this.domainService.setAppTitle();
+      }
+    } catch (ex) {
+      console.log('getCurrentUserFromServer error' + ex);
+    }
   }
 
   logout() {
@@ -121,17 +121,11 @@ export class SecurityService {
     return subject.asObservable();
   }
 
-  getCurrentUserFromServer(): Observable<User> {
-    const subject = new ReplaySubject();
-    this.http.get('rest/security/user')
-      .subscribe((res: Response) => {
-        subject.next(res.json());
-      }, (error: any) => {
-        subject.next(null);
-      });
-    console.log('getCurrentUserFromServer:' + subject);
-    return subject.asObservable();
+  getCurrentUserFromServer(): Promise<User> {
+    return this.http.get('rest/security/user').
+      map((res: Response) => res.json()).toPromise();
   }
+
 
   isAuthenticated(callServer: boolean = false): Observable<boolean> {
     const subject = new ReplaySubject();
@@ -140,7 +134,6 @@ export class SecurityService {
       this.getCurrentUsernameFromServer()
         .subscribe((user: string) => {
           let userUndefined = (user == null || user == "");
-          console.log('user empty or undefined: ' + userUndefined);
           subject.next(!userUndefined);
         }, (error: any) => {
           console.log('isAuthenticated error' + error);
@@ -163,7 +156,8 @@ export class SecurityService {
   }
 
   isUserFromExternalAuthProvider(): boolean {
-    return this.getCurrentUser() ? this.getCurrentUser().externalAuthProvider : false;
+    const user = this.getCurrentUser();
+    return user ? user.externalAuthProvider : false;
   }
 
   isCurrentUserInRole(roles: Array<string>): boolean {

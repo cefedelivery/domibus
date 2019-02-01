@@ -29,7 +29,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  */
 @Conditional(SecurityInternalAuthProviderCondition.class)
 @Configuration
-@EnableWebSecurity (debug = true)
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityAdminConsoleConfiguration extends AbstractWebSecurityConfigurerAdapter {
 

@@ -58,9 +58,7 @@ public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdap
                 .and()
                 .ignoring().antMatchers("/ext/**")
                 .and()
-                .ignoring().antMatchers("/logout/**")
-                .and()
-                .debug(true);
+                .ignoring().antMatchers("/logout/**");
     }
 
     @Override
@@ -109,7 +107,6 @@ public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdap
     protected void configureAuthenticationManagerBuilder(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(ecasUserDetailsService);
     }
-
 
 
 }

@@ -17,10 +17,10 @@ import {AlertsComponent} from './alerts/alerts.component';
 import {TestServiceComponent} from './testservice/testservice.component';
 import {PluginUserComponent} from './pluginuser/pluginuser.component';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
-import {AuthExternalProviderGuard} from './guards/auth-external-provider.guard';
+import {AuthExternalProviderGuard} from './common/guards/auth-external-provider.guard';
 import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
-import {LogoutAuthExtProviderComponent} from "./logout/logout.components";
+import {LogoutAuthExtProviderComponent} from "./security/logout/logout.components";
 
 const appRoutes: Routes = [
   {

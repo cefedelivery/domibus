@@ -195,7 +195,7 @@ public class AuthenticationResource {
     UserDetail getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication!= null && !(authentication instanceof AnonymousAuthenticationToken)) {
-            UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UserDetail userDetail = (UserDetail) authentication.getPrincipal();
             LOG.debug("Principal found on SecurityContextHolder: {}", userDetail);
             return userDetail;
         }

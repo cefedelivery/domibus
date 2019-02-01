@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public abstract class AuthenticationServiceBase {
 
     @Autowired
-    private DomainService domainService;
+    protected DomainService domainService;
 
     /**
      * Set the domain in the current security context

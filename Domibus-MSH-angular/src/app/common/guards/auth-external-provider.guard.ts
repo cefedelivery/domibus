@@ -1,6 +1,6 @@
-﻿import {Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from '@angular/router';
-import {SecurityService} from '../security/security.service';
+import {SecurityService} from '../../security/security.service';
 
 /**
  * It will redirect to home ('/') if the external provider = true
@@ -15,7 +15,6 @@ export class AuthExternalProviderGuard implements CanActivate {
     const isUserFromExternalAuthProvider = this.securityService.isUserFromExternalAuthProvider();
 
     if (isUserFromExternalAuthProvider) {
-      console.log('redirect to /');
       this.router.navigate(['/']);
       return false;
     }

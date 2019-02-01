@@ -6,7 +6,10 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
- * Abstract WebSeccurityConfigurerAdapter class
+ * Abstract class for Domibus security configuration
+ *
+ * It extends {@link WebSecurityConfigurerAdapter} class and declares abstract methods
+ * which need to be overridden by each implementation. Common code is exposed in non abstract methods.
  *
  * @author Catalin Enache
  * @since 4.1
@@ -32,7 +35,8 @@ public abstract class AbstractWebSecurityConfigurerAdapter extends WebSecurityCo
 
 
     /**
-     * configure http security config - to be implemented
+     * configure {@link HttpSecurity} - to be implemented
+     *
      * @param http
      * @throws Exception
      */
