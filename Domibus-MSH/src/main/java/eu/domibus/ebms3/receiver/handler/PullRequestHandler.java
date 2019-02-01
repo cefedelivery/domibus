@@ -106,7 +106,7 @@ public class PullRequestHandler {
                 leg = pullContext.filterLegOnMpc();
                 soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
-                if (pullRequestMatcher.matchReliableCallBack(leg) &&
+                if (pullRequestMatcher.matchReliableCallBack(leg.getReliability()) &&
                         leg.getReliability().isNonRepudiation()) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }

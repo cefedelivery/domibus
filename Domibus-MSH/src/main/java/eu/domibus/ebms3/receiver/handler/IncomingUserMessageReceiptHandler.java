@@ -7,6 +7,8 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Reliability;
+import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.core.pmode.PModeProvider;
@@ -35,6 +37,8 @@ import javax.xml.ws.soap.SOAPFaultException;
 public class IncomingUserMessageReceiptHandler implements IncomingMessageHandler {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(IncomingUserMessageReceiptHandler.class);
+
+    protected Reliability sourceMessageReliability;
 
     @Autowired
     private MessagingDao messagingDao;
@@ -100,7 +104,7 @@ public class IncomingUserMessageReceiptHandler implements IncomingMessageHandler
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
-            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, pModeKey);
+            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, getSourceMessageReliability());
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
@@ -117,6 +121,15 @@ public class IncomingUserMessageReceiptHandler implements IncomingMessageHandler
 
     protected SOAPMessage getSoapMessage(LegConfiguration legConfiguration, UserMessage userMessage) throws EbMS3Exception {
         return messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+    }
+
+    protected Reliability getSourceMessageReliability() {
+        if (sourceMessageReliability == null) {
+            sourceMessageReliability = new Reliability();
+            sourceMessageReliability.setNonRepudiation(false);
+            sourceMessageReliability.setReplyPattern(ReplyPattern.RESPONSE);
+        }
+        return sourceMessageReliability;
     }
 
 }

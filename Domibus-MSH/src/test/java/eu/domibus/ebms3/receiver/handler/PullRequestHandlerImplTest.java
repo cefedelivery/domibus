@@ -132,7 +132,7 @@ public class PullRequestHandlerImplTest {
             legConfiguration.getReliability().isNonRepudiation();
             result = true;
 
-            pullRequestMatcher.matchReliableCallBack(withAny(legConfiguration));
+            pullRequestMatcher.matchReliableCallBack(withAny(legConfiguration.getReliability()));
             result = true;
 
             pullContext.filterLegOnMpc();
