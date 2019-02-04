@@ -91,7 +91,7 @@
     <build>
         <resources>
             <resource>
-                <directory>${weblogic.common.project.folder}/src/main/resources</directory>
+                <directory>${weblogic.common.project.folder}/src/main/res</directory>
             </resource>
         </resources>
 

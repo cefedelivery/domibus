@@ -32,6 +32,8 @@ import java.util.Set;
 
 
 /**
+ * {@link UserDetailsService} implementation for ECAS
+ *
  * @author Catalin Enache
  * @since 4.1
  */
