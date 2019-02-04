@@ -213,12 +213,14 @@ public class CertificateServiceImpl implements CertificateService {
         final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
         final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
 
-        final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
+        final Date today = LocalDateTime.now().withTime(0, 0, 0, 0).toDate();
+        final Date maxDate = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
         final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
 
-        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
-        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset).forEach(certificate -> {
-            certificate.setAlertImminentNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date between current date and current date + offset[{}]->[{}]",
+                notificationDate, imminentExpirationDelay,  maxDate);
+        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, today, maxDate).forEach(certificate -> {
+            certificate.setAlertImminentNotificationDate(today);
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
             final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;

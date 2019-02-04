@@ -62,10 +62,11 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
     }
 
     @Override
-    public List<Certificate> findImminentExpirationToNotifyAsAlert(final Date nextNotification, final Date offset) {
+    public List<Certificate> findImminentExpirationToNotifyAsAlert(final Date nextNotification, final Date fromDate, final Date toDate) {
         TypedQuery<Certificate> namedQuery = em.createNamedQuery("Certificate.findImminentExpirationToNotifyCertificate", Certificate.class);
         namedQuery.setParameter("NEXT_NOTIFICATION", nextNotification);
-        namedQuery.setParameter("OFFSET_DATE", offset);
+        namedQuery.setParameter("FROM_DATE", fromDate);
+        namedQuery.setParameter("TO_DATE", toDate);
         return namedQuery.getResultList();
     }
 

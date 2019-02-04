@@ -13,7 +13,7 @@ public interface CertificateDao {
 
     void saveOrUpdate(Certificate certificate);
 
-    List<Certificate> findImminentExpirationToNotifyAsAlert(Date nextNotification, Date offset);
+    List<Certificate> findImminentExpirationToNotifyAsAlert(Date nextNotification, Date fromDate, Date toDate);
 
     List<Certificate> findExpiredToNotifyAsAlert(final Date nextNotification, final Date endNotification);
 
