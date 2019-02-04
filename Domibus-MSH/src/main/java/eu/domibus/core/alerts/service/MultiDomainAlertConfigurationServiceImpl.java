@@ -322,6 +322,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             address.validate();
             return true;
         } catch (AddressException ae) {
+            LOG.trace("Email address [{}] is not valid.", email);
             return false;
         }
     }
