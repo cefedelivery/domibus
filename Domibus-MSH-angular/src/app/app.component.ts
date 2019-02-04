@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {SecurityService} from './security/security.service';
-import {NavigationStart, Router, RouterOutlet} from '@angular/router';
+import {Router, RouterOutlet} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
 import {Http} from '@angular/http';
 import {DomainService} from './security/domain.service';
@@ -50,18 +50,6 @@ export class AppComponent implements OnInit {
       data => {
         this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']);
       });
-
-    //TODO to be addressed by UI refactoring
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        if (event.url == '/login') {
-          const currentUser = this.securityService.getCurrentUser();
-          if (!!currentUser) {
-            this.router.navigate(['/']);
-          }
-        }
-      }
-    });
   }
 
   isAdmin (): boolean {

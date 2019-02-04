@@ -15,8 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * @since 4.1
  */
 public abstract class AbstractWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
-    protected static final String SUPER_ROLE = "AP_ADMIN";
-    protected static final String[] ADMIN_ROLES = {"ADMIN", SUPER_ROLE};
+//    protected static final String SUPER_ROLE = "AP_ADMIN";
+//    protected static final String[] ADMIN_ROLES = {"ADMIN", SUPER_ROLE};
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

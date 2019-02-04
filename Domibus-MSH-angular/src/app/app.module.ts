@@ -92,6 +92,7 @@ import {ChangePasswordComponent} from './security/change-password/change-passwor
 import {FilterableListComponent} from './common/filterable-list.component';
 import {AuthExternalProviderGuard} from "./common/guards/auth-external-provider.guard";
 import {LogoutAuthExtProviderComponent} from "./security/logout/logout.components";
+import {RedirectHomeGuard} from "./common/guards/redirect-home.guard";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -209,6 +210,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     DirtyGuard,
     DefaultPasswordGuard,
     AuthExternalProviderGuard,
+    RedirectHomeGuard,
     HttpEventService,
     SecurityService,
     SecurityEventService,

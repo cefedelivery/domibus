@@ -1,5 +1,6 @@
 package eu.domibus.weblogic.security;
 
+import eu.domibus.api.security.AuthRole;
 import eu.domibus.configuration.security.AbstractWebSecurityConfigurerAdapter;
 import eu.domibus.configuration.security.SecurityExternalAuthProviderCondition;
 import eu.domibus.security.AuthenticationService;
@@ -74,20 +75,20 @@ public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdap
                         "/rest/application/fourcornerenabled",
                         "/rest/application/extauthproviderenabled",
                         "/rest/application/multitenancy").permitAll()
-                .antMatchers("/rest/application/domains").hasRole(SUPER_ROLE)
+                .antMatchers("/rest/application/domains").hasAnyAuthority(AuthRole.ROLE_AP_ADMIN.name())
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
-                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole(SUPER_ROLE)
-                .antMatchers("/rest/pmode/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/party/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/truststore/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/messagefilters/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/jms/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/user/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/plugin/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/audit/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/alerts/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/testservice/**").hasAnyRole(ADMIN_ROLES)
-                .antMatchers("/rest/logging/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyAuthority(AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/pmode/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/party/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/truststore/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/messagefilters/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/jms/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/user/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/plugin/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/audit/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/alerts/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/testservice/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
+                .antMatchers("/rest/logging/**").hasAnyAuthority(AuthRole.ROLE_ADMIN.name(), AuthRole.ROLE_AP_ADMIN.name())
                 .antMatchers("/rest/**").authenticated()
                 .and()
                 .jee().authenticatedUserDetailsService(ecasUserDetailsService)
