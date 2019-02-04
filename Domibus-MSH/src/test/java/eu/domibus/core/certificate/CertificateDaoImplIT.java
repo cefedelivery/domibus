@@ -224,7 +224,7 @@ public class CertificateDaoImplIT {
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(offset.minusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), localDateTime.toDate(), offset.toDate());
         assertEquals(1, imminentExpirationToNotify.size());
     }
 
@@ -243,7 +243,7 @@ public class CertificateDaoImplIT {
         certificate.setNotAfter(offset.minusDays(1).toDate());
         certificate.setAlertImminentNotificationDate(notification.plusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), localDateTime.toDate(), offset.toDate());
         assertEquals(0, imminentExpirationToNotify.size());
     }
 
@@ -262,8 +262,27 @@ public class CertificateDaoImplIT {
         certificate.setNotAfter(offset.minusDays(1).toDate());
         certificate.setAlertImminentNotificationDate(notification.minusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), localDateTime.toDate(), offset.toDate());
         assertEquals(1, imminentExpirationToNotify.size());
+    }
+
+    @Test
+    @Transactional
+    public void imminentExpirationNotTriggeredForExpiredCertificates() {
+        final org.joda.time.LocalDateTime localDateTime = org.joda.time.LocalDateTime.now().withTime(0, 0, 0, 0);
+        final org.joda.time.LocalDateTime offset = localDateTime.plusDays(15);
+        final org.joda.time.LocalDateTime notification = localDateTime.plusDays(7);
+        Certificate certificate = new Certificate();
+        String firstCertificateName = "firstCertificateName";
+        certificate.setAlias(firstCertificateName);
+        certificate.setNotBefore(localDateTime.minusYears(1).toDate());
+        certificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
+        certificate.setCertificateType(CertificateType.PRIVATE);
+        certificate.setNotAfter(localDateTime.minusDays(2).toDate()); // expired 2 days ago
+        certificate.setAlertImminentNotificationDate(notification.minusDays(1).toDate());
+        em.persist(certificate);
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), localDateTime.toDate(), offset.toDate());
+        assertEquals(0, imminentExpirationToNotify.size());
     }
 
     @Test
