@@ -101,9 +101,10 @@ public class FSSendMessagesService {
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
 
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            LOG.debug("{}", contentFiles);
+            LOG.trace("{}", contentFiles);
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
+            LOG.debug("Processable files [{}]", processableFiles);
             for (FileObject processableFile : processableFiles) {
                 processFileSafely(processableFile, domain);
             }

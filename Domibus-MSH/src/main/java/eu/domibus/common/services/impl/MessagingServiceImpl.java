@@ -131,6 +131,7 @@ public class MessagingServiceImpl implements MessagingService {
             final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
             userMessage.setSplitAndJoin(mayUseSplitAndJoin);
             if (StringUtils.isBlank(partInfo.getFileName())) {
+
                 InputStream is = partInfo.getPayloadDatahandler().getInputStream();
                 final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
                 partInfo.setFileName(attachmentStore.getAbsolutePath());
