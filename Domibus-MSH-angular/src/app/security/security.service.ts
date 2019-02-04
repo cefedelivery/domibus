@@ -52,7 +52,6 @@ export class SecurityService {
   async login_extauthprovider() {
     console.log('login from auth external provider');
 
-
     try {
       //get the user from server and write it in local storage
       const user = await this.getCurrentUserFromServer();

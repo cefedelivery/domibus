@@ -16,7 +16,6 @@ export class AppComponent implements OnInit {
 
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? 'menu-expanded' : 'menu-collapsed';
-  fourCornerEnabled: boolean = true;
   extAuthProviderEnabled: boolean = false;
 
   @ViewChild(RouterOutlet)
@@ -55,14 +54,11 @@ export class AppComponent implements OnInit {
     //TODO to be addressed by UI refactoring
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        if (event.url.startsWith('/login')) {
+        if (event.url == '/login') {
           const currentUser = this.securityService.getCurrentUser();
-          this.securityService.isAuthenticated(true).subscribe((isAuthenticated: boolean) => {
-            if (isAuthenticated) {
-              console.log('going to /');
-              this.router.navigate(['/']);
-            }
-          });
+          if (!!currentUser) {
+            this.router.navigate(['/']);
+          }
         }
       }
     });
@@ -87,14 +83,8 @@ export class AppComponent implements OnInit {
 
   logout(event: Event): void {
     event.preventDefault();
-    console.log('do the logout');
-    this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']).then((ok) => {
-      if (ok) {
-        this.securityService.logout();
-      }
-    }).catch((error) => {
-      console.log('navigate error: ' + error);
-    })
+
+    this.securityService.logout();
   }
 
   toggleMenu () {
