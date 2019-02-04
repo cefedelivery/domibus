@@ -8,7 +8,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import net.bytebuddy.asm.Advice;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,21 +97,20 @@ public class MailSender {
     }
 
     public <T extends MailModel> void sendMail(final T model, final String from, final String to) {
-        if(StringUtils.isBlank(to)) {
+        if (StringUtils.isBlank(to)) {
             throw new IllegalArgumentException("The 'to' property cannot be null");
         }
-        if(StringUtils.isBlank(from)) {
+        if (StringUtils.isBlank(from)) {
             throw new IllegalArgumentException("The 'from' property cannot be null");
         }
 
-        if (!mailSenderInitiated) {
-            mailSenderInitiated = true;
+        if (!this.mailSenderInitiated) {
+            this.mailSenderInitiated = true;
             try {
                 initMailSender();
             } catch (Exception ex) {
                 LOG.error("Could not initiate mail sender", ex);
             }
-
         }
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
@@ -123,8 +121,8 @@ public class MailSender {
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
             if (to.contains(";")) {
-                String[] targets = to.split(";");
-                helper.setTo(targets);
+                String[] destinations = to.split(";");
+                helper.setTo(destinations);
             } else {
                 helper.setTo(to);
             }
@@ -140,8 +138,8 @@ public class MailSender {
 
     MimeMessageHelper getMimeMessageHelper(MimeMessage message) throws MessagingException {
         return new MimeMessageHelper(message,
-                        MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                        StandardCharsets.UTF_8.name());
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
     }
 
 

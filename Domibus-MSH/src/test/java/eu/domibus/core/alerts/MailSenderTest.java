@@ -127,10 +127,6 @@ public class MailSenderTest {
 
             javaMailSender.createMimeMessage();
             result = mimeMessage;
-
-//            mailSender.getMimeMessageHelper(mimeMessage);
-//            result = mimeMessageHelper;
-
         }};
         mailSender.sendMail(model, "from@test.com", "recipient1@test.com;recipient2@test.com");
         new VerificationsInOrder() {{
