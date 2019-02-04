@@ -1,9 +1,6 @@
 <client-config xmlns="https://www.cc.cec/cas/schemas/client-config/ecas/1.8"
                xmlns:cas="https://www.cc.cec/cas/schemas/client-config/cas/2.0">
 
-    <!--Obsolete. Candidate for removal-->
-    <configurationId>eu.europa.ec.digit.iam.xenos</configurationId>
-
     <cas:serverName>localhost</cas:serverName>
 
     <ecasBaseUrl>https://192.168.99.101:7102</ecasBaseUrl>
