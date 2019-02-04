@@ -303,7 +303,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             List<String> emailsToValidate = new ArrayList<>(Arrays.asList(alertEmailSender));
             emailsToValidate.addAll(Arrays.asList(alertEmailReceiver.split(";")));
             for (String email : emailsToValidate) {
-                misConfigured = isValidEmail(email);
+                misConfigured = !isValidEmail(email);
                 if (misConfigured) {
                     break;
                 }
