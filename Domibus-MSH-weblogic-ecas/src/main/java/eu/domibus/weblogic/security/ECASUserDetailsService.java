@@ -58,8 +58,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     private static final String ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY = "domibus.security.ext.auth.provider.user.role.mappings";
     private static final String ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY = "domibus.security.ext.auth.provider.domain.mappings";
 
-    private static final String ECAS_DOMIBUS_MAPPING_SPLIT_CHAR = ";";
-    private static final String ECAS_DOMIBUS_MAPPING_VALUE_CHAR = "=";
+    private static final String ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR = ";";
+    private static final String ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR = "=";
 
     @Autowired
     private DomainService domainService;
@@ -212,8 +212,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
             throw new IllegalArgumentException("Domibus user role mappings to LDAP groups could not be empty");
         }
 
-        return Stream.of(userRoleMappings.split(ECAS_DOMIBUS_MAPPING_SPLIT_CHAR))
-                .map(str -> str.split(ECAS_DOMIBUS_MAPPING_VALUE_CHAR))
+        return Stream.of(userRoleMappings.split(ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR))
+                .map(str -> str.split(ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR))
                 .collect(Collectors.toMap(str -> str[0], str -> AuthRole.valueOf(str[1])));
     }
 
@@ -226,8 +226,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
             throw new IllegalArgumentException("Domibus user role mappings to LDAP groups could not be empty");
         }
 
-        return Stream.of(domainMappings.split(ECAS_DOMIBUS_MAPPING_SPLIT_CHAR))
-                .map(str -> str.split(ECAS_DOMIBUS_MAPPING_VALUE_CHAR))
+        return Stream.of(domainMappings.split(ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR))
+                .map(str -> str.split(ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR))
                 .collect(Collectors.toMap(str -> str[0], str -> str[1]));
     }
 }
