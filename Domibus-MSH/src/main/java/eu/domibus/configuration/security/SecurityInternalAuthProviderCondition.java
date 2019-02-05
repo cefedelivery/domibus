@@ -17,7 +17,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @since 4.1
  */
 @Configuration
-@PropertySource(value = "file:///${domibus.config.location}/domibus.properties")
+@PropertySource("classpath:config/domibus.properties")
 public class SecurityInternalAuthProviderCondition implements ConfigurationCondition {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SecurityInternalAuthProviderCondition.class);

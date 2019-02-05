@@ -18,7 +18,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <weblogic.common.project.folder>${project.basedir}/../Domibus-MSH-weblogic-common</weblogic.common.project.folder>
     </properties>
 
 
@@ -106,14 +105,6 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>${weblogic.common.project.folder}/src/main/res</directory>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>net.ju-n.maven.plugins</groupId>
@@ -133,7 +124,7 @@
                     </algorithms>
                     <fileSets>
                         <fileSet>
-                            <directory>${weblogic.common.project.folder}/src/main/conf/domibus</directory>
+                            <directory>${project.basedir}/src/main/conf/domibus</directory>
                             <includes>
                                 <include>domibus.properties</include>
                             </includes>

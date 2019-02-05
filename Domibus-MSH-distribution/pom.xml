@@ -176,7 +176,7 @@
                                 <id>make-assembly-weblogic-ecas</id>
                                 <configuration>
                                     <descriptors>
-                                        <descriptor>src/main/assembly/weblogic/weblogic-configuration-only.xml</descriptor>
+                                        <descriptor>src/main/assembly/weblogic/weblogic-ecas-configuration-only.xml</descriptor>
                                         <descriptor>src/main/assembly/weblogic/weblogic-ecas-war.xml</descriptor>
                                     </descriptors>
                                 </configuration>

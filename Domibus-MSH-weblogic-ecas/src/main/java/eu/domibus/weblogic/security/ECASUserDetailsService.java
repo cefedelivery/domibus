@@ -28,7 +28,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -50,8 +53,13 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final String ECAS_GROUP = "eu.cec.digit.ecas.client.j2ee.weblogic.EcasGroup";
 
-    private static final String ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY = "domibus.security.ext.auth.provider.group.role.prefix";
-    private static final String ECAS_DOMIBUS_DOMAIN_PREFIX_KEY = "domibus.security.ext.auth.provider.group.domain.prefix";
+    private static final String ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY = "domibus.security.ext.auth.provider.group.prefix";
+
+    private static final String ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY = "domibus.security.ext.auth.provider.user.role.mappings";
+    private static final String ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY = "domibus.security.ext.auth.provider.domain.mappings";
+
+    private static final String ECAS_DOMIBUS_MAPPING_SPLIT_CHAR = ";";
+    private static final String ECAS_DOMIBUS_MAPPING_VALUE_CHAR = "=";
 
     @Autowired
     private DomainService domainService;
@@ -87,22 +95,41 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         throw new UsernameNotFoundException("Cannot find any user who has the name " + username);
     }
 
+    /**
+     * It reads the principals (LDAP groups) returned by ECAS and create UserDetails
+     *
+     * @param username
+     * @return UserDetails object
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     */
     private UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
 
         List<GrantedAuthority> userGroups = new LinkedList<>();
-        List<String> userGroupsStr = new LinkedList<>();
+        List<AuthRole> userGroupsStr = new LinkedList<>();
         String domainCode = null;
-        final String userRolePrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY);
-        final String domainPrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_DOMAIN_PREFIX_KEY);
+        final String ldapGroupPrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY);
+
+        Map<String, AuthRole> userRoleMappings = retrieveUserRoleMappings();
+        Map<String, String> domainMappings = retrieveDomainMappings();
 
         //extract user role and domain
         for (Principal principal : getPrincipals()) {
             if (isUserGroupPrincipal(principal)) {
                 LOG.debug("Found a user group principal: {}", principal);
-                if (principal.getName().startsWith(userRolePrefix)) {
-                    userGroupsStr.add(principal.getName().replaceAll("^" + userRolePrefix, StringUtils.EMPTY));
-                } else if (principal.getName().startsWith(domainPrefix)) {
-                    domainCode = principal.getName().replaceAll("^" + domainPrefix, StringUtils.EMPTY);
+                final String principalName = principal.getName();
+
+                //only Domibus mapped ldap groups
+                if (principalName.startsWith(ldapGroupPrefix)) {
+
+                    //search for user roles
+                    if (userRoleMappings.get(principalName) != null) {
+                        userGroupsStr.add(userRoleMappings.get(principalName));
+                    } else if (domainMappings.get(principalName) != null) {
+                        domainCode = domainMappings.get(principalName);
+                    }
                 }
             } else {
                 if (isUserPrincipal(principal) && !username.equals(principal.getName())) {
@@ -139,10 +166,10 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         }
     }
 
-    private GrantedAuthority chooseHighestUserGroup(final List<String> userGroups) {
-        if (userGroups.contains("AP_ADMIN")) {
+    private GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
+        if (userGroups.contains(AuthRole.ROLE_AP_ADMIN)) {
             return new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name());
-        } else if (userGroups.contains("ADMIN")) {
+        } else if (userGroups.contains(AuthRole.ROLE_ADMIN)) {
             return new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name());
         }
         return new SimpleGrantedAuthority(AuthRole.ROLE_USER.name());
@@ -174,5 +201,33 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private boolean isUserGroupPrincipal(Principal principal) throws ClassNotFoundException {
         return Class.forName(ECAS_GROUP).isInstance(principal);
+    }
+
+    /**
+     * @return Map of Domibus user roles and LDAP EU Login groups
+     */
+    private Map<String, AuthRole> retrieveUserRoleMappings() {
+        final String userRoleMappings = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY);
+        if (StringUtils.isEmpty(userRoleMappings)) {
+            throw new IllegalArgumentException("Domibus user role mappings to LDAP groups could not be empty");
+        }
+
+        return Stream.of(userRoleMappings.split(ECAS_DOMIBUS_MAPPING_SPLIT_CHAR))
+                .map(str -> str.split(ECAS_DOMIBUS_MAPPING_VALUE_CHAR))
+                .collect(Collectors.toMap(str -> str[0], str -> AuthRole.valueOf(str[1])));
+    }
+
+    /**
+     * @return Map of Domibus domains and LDAP EU Login groups
+     */
+    private Map<String, String> retrieveDomainMappings() {
+        final String domainMappings = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY);
+        if (StringUtils.isEmpty(domainMappings)) {
+            throw new IllegalArgumentException("Domibus user role mappings to LDAP groups could not be empty");
+        }
+
+        return Stream.of(domainMappings.split(ECAS_DOMIBUS_MAPPING_SPLIT_CHAR))
+                .map(str -> str.split(ECAS_DOMIBUS_MAPPING_VALUE_CHAR))
+                .collect(Collectors.toMap(str -> str[0], str -> str[1]));
     }
 }
