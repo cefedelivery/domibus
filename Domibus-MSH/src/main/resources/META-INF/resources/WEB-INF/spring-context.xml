@@ -96,8 +96,8 @@
     </bean>
     <bean id="dateFormatter" class="eu.domibus.ebms3.common.model.TimestampDateFormatter"/>
 
-    <bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <!--<bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="domibusJDBC-nonXADataSource"/>
-    </bean>
+    </bean>-->
 
 </beans>

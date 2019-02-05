@@ -105,6 +105,7 @@ public class PullMessageServiceImpl implements PullMessageService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class, timerName = "update_pull_message_after_request")
     public void updatePullMessageAfterRequest(final UserMessage userMessage,
                                               final String messageId,
                                               final LegConfiguration legConfiguration,
@@ -144,6 +145,7 @@ public class PullMessageServiceImpl implements PullMessageService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class, timerName = "update_pull_message_after_receipt")
     public PullRequestResult updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
             ResponseHandler.CheckResult isOk,
@@ -186,7 +188,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     @Transactional(propagation = Propagation.REQUIRED)
     @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class, timerName = "get_pull_message_id")
     public String getPullMessageId(final String initiator, final String mpc) {
-        final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(initiator, mpc);
+        final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(mpc, initiator);
         LOG.trace("[PULL_REQUEST]:Reading messages for initiatior [{}] mpc[{}].", initiator, mpc);
         for (MessagingLock lock : messagingLock) {
             LOG.trace("[getPullMessageId]:Message[{}]] try to acquire lock", lock.getMessageId());

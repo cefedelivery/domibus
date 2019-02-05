@@ -62,14 +62,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private JdbcTemplate lockJdbcTemplate;
 
-    private TransactionTemplate template;
-
-    @Autowired
-    public MessagingLockDaoImpl(DataSourceTransactionManager dataSourceTransactionManager) {
-        template = new TransactionTemplate(dataSourceTransactionManager);
-        template.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
-    }
-
     @Autowired
     @Qualifier("domibusJDBC-XADataSource")
     public void setDataSource(DataSource dataSource) {
