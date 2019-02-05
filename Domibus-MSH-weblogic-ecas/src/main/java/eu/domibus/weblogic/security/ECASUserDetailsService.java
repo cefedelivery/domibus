@@ -223,7 +223,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     private Map<String, String> retrieveDomainMappings() {
         final String domainMappings = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY);
         if (StringUtils.isEmpty(domainMappings)) {
-            throw new IllegalArgumentException("Domibus user role mappings to LDAP groups could not be empty");
+            throw new IllegalArgumentException("Domibus domain mappings to LDAP groups could not be empty");
         }
 
         return Stream.of(domainMappings.split(ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR))
