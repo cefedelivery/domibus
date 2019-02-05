@@ -55,8 +55,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final String ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY = "domibus.security.ext.auth.provider.group.prefix";
 
-    private static final String ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY = "domibus.security.ext.auth.provider.user.role.mappings";
-    private static final String ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY = "domibus.security.ext.auth.provider.domain.mappings";
+    static final String ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY = "domibus.security.ext.auth.provider.user.role.mappings";
+    static final String ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY = "domibus.security.ext.auth.provider.domain.mappings";
 
     private static final String ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR = ";";
     private static final String ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR = "=";
@@ -105,7 +105,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
      * @throws ClassNotFoundException
      * @throws IllegalAccessException
      */
-    private UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
+    UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
 
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<AuthRole> userGroupsStr = new LinkedList<>();
@@ -175,7 +175,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         return new SimpleGrantedAuthority(AuthRole.ROLE_USER.name());
     }
 
-    private boolean isWeblogicSecurity() {
+    protected boolean isWeblogicSecurity() {
         boolean weblogicSecurityLoaded = false;
         try {
             Class.forName(WEBLOGIC_SECURITY_CLASS, false, getClass().getClassLoader());
@@ -187,7 +187,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         return weblogicSecurityLoaded;
     }
 
-    private Set<Principal> getPrincipals()
+    protected Set<Principal> getPrincipals()
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
         Subject subject = (Subject) Class.forName(WEBLOGIC_SECURITY_CLASS)
                 .getMethod(WEBLOGIC_SECURITY_GET_METHOD, null)
@@ -206,7 +206,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     /**
      * @return Map of Domibus user roles and LDAP EU Login groups
      */
-    private Map<String, AuthRole> retrieveUserRoleMappings() {
+    protected Map<String, AuthRole> retrieveUserRoleMappings() {
         final String userRoleMappings = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY);
         if (StringUtils.isEmpty(userRoleMappings)) {
             throw new IllegalArgumentException("Domibus user role mappings to LDAP groups could not be empty");
@@ -220,7 +220,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     /**
      * @return Map of Domibus domains and LDAP EU Login groups
      */
-    private Map<String, String> retrieveDomainMappings() {
+    protected Map<String, String> retrieveDomainMappings() {
         final String domainMappings = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY);
         if (StringUtils.isEmpty(domainMappings)) {
             throw new IllegalArgumentException("Domibus domain mappings to LDAP groups could not be empty");
