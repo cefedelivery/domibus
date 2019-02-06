@@ -53,8 +53,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final String ECAS_GROUP = "eu.cec.digit.ecas.client.j2ee.weblogic.EcasGroup";
 
-    private static final String ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY = "domibus.security.ext.auth.provider.group.prefix";
-
+    static final String ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY = "domibus.security.ext.auth.provider.group.prefix";
     static final String ECAS_DOMIBUS_USER_ROLE_MAPPINGS_KEY = "domibus.security.ext.auth.provider.user.role.mappings";
     static final String ECAS_DOMIBUS_DOMAIN_MAPPINGS_KEY = "domibus.security.ext.auth.provider.domain.mappings";
 
@@ -105,7 +104,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
      * @throws ClassNotFoundException
      * @throws IllegalAccessException
      */
-    UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
+    protected UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
 
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<AuthRole> userGroupsStr = new LinkedList<>();
@@ -150,7 +149,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         return userDetail;
     }
 
-    private void setDomainFromECASGroup(String domainCode, UserDetail userDetail) {
+    protected void setDomainFromECASGroup(String domainCode, UserDetail userDetail) {
         if (domibusConfigurationService.isMultiTenantAware()) {
             Domain domain = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
                     .findAny()
@@ -166,7 +165,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         }
     }
 
-    private GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
+    protected GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
         if (userGroups.contains(AuthRole.ROLE_AP_ADMIN)) {
             return new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name());
         } else if (userGroups.contains(AuthRole.ROLE_ADMIN)) {
@@ -199,7 +198,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         return Class.forName(ECAS_USER).isInstance(principal);
     }
 
-    private boolean isUserGroupPrincipal(Principal principal) throws ClassNotFoundException {
+    protected boolean isUserGroupPrincipal(Principal principal) throws ClassNotFoundException {
         return Class.forName(ECAS_GROUP).isInstance(principal);
     }
 

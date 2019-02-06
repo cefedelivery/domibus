@@ -1,6 +1,7 @@
 package eu.domibus.weblogic.security;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -12,11 +13,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.Principal;
+import java.util.*;
 
 /**
  * @author Catalin Enache
@@ -53,25 +55,11 @@ public class ECASUserDetailsServiceTest {
     public void loadUserDetails(@Mocked final PreAuthenticatedAuthenticationToken token, @Mocked final UserDetail userDetail) {
         final String username = "super";
 
-//        UserDetail userDetail = new UserDetail(null);
-
         new Expectations(ecasUserDetailsService) {{
-//            ecasUserDetailsService.isWeblogicSecurity();
-//            result = true;
-//
-//            ecasUserDetailsService.retrieveUserRoleMappings();
-//            result = userRoleMappings;
-//
-//            ecasUserDetailsService.retrieveDomainMappings();
-//            result = domainMappings;
-//
-//            ecasUserDetailsService.getPrincipals();
             token.getPrincipal();
             result = username;
-//
-             ecasUserDetailsService.loadUserByUsername(username);
-             result = userDetail;
-
+            ecasUserDetailsService.loadUserByUsername(username);
+            result = userDetail;
         }};
 
         //tested method
@@ -102,6 +90,43 @@ public class ECASUserDetailsServiceTest {
         }};
     }
 
+    @Test
+    public void createUserDetails(@Mocked final Principal principal, @Mocked final UserDetail userDetail) throws Exception {
+        final String username = "super";
+        final String domainCode = "domain1";
+
+        final Set<Principal> principals = new HashSet<>();
+        principals.add(principal);
+
+        new Expectations(ecasUserDetailsService) {{
+            domibusPropertyProvider.getProperty(ECASUserDetailsService.ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY);
+            result = "DIGIT_DOM";
+
+            ecasUserDetailsService.retrieveUserRoleMappings();
+            result = userRoleMappings;
+
+            ecasUserDetailsService.retrieveDomainMappings();
+            result = domainMappings;
+
+            ecasUserDetailsService.getPrincipals();
+            result = principals;
+
+            ecasUserDetailsService.isUserGroupPrincipal((Principal) any);
+            result = true;
+
+            principal.getName();
+            result = "DIGIT_DOMRADM";
+
+            ecasUserDetailsService.chooseHighestUserGroup((ArrayList<AuthRole>) any);
+            result = new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name());
+        }};
+
+        //tested method
+        ecasUserDetailsService.createUserDetails(username);
+
+        new FullVerifications(ecasUserDetailsService) {{
+        }};
+    }
 
     @Test
     public void retrieveDomainMappings() {
@@ -129,5 +154,69 @@ public class ECASUserDetailsServiceTest {
 
         Assert.assertTrue(userRoleMappings.entrySet().size() == 3);
         Assert.assertEquals(AuthRole.ROLE_USER, userRoleMappings.get("DIGIT_DOMRUSR"));
+        Assert.assertEquals(AuthRole.ROLE_ADMIN, userRoleMappings.get("DIGIT_DOMRADM"));
+        Assert.assertEquals(AuthRole.ROLE_AP_ADMIN, userRoleMappings.get("DIGIT_DOMRSADM"));
+    }
+
+    @Test
+    public void chooseHighestUserGroup() {
+
+        final List<AuthRole> list1 = new ArrayList<>();
+        list1.add(AuthRole.ROLE_ADMIN);
+        list1.add(AuthRole.ROLE_USER);
+
+        Assert.assertEquals(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()),
+                ecasUserDetailsService.chooseHighestUserGroup(list1));
+
+        list1.add(AuthRole.ROLE_AP_ADMIN);
+        Assert.assertEquals(new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name()),
+                ecasUserDetailsService.chooseHighestUserGroup(list1));
+    }
+
+    @Test
+    public void setDomainFromEcasGroup_Multitenancy(@Mocked final UserDetail userDetail) {
+        final String domainCode = "domain1";
+        List<Domain> domains = new ArrayList<>();
+        Domain domain1 = new Domain("domain1", "Domain1");
+        Domain domain2 = new Domain("domain2", "Domain2");
+        domains.add(domain1);
+        domains.add(domain2);
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            domainService.getDomains();
+            result = domains;
+        }};
+
+        //tested method
+        ecasUserDetailsService.setDomainFromECASGroup(domainCode, userDetail);
+
+        new Verifications() {{
+            String actualDomain;
+            userDetail.setDomain(actualDomain = withCapture());
+            Assert.assertEquals(domainCode, actualDomain);
+        }};
+    }
+
+    @Test
+    public void setDomainFromEcasGroup_NonMultitenancy(@Mocked final UserDetail userDetail) {
+        final String domainCode = DomainService.DEFAULT_DOMAIN.getCode();
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = false;
+
+        }};
+
+        //tested method
+        ecasUserDetailsService.setDomainFromECASGroup(domainCode, userDetail);
+
+        new Verifications() {{
+            String actualDomain;
+            userDetail.setDomain(actualDomain = withCapture());
+            Assert.assertEquals(domainCode, actualDomain);
+        }};
     }
 }
