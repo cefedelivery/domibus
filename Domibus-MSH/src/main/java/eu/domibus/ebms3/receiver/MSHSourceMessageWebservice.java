@@ -28,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.message.Message;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jws.WebMethod;
 import javax.jws.WebResult;
@@ -86,6 +88,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
     @WebMethod
     @WebResult(name = "soapMessageResult")
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SOAPMessage invoke(final SOAPMessage request) {
         Messaging messaging = null;
         UserMessage userMessage = null;
