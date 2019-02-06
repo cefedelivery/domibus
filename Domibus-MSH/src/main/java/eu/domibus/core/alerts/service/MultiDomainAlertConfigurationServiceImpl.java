@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 
 
@@ -293,24 +296,35 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         final String alertReceiverPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_RECEIVER_EMAIL, DOMIBUS_ALERT_SUPER_RECEIVER_EMAIL);
         final String alertEmailReceiver = domibusPropertyProvider.getProperty(domain, alertReceiverPropertyName);
 
-        boolean missConfigured = false;
+        boolean misConfigured = false;
         if (StringUtils.isEmpty(alertEmailReceiver) || StringUtils.isEmpty(alertEmailSender)) {
-            missConfigured = true;
+            misConfigured = true;
         } else {
-            try {
-                InternetAddress receiverAddress = new InternetAddress(alertEmailReceiver);
-                InternetAddress senderAddress = new InternetAddress(alertEmailSender);
-                receiverAddress.validate();
-                senderAddress.validate();
-            } catch (AddressException ae) {
-                missConfigured = true;
+            List<String> emailsToValidate = new ArrayList<>(Arrays.asList(alertEmailSender));
+            emailsToValidate.addAll(Arrays.asList(alertEmailReceiver.split(";")));
+            for (String email : emailsToValidate) {
+                misConfigured = !isValidEmail(email);
+                if (misConfigured) {
+                    break;
+                }
             }
         }
-        if (missConfigured) {
+        if (misConfigured) {
             LOG.error("Alert module can not send email, mail sender property name:[{}]/value[{}] and receiver property name:[{}]/value[{}] are mandatory in domain:[{}]", alertSenderPropertyName, alertEmailSender, alertReceiverPropertyName, alertEmailReceiver, domain);
             throw new IllegalArgumentException("Invalid email address configured for the alert module.");
         }
         return new CommonConfiguration(alertLifeTimeInDays, alertEmailSender, alertEmailReceiver);
+    }
+
+    private boolean isValidEmail(String email) {
+        try {
+            InternetAddress address = new InternetAddress(email);
+            address.validate();
+            return true;
+        } catch (AddressException ae) {
+            LOG.trace("Email address [{}] is not valid:", email, ae);
+            return false;
+        }
     }
 
     protected MessagingModuleConfiguration readMessageConfiguration(Domain domain) {
