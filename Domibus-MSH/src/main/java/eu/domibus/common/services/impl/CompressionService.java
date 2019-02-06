@@ -47,10 +47,18 @@ public class CompressionService {
 
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
+            LOG.debug("Compression is not configured for message [{}]");
             return false;
         }
 
         if (partInfo.isInBody()) {
+            LOG.debug("Compression is not used for body payloads");
+            return false;
+        }
+
+        final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfigForMessage);
+        if(mayUseSplitAndJoin) {
+            LOG.debug("SplitAndJoin compression is only applied for the multipart message");
             return false;
         }
 
