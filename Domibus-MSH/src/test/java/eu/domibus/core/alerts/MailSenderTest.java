@@ -6,10 +6,12 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import freemarker.template.Configuration;
+import freemarker.template.TemplateNotFoundException;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -47,15 +49,16 @@ public class MailSenderTest {
     @Injectable
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
-    @Test
-    public void initMailSender(@Mocked final Properties javaMailProperties, @Mocked final Predicate predicate) {
-        final String smtpUrl = "smtpUrl";
-        final String port = "25";
-        final String user = "user";
-        final String password = "password";
-        final String dynamicPropertyName = "domibus.alert.mail.smtp.port";
-        final String dynamicSmtpPort = "450";
-        final Set<String> dynamicPropertySet = Sets.newHashSet(dynamicPropertyName);
+    final String smtpUrl = "smtpUrl";
+    final String port = "25";
+    final String user = "user";
+    final String password = "password";
+    final String dynamicPropertyName = "domibus.alert.mail.smtp.port";
+    final String dynamicSmtpPort = "450";
+    final Set<String> dynamicPropertySet = Sets.newHashSet(dynamicPropertyName);
+
+    private void setupMailProperties(@Mocked Properties javaMailProperties, @Mocked Predicate predicate) {
+
         new Expectations() {{
             multiDomainAlertConfigurationService.isAlertModuleEnabled();
             result = true;
@@ -78,6 +81,13 @@ public class MailSenderTest {
             domibusPropertyProvider.getProperty(dynamicPropertyName);
             result = dynamicSmtpPort;
         }};
+    }
+
+    @Test
+    public void initMailSender(@Mocked final Properties javaMailProperties, @Mocked final Predicate predicate) {
+
+        setupMailProperties(javaMailProperties, predicate);
+
         mailSender.initMailSender();
         new VerificationsInOrder() {{
             javaMailSender.setHost(smtpUrl);
@@ -96,35 +106,10 @@ public class MailSenderTest {
     public void sendMail(@Mocked final Properties javaMailProperties, @Mocked final Predicate predicate,
                          @Mocked MailModel model, @Mocked MimeMessage mimeMessage,
                          @Mocked MimeMessageHelper mimeMessageHelper) throws IOException, MessagingException {
-        final String smtpUrl = "smtpUrl";
-        final String port = "25";
-        final String user = "user";
-        final String password = "password";
-        final String dynamicPropertyName = "domibus.alert.mail.smtp.port";
-        final String dynamicSmtpPort = "450";
-        final Set<String> dynamicPropertySet = Sets.newHashSet(dynamicPropertyName);
-        new Expectations() {{
-            multiDomainAlertConfigurationService.isAlertModuleEnabled();
-            result = true;
-            domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_URL);
-            result = smtpUrl;
-            domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PORT);
-            result = port;
-            domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_USER);
-            result = user;
-            domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PASSWORD);
-            result = password;
-            multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
-            result = "domibus.alert.mail.sending.active";
-            domibusPropertyProvider.getOptionalDomainProperty("domibus.alert.mail.sending.active");
-            result = true;
-            javaMailSender.getJavaMailProperties();
-            result = javaMailProperties;
-            domibusPropertyProvider.filterPropertiesName(withAny(predicate));
-            result = dynamicPropertySet;
-            domibusPropertyProvider.getProperty(dynamicPropertyName);
-            result = dynamicSmtpPort;
 
+        setupMailProperties(javaMailProperties, predicate);
+
+        new Expectations() {{
             javaMailSender.createMimeMessage();
             result = mimeMessage;
         }};
@@ -134,6 +119,62 @@ public class MailSenderTest {
             times = 1;
             javaMailSender.send(mimeMessage);
             times = 1;
+        }};
+    }
+
+    @Test(expected = AlertDispatchException.class)
+    public void sendMailTestInvalidTemplate(@Mocked final Properties javaMailProperties, @Mocked final Predicate predicate,
+                                            @Mocked MailModel model, @Mocked MimeMessage mimeMessage,
+                                            @Mocked MimeMessageHelper mimeMessageHelper) throws IOException, MessagingException {
+
+        setupMailProperties(javaMailProperties, predicate);
+
+        new Expectations() {{
+            javaMailSender.createMimeMessage();
+            result = mimeMessage;
+            freemarkerConfig.getTemplate(anyString);
+            result = new TemplateNotFoundException("test", null, "error message");
+        }};
+
+        mailSender.sendMail(model, "from@test.com", "recipient1@test.com;recipient2@test.com");
+        new VerificationsInOrder() {{
+            javaMailSender.send((MimeMessage) any);
+            times = 0;
+        }};
+    }
+
+    @Test(expected = AlertDispatchException.class)
+    public void sendMailTestSendMailFailure(@Mocked final Properties javaMailProperties, @Mocked final Predicate predicate,
+                                            @Mocked MailModel model, @Mocked MimeMessage mimeMessage,
+                                            @Mocked MimeMessageHelper mimeMessageHelper) throws IOException, MessagingException {
+
+        setupMailProperties(javaMailProperties, predicate);
+
+        new Expectations() {{
+            javaMailSender.createMimeMessage();
+            result = mimeMessage;
+
+            javaMailSender.send(mimeMessage);
+            result = new MailSendException("error message");
+        }};
+
+        mailSender.sendMail(model, "from@test.com", "recipient1@test.com;recipient2@test.com");
+        new VerificationsInOrder() {{
+            javaMailSender.send(mimeMessage);
+            times = 1;
+        }};
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void sendMailIllegalAddresses(@Mocked final Properties javaMailProperties, @Mocked final Predicate predicate,
+                                         @Mocked MailModel model, @Mocked MimeMessage mimeMessage,
+                                         @Mocked MimeMessageHelper mimeMessageHelper) throws IOException, MessagingException {
+
+        mailSender.sendMail(model, "", "   ");
+
+        new VerificationsInOrder() {{
+            javaMailSender.send((MimeMessage) any);
+            times = 0;
         }};
     }
 }

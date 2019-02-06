@@ -11,6 +11,7 @@ import freemarker.template.TemplateException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -121,8 +122,7 @@ public class MailSender {
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
             if (to.contains(";")) {
-                String[] destinations = to.split(";");
-                helper.setTo(destinations);
+                helper.setTo(to.split(";"));
             } else {
                 helper.setTo(to);
             }
@@ -130,7 +130,7 @@ public class MailSender {
             helper.setSubject(model.getSubject());
             helper.setFrom(from);
             javaMailSender.send(message);
-        } catch (IOException | MessagingException | TemplateException e) {
+        } catch (IOException | MessagingException | TemplateException | MailException e) {
             LOG.error("Exception while sending mail from[{}] to[{}]", from, to, e);
             throw new AlertDispatchException(e);
         }
