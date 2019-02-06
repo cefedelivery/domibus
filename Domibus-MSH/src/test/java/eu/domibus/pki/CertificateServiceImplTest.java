@@ -25,11 +25,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.CertificateException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,9 +40,6 @@ import java.util.List;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by Cosmin Baciu on 07-Jul-16.
@@ -460,7 +456,7 @@ public class CertificateServiceImplTest {
             now1.minusDays(imminentExpirationFrequency).toDate();
             result = notificationDate;
 
-            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, (Date) any, offset);
             result = Lists.newArrayList(certificate);
 
             certificate.getAlias();
@@ -472,7 +468,7 @@ public class CertificateServiceImplTest {
         }};
         certificateService.sendCertificateImminentExpirationAlerts();
         new VerificationsInOrder() {{
-            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, (Date) any, offset);
             times = 1;
             certificateDao.saveOrUpdate(certificate);
             times = 1;

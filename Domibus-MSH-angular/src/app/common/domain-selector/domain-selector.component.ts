@@ -5,7 +5,7 @@ import {Domain} from '../../security/domain';
 import {MdDialog} from '@angular/material';
 import {CancelDialogComponent} from '../cancel-dialog/cancel-dialog.component';
 import {AlertService} from '../alert/alert.service';
-import {Router, RoutesRecognized} from '@angular/router';
+import {ActivatedRoute, ActivatedRouteSnapshot, Router, RoutesRecognized} from '@angular/router';
 
 @Component({
   selector: 'domain-selector',
@@ -23,19 +23,21 @@ export class DomainSelectorComponent implements OnInit {
   @Input()
   currentComponent: any;
 
-  constructor (private domainService: DomainService,
-               private securityService: SecurityService,
-               private dialog: MdDialog,
-               private alertService: AlertService,
-               private router: Router) {
+  constructor(private domainService: DomainService,
+              private securityService: SecurityService,
+              private dialog: MdDialog,
+              private alertService: AlertService,
+              private router: Router,
+              private route: ActivatedRoute) {
   }
 
-  async ngOnInit () {
+  async ngOnInit() {
     const isMultiDomain = await this.domainService.isMultiDomain().toPromise();
 
     if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
       this.domains = await this.domainService.getDomains();
       this.displayDomains = true;
+      this.showDomains = this.shouldShowDomains(this.route.snapshot);
 
       this.domainService.getCurrentDomain().subscribe(domain => {
         this.domainCode = this.currentDomainCode = (domain ? domain.code : null);
@@ -45,12 +47,16 @@ export class DomainSelectorComponent implements OnInit {
     this.router.events.subscribe(event => {
       if (event instanceof RoutesRecognized) {
         let route = event.state.root.firstChild;
-        this.showDomains = this.displayDomains && !route.data.isDomainIndependent;
+        this.showDomains = this.shouldShowDomains(route);
       }
     });
   }
 
-  async changeDomain () {
+  private shouldShowDomains(route: ActivatedRouteSnapshot) {
+    return this.displayDomains && !route.data.isDomainIndependent;
+  }
+
+  async changeDomain() {
     let canChangeDomain = Promise.resolve(true);
     if (this.currentComponent && this.currentComponent.isDirty && this.currentComponent.isDirty()) {
       canChangeDomain = this.dialog.open(CancelDialogComponent).afterClosed().toPromise<boolean>();

@@ -10,7 +10,6 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.util.MessageUtil;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.neethi.Policy;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,21 +54,21 @@ public class PullReceiptSender {
     private void handleDispatchReceiptResult(SOAPMessage acknowledgementResult) throws EbMS3Exception {
         if (acknowledgementResult == null) {
             LOG.debug("acknowledgementResult is null, as expected. No errors were reported");
-            return ;
+            return;
         }
         Messaging errorMessage = MessageUtil.getMessage(acknowledgementResult, jaxbContext);
         if (errorMessage == null || errorMessage.getSignalMessage() == null) {
             LOG.debug("acknowledgementResult is not null, but it does not contain a SignalMessage with the reported errors. ");
-            return ;
+            return;
         }
         Set<Error> errors = errorMessage.getSignalMessage().getError();
-        if (errors != null) {
-            for (Error error : errors) {
-                LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
-                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
-                ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-                throw ebMS3Ex;
-            }
+        if (errors != null && !errors.isEmpty()) {
+            Error error = errors.iterator().next();
+            LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
+            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+            ebMS3Ex.setMshRole(MSHRole.RECEIVING);
+            throw ebMS3Ex;
+
         }
     }
 }
