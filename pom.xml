@@ -158,7 +158,7 @@
             </dependency>
             <!-- End Jackson-->
 
-            <!-- SL4J + Logback -->
+            <!-- SLF4J + Logback -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
@@ -194,7 +194,7 @@
                 <artifactId>logback-elasticsearch-appender</artifactId>
                 <version>${logback.elasticsearch.appender.version}</version>
             </dependency>
-            <!-- End SL4J + Logback -->
+            <!-- End SLF4J + Logback -->
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -731,7 +731,17 @@
             <modules>
                 <module>Domibus-MSH-taskexecutor-weblogic</module>
                 <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
                 <module>Domibus-MSH-weblogic</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>weblogic-ecas</id>
+            <modules>
+                <module>Domibus-MSH-taskexecutor-weblogic</module>
+                <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
+                <module>Domibus-MSH-weblogic-ecas</module>
             </modules>
         </profile>
         <profile>

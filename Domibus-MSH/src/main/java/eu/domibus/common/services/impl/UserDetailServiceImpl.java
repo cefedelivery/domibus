@@ -12,12 +12,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
  */
+@Service
 public class UserDetailServiceImpl implements UserDetailsService {
     public static final String CHECK_DEFAULT_PASSWORD = "domibus.passwordPolicy.checkDefaultPassword";
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserDetailServiceImpl.class);
@@ -26,7 +28,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     private UserDao userDao;
 
     @Autowired
-    private BCryptPasswordEncoder bcryptEncoder;
+    BCryptPasswordEncoder bcryptEncoder;
 
     @Autowired
     private UserService userService;

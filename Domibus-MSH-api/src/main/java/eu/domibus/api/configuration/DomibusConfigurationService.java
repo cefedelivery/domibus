@@ -10,6 +10,7 @@ public interface DomibusConfigurationService {
 
     String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
     String CLUSTER_DEPLOYMENT = "domibus.deployment.clustered";
+    String EXTERNAL_AUTH_PROVIDER = "domibus.security.ext.auth.provider.enabled";
 
     String getConfigLocation();
 
@@ -20,5 +21,12 @@ public interface DomibusConfigurationService {
     boolean isMultiTenantAware();
 
     boolean isFourCornerEnabled();
+
+    /**
+     * Returns true if external authentication provider is enabled
+     *
+     * @return boolean - true if an authentication external provider is enabled
+     */
+    boolean isExtAuthProviderEnabled();
 
 }

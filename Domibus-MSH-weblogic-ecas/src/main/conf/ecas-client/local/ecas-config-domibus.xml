@@ -1,0 +1,64 @@
+<client-config xmlns="https://www.cc.cec/cas/schemas/client-config/ecas/1.8"
+               xmlns:cas="https://www.cc.cec/cas/schemas/client-config/cas/2.0">
+
+    <cas:serverName>localhost</cas:serverName>
+
+    <ecasBaseUrl>https://192.168.99.101:7102</ecasBaseUrl>
+
+    <groups>
+        <group>*</group>
+    </groups>
+
+    <acceptStrengths>
+        <strength>BASIC</strength>
+        <strength>CLIENT_CERT</strength>
+    </acceptStrengths>
+
+    <assuranceLevel>NO_ASSURANCE</assuranceLevel>
+    <!-- renew is false only for local in order to speedup the development-->
+    <cas:renew>false</cas:renew>
+    <requestingUserDetails>true</requestingUserDetails>
+
+    <trustedCertificates>
+        <!-- ECAS root CA for vagrant mockup -->
+        <trustedCertificate>
+            MIIGmzCCBIOgAwIBAgIQGtnPABvuTxCcuW45SuaK4TANBgkqhkiG9w0BAQ0FADCB
+            mTELMAkGA1UEBhMCQkUxETAPBgNVBAgMCEJydXNzZWxzMREwDwYDVQQHDAhCcnVz
+            c2VsczEcMBoGA1UECgwTRXVyb3BlYW4gQ29tbWlzc2lvbjEOMAwGA1UECwwFRElH
+            SVQxNjA0BgNVBAMMLUVDQVMgTW9jay1VcCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkg
+            KERldiBPbmx5KTAeFw0xNjAyMDMxNTAyMjNaFw0yMTAyMDUxNTAyMjNaMIGZMQsw
+            CQYDVQQGEwJCRTERMA8GA1UECAwIQnJ1c3NlbHMxETAPBgNVBAcMCEJydXNzZWxz
+            MRwwGgYDVQQKDBNFdXJvcGVhbiBDb21taXNzaW9uMQ4wDAYDVQQLDAVESUdJVDE2
+            MDQGA1UEAwwtRUNBUyBNb2NrLVVwIENlcnRpZmljYXRlIEF1dGhvcml0eSAoRGV2
+            IE9ubHkpMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAuCephZcwFEMY
+            d7KXlClwXH6z4HrN9o6+BNRJI1Oso1SzbVY4belVbQLnPNF87puFCI9vdlsUD4Sh
+            RqOyfyUpDiBqO9IcbMhphKQOwgo1TFZE+fZaxibO2MBJV5eryibi8XuVsyHjNFA/
+            FnGVOD9lvtgPcWPVLVp44pmPeN1m3hr4IeqKICkVTEoaiayDrND2TxDpYVl4e/1Z
+            TJ/n+weVmuKbwJn1SVia/Tb4rJlWCiHncEfOXMf0O0sE+40pNb8D9R4BWXvH5ypM
+            6LhLqivpYBAsm1VRsuiyBBvDeQxEjeb/+wiQUFObHXaUs3jeiV0nPUWVQM68xTMO
+            3bQPdnmG6M5ydGlicndGUIaFMuj41AgDpsUcIp/XqSMLKkxN4mS9C8nFWvQqTgTn
+            Eq4FeXKl79T/8N9YaqZU/rmo4Rjg/Dbr/CnRQldvQbz4HwcmkBj2njq+V51eSFCe
+            P4p33XCtcFW3wK7j/IMuWgPZ5ozdt0PHI2Cse7XYeM78YSE/VY7eEnrRU8hhjFcq
+            xdIgY/orryQRm9aaKI/SJcS7icFhBMPJdaFc6UihMzE56MrR1brsJ7cIDaSdkIUV
+            4e5RAjK1cyCxj8eClz75q9MWgko8jGUGNqyovb6/uXHvny64nV3cS2ofT6+IA3iX
+            5jhCOy0pYzIeGH6ugjCsNcA2MitEieUCAwEAAaOB3DCB2TARBglghkgBhvhCAQEE
+            BAMCAPcwCwYDVR0PBAQDAgH+MB0GA1UdDgQWBBTvjIXMlD5DE9ija8fuqHSFJBpW
+            CDAfBgNVHSMEGDAWgBTvjIXMlD5DE9ija8fuqHSFJBpWCDASBgNVHRMBAf8ECDAG
+            AQH/AgEBMGMGA1UdJQRcMFoGCCsGAQUFBwMFBggrBgEFBQcDBgYIKwYBBQUHAwcG
+            CCsGAQUFBwMIBggrBgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUFBwMDBggrBgEFBQcD
+            BAYIKwYBBQUHAwkwDQYJKoZIhvcNAQENBQADggIBAJMHzMwzuqRab2b1ucDUzFQ9
+            c6wd/Wm/4YBk/Vp0j17qmrQRXaNPTKJdvxYd1JuGMr8Un2oEsvAX6/fXmVoCJH5C
+            RsBVWKPaWTE1/nbKgfuvlUnkmvvEQuIHvuMNJ4GQHMFi16PO6g6GxNHv72j5+Y92
+            nPUUx6ttXJD2buhQKJs3qE133o6iWxxNs8BXSbfvxI0UjfewAE0PcCWmLPfEX8En
+            rRoBONVg4jlWSj57P1lan21MHKtSBDQbAbQTT9Fq+2nAwg3/EQOjEjNyY0r2JLjj
+            OpcZZjkmnLSAO9CN54XbpKiLjvAwonM+Cz4k874CxrYcWm65iXJnX6tYgOEU2nSi
+            n/Ku6sfSHtpvDhSafTXD9OrMa/j2BYWCjC7O4fphVwhiAzQjyRVTYAslcD9NC2gK
+            akepFzdpl8RQqDWTVcCn5IIouip/3ewXDqYCbFJd0cIYwwlyT2mQ3OS9hm017jja
+            JcS7KcYQ9E19OMyHl6eBDkhS9v2u8mUgE0l0s6i/gRwPoZQY4e0V7htRYL1vwr1Y
+            BuIoXAjr7vJ9rb5/IokcZh0tL1cTApJGJ0dZ4VgKwtlV473oTWiLSGyJNiknybF1
+            CU1j4ob8LtGB455n1Oaf7YwB5qAImmodL1IoHZDs1vCWP3iX8NVngsfumgBO5XMT
+            KKer3FmgiDOczuEHpvVj
+        </trustedCertificate>
+    </trustedCertificates>
+
+</client-config>
