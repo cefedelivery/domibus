@@ -99,6 +99,7 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             messageOut.setStringProperty(AGREEMENT_REF, submission.getAgreementRef());
             messageOut.setStringProperty(REF_TO_MESSAGE_ID, submission.getRefToMessageId());
 
+            // save the first payload (payload_1) for the bodyload (if exists)
             int counter = 1;
             for (final Submission.Payload p : submission.getPayloads()) {
                 if (p.isInBody()) {
@@ -109,8 +110,8 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             final boolean putAttachmentsInQueue = Boolean.parseBoolean(getProperty(PUT_ATTACHMENTS_IN_QUEUE, "true"));
             for (final Submission.Payload p : submission.getPayloads()) {
-                transformFromSubmissionHandlePayload(messageOut, putAttachmentsInQueue, counter, p);
-                counter++;
+                // counter is increased for payloads (not for bodyload which is always set to payload_1)
+                counter = transformFromSubmissionHandlePayload(messageOut, putAttachmentsInQueue, counter, p);
             }
             messageOut.setIntProperty(TOTAL_NUMBER_OF_PAYLOADS, submission.getPayloads().size());
         } catch (final JMSException | IOException ex) {
@@ -131,10 +132,11 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
     }
 
 
-    private void transformFromSubmissionHandlePayload(MapMessage messageOut, boolean putAttachmentsInQueue, int counter, Submission.Payload p) throws JMSException, IOException {
+    private int transformFromSubmissionHandlePayload(MapMessage messageOut, boolean putAttachmentsInQueue, int counter, Submission.Payload p) throws JMSException, IOException {
         if (p.isInBody()) {
             if (p.getPayloadDatahandler() != null) {
                 messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
+                messageOut.setStringProperty(P1_IN_BODY, "true");
             }
 
             messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), findMime(p.getPayloadProperties()));
@@ -155,7 +157,9 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             }
             messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
             messageOut.setStringProperty(payContID, p.getContentId());
+            counter++;
         }
+        return counter;
     }
 
     private String findElement(String element, Collection<Submission.TypedProperty> props) {

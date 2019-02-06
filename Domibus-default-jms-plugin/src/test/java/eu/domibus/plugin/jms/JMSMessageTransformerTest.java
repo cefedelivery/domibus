@@ -45,6 +45,7 @@ public class JMSMessageTransformerTest {
     private static final String SERVICE_TYPE_TC1 = "tc1";
     private static final String PAYLOAD_FILENAME = "FileName";
     private static final String PAYLOAD_1_FILENAME = "payload_1_fileName";
+    private static final String PAYLOAD_2_FILENAME = "payload_2_fileName";
     private static final String FILENAME_TEST = "09878378732323.payload";
     private static final String CUSTOM_AGREEMENT_REF = "customAgreement";
 
@@ -81,16 +82,21 @@ public class JMSMessageTransformerTest {
         submissionObj.setRefToMessageId("123456");
 
         String strPayLoad1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-        DataHandler payLoadDataHandler = new DataHandler(new ByteArrayDataSource(strPayLoad1.getBytes(), DEFAULT_MT));
-        ;
+        DataHandler payLoadDataHandler1 = new DataHandler(new ByteArrayDataSource(strPayLoad1.getBytes(), DEFAULT_MT));
+
+        String strPayLoad2 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+        DataHandler payLoadDataHandler2 = new DataHandler(new ByteArrayDataSource(strPayLoad2.getBytes(), DEFAULT_MT));
+
 
         Submission.TypedProperty objTypedProperty1 = new Submission.TypedProperty(MIME_TYPE, DEFAULT_MT);
         Submission.TypedProperty objTypedProperty2 = new Submission.TypedProperty(PAYLOAD_FILENAME, FILENAME_TEST);
         Collection<Submission.TypedProperty> listTypedProperty = new ArrayList<>();
         listTypedProperty.add(objTypedProperty1);
         listTypedProperty.add(objTypedProperty2);
-        Submission.Payload objPayload1 = new Submission.Payload(PAYLOAD_ID, payLoadDataHandler, listTypedProperty, false, null, null);
+        Submission.Payload objPayload1 = new Submission.Payload(PAYLOAD_ID, payLoadDataHandler1, listTypedProperty, false, null, null);
         submissionObj.addPayload(objPayload1);
+        Submission.Payload objBodyload = new Submission.Payload("", payLoadDataHandler2, listTypedProperty, true, null, null);
+        submissionObj.addPayload(objBodyload);
 
 
         MapMessage messageMap = new ActiveMQMapMessage();
@@ -113,9 +119,10 @@ public class JMSMessageTransformerTest {
         Assert.assertEquals("12345", messageMap.getStringProperty(AGREEMENT_REF));
         Assert.assertEquals("123456", messageMap.getStringProperty(REF_TO_MESSAGE_ID));
         messageMap.setStringProperty(JMSMessageConstants.AGREEMENT_REF, "customAgreement");
+        Assert.assertEquals("true", messageMap.getStringProperty(P1_IN_BODY));
 
         File file = new File(FILENAME_TEST);
-        Assert.assertEquals(file.getName(), messageMap.getStringProperty(PAYLOAD_1_FILENAME));
+        Assert.assertEquals(file.getName(), messageMap.getStringProperty(PAYLOAD_2_FILENAME));
 
     }
 
@@ -143,7 +150,7 @@ public class JMSMessageTransformerTest {
 
         messageMap.setJMSCorrelationID("12345");
 
-        messageMap.setStringProperty(JMSMessageConstants.TOTAL_NUMBER_OF_PAYLOADS, "1");
+        messageMap.setStringProperty(JMSMessageConstants.TOTAL_NUMBER_OF_PAYLOADS, "2");
         messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), PAYLOAD_ID);
         messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), DEFAULT_MT);
         String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";

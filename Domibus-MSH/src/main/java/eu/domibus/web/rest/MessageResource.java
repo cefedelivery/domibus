@@ -10,6 +10,8 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.io.IOUtils;
+import org.apache.cxf.common.util.CollectionUtils;
+import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -100,20 +102,36 @@ public class MessageResource {
     private Map<String, InputStream> getMessageWithAttachments(UserMessage userMessage) {
 
         Map<String, InputStream> ret = new HashMap<>();
+        ret.put("message.xml", getMessage(userMessage));
+
+        if(userMessage.getPayloadInfo() == null ||
+                CollectionUtils.isEmpty(userMessage.getPayloadInfo().getPartInfo())) {
+            return ret;
+        }
 
         final List<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
         for (PartInfo info : partInfo) {
             try {
-                ret.put(info.getHref().replace("cid:", ""), info.getPayloadDatahandler().getInputStream());
+                ret.put(getPayloadName(info), info.getPayloadDatahandler().getInputStream());
             } catch (IOException e) {
                 LOGGER.error("Error getting input stream for attachment [{}]", info.getHref());
             }
         }
 
-        ret.put("message.xml", getMessage(userMessage));
-
 
         return ret;
+    }
+
+    protected String getPayloadName(PartInfo info) {
+        if(StringUtils.isEmpty(info.getHref())) {
+            return "bodyload";
+        }
+        if(!info.getHref().contains("cid:")) {
+            LOGGER.warn("PayloadId does not contain \"cid:\" prefix [{}]", info.getHref());
+            return info.getHref();
+        }
+
+        return info.getHref().replace("cid:", "");
     }
 
     private byte[] zip(Map<String, InputStream> message) throws IOException {
