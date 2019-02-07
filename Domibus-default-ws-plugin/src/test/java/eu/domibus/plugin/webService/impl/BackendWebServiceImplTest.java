@@ -8,10 +8,14 @@ import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.webService.generated.LargePayloadType;
 import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.StatusRequest;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.NonStrictExpectations;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -108,5 +112,23 @@ public class BackendWebServiceImplTest {
         }};
 
         backendWebService.validateSubmitRequest(submitRequest, ebMSHeaderInfo);
+    }
+
+    @Test
+    public void trimsAndStripsMessageIdWhenGettingMessageStatus(@Injectable StatusRequest statusRequest) throws Exception {
+        new NonStrictExpectations() {{
+            statusRequest.getMessageID();
+            result = " \n\t -Dom137--  \t\n ";
+
+        }};
+
+        backendWebService.getStatus(statusRequest);
+
+        new Verifications() {{
+            String trimmedMessageId;
+            messageRetriever.getStatus(trimmedMessageId = withCapture());
+            Assert.assertEquals("Should have trimmed spaces at the end of the message identifier when retrieving its status",
+                    "-Dom137--", trimmedMessageId);
+        }};
     }
 }

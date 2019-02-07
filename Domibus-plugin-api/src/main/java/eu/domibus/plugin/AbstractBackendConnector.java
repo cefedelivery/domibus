@@ -13,8 +13,7 @@ import eu.domibus.plugin.exception.TransformationException;
 import eu.domibus.plugin.handler.MessagePuller;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
-import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
-import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +51,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     public void setLister(final MessageLister lister) {
         this.lister = lister;
     }
-    
+
     @Override
     // The following does not have effect at this level since the transaction would have already been rolled back!
     // @Transactional(noRollbackFor = {IllegalArgumentException.class, IllegalStateException.class})
@@ -85,7 +84,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
 
     @Override
     public MessageStatus getStatus(final String messageId) {
-        return this.messageRetriever.getStatus(messageId);
+        return this.messageRetriever.getStatus(trim(messageId));
     }
 
     @Override
@@ -121,5 +120,9 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     @Override
     public String getName() {
         return name;
+    }
+
+    protected String trim(String messageId) {
+        return StringUtils.stripToEmpty(StringUtils.trimToEmpty(messageId));
     }
 }
