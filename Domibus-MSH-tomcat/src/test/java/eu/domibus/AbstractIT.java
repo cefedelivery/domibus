@@ -42,6 +42,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -75,6 +76,7 @@ import static org.awaitility.Awaitility.with;
 @ContextConfiguration("classpath:spring-context.xml")
 @DirtiesContext
 @Rollback
+@TestPropertySource("classpath:domibus.properties")
 public abstract class AbstractIT {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
