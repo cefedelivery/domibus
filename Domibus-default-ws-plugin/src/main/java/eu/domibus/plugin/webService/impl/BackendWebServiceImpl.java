@@ -231,7 +231,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
 
-        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID());
+        String trimmedMessageId = messageExtService.cleanMessageIdentifier(retrieveMessageRequest.getMessageID());
 
         try {
             userMessage = downloadMessage(trimmedMessageId, null);
@@ -312,7 +312,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.error(MESSAGE_ID_EMPTY);
             throw new StatusFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
-        String trimmedMessageId = trim(statusRequest.getMessageID());
+        String trimmedMessageId = messageExtService.cleanMessageIdentifier(statusRequest.getMessageID());
         return defaultTransformer.transformFromMessageStatus(messageRetriever.getStatus(trimmedMessageId));
     }
 

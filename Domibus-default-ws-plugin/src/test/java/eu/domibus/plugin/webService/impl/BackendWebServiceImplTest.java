@@ -2,6 +2,7 @@ package eu.domibus.plugin.webService.impl;
 
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.ext.services.MessageAcknowledgeExtService;
+import eu.domibus.ext.services.MessageExtService;
 import eu.domibus.plugin.handler.MessagePuller;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
@@ -30,7 +31,7 @@ import java.util.List;
 public class BackendWebServiceImplTest {
 
     @Tested
-    BackendWebServiceImpl backendWebService;
+    private BackendWebServiceImpl backendWebService;
 
     @Injectable
     private StubDtoTransformer defaultTransformer;
@@ -39,16 +40,19 @@ public class BackendWebServiceImplTest {
     private MessageAcknowledgeExtService messageAcknowledgeExtService;
 
     @Injectable
-    protected MessageRetriever messageRetriever;
+    private  MessageRetriever messageRetriever;
 
     @Injectable
-    protected MessageSubmitter messageSubmitter;
+    private  MessageSubmitter messageSubmitter;
 
     @Injectable
-    MessagePuller messagePuller;
+    private MessagePuller messagePuller;
 
     @Injectable
-    String name;
+    private MessageExtService messageExtService;
+
+    @Injectable
+    private String name;
 
     @Test(expected = SubmitMessageFault.class)
     public void validateSubmitRequestWithPayloadsAndBodyload(@Injectable SubmitRequest submitRequest,
@@ -114,21 +118,4 @@ public class BackendWebServiceImplTest {
         backendWebService.validateSubmitRequest(submitRequest, ebMSHeaderInfo);
     }
 
-    @Test
-    public void trimsAndStripsMessageIdWhenGettingMessageStatus(@Injectable StatusRequest statusRequest) throws Exception {
-        new NonStrictExpectations() {{
-            statusRequest.getMessageID();
-            result = " \n\t -Dom137--  \t\n ";
-
-        }};
-
-        backendWebService.getStatus(statusRequest);
-
-        new Verifications() {{
-            String trimmedMessageId;
-            messageRetriever.getStatus(trimmedMessageId = withCapture());
-            Assert.assertEquals("Should have trimmed spaces at the end of the message identifier when retrieving its status",
-                    "-Dom137--", trimmedMessageId);
-        }};
-    }
 }

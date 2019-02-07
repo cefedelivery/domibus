@@ -4,6 +4,7 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.MessageStatusChangeEvent;
+import eu.domibus.ext.services.MessageExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -41,6 +42,9 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
 
     @Autowired
     protected MessagePuller messagePuller;
+
+    @Autowired
+    protected MessageExtService messageExtService;
 
     private MessageLister lister;
 
@@ -84,7 +88,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
 
     @Override
     public MessageStatus getStatus(final String messageId) {
-        return this.messageRetriever.getStatus(trim(messageId));
+        return this.messageRetriever.getStatus(messageExtService.cleanMessageIdentifier(messageId));
     }
 
     @Override
