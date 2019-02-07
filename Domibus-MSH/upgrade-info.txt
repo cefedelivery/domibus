@@ -1,3 +1,5 @@
+Domibus 4.0.2 (from 4.0.1):
+                - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
 Domibus 4.0.1 (from 4.0.0):
                 - Run the appropriate DB migration script(mysql5innoDb-4.0-to-4.0.1-migration.ddl for MySQL or oracle10g-4.0-to-4.0.1-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
