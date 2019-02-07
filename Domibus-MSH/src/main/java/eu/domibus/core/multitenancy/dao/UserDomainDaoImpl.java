@@ -105,5 +105,11 @@ public class UserDomainDaoImpl extends BasicDao<UserDomainEntity> implements Use
         }
     }
 
+    @Override
+    public List<UserDomainEntity> listAllUsers() {
+        TypedQuery<UserDomainEntity> namedQuery = em.createNamedQuery("UserDomainEntity.findAll", UserDomainEntity.class);
+        return namedQuery.getResultList();
+    }
+
 }
 
