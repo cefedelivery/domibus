@@ -28,7 +28,6 @@ import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -115,7 +114,7 @@ public class CertificateServiceImpl implements CertificateService {
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {
-            LOG.warn("Certificate is not valid:[{}] ",cert);
+            LOG.warn("Certificate is not valid:[{}] ", cert);
             return false;
         }
         try {
@@ -141,7 +140,7 @@ public class CertificateServiceImpl implements CertificateService {
     public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
         final String dn = certificate.getSubjectDN().getName();
-        LOG.debug("DN is:[{}]",dn);
+        LOG.debug("DN is:[{}]", dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
             if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
@@ -150,30 +149,6 @@ public class CertificateServiceImpl implements CertificateService {
             }
         }
         throw new IllegalArgumentException("The certificate does not contain a common name (CN): " + certificate.getSubjectDN().getName());
-    }
-
-    /**
-     * Load certificate with alias from JKS file and return as {@code X509Certificate}.
-     *
-     * @param filePath the path to the JKS file
-     * @param alias the certificate alias
-     * @param password the key store certificate
-     * @return a X509 certificate
-     */
-    @Override
-    public X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
-        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fileInputStream, password.toCharArray());
-
-            Certificate cert = keyStore.getCertificate(alias);
-
-            return (X509Certificate) cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
-            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias, e);
-        }
     }
 
     /**
@@ -210,13 +185,13 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) {
+    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password, String type) {
         try {
-            KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore tempTrustStore = KeyStore.getInstance(type);
             tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
             newTrustStoreBytes.reset();
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-            throw new DomibusCertificateException("Could not load key store", e);
+            throw new DomibusCertificateException("Could not load key store: " + e.getMessage(), e);
         }
     }
 
@@ -238,19 +213,20 @@ public class CertificateServiceImpl implements CertificateService {
         final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
         final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
 
-        final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
+        final Date today = LocalDateTime.now().withTime(0, 0, 0, 0).toDate();
+        final Date maxDate = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
         final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
 
-        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
-        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset).forEach(certificate -> {
-            certificate.setAlertImminentNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date between current date and current date + offset[{}]->[{}]",
+                notificationDate, imminentExpirationDelay,  maxDate);
+        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, today, maxDate).forEach(certificate -> {
+            certificate.setAlertImminentNotificationDate(today);
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
             final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
             eventService.enqueueImminentCertificateExpirationEvent(accessPointOrAlias, alias, certificate.getNotAfter());
         });
     }
-
 
 
     protected void sendCertificateExpiredAlerts() {
@@ -268,7 +244,7 @@ public class CertificateServiceImpl implements CertificateService {
         Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
 
         LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
-        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
+        certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification).forEach(certificate -> {
             certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
@@ -287,12 +263,14 @@ public class CertificateServiceImpl implements CertificateService {
 
 
     /**
-     * Create or update certificate in the db.
+     * Create or update all keystore certificates in the db.
+     *
      * @param trustStore the trust store
-     * @param keyStore the key store
+     * @param keyStore   the key store
      */
     protected void saveCertificateData(KeyStore trustStore, KeyStore keyStore) {
         List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates(trustStore, keyStore);
+        certificateDao.removeUnusedCertificates(certificates);
         for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
             certificateDao.saveOrUpdate(certificate);
         }
@@ -320,7 +298,7 @@ public class CertificateServiceImpl implements CertificateService {
      * Group keystore and trustStore certificates in a list.
      *
      * @param trustStore the trust store
-     * @param keyStore the key store
+     * @param keyStore   the key store
      * @return a list of certificate.
      */
     protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates(KeyStore trustStore, KeyStore keyStore) {

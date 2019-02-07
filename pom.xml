@@ -158,7 +158,7 @@
             </dependency>
             <!-- End Jackson-->
 
-            <!-- SL4J + Logback -->
+            <!-- SLF4J + Logback -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
@@ -175,6 +175,16 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
@@ -184,7 +194,7 @@
                 <artifactId>logback-elasticsearch-appender</artifactId>
                 <version>${logback.elasticsearch.appender.version}</version>
             </dependency>
-            <!-- End SL4J + Logback -->
+            <!-- End SLF4J + Logback -->
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -721,7 +731,17 @@
             <modules>
                 <module>Domibus-MSH-taskexecutor-weblogic</module>
                 <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
                 <module>Domibus-MSH-weblogic</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>weblogic-ecas</id>
+            <modules>
+                <module>Domibus-MSH-taskexecutor-weblogic</module>
+                <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
+                <module>Domibus-MSH-weblogic-ecas</module>
             </modules>
         </profile>
         <profile>

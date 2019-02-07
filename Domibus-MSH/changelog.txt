@@ -9,6 +9,7 @@ Domibus 4.1
 - Default password policy enforcement for all users at the back-end level;
 - Added route and component for changing password when default used or about to expire for all users.
 - Renamed property "message.retention.downloaded.max.delete" to "domibus.retentionWorker.message.retention.downloaded.max.delete" and property "message.retention.not_downloaded.max.delete" to "domibus.retentionWorker.message.retention.not_downloaded.max.delete"
+- New property "domibus.msh.retry.messageExpirationDelay" to grant a few seconds for schedulling the retry of the last attempt
 Domibus 4.0.2
 - Improved the logging in the Default JMS Plugin
 - Allow sending an XML payload in the Soap body

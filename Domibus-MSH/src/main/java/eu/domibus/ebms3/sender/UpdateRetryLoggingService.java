@@ -9,6 +9,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.RetryStrategy;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
@@ -28,6 +29,7 @@ import java.util.Date;
 public class UpdateRetryLoggingService {
 
     public static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
+    public static final String MESSAGE_EXPIRATION_DELAY = "domibus.msh.retry.messageExpirationDelay";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UpdateRetryLoggingService.class);
 
@@ -71,11 +73,11 @@ public class UpdateRetryLoggingService {
         LOG.debug("Updating retry for message");
         UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
-        userMessageLog.setNextAttempt(getScheduledStartDate(userMessageLog)); // this is needed for the first computation of "next attempt" if receiver is down
         LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
+        userMessageLog.setNextAttempt(getScheduledStartDate(userMessageLog)); // this is needed for the first computation of "next attempt" if receiver is down
         userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration) && !userMessageLog.isTestMessage()) {
-            increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
+            updateNextAttemptAndNotify(legConfiguration, messageStatus, userMessageLog);
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             messageFailed(userMessageLog);
         }
@@ -109,8 +111,7 @@ public class UpdateRetryLoggingService {
         updateRetryLogging(messageId, legConfiguration, MessageStatus.WAITING_FOR_RECEIPT);
     }
 
-    public void increaseAttempAndNotify(LegConfiguration legConfiguration, MessageStatus messageStatus, MessageLog userMessageLog) {
-        LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
+    public void updateNextAttemptAndNotify(LegConfiguration legConfiguration, MessageStatus messageStatus, MessageLog userMessageLog) {
         updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
         saveAndNotify(messageStatus, userMessageLog);
     }
@@ -131,9 +132,19 @@ public class UpdateRetryLoggingService {
      * @return true if the message can be sent again
      */
     public boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        if(legConfiguration.getReceptionAwareness() == null){
+            return false;
+        }
+        LOG.debug("Send attempts [{}], max send attempts [{}], scheduled start time [{}], retry timeout [{}]",
+                userMessageLog.getSendAttempts(), userMessageLog.getSendAttemptsMax(),
+                getScheduledStartTime(userMessageLog), legConfiguration.getReceptionAwareness().getRetryTimeout());
         // retries start after the first send attempt
-        return legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
-                && (getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis();
+        Boolean hasMoreAttempts = userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax();
+        long retryTimeout = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000L;
+        Boolean hasMoreTime = (getScheduledStartTime(userMessageLog) + retryTimeout) > System.currentTimeMillis();
+
+        LOG.debug("Verify if has more attempts: [{}] and has more time: [{}]", hasMoreAttempts, hasMoreTime);
+        return hasMoreAttempts && hasMoreTime;
     }
 
     /**
@@ -160,22 +171,31 @@ public class UpdateRetryLoggingService {
         if (legConfiguration.getReceptionAwareness() != null) {
             final Long scheduledStartTime = getScheduledStartTime(userMessageLog);
             final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
-            return new Date(scheduledStartTime + timeOut);
+            Date result = new Date(scheduledStartTime + timeOut);
+            LOG.debug("Message expiration date is [{}]", result);
+            return result;
         }
         return null;
     }
 
     public boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        return getMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
+        int delay = domibusPropertyProvider.getIntegerProperty(MESSAGE_EXPIRATION_DELAY);
+        Boolean isExpired =  (getMessageExpirationDate(userMessageLog, legConfiguration).getTime() + delay) < System.currentTimeMillis();
+        LOG.debug("Verify if message expired: [{}]", isExpired);
+        return isExpired;
     }
 
     public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        final MessageLog userMessageLog1 = userMessageLog;
         Date nextAttempt = new Date();
         if (userMessageLog.getNextAttempt() !=null) {
-            nextAttempt = userMessageLog.getNextAttempt();
+            nextAttempt = new Date(userMessageLog.getNextAttempt().getTime());
         }
-        userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, legConfiguration.getReceptionAwareness().getRetryCount(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+        RetryStrategy.AttemptAlgorithm algorithm = legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm();
+        int retryCount = legConfiguration.getReceptionAwareness().getRetryCount();
+        int retryTimeout = legConfiguration.getReceptionAwareness().getRetryTimeout();
+        Date newNextAttempt = algorithm.compute(nextAttempt, retryCount, retryTimeout);
+        LOG.debug("Updating next attempt from [{}] to [{}]", nextAttempt, newNextAttempt);
+        userMessageLog.setNextAttempt(newNextAttempt);
     }
 }
 

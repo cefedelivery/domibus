@@ -9,6 +9,7 @@ import {DomibusInfo} from "./domibusinfo";
 export class DomibusInfoService {
 
   private isFourCornerEnabledPromise: Promise<boolean>;
+  private isExtAuthProviderEnabledPromise: Promise<boolean>;
 
   constructor(private http: Http) {
   }
@@ -35,5 +36,13 @@ export class DomibusInfoService {
         .map((res: Response) => res.json()).toPromise();
     }
     return this.isFourCornerEnabledPromise;
+  }
+
+  isExtAuthProviderEnabled(): Promise<boolean> {
+    if (!this.isExtAuthProviderEnabledPromise) {
+      this.isExtAuthProviderEnabledPromise = this.http.get('rest/application/extauthproviderenabled')
+        .map((res: Response) => res.json()).toPromise();
+    }
+    return this.isExtAuthProviderEnabledPromise;
   }
 }

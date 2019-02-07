@@ -17,8 +17,11 @@ import {AlertsComponent} from './alerts/alerts.component';
 import {TestServiceComponent} from './testservice/testservice.component';
 import {PluginUserComponent} from './pluginuser/pluginuser.component';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
+import {AuthExternalProviderGuard} from './common/guards/auth-external-provider.guard';
 import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
+import {LogoutAuthExtProviderComponent} from "./security/logout/logout.components";
+import {RedirectHomeGuard} from "./common/guards/redirect-home.guard";
 
 const appRoutes: Routes = [
   {
@@ -69,7 +72,7 @@ const appRoutes: Routes = [
   {
     path: 'user',
     component: UserComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard, AuthExternalProviderGuard],
     canDeactivate: [DirtyGuard]
   },
   {
@@ -79,11 +82,11 @@ const appRoutes: Routes = [
     canDeactivate: [DirtyGuard]
   },
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
-  {path: 'login', component: LoginComponent},
+  {path: 'login', component: LoginComponent, canActivate: [AuthExternalProviderGuard, RedirectHomeGuard]},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
-  {path: 'changePassword', component: ChangePasswordComponent, canActivate: [AuthenticatedGuard]},
+  {path: 'changePassword', component: ChangePasswordComponent, canActivate: [AuthenticatedGuard, AuthExternalProviderGuard]},
   {
     path: 'logging',
     component: LoggingComponent,
@@ -92,6 +95,7 @@ const appRoutes: Routes = [
       isDomainIndependent: true
     }
   },
+  {path: 'logout', component: LogoutAuthExtProviderComponent},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];

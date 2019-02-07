@@ -1,16 +1,18 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
@@ -62,10 +64,13 @@ public class TruststoreResourceTest {
     @Injectable
     private CsvServiceImpl csvServiceImpl;
 
+    @Injectable
+    ErrorHandlerService errorHandlerService;
+
     @Test
-    public void testUploadTruststoreFileSuccess() {
+    public void testUploadTruststoreFileSuccess() throws IOException {
         // Given
-        MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[] {1,0,1});
+        MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[]{1, 0, 1});
 
         // When
         ResponseEntity<String> responseEntity = truststoreResource.uploadTruststoreFile(multiPartFile, "pass");
@@ -77,9 +82,9 @@ public class TruststoreResourceTest {
     }
 
     @Test
-    public void testUploadTruststoreEmpty() {
+    public void testUploadTruststoreEmpty() throws IOException {
         // Given
-        MultipartFile emptyFile = new MockMultipartFile("emptyfile", new byte[] {});
+        MultipartFile emptyFile = new MockMultipartFile("emptyfile", new byte[]{});
 
         // When
         ResponseEntity<String> responseEntity = truststoreResource.uploadTruststoreFile(emptyFile, "pass");
@@ -90,10 +95,10 @@ public class TruststoreResourceTest {
         Assert.assertEquals("Failed to upload the truststore file since it was empty.", responseEntity.getBody());
     }
 
-    @Test
+    @Test(expected = CryptoException.class)
     public void testUploadTruststoreException() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         // Given
-        MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[] {1,0,1});
+        MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[]{1, 0, 1});
 
         final Domain domain = DomainService.DEFAULT_DOMAIN;
 
@@ -102,16 +107,11 @@ public class TruststoreResourceTest {
             result = domain;
 
             multiDomainCertificateProvider.replaceTrustStore(domain, (byte[]) any, anyString);
-            result = new KeyStoreException("Impossible to access keystore");
+            result = new CryptoException("Password is incorrect");
         }};
 
         // When
         ResponseEntity<String> responseEntity = truststoreResource.uploadTruststoreFile(multiPartFile, "pass");
-
-        // Then
-        Assert.assertNotNull(responseEntity);
-        Assert.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the truststore file due to => Impossible to access keystore", responseEntity.getBody());
     }
 
     private List<TrustStoreRO> getTestTrustStoreROList(Date date) {
@@ -164,7 +164,7 @@ public class TruststoreResourceTest {
         new Expectations(truststoreResource) {{
             truststoreResource.trustStoreEntries();
             result = trustStoreROList;
-            csvServiceImpl.exportToCSV(trustStoreROList,null,(Map<String, String>)any, (List<String>)any);
+            csvServiceImpl.exportToCSV(trustStoreROList, null, (Map<String, String>) any, (List<String>) any);
             result = "Name, Subject, Issuer, Valid From, Valid Until" + System.lineSeparator() +
                     "Name, Subject, Issuer, " + date + ", " + date + System.lineSeparator();
         }};

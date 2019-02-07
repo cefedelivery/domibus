@@ -26,8 +26,8 @@
                    #toPartyId="ngModel" id="topartyid_id">
           </md-input-container>
           <md-input-container *ngIf="advancedSearch">
-            <input mdInput placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
-                   #conversationId="ngModel" id="conversationid_id">
+            <input mdInput [hidden]="!canSearchByConversationId" placeholder="Conversation Id" name="conversationId" [(ngModel)]="filter.conversationId"
+                   #conversationId="ngModel" id="conversationid_id" >
           </md-input-container>
           <md-select placeholder="AP Role" name="mshRole" [(ngModel)]="filter.mshRole" id="aprole_id"
                      *ngIf="advancedSearch">
@@ -38,7 +38,7 @@
             </md-option>
           </md-select>
           <md-select placeholder="Message Type" name="messageType" [(ngModel)]="filter.messageType" id="messagetype_id"
-                     *ngIf="advancedSearch">
+                     *ngIf="advancedSearch" (change)="onMessageTypeChanged($event)">
             <md-option *ngFor="let type of msgTypes" [value]="type">
               {{type}}
             </md-option>

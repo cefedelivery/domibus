@@ -1,7 +1,8 @@
 package eu.domibus.common.util;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.proxy.DomibusProxy;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import junit.framework.Assert;
 import mockit.Injectable;
 import mockit.NonStrictExpectations;
@@ -9,11 +10,13 @@ import mockit.Tested;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CredentialsProvider;
+import org.junit.Before;
 import org.junit.Test;
 
 
 /**
- * Created by idragusa on 6/5/18.
+ * @author idragusa
+ * @since 4.0
  */
 public class ProxyUtilTest {
 
@@ -21,83 +24,37 @@ public class ProxyUtilTest {
     ProxyUtil proxyUtil;
 
     @Injectable
-    protected DomibusPropertyProvider domibusPropertyProvider;
+    protected DomibusProxyService domibusProxyService;
 
-    @Injectable
-    protected DomibusConfigurationService domibusConfigurationService;
+    @Before
+    public void testData() {
+        new NonStrictExpectations() {
+            {
+                DomibusProxy domibusProxy = new DomibusProxy();
+                domibusProxy.setEnabled(true);
+                domibusProxy.setHttpProxyHost("somehost");
+                domibusProxy.setHttpProxyPort(8280);
+                domibusProxy.setHttpProxyUser("someuser");
+                domibusProxy.setHttpProxyPassword("somepassword");
 
-    @Test
-    public void testUseProxyFalse() {
-        Assert.assertFalse(domibusConfigurationService.useProxy());
-    }
+                domibusProxyService.getDomibusProxy();
+                result = domibusProxy;
 
-    @Test
-    public void testUseProxytrue() {
-        new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
-            result = true;
+                domibusProxyService.useProxy();
+                result = true;
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = "somehost";
+                domibusProxyService.isProxyUserSet();
+                result = true;
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8280";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = "someuser";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "somepass";
-
-        }};
-
-        // exception is expected
-        Assert.assertTrue(domibusConfigurationService.useProxy());
+                domibusProxyService.isNonProxyHostsSet();
+                result = false;
+            }};
     }
 
     @Test
     public void testGetConfiguredProxy() {
-        new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
-            result = true;
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = "somehost";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8280";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = "someuser";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "somepass";
-
-        }};
         HttpHost httpHost = proxyUtil.getConfiguredProxy();
-
         Assert.assertEquals(httpHost.getPort(), 8280);
-    }
-
-    @Test
-    public void testGetConfiguredCredentialsProvider() {
-        new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
-            result = true;
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = "somehost";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8280";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = "someuser";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "somepass";
-
-        }};
         CredentialsProvider credentialsProvider = proxyUtil.getConfiguredCredentialsProvider();
         Assert.assertEquals("someuser", credentialsProvider.getCredentials(AuthScope.ANY).getUserPrincipal().getName());
     }

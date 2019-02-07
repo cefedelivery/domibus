@@ -45,7 +45,27 @@ export class SecurityService {
       });
   }
 
+  /**
+   * It simulates the login function for an external authentication provider
+   * Saves current user to local storage, etc
+   */
+  async login_extauthprovider() {
+    console.log('login from auth external provider');
+
+    try {
+      //get the user from server and write it in local storage
+      const user = await this.getCurrentUserFromServer();
+      if (user) {
+        this.updateCurrentUser(user);
+        this.domainService.setAppTitle();
+      }
+    } catch (ex) {
+      console.log('getCurrentUserFromServer error' + ex);
+    }
+  }
+
   logout() {
+    console.log('security service - logout');
     this.alertService.close();
 
     this.clearSession();
@@ -85,12 +105,13 @@ export class SecurityService {
   }
 
   updateCurrentUser(user: User): void {
+    console.log('save current user on local storage');
     sessionStorage.setItem('currentUser', JSON.stringify(user));
   }
 
   private getCurrentUsernameFromServer(): Observable<string> {
     const subject = new ReplaySubject();
-    this.http.get('rest/security/user')
+    this.http.get('rest/security/username')
       .subscribe((res: Response) => {
         subject.next(res.text());
       }, (error: any) => {
@@ -99,16 +120,22 @@ export class SecurityService {
     return subject.asObservable();
   }
 
+  getCurrentUserFromServer(): Promise<User> {
+    return this.http.get('rest/security/user').
+      map((res: Response) => res.json()).toPromise();
+  }
+
+
   isAuthenticated(callServer: boolean = false): Observable<boolean> {
     const subject = new ReplaySubject();
     if (callServer) {
       // we get the username from the server to trigger the redirection to the login screen in case the user is not authenticated
       this.getCurrentUsernameFromServer()
         .subscribe((user: string) => {
-          // console.log('isAuthenticated: getCurrentUsernameFromServer [' + user + ']');
-          subject.next(user !== null);
-        }, (user: string) => {
-          console.log('isAuthenticated error' + user);
+          let userUndefined = (user == null || user == "");
+          subject.next(!userUndefined);
+        }, (error: any) => {
+          console.log('isAuthenticated error' + error);
           subject.next(false);
         });
 
@@ -125,6 +152,11 @@ export class SecurityService {
 
   isCurrentUserAdmin(): boolean {
     return this.isCurrentUserInRole([SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
+  }
+
+  isUserFromExternalAuthProvider(): boolean {
+    const user = this.getCurrentUser();
+    return user ? user.externalAuthProvider : false;
   }
 
   isCurrentUserInRole(roles: Array<string>): boolean {
