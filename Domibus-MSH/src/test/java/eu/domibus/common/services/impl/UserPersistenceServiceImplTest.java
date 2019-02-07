@@ -122,7 +122,7 @@ public class UserPersistenceServiceImplTest {
         List<eu.domibus.api.user.User> addedUsers = Arrays.asList(addedUser);
 
         new Expectations() {{
-            userDomainService.getAllUserNames();
+            userDomainService.getAllUserDomainMappings();
             result = new ArrayList<>();
             domainConverter.convert(addedUser, User.class);
             result = addedUserUntity;

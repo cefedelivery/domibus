@@ -6,6 +6,7 @@ import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import mockit.*;
 import org.junit.Test;
@@ -40,6 +41,9 @@ public class UserDomainServiceMultiDomainTest {
 
     @Injectable
     protected DomibusCacheService domibusCacheService;
+
+    @Injectable
+    DomainCoreConverter domainCoreConverter;
 
     @Tested
     UserDomainServiceMultiDomainImpl userDomainServiceMultiDomainImpl;
