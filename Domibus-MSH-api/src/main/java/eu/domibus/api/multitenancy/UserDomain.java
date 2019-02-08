@@ -3,6 +3,11 @@ package eu.domibus.api.multitenancy;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+/**
+ * @author Ion Perpegel
+ * @since 4.1
+ * The API class for user domain mappings in the general schema
+ */
 public class UserDomain {
     private String userName;
     private String domain;
