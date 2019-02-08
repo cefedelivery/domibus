@@ -4,32 +4,29 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.services.SoapService;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.io.FileUtils;
+import eu.domibus.util.MessageUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.io.CachedOutputStream;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.apache.http.entity.ContentType;
+import org.springframework.core.io.ClassPathResource;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
 
-
-@Service
 public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SaveRequestToFileInInterceptor.class);
 
@@ -38,17 +35,13 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
         this.addBefore(AttachmentInInterceptor.class.getName());
     }
 
-    @Autowired
-    protected SoapService soapService;
-
-    @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
-    @Autowired
     protected DomainContextProvider domainContextProvider;
 
-    @Autowired
     protected SplitAndJoinService splitAndJoinService;
+
+    protected MessageUtil messageUtil;
 
     @Override
     public void handleMessage(Message message) throws Fault {
@@ -66,21 +59,37 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
         }
 
         InputStream in = message.getContent(InputStream.class);
-        CachedOutputStream cos = new CachedOutputStream();
-        try {
-            cacheMessageContent(message, temporaryDirectoryLocation, in, cos);
+        String fileName = splitAndJoinService.generateSourceFileName(temporaryDirectoryLocation);
 
-            String fileName = splitAndJoinService.generateSourceFileName(temporaryDirectoryLocation);
-            copyMessageContentToFile(cos, fileName, compression);
+        try (FileOutputStream cos = new FileOutputStream(new File(fileName))) {
+            LOG.debug("Start copying message [{}] to file [{}]", messageId, fileName);
+            IOUtils.copy(in, cos);
+            in.close();
+            cos.close();
+            LOG.debug("Finished copying message [{}] to file [{}]", messageId, fileName);
+
+            replaceSoapEnvelope(message, contentType);
+
             LOG.putMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE, fileName);
             LOG.putMDC(MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION, String.valueOf(compression));
             LOG.putMDC(MSHDispatcher.HEADER_DOMIBUS_DOMAIN, domain);
-        } finally {
-            try {
-                cos.close();
-            } catch (IOException e) {
-                LOG.error("Could not close output stream", e);
-            }
+        } catch (IOException e) {
+            LOG.error("Could not store message into temporary location [{}]", temporaryDirectoryLocation);
+            throw new Fault(e);
+        }
+    }
+
+    protected void replaceSoapEnvelope(Message message, String contentTypeHeader) throws IOException {
+        final ContentType contentType = ContentType.parse(contentTypeHeader);
+        final String boundary = contentType.getParameter("boundary");
+        try (InputStream soapEnvelopeTemplateStream = new ClassPathResource("templates/soapEnvelopeTemplate.xml").getInputStream()) {
+            String soapEnvelopeTemplate = IOUtils.toString(soapEnvelopeTemplateStream, "UTF-8");
+            LOG.trace("soapEnvelopeTemplate [{}]", soapEnvelopeTemplate);
+            String soapContent = StringUtils.replace(soapEnvelopeTemplate, "{boundary}", boundary);
+            LOG.trace("New soapContent [{}]", soapContent);
+
+            LOG.debug("Replacing Soap envelope content");
+            message.setContent(InputStream.class, IOUtils.toInputStream(soapContent, "UTF-8"));
         }
     }
 
@@ -93,57 +102,19 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
 
     }
 
-    protected void copyMessageContentToFile(CachedOutputStream cos, String fileName, boolean compression) {
-        if (compression) {
-            compressMessageContentToFile(cos, fileName);
-        } else {
-            copyMessageContentToFile(cos, fileName);
-        }
+    public void setDomibusPropertyProvider(DomibusPropertyProvider domibusPropertyProvider) {
+        this.domibusPropertyProvider = domibusPropertyProvider;
     }
 
-    protected void copyMessageContentToFile(CachedOutputStream cos, String fileName) {
-        LOG.debug("Copying the message content to file " + fileName);
-        try {
-            FileUtils.copyInputStreamToFile(cos.getInputStream(), new File(fileName));
-        } catch (IOException e) {
-            LOG.error("Could not copy the message content to file " + fileName);
-            throw new Fault(e);
-        }
+    public void setDomainContextProvider(DomainContextProvider domainContextProvider) {
+        this.domainContextProvider = domainContextProvider;
     }
 
-    protected void compressMessageContentToFile(CachedOutputStream cos, String fileName) {
-        LOG.debug("Compressing the message content to file " + fileName);
-        try (GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(fileName))) {
-            final InputStream inputStream = cos.getInputStream();
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = inputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, len);
-            }
-
-        } catch (IOException e) {
-            LOG.error("Could not compress the message content to file " + fileName);
-            throw new Fault(e);
-        }
+    public void setSplitAndJoinService(SplitAndJoinService splitAndJoinService) {
+        this.splitAndJoinService = splitAndJoinService;
     }
 
-
-    protected void cacheMessageContent(Message message, String temporaryDirectoryLocation, InputStream in, CachedOutputStream cos) {
-        try {
-            cos.setOutputDir(new File(temporaryDirectoryLocation));
-            IOUtils.copy(in, cos);
-            message.setContent(InputStream.class, cos.getInputStream());
-        } catch (IOException e) {
-            LOG.error("Could not store message into temporary location [{}]", temporaryDirectoryLocation);
-            throw new Fault(e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    LOG.error("Could not close input stream", e);
-                }
-            }
-        }
+    public void setMessageUtil(MessageUtil messageUtil) {
+        this.messageUtil = messageUtil;
     }
 }

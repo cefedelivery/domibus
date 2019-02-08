@@ -24,8 +24,12 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.attachment.AttachmentDeserializer;
+import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.message.MessageImpl;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,11 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jws.WebMethod;
 import javax.jws.WebResult;
-import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
@@ -46,6 +46,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 
 @WebServiceProvider(portName = "local-msh-dispatch", serviceName = "local-msh-dispatch-service")
@@ -68,11 +69,13 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     protected MessageGroupDao messageGroupDao;
 
     @Autowired
-    StorageProvider storageProvider;
-
+    protected StorageProvider storageProvider;
 
     @Autowired
     protected MessageUtil messageUtil;
+
+    @Autowired
+    protected SoapUtil soapUtil;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -90,15 +93,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     @WebResult(name = "soapMessageResult")
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SOAPMessage invoke(final SOAPMessage request) {
-        Messaging messaging = null;
-        UserMessage userMessage = null;
-        try {
-            messaging = messageUtil.getMessaging(request);
-            userMessage = messaging.getUserMessage();
-        } catch (SOAPException | JAXBException e) {
-            LOG.error("Could not parse Messaging from message", e);
-            throw new WebServiceException(e);
-        }
+        LOG.debug("Processing source message file");
 
         final String domain = LOG.getMDC(MSHDispatcher.HEADER_DOMIBUS_DOMAIN);
         domainContextProvider.setCurrentDomain(domain);
@@ -106,16 +101,22 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         final String contentTypeString = LOG.getMDC(Message.CONTENT_TYPE);
         final boolean compression = Boolean.valueOf(LOG.getMDC(MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION));
         final String sourceMessageFileName = LOG.getMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE);
-        final ContentType contentType = ContentType.parse(contentTypeString);
+
+        UserMessage userMessage = getUserMessage(sourceMessageFileName, contentTypeString);
 
         MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
         messageGroupEntity.setGroupId(UUID.randomUUID().toString());
-        final File sourceMessageFile = new File(sourceMessageFileName);
+        File sourceMessageFile = new File(sourceMessageFileName);
+        messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
         if (compression) {
-            messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
+            final File compressSourceMessage = compressSourceMessage(sourceMessageFileName);
+            LOG.debug("Deleting file [{}]", sourceMessageFile);
+            sourceMessageFile.delete();
+
+            LOG.debug("Using [{}] as source message file ", compressSourceMessage);
+            sourceMessageFile = compressSourceMessage;
+            messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(compressSourceMessage.length()));
             messageGroupEntity.setCompressionAlgorithm("application/gzip");
-        } else {
-            messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
         }
 
         messageGroupEntity.setSoapAction("");
@@ -144,6 +145,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         sourceMessageFile.delete();
         LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
 
+        final ContentType contentType = ContentType.parse(contentTypeString);
         MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
         messageHeaderEntity.setBoundary(contentType.getParameter("boundary"));
         final String start = contentType.getParameter("start");
@@ -163,15 +165,58 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         }
 
         try {
-            SOAPFactory soapFac = SOAPFactory.newInstance();
+//            SOAPFactory soapFac = SOAPFactory.newInstance();
             SOAPMessage responseMessage = messageFactory.createMessage();
-            QName sayHi = new QName("http://apache.org/hello_world_rpclit", "sayHiWAttach");
-            responseMessage.getSOAPBody().addChildElement(soapFac.createElement(sayHi));
+//            QName sayHi = new QName("http://apache.org/hello_world_rpclit", "sayHiWAttach");
+//            responseMessage.getSOAPBody().addChildElement(soapFac.createElement(sayHi));
             responseMessage.saveChanges();
 
-            LOG.info("Invoke [{}]", request);
+            LOG.debug("Finished processing source message file");
             return responseMessage;
         } catch (Exception e) {
+            throw new WebServiceException(e);
+        }
+    }
+
+    protected File compressSourceMessage(String fileName) {
+        String compressedFileName = fileName + File.pathSeparator + ".zip";
+        LOG.debug("Compressing the source message file [{}] to [{}]", fileName, compressedFileName);
+        try (GZIPOutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(compressedFileName)));
+             FileInputStream sourceMessageInputStream = new FileInputStream(fileName)) {
+            byte[] buffer = new byte[32 * 1024];
+            int len;
+            while ((len = sourceMessageInputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            LOG.error("Could not compress the message content to file " + fileName);
+            throw new Fault(e);
+        }
+        return new File(compressedFileName);
+    }
+
+    protected UserMessage getUserMessage(String sourceMessageFileName, String contentTypeString) {
+        LOG.debug("Parsing UserMessage");
+        try (InputStream rawInputStream = new FileInputStream(sourceMessageFileName)) {
+            MessageImpl messageImpl = new MessageImpl();
+            messageImpl.setContent(InputStream.class, rawInputStream);
+            messageImpl.put(Message.CONTENT_TYPE, contentTypeString);
+
+            LOG.debug("Start initializeAttachments");
+            new AttachmentDeserializer(messageImpl).initializeAttachments();
+            LOG.debug("End initializeAttachments");
+
+            LOG.debug("Start createUserMessage");
+            final SOAPMessage soapMessage = soapUtil.createUserMessage(messageImpl);
+            LOG.debug("End createUserMessage");
+
+            Messaging messaging = messageUtil.getMessaging(soapMessage);
+            LOG.debug("Finished parsing UserMessage");
+            return messaging.getUserMessage();
+
+        } catch (Exception e) {
+            //TODO notify the backend that an error occured
+            LOG.error("Error parsing the source file [{}]", sourceMessageFileName);
             throw new WebServiceException(e);
         }
     }

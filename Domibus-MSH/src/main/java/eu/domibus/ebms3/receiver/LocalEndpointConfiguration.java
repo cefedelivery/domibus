@@ -1,6 +1,10 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.util.MessageUtil;
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxws.EndpointImpl;
 import org.apache.cxf.transport.ConduitInitiatorManager;
@@ -26,7 +30,16 @@ public class LocalEndpointConfiguration {
     MSHSourceMessageWebservice mshWebserviceSerializer;
 
     @Autowired
-    SaveRequestToFileInInterceptor saveRequestToFileInInterceptor;
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    DomainContextProvider domainContextProvider;
+
+    @Autowired
+    SplitAndJoinService splitAndJoinService;
+
+    @Autowired
+    MessageUtil messageUtil;
 
     @Bean(name = "localMSH")
     public Endpoint createMSHEndpoint() {
@@ -46,13 +59,24 @@ public class LocalEndpointConfiguration {
         extension.registerConduitInitiator("http://cxf.apache.org/bindings/xformat", localTransport);
 
 
+
+
         EndpointImpl endpoint = new EndpointImpl(bus, mshWebserviceSerializer);
         endpoint.setTransportId(LocalTransportFactory.TRANSPORT_ID);
-        endpoint.getInInterceptors().add(saveRequestToFileInInterceptor);
+        endpoint.getInInterceptors().add(createSaveRequestToFileInInterceptor());
         endpoint.getInInterceptors().add(new SetPolicyInInterceptor.CheckEBMSHeaderInterceptor());
         endpoint.setAddress(MSHDispatcher.LOCAL_MSH_ENDPOINT);
         endpoint.publish();
 
         return endpoint;
+    }
+
+    protected SaveRequestToFileInInterceptor createSaveRequestToFileInInterceptor() {
+        SaveRequestToFileInInterceptor result = new SaveRequestToFileInInterceptor();
+        result.setDomainContextProvider(domainContextProvider);
+        result.setDomibusPropertyProvider(domibusPropertyProvider);
+        result.setMessageUtil(messageUtil);
+        result.setSplitAndJoinService(splitAndJoinService);
+        return result;
     }
 }
