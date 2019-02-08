@@ -201,15 +201,22 @@ public class MessageSender implements MessageListener {
             throw t;
         } finally {
             try {
+                LOG.debug("Finally handle reliability");
                 reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
-                attempt.setError(attemptError);
-                attempt.setStatus(attemptStatus);
-                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                messageAttemptService.create(attempt);
+                updateAndCreateAttempt(attempt, attemptError, attemptStatus);
             } catch (Exception ex) {
-                LOG.error("Finally: ", ex);
+                LOG.warn("Finally exception when handlingReliability: ", ex);
+                reliabilityService.handleReliabilityInNewTransaction(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
+                updateAndCreateAttempt(attempt, attemptError, attemptStatus);
             }
         }
+    }
+
+    protected void updateAndCreateAttempt(MessageAttempt attempt, String attemptError, MessageAttemptStatus attemptStatus) {
+        attempt.setError(attemptError);
+        attempt.setStatus(attemptStatus);
+        attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+        messageAttemptService.create(attempt);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
