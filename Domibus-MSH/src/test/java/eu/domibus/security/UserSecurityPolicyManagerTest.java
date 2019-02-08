@@ -210,9 +210,17 @@ public class UserSecurityPolicyManagerTest {
     @Test
     public void testValidateDaysTillExpiration() {
         final LocalDate today = LocalDate.of(2018, 10, 15);
-        final LocalDateTime passwordChangeDate = LocalDateTime.of(2018, 9, 15, 15, 58, 59);
         final Integer maxPasswordAge = 45;
+
+        final LocalDateTime passwordChangeDate = LocalDateTime.of(2018, 9, 15, 15, 58, 59);
         final Integer remainingDays = 15;
+
+        final LocalDateTime passwordChangeDate2 = LocalDateTime.of(2019, 9, 15, 15, 58, 59);
+        final Integer remainingDays2 = null;
+
+        final LocalDateTime passwordChangeDate3 = LocalDateTime.of(2018, 9, 1, 15, 58, 59);
+        final Integer remainingDays3 = 1;
+
         final String username = "user1";
         final String maximumDefaultPasswordAgeProperty = "MaximumDefaultPasswordAgeProperty";
 
@@ -230,8 +238,12 @@ public class UserSecurityPolicyManagerTest {
         }};
 
         Integer result = securityPolicyManager.getDaysTillExpiration(username, true, passwordChangeDate);
+        Integer result2 = securityPolicyManager.getDaysTillExpiration(username, true, passwordChangeDate2);
+        Integer result3 = securityPolicyManager.getDaysTillExpiration(username, true, passwordChangeDate3);
 
         assertEquals(remainingDays, result);
+        assertEquals(remainingDays2, result2);
+        assertEquals(remainingDays3, result3);
     }
 
     @Test
