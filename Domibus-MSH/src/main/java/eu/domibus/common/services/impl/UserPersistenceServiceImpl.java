@@ -130,10 +130,11 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     protected void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
         // validate user not already in general schema
-        //get all users from user-domains table in general schema
+        // get all users from user-domains table in general schema
         List<UserDomain> allUsers = userDomainService.getAllUserDomainMappings();
         for (eu.domibus.api.user.User user : newUsers) {
-            List<UserDomain> existing = allUsers.stream().filter(userDomain -> userDomain.getUserName().equalsIgnoreCase(user.getUserName()))
+            List<UserDomain> existing = allUsers.stream()
+                    .filter(userDomain -> userDomain.getUserName().equalsIgnoreCase(user.getUserName()))
                     .collect(Collectors.toList());
 
             if (!existing.isEmpty()) {
