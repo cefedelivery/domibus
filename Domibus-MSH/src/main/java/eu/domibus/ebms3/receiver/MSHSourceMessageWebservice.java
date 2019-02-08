@@ -179,7 +179,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
     protected File compressSourceMessage(String fileName) {
-        String compressedFileName = fileName + File.pathSeparator + ".zip";
+        String compressedFileName = fileName + ".zip";
         LOG.debug("Compressing the source message file [{}] to [{}]", fileName, compressedFileName);
         try (GZIPOutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(compressedFileName)));
              FileInputStream sourceMessageInputStream = new FileInputStream(fileName)) {
