@@ -21,10 +21,7 @@ import static org.junit.Assert.assertNotEquals;
 public class DomibusPropertiesServiceTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusPropertiesServiceTest.class);
-
-    @Mocked
-    private Properties domibusProps = new Properties();
-
+ 
     @Tested
     DomibusPropertiesService service;
 
@@ -41,7 +38,7 @@ public class DomibusPropertiesServiceTest {
     }
 
     @Test
-    public void testVersionNumber() throws Exception {
+    public void testVersionNumber(@Mocked Properties domibusProps) throws Exception {
 
         new Expectations() {{
             domibusProps.getProperty("Artifact-Version");
