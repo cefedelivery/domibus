@@ -100,7 +100,6 @@ public class EbMS3Exception extends Exception {
     public String getShortDescription() {
         return this.ebMS3ErrorCode.getShortDescription();
     }
-
     public String getSeverity() {
         return this.ebMS3ErrorCode.getSeverity();
     }
@@ -111,8 +110,8 @@ public class EbMS3Exception extends Exception {
 
     //this is a hack to avoid a classCastException in @see WebFaultOutInterceptor
     public Source getFaultInfo() {
-        Document document = new DOMDocument("Empty document");
-        final Element firstElement = document.createElement("Empty child");
+        Document document = new DOMDocument("Empty_document");
+        final Element firstElement = document.createElement("Empty_child");
         document.appendChild(firstElement);
         return new DOMSource(document);
     }
