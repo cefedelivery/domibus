@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -155,8 +155,8 @@ public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
 
         LocalDate expirationDate = passwordDate.plusDays(maxPasswordAgeInDays);
         LocalDate today = LocalDate.now();
-        int daysUntilExpiration = Period.between(today, expirationDate).getDays();
-
+        int daysUntilExpiration = (int) ChronoUnit.DAYS.between(today, expirationDate);
+        
         LOG.debug("Password policy: days until expiration for user [{}] : {} days", userName, daysUntilExpiration);
 
         if (0 <= daysUntilExpiration && daysUntilExpiration <= warningDaysBeforeExpiration) {
