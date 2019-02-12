@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -48,10 +49,11 @@ public class DomainDaoImpl implements DomainDao {
         File confDirectory = new File(propertyValue);
         final Collection<File> propertyFiles = FileUtils.listFiles(confDirectory, DOMAIN_FILE_EXTENSION, false);
 
-
         if (propertyFiles == null) {
             return result;
         }
+
+        List<Domain> additionalDomains = new ArrayList<>();
         for (File propertyFile : propertyFiles) {
             final String fileName = propertyFile.getName();
             if (StringUtils.containsIgnoreCase(fileName, DOMAIN_FILE_SUFFIX)) {
@@ -59,10 +61,12 @@ public class DomainDaoImpl implements DomainDao {
 
                 Domain domain = new Domain(domainCode, null);
                 domain.setName(getDomainTitle(domain));
-                result.add(domain);
+                additionalDomains.add(domain);
             }
-
         }
+        additionalDomains.sort(Comparator.comparing(Domain::getName, String.CASE_INSENSITIVE_ORDER));
+        result.addAll(additionalDomains);
+
         return result;
     }
 
