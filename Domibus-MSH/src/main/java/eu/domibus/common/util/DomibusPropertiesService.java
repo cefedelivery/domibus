@@ -46,8 +46,8 @@ public class DomibusPropertiesService {
     }
 
     public String getVersionNumber() {
-        String arrtifactVersion = getArtifactVersion();
-        String versionNumber = arrtifactVersion.split("-")[0];
+        String artifactVersion = getArtifactVersion();
+        String versionNumber = artifactVersion.split("-")[0];
         return versionNumber;
     }
 
