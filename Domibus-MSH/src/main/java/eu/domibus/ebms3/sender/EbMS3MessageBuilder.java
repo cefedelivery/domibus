@@ -117,9 +117,9 @@ public class EbMS3MessageBuilder {
                 this.attachPayload(partInfo, message);
             }
 
-            transformBeforeSending(userMessage.getMessageInfo().getMessageId(), message);
-
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+
+            transformBeforeSending(userMessage.getMessageInfo().getMessageId(), message);
 
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
             messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
@@ -151,8 +151,6 @@ public class EbMS3MessageBuilder {
         for (OutgoingMessageTransformer outgoingMessageTransformer : outgoingMessageTransformers) {
             outgoingMessageTransformer.transformOutgoingMessage(message);
         }
-
-
     }
 
     protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) throws EbMS3Exception {

@@ -39,7 +39,5 @@
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
 
-    <bean id="jmsJaxbContext" class="javax.xml.bind.JAXBContext" factory-method="newInstance">
-        <constructor-arg type="java.lang.String" value="eu.domibus.plugin.jms.xml"/>
-    </bean>
+
 </beans>
