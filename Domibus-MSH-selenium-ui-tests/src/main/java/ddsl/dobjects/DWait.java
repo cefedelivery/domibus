@@ -1,0 +1,53 @@
+package ddsl.dobjects;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.PROPERTIES;
+
+public class DWait {
+
+	private WebDriver driver;
+	protected WebDriverWait webDriverWait;
+
+
+	public DWait(WebDriver driver) {
+		this.driver = driver;
+		this.webDriverWait = new WebDriverWait(this.driver, PROPERTIES.TIMEOUT);
+	}
+
+	public void forXMillis(Integer millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) { e.printStackTrace(); }
+	}
+
+	public WebElement forElementToBeClickable(WebElement element) {
+		return webDriverWait.until(ExpectedConditions.elementToBeClickable(element));
+	}
+
+	public WebElement forElementToBeVisible(WebElement element) {
+		return webDriverWait.until(ExpectedConditions.visibilityOf(element));
+	}
+
+	public void forElementToBeEnabled(WebElement element) {
+		int maxTimeout = PROPERTIES.TIMEOUT * 1000;
+		int waitedSoFar = 0;
+		while ((null != element.getAttribute("disabled")) && (waitedSoFar < maxTimeout)){
+			waitedSoFar += 300;
+			forXMillis(300);
+		}
+	}
+
+	public void forAttributeNotEmpty(WebElement element, String attributeName) {
+		webDriverWait.until(ExpectedConditions.attributeToBeNotEmpty(element, attributeName));
+	}
+
+	public void forElementToBeGone(WebElement element) {
+		try {
+			webDriverWait.until(ExpectedConditions.not(ExpectedConditions.visibilityOf(element)));
+		} catch (Exception e) {	}
+	}
+
+}
