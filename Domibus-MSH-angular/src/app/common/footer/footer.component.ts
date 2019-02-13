@@ -1,6 +1,6 @@
-﻿import {Component, OnInit} from "@angular/core";
-import {DomibusInfoService} from "../appinfo/domibusinfo.service";
-import {DomibusInfo} from "../appinfo/domibusinfo";
+﻿import {Component, OnInit} from '@angular/core';
+import {DomibusInfoService} from '../appinfo/domibusinfo.service';
+import {DomibusInfo} from '../appinfo/domibusinfo';
 
 @Component({
   moduleId: module.id,
@@ -16,12 +16,9 @@ export class FooterComponent implements OnInit {
   constructor(private domibusInfoService: DomibusInfoService) {
   }
 
-  ngOnInit(): void {
-    // console.log("FooterComponent onInit");
-    this.domibusInfoService.getDomibusInfo().subscribe((domibusInfo: DomibusInfo) => {
-      this.domibusVersion = domibusInfo.version;
-      }
-    );
+  async ngOnInit() {
+    const domibusInfo = await this.domibusInfoService.getDomibusInfo();
+    this.domibusVersion = domibusInfo.version;
   }
 
 
