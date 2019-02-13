@@ -34,7 +34,7 @@ import java.util.List;
 public class FSSendMessagesService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
-    
+
     public static final String METADATA_FILE_NAME = "metadata.xml";
     public static final String DEFAULT_DOMAIN = "default";
     public static final String ERROR_EXTENSION = ".error";
@@ -42,10 +42,10 @@ public class FSSendMessagesService {
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
-    
+
     @Autowired
     private FSFilesManager fsFilesManager;
-    
+
     @Autowired
     private FSProcessFileService fsProcessFileService;
 
@@ -66,17 +66,15 @@ public class FSSendMessagesService {
         LOG.debug("Sending file system messages...");
 
         sendMessages(null);
-        
+
         for (String domain : fsPluginProperties.getDomains()) {
             if (fsMultiTenancyService.verifyDomainExists(domain)) {
                 sendMessages(domain);
             }
         }
     }
-    
-    private void sendMessages(String domain) {
-        FileObject[] contentFiles = null;
 
+    private void sendMessages(String domain) {
         if(domibusConfigurationExtService.isMultiTenantAware()) {
             if(domain == null) {
                 domain = DEFAULT_DOMAIN;
@@ -97,9 +95,10 @@ public class FSSendMessagesService {
             authenticationExtService.basicAuthenticate(authenticationUser, authenticationPassword);
         }
 
+        FileObject[] contentFiles = null;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
-            
+
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.debug("{}", contentFiles);
 
@@ -122,7 +121,7 @@ public class FSSendMessagesService {
     private void processFileSafely(FileObject processableFile, String domain) {
         String errorMessage = null;
         try {
-            fsProcessFileService.processFile(processableFile);
+            fsProcessFileService.processFile(processableFile, domain);
         } catch (JAXBException ex) {
             errorMessage = buildErrorMessage("Invalid metadata file: " + ex.toString()).toString();
             LOG.error(errorMessage, ex);
@@ -206,17 +205,17 @@ public class FSSendMessagesService {
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
         List<FileObject> filteredFiles = new LinkedList<>();
-        
+
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
-            
+
             if (!StringUtils.equals(baseName, METADATA_FILE_NAME)
                     && !FSFileNameHelper.isAnyState(baseName)
                     && !FSFileNameHelper.isProcessed(baseName)) {
                 filteredFiles.add(file);
             }
         }
-        
+
         return filteredFiles;
     }
 

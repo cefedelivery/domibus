@@ -32,16 +32,16 @@ import java.util.List;
  */
 @RunWith(JMockit.class)
 public class FSSendMessagesServiceTest {
-    
+
     @Tested
     private FSSendMessagesService instance;
-    
+
     @Injectable
     private FSPluginProperties fsPluginProperties;
-    
+
     @Injectable
     private BackendFSImpl backendFSPlugin;
-    
+
     @Injectable
     private FSFilesManager fsFilesManager;
 
@@ -53,18 +53,18 @@ public class FSSendMessagesServiceTest {
 
     @Injectable
     private FSMultiTenancyService fsMultiTenancyService;
-    
+
     @Tested
     @Injectable
     private FSProcessFileService fsProcessFileService;
-    
+
     private FileObject rootDir;
     private FileObject outgoingFolder;
     private FileObject contentFile;
     private FileObject metadataFile;
-    
+
     private UserMessage metadata;
-    
+
     @Before
     public void setUp() throws IOException, JAXBException {
         String location = "ram:///FSSendMessagesServiceTest";
@@ -75,9 +75,9 @@ public class FSSendMessagesServiceTest {
 
         outgoingFolder = rootDir.resolveFile(FSFilesManager.OUTGOING_FOLDER);
         outgoingFolder.createFolder();
-        
+
         metadata = FSTestHelper.getUserMessage(this.getClass(), "testSendMessages_metadata.xml");
-        
+
         try (InputStream testMetadata = FSTestHelper.getTestResource(this.getClass(), "testSendMessages_metadata.xml")) {
             metadataFile = outgoingFolder.resolveFile("metadata.xml");
             metadataFile.createFile();
@@ -85,7 +85,7 @@ public class FSSendMessagesServiceTest {
             IOUtils.copy(testMetadata, metadataFileContent.getOutputStream());
             metadataFile.close();
         }
-        
+
         try (InputStream testContent = FSTestHelper.getTestResource(this.getClass(), "testSendMessages_content.xml")) {
             contentFile = outgoingFolder.resolveFile("content.xml");
             contentFile.createFile();
@@ -106,6 +106,9 @@ public class FSSendMessagesServiceTest {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
             result = Collections.emptyList();
+
+            fsPluginProperties.getPayloadId(null);
+            result = "cid:message";
 
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
@@ -143,9 +146,9 @@ public class FSSendMessagesServiceTest {
             }));
             result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         }};
-        
+
         instance.sendMessages();
-        
+
         new VerificationsInOrder(1) {{
             fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
         }};
@@ -166,6 +169,9 @@ public class FSSendMessagesServiceTest {
 
             fsPluginProperties.getDomains();
             result = domains;
+
+            fsPluginProperties.getPayloadId("DOMAIN1");
+            result = "cid:message";
 
             fsFilesManager.setUpFileSystem("DOMAIN1");
             result = rootDir;
@@ -276,28 +282,31 @@ public class FSSendMessagesServiceTest {
             maxTimes = 0;
         }};
     }
-    
+
     @Test
     public void testSendMessages_RenameException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
             result = Collections.emptyList();
-            
+
+            fsPluginProperties.getPayloadId(null);
+            result = "cid:message";
+
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
-            
+
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             result = outgoingFolder;
-            
+
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { metadataFile, contentFile };
-            
+
             fsFilesManager.resolveSibling(contentFile, "metadata.xml");
             result = metadataFile;
-            
+
             fsFilesManager.getDataHandler(contentFile);
             result = new DataHandler(new FileObjectDataSource(contentFile));
-            
+
             backendFSPlugin.submit(with(new Delegate<FSMessage>() {
                  void delegate(FSMessage message) throws IOException {
                      Assert.assertNotNull(message);
@@ -318,12 +327,12 @@ public class FSSendMessagesServiceTest {
                  }
             }));
             result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
-            
+
             fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
             result = new FileSystemException("Test-forced exception");
         }};
-        
+
         instance.sendMessages();
     }
-    
+
 }

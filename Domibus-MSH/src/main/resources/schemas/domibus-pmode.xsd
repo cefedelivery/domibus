@@ -180,7 +180,7 @@
                                             <xs:complexType>
                                                 <xs:attribute name="name" use="required"
                                                               type="max255-non-empty-string"/>
-                                                <xs:attribute name="cid" type="max255-non-empty-string"
+                                                <xs:attribute name="cid" type="xs:string"
                                                               use="required"/>
                                                 <xs:attribute name="mimeType" type="max255-non-empty-string"/>
                                                 <xs:attribute name="inBody" type="xs:string"/>
@@ -196,18 +196,14 @@
                                                     minOccurs="0">
                                             <xs:complexType>
                                                 <xs:sequence>
-                                                    <xs:element maxOccurs="unbounded"
-                                                                name="attachment">
+                                                    <xs:element maxOccurs="unbounded" name="attachment">
                                                         <xs:complexType>
-                                                            <xs:attribute name="name" type="max255-non-empty-string"
-                                                                          use="required"/>
+                                                            <xs:attribute name="name" type="max255-non-empty-string" use="required"/>
                                                         </xs:complexType>
                                                     </xs:element>
                                                 </xs:sequence>
-                                                <xs:attribute name="name" type="max255-non-empty-string"
-                                                              use="required"/>
-                                                <xs:attribute name="maxSize" type="xs:integer"
-                                                              use="required"/>
+                                                <xs:attribute name="name" type="max255-non-empty-string" use="required"/>
+                                                <xs:attribute name="maxSize" type="xs:integer" use="required"/>
                                             </xs:complexType>
                                             <xs:unique name="uniqueAttachment">
                                                 <xs:selector xpath="attachment"/>

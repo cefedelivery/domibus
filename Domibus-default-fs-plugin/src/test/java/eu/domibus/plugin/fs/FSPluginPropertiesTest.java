@@ -18,7 +18,7 @@ public class FSPluginPropertiesTest {
     private static final String BRIS = "BRIS";
     private static final String UNORDEREDA = "UNORDEREDA";
     private static final String UNORDEREDB = "UNORDEREDB";
-    
+
     private static final String DEFAULT_LOCATION = "/tmp/fs_plugin_data";
     private static final String DOMAIN1_LOCATION = "/tmp/fs_plugin_data/DOMAIN1";
 
@@ -37,7 +37,7 @@ public class FSPluginPropertiesTest {
     public void testGetLocation() throws Exception {
         Assert.assertEquals(DEFAULT_LOCATION, fSPluginProperties.getLocation());
     }
-    
+
     @Test
     public void testGetLocation_Domain1() throws Exception {
         Assert.assertEquals(DOMAIN1_LOCATION, fSPluginProperties.getLocation(DOMAIN1));
@@ -57,7 +57,7 @@ public class FSPluginPropertiesTest {
     public void testGetSentPurgeWorkerCronExpression() throws Exception {
         Assert.assertEquals("0 0/1 * * * ?", fSPluginProperties.getSentPurgeWorkerCronExpression());
     }
-    
+
     @Test
     public void testGetSentPurgeExpired() throws Exception {
         Assert.assertEquals(Integer.valueOf(600), fSPluginProperties.getSentPurgeExpired());
@@ -101,6 +101,21 @@ public class FSPluginPropertiesTest {
     @Test
     public void testGetUser_NotSecured() throws Exception {
         Assert.assertEquals("", fSPluginProperties.getUser(DOMAIN2));
+    }
+
+    @Test
+    public void testGetPayloadId_Domain() throws Exception {
+        Assert.assertEquals("cid:attachment", fSPluginProperties.getPayloadId(DOMAIN1));
+    }
+
+    @Test
+    public void testGetPayloadId_DomainMissing() throws Exception {
+        Assert.assertEquals("cid:message", fSPluginProperties.getPayloadId(DOMAIN2));
+    }
+
+    @Test
+    public void testGetPayloadId_NullDomain() throws Exception {
+        Assert.assertEquals("cid:message", fSPluginProperties.getPayloadId(null));
     }
 
     @Test
