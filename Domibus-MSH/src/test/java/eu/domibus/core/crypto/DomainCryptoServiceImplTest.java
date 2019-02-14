@@ -46,7 +46,7 @@ public class DomainCryptoServiceImplTest {
         when(domain.getCode()).thenReturn("DEF");
         when(domain.getName()).thenReturn("DEFAULT");
         domainCryptoService.setDomainCryptoServiceSpiList(Lists.newArrayList(defaultSpi,dssSpi));
-        when(domibusPropertyProvider.getDomainProperty(domainCryptoService.PROPERTY_NAME)).thenReturn(dss);
+        when(domibusPropertyProvider.getDomainProperty(domainCryptoService.IAM_IDENTIFIER)).thenReturn(dss);
         domainCryptoService.init();
         verify(dssSpi,times(1)).setDomain(new Domain("DEF","DEFAULT"));
         verify(dssSpi,times(1)).init();
@@ -60,7 +60,7 @@ public class DomainCryptoServiceImplTest {
         when(defaultSpi.getIdentifier()).thenReturn(dss);
         when(dssSpi.getIdentifier()).thenReturn(dss);
         domainCryptoService.setDomainCryptoServiceSpiList(Lists.newArrayList(defaultSpi,dssSpi));
-        when(domibusPropertyProvider.getDomainProperty(domainCryptoService.PROPERTY_NAME)).thenReturn(dss);
+        when(domibusPropertyProvider.getDomainProperty(domainCryptoService.IAM_IDENTIFIER)).thenReturn(dss);
         domainCryptoService.init();
     }
 
@@ -72,7 +72,7 @@ public class DomainCryptoServiceImplTest {
         when(defaultSpi.getIdentifier()).thenReturn(dss);
         when(dssSpi.getIdentifier()).thenReturn(dss);
         domainCryptoService.setDomainCryptoServiceSpiList(Lists.newArrayList());
-        when(domibusPropertyProvider.getDomainProperty(domainCryptoService.PROPERTY_NAME)).thenReturn(dss);
+        when(domibusPropertyProvider.getDomainProperty(domainCryptoService.IAM_IDENTIFIER)).thenReturn(dss);
         domainCryptoService.init();
     }
 }

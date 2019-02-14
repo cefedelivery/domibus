@@ -17,7 +17,6 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,12 +35,11 @@ import java.util.Properties;
  * @since 4.0
  */
 @Component
-@Qualifier(DefaultDomainCryptoServiceSpiImpl.IDENTIFIER)
 public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainCryptoServiceSpi {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultDomainCryptoServiceSpiImpl.class);
 
-    public final static String IDENTIFIER="DEFAULT_SPI";
+    private static final String IDENTIFIER="DEFAULT_SPI";
 
     protected Domain domain;
 
@@ -172,7 +170,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
     }
 
     @Override
-    public void addCertificate(List<eu.domibus.core.crypto.spi.CertificateEntry> certificates, boolean overwrite) {
+    public synchronized void addCertificate(List<eu.domibus.core.crypto.spi.CertificateEntry> certificates, boolean overwrite) {
         certificates.forEach(certEntry ->
                 doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite));
         persistTrustStore();
@@ -292,7 +290,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
 
     @Override
     public void removeCertificate(List<String> aliases) {
-        aliases.forEach(alias -> doRemoveCertificate(alias));
+        aliases.forEach(this::doRemoveCertificate);
         persistTrustStore();
     }
 

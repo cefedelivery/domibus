@@ -44,7 +44,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
 
-    protected static final String PROPERTY_NAME = "domibus.iam.extension.identifier";
+    protected static final String IAM_IDENTIFIER = "domibus.iam.extension.identifier";
 
     public DomainCryptoServiceImpl() {
     }
@@ -55,7 +55,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @PostConstruct
     public void init() {
-        String spiIdentifier = domibusPropertyProvider.getDomainProperty(PROPERTY_NAME);
+        String spiIdentifier = domibusPropertyProvider.getDomainProperty(IAM_IDENTIFIER);
         final List<DomainCryptoServiceSpi> providerList = domainCryptoServiceSpiList.stream().
                 filter(domainCryptoServiceSpi -> spiIdentifier.equals(domainCryptoServiceSpi.getIdentifier())).collect(Collectors.toList());
 
