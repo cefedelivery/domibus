@@ -41,8 +41,14 @@ public class DomibusPropertiesService {
         }
     }
 
-    public String getImplVersion() {
+    public String getArtifactVersion() {
         return domibusProps.getProperty("Artifact-Version");
+    }
+
+    public String getVersionNumber() {
+        String artifactVersion = getArtifactVersion();
+        String versionNumber = artifactVersion.split("-")[0];
+        return versionNumber;
     }
 
     public String getArtifactName() {
@@ -57,7 +63,7 @@ public class DomibusPropertiesService {
         StringBuilder display = new StringBuilder();
         display.append(getArtifactName());
         display.append(" Version [");
-        display.append(getImplVersion());
+        display.append(getArtifactVersion());
         display.append("] Build-Time [");
         display.append(getBuiltTime());
         display.append("]");

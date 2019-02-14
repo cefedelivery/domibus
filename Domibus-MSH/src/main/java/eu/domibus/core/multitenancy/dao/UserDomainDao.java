@@ -21,4 +21,6 @@ public interface UserDomainDao {
     List<UserDomainEntity> listPreferredDomains();
 
     List<String> listAllUserNames();
+
+    List<UserDomainEntity> listAllUsers();
 }
