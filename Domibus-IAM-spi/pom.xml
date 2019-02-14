@@ -31,6 +31,14 @@
             <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.wss4j</groupId>
+            <artifactId>wss4j-ws-security-common</artifactId>
+            <version>${wss4j.ws.security.common}</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
 

@@ -3,11 +3,15 @@ package eu.domibus.core.crypto.spi;
 import java.security.cert.X509Certificate;
 
 /**
- * @author Ion Perpegel(perpion)
- * @since 4.0
+ * @author Thomas Dussart
+ * @since 4.1
+ *
+ * Just a mapper class for core CertificateEntry class.
  */
 public class CertificateEntry {
+
     private String alias;
+
     private X509Certificate certificate;
 
     public CertificateEntry(String alias, X509Certificate certificate) {

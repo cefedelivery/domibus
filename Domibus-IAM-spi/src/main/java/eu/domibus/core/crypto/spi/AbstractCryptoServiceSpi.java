@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi{
 
@@ -128,6 +128,10 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
     @Override
     public void setDomain(Domain domain) {
         this.domain=domain;
+    }
+
+    protected Domain getDomain() {
+        return domain;
     }
 
     @Override

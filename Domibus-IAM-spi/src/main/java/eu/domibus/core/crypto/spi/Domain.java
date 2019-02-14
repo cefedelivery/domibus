@@ -5,7 +5,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
+ *
+ * Just a mapper class for core Domain class.
  */
 public class Domain {
 

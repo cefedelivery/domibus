@@ -1,26 +1,20 @@
 package eu.domibus.core.crypto.spi.dss;
 
-import eu.domibus.core.crypto.spi.*;
-import org.apache.wss4j.common.crypto.CryptoType;
+import eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.security.auth.callback.CallbackHandler;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
+ *
+ * Future DSS IAM provider implementation.
  */
 
 
