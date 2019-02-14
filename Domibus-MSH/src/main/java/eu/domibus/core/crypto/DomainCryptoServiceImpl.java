@@ -81,109 +81,105 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     }
 
 
-    private DomainCryptoServiceSpi getIamProvider() {
-        return iamProvider;
-    }
-
     @Override
     public X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException {
-        return getIamProvider().getCertificateFromKeyStore(alias);
+        return iamProvider.getCertificateFromKeyStore(alias);
     }
 
     @Override
     public X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException {
-        return getIamProvider().getCertificateFromTrustStore(alias);
+        return iamProvider.getCertificateFromTrustStore(alias);
     }
 
     @Override
     public X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException {
-        return getIamProvider().getX509Certificates(cryptoType);
+        return iamProvider.getX509Certificates(cryptoType);
     }
 
     @Override
     public String getX509Identifier(X509Certificate cert) throws WSSecurityException {
-        return getIamProvider().getX509Identifier(cert);
+        return iamProvider.getX509Identifier(cert);
     }
 
     @Override
     public PrivateKey getPrivateKey(X509Certificate certificate, CallbackHandler callbackHandler) throws WSSecurityException {
-        return getIamProvider().getPrivateKey(certificate, callbackHandler);
+        return iamProvider.getPrivateKey(certificate, callbackHandler);
     }
 
     @Override
     public PrivateKey getPrivateKey(PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException {
-        return getIamProvider().getPrivateKey(publicKey, callbackHandler);
+        return iamProvider.getPrivateKey(publicKey, callbackHandler);
     }
 
     @Override
     public PrivateKey getPrivateKey(String identifier, String password) throws WSSecurityException {
-        return getIamProvider().getPrivateKey(identifier, password);
+        return iamProvider.getPrivateKey(identifier, password);
     }
 
     @Override
     public void verifyTrust(PublicKey publicKey) throws WSSecurityException {
-        getIamProvider().verifyTrust(publicKey);
+        iamProvider.verifyTrust(publicKey);
     }
 
     @Override
     public void verifyTrust(X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException {
-        getIamProvider().verifyTrust(certs, enableRevocation, subjectCertConstraints, issuerCertConstraints);
+        iamProvider.verifyTrust(certs, enableRevocation, subjectCertConstraints, issuerCertConstraints);
     }
 
     @Override
     public String getDefaultX509Identifier() throws WSSecurityException {
-        return getIamProvider().getDefaultX509Identifier();
+        return iamProvider.getDefaultX509Identifier();
     }
 
     @Override
     public String getPrivateKeyPassword(String alias) {
-        return getIamProvider().getPrivateKeyPassword(alias);
+        return iamProvider.getPrivateKeyPassword(alias);
     }
 
     @Override
-    public synchronized void refreshTrustStore() throws CryptoException {
-        getIamProvider().refreshTrustStore();
+    public void refreshTrustStore() throws CryptoException {
+        iamProvider.refreshTrustStore();
     }
 
     @Override
-    public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoException {
-        getIamProvider().replaceTrustStore(store, password);
+    public void replaceTrustStore(byte[] store, String password) throws CryptoException {
+        iamProvider.replaceTrustStore(store, password);
     }
 
     @Override
     public KeyStore getKeyStore() {
-        return getIamProvider().getKeyStore();
+        return iamProvider.getKeyStore();
     }
 
     @Override
     public KeyStore getTrustStore() {
-        return getIamProvider().getTrustStore();
+        return iamProvider.getTrustStore();
     }
 
 
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        return getIamProvider().isCertificateChainValid(alias);
+        return iamProvider.isCertificateChainValid(alias);
     }
 
     @Override
-    public synchronized boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
-        return getIamProvider().addCertificate(certificate, alias, overwrite);
+    public  boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
+        return iamProvider.addCertificate(certificate, alias, overwrite);
     }
 
     @Override
-    public synchronized void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
-        getIamProvider().addCertificate(domainCoreConverter.convert(certificates, eu.domibus.core.crypto.spi.CertificateEntry.class), overwrite);
+    public void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
+        iamProvider.addCertificate(domainCoreConverter.convert(certificates, eu.domibus.core.crypto.spi.CertificateEntry.class), overwrite);
     }
 
     @Override
     public boolean removeCertificate(String alias) {
-        return getIamProvider().removeCertificate(alias);
+        return iamProvider.removeCertificate(alias);
     }
 
     @Override
     public void removeCertificate(List<String> aliases) {
-        getIamProvider().removeCertificate(aliases);
+        iamProvider.removeCertificate(aliases);
     }
 
     protected void setDomainCryptoServiceSpiList(List<DomainCryptoServiceSpi> domainCryptoServiceSpiList) {
