@@ -1,7 +1,5 @@
-package eu.domibus.core.crypto.api;
+package eu.domibus.core.crypto.spi;
 
-import eu.domibus.api.crypto.CryptoException;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 
@@ -16,10 +14,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * @author Cosmin Baciu
- * @since 4.0
+ * @author Thomas Dussart
+ * @since 4.1
+ *
+ * Extenalized interface thant enable to implement identification and access management extensions.
  */
-public interface DomainCryptoService {
+public interface DomainCryptoServiceSpi {
 
     /* START - Methods required to be implemented by the org.apache.wss4j.common.crypto.CryptoBase */
     X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException;
@@ -43,7 +43,7 @@ public interface DomainCryptoService {
 
     void refreshTrustStore();
 
-    void replaceTrustStore(byte[] store, String password) throws CryptoException;
+    void replaceTrustStore(byte[] store, String password);
 
     KeyStore getKeyStore();
 
@@ -63,4 +63,9 @@ public interface DomainCryptoService {
 
     void removeCertificate(List<String> aliases);
 
+    String getIdentifier();
+
+    void setDomain(Domain domain);
+
+    void init();
 }

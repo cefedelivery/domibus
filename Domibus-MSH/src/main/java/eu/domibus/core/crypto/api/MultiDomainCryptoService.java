@@ -2,7 +2,7 @@ package eu.domibus.core.crypto.api;
 
 import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.core.crypto.spi.DomibusCertificateException;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 

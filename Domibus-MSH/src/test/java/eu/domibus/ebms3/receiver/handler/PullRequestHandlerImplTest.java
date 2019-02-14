@@ -19,7 +19,7 @@ import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.MessageTestUtility;
 import eu.domibus.ebms3.sender.*;
-import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.core.crypto.spi.DomibusCertificateException;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.cxf.phase.PhaseInterceptorChain;

@@ -1,15 +1,21 @@
 package eu.domibus.plugin.classloader;
 
+import com.google.common.collect.Lists;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Cosmin Baciu on 6/15/2016.
@@ -18,25 +24,31 @@ public class PluginClassLoader extends URLClassLoader {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginClassLoader.class);
 
-    public PluginClassLoader(File file, ClassLoader parent) throws MalformedURLException {
-        super(discoverPlugins(file), parent);
+    public PluginClassLoader(Set<File> files, ClassLoader parent) throws MalformedURLException {
+        super(discoverPlugins(files), parent);
     }
 
-    protected static URL[] discoverPlugins(File file) throws MalformedURLException {
-        List<URL> urls = new ArrayList<URL>();
-        File[] pluginJarFiles = file.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".jar");
-            }
-        });
+    /**
+     * Group the plugins and extension directories to extract the jar files url.
+     * @param directories set of extension/plugins directories.
+     * @return the urls of the jar files.
+     * @throws MalformedURLException
+     */
+    protected static URL[] discoverPlugins(Set<File> directories) throws MalformedURLException {
 
-        if (pluginJarFiles != null) {
-            for (File pluginJar : pluginJarFiles) {
-                urls.add(pluginJar.toURI().toURL());
-            }
+        final List<URI> jarUris = directories.stream().
+                map(directory -> directory.listFiles((dir, name) -> name.endsWith(".jar"))).
+                filter(Objects::nonNull).
+                map(Lists::newArrayList).
+                flatMap(ArrayList::stream).
+                map(pluginJarFile -> pluginJarFile.toURI()).
+                collect(Collectors.toList());
+
+        final URL[] urls = new URL[jarUris.size()];
+        for (int i = 0; i < jarUris.size(); i++) {
+            urls[i] = jarUris.get(i).toURL();
+            LOG.info("Adding the following plugin to the classpath:[{}] ", urls[i]);
         }
-        LOG.info("Adding the following plugins to the classpath: " + urls);
-        return urls.toArray(new URL[urls.size()]);
+        return urls;
     }
 }

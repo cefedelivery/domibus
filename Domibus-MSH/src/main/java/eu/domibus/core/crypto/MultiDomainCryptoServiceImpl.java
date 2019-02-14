@@ -7,7 +7,7 @@ import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.core.crypto.spi.DomibusCertificateException;
 import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
 import org.apache.wss4j.common.crypto.CryptoType;
