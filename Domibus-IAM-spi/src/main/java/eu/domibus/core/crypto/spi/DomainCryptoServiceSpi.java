@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
  * Extenalized interface thant enable to implement identification and access management extensions.
  */
 public interface DomainCryptoServiceSpi {
-
     /* START - Methods required to be implemented by the org.apache.wss4j.common.crypto.CryptoBase */
     X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException;
 

@@ -3,6 +3,7 @@ package eu.domibus.core.crypto.spi;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.security.KeyStore;
@@ -20,7 +21,10 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi{
 
+    public static final String DEFAULT_IAM_SPI="DEFAULT_IAM_SPI";
+
     @Autowired
+    @Qualifier(DEFAULT_IAM_SPI)
     private DomainCryptoServiceSpi defaultDomainCryptoService;
 
     private Domain domain;

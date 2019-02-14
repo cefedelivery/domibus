@@ -7,6 +7,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi;
 import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
 import eu.domibus.core.crypto.spi.DomibusCertificateException;
 import eu.domibus.logging.DomibusLogger;
@@ -17,6 +18,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +37,10 @@ import java.util.Properties;
  * @since 4.0
  */
 @Component
+@Qualifier(AbstractCryptoServiceSpi.DEFAULT_IAM_SPI)
 public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainCryptoServiceSpi {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultDomainCryptoServiceSpiImpl.class);
-
-    private static final String IDENTIFIER="DEFAULT_SPI";
 
     protected Domain domain;
 
@@ -296,7 +297,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
 
     @Override
     public String getIdentifier() {
-        return IDENTIFIER;
+        return AbstractCryptoServiceSpi.DEFAULT_IAM_SPI;
     }
 
     @Override
