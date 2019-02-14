@@ -2,7 +2,6 @@ package eu.domibus.plugin.jms;
 
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.ext.services.DomainContextExtService;
-import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -35,9 +34,6 @@ public class BackendJMSReceivingListener {
     @Autowired
     protected AuthenticationExtService authenticationExtService;
 
-    @Autowired
-    private DomibusConfigurationExtService domibusConfigurationExtService;
-
 
     /**
      * This method is called when a message was received at the incoming queue
@@ -48,7 +44,8 @@ public class BackendJMSReceivingListener {
     //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void receiveMessage(final MapMessage map) {
-        if (domibusConfigurationExtService.isMultiTenantAware()) {
+        if (!authenticationExtService.isUnsecureLoginAllowed()) {
+            LOG.debug("Performing authentication");
             LOG.clearCustomKeys();
             authenticate(map);
         }

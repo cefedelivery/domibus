@@ -17,6 +17,8 @@ Domibus 4.0.2
 - Fixed the caching for the downloaded CRLs
 - Allow proxy configuration without user/password
 - Improved the duplicate detection
+- Default FS Plugin: add configuration for message payload identifiers
+- Allow proxy configuration without user/password
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
