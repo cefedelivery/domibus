@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author Sebastian-Ion TINCU
+ * @since 4.1
  */
 @Service
-public class MessageServiceDelegate implements MessageExtService {
+public class MessageServiceImpl implements MessageExtService {
 
     /**
      * {@inheritDoc}

@@ -3,25 +3,31 @@ package eu.domibus.plugin.webService.impl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.ext.services.MessageAcknowledgeExtService;
 import eu.domibus.ext.services.MessageExtService;
+import eu.domibus.plugin.MessageLister;
 import eu.domibus.plugin.handler.MessagePuller;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.webService.generated.LargePayloadType;
+import eu.domibus.plugin.webService.generated.RetrieveMessageFault;
+import eu.domibus.plugin.webService.generated.RetrieveMessageRequest;
+import eu.domibus.plugin.webService.generated.RetrieveMessageResponse;
+import eu.domibus.plugin.webService.generated.StatusFault;
 import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.plugin.webService.generated.StatusRequest;
 import mockit.Expectations;
 import mockit.Injectable;
-import mockit.NonStrictExpectations;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.xml.ws.Holder;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Cosmin Baciu
@@ -50,6 +56,9 @@ public class BackendWebServiceImplTest {
 
     @Injectable
     private MessageExtService messageExtService;
+
+    @Injectable
+    private MessageLister lister;
 
     @Injectable
     private String name;
@@ -118,4 +127,39 @@ public class BackendWebServiceImplTest {
         backendWebService.validateSubmitRequest(submitRequest, ebMSHeaderInfo);
     }
 
+    @Test
+    public void cleansTheMessageIdentifierBeforeRetrievingTheMessageByItsIdentifier(@Injectable RetrieveMessageRequest retrieveMessageRequest,
+                                                                                    @Injectable RetrieveMessageResponse retrieveMessageResponse,
+                                                                                    @Injectable Messaging ebMSHeaderInfo) throws RetrieveMessageFault {
+        new Expectations() {{
+            retrieveMessageRequest.getMessageID();
+            result = "-Dom137--";
+
+        }};
+
+        backendWebService.retrieveMessage(retrieveMessageRequest, new Holder<RetrieveMessageResponse>(retrieveMessageResponse), new Holder<>(ebMSHeaderInfo));
+
+        new Verifications() {{
+            String messageId;
+            messageExtService.cleanMessageIdentifier(messageId = withCapture());
+            assertEquals("The message identifier should have been cleaned before retrieving the message", "-Dom137--", messageId);
+        }};
+    }
+
+    @Test
+    public void cleansTheMessageIdentifierBeforeRetrievingTheStatusOfAMessageByItsIdentifier(@Injectable StatusRequest statusRequest) throws StatusFault {
+        new Expectations() {{
+            statusRequest.getMessageID();
+            result = "-Dom138--";
+
+        }};
+
+        backendWebService.getStatus(statusRequest);
+
+        new Verifications() {{
+            String messageId;
+            messageExtService.cleanMessageIdentifier(messageId = withCapture());
+            assertEquals("The message identifier should have been cleaned before retrieving the message", "-Dom138--", messageId);
+        }};
+    }
 }

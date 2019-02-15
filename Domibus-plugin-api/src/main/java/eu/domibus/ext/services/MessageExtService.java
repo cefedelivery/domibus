@@ -3,7 +3,7 @@ package eu.domibus.ext.services;
 import eu.domibus.ext.exceptions.MessageExtException;
 
 /**
- *  All the operations related to messages.
+ *  An interface containing utility operations for processing messages, message identifiers or any other message properties.
  *
  * @author Sebastian-Ion TINCU
  */

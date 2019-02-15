@@ -18,7 +18,7 @@ public class MessageServiceInterceptor extends ServiceInterceptor {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageServiceInterceptor.class);
 
-    @Around(value = "execution(public * eu.domibus.ext.delegate.services.message.MessageServiceDelegate.*(..))")
+    @Around(value = "execution(public * eu.domibus.ext.delegate.services.message.MessageServiceImpl.*(..))")
     @Override
     public Object intercept(ProceedingJoinPoint joinPoint) throws Throwable {
         return super.intercept(joinPoint);

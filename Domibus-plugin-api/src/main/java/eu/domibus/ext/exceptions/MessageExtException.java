@@ -4,7 +4,7 @@ package eu.domibus.ext.exceptions;
  * Raised in case an exception occurs when dealing with messages.
  *
  * @author Sebastian-Ion TINCU
- * @since 4.0
+ * @since 4.1
  */
 public class MessageExtException extends DomibusServiceExtException {
 
