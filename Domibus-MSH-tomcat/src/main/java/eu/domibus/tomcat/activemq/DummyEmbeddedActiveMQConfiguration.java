@@ -10,7 +10,6 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @since 3.3
  */
 @Configuration
-@PropertySource(value = "file:///${domibus.config.location}/domibus.properties")
 public class DummyEmbeddedActiveMQConfiguration implements Condition {
 
     private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(DummyEmbeddedActiveMQConfiguration.class);
