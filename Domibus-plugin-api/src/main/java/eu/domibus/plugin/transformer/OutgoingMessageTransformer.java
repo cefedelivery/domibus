@@ -1,5 +1,7 @@
 package eu.domibus.plugin.transformer;
 
+import eu.domibus.plugin.Submission;
+
 import javax.xml.soap.SOAPMessage;
 
 /**
@@ -8,5 +10,5 @@ import javax.xml.soap.SOAPMessage;
  */
 public interface OutgoingMessageTransformer {
 
-    void transformOutgoingMessage(SOAPMessage message);
+    void transformOutgoingMessage(Submission submission, SOAPMessage message);
 }

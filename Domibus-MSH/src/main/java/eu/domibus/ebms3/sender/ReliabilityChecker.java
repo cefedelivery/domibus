@@ -13,7 +13,9 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import org.apache.wss4j.common.WSS4JConstants;
 import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.stax.ext.WSSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
@@ -158,7 +161,10 @@ public class ReliabilityChecker {
                         throw ex;
                     }
 
-                    final NodeList referencesFromSecurityHeader = nonRepudiationChecker.getNonRepudiationNodeList(request.getSOAPHeader().getElementsByTagNameNS(WSConstants.SIG_NS, WSConstants.SIG_INFO_LN).item(0));
+                    final SOAPElement securityElement = (SOAPElement) request.getSOAPHeader().getChildElements(WSSConstants.TAG_WSSE_SECURITY).next();
+                    final SOAPElement signatureElement = (SOAPElement) securityElement.getChildElements(new QName(WSS4JConstants.SIG_NS, WSS4JConstants.SIG_LN)).next();
+                    final Node securitySignedInfo = signatureElement.getElementsByTagNameNS(WSConstants.SIG_NS, WSConstants.SIG_INFO_LN).item(0);
+                    final NodeList referencesFromSecurityHeader = nonRepudiationChecker.getNonRepudiationNodeList(securitySignedInfo);
                     final NodeList referencesFromNonRepudiationInformation = nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
 
                     if (!nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation)) {

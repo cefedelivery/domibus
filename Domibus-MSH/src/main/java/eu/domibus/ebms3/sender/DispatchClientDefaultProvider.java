@@ -68,6 +68,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);
         dispatch.getRequestContext().put(ASYMMETRIC_SIG_ALGO_PROPERTY, algorithm);
         dispatch.getRequestContext().put(PMODE_KEY_CONTEXT_PROPERTY, pModeKey);
+        dispatch.getRequestContext().put("ws-security.use.str.transform", "false");
         final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();

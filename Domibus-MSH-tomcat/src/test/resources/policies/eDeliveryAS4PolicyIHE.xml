@@ -61,7 +61,7 @@ A subject key identifier MAY only be used to reference an X.509v3 certificate.
                 </sp:Attachments>
             </sp:SignedParts>
 			 <sp:SignedElements>
-                <sp:XPath>/*[local-name() = 'Envelope']/*[local-name() = 'Header']/*[local-name() = 'Security']/*[local-name() = 'description']</sp:XPath>
+                <sp:XPath>/*[local-name() = 'Envelope']/*[local-name() = 'Header']/*[local-name() = 'Security']/*[local-name() = 'Assertion']</sp:XPath>
             </sp:SignedElements>
             <sp:EncryptedParts>
                 <sp:Attachments/>				    

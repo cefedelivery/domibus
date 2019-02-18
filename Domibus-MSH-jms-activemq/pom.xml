@@ -26,6 +26,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-jms-spi</artifactId>
             <version>${project.version}</version>

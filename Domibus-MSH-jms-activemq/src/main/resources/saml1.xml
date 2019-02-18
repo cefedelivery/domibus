@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+                ID="urn:uuid:7102AC72154DCFD1F51253534608781"
+                IssueInstant="2009-09-21T12:03:28.788Z" Version="2.0">
+    <saml:Issuer>urn:idp:countryB</saml:Issuer>
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod
+                    Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+            <ds:Reference URI="#urn:uuid:7102AC72154DCFD1F51253534608780">
+                <ds:Transforms>
+                    <ds:Transform
+                            Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <ds:Transform
+                            Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#">
+                        <ec:InclusiveNamespaces
+                                xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"
+                                PrefixList="ds saml xs"/>
+                    </ds:Transform>
+                </ds:Transforms>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                <ds:DigestValue>A1LyLvFHRrYaOJ28YVFd3MfKGSI=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>cH+lCY …</ds:SignatureValue>
+        <ds:KeyInfo>
+            <ds:X509Data>
+                <ds:X509Certificate>MIIIADS …</ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </ds:Signature>
+    <saml:Subject>
+        <saml:NameID
+                Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
+            Franz.Muller@AKH.Vienna.at
+        </saml:NameID>
+        <saml:SubjectConfirmation
+                Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches">
+            <saml:SubjectConfirmationData/>
+        </saml:SubjectConfirmation>
+    </saml:Subject>
+    <saml:Conditions
+            NotBefore="2009-09-21T12:03:28.788Z"
+            NotOnOrAfter="2009-09-21T16:03:28.788Z">
+    </saml:Conditions>
+    <saml:AuthnStatement
+            AuthnInstant="2009-09-21T12:03:28.788Z"
+            SessionNotOnOrAfter="2009-09-21T16:03:28.788Z">
+        <saml:AuthnContext>
+            <saml:AuthnContextClassRef>
+                urn:oasis:names:tc:SAML:2.0:ac:classes:X509
+            </saml:AuthnContextClassRef>
+        </saml:AuthnContext>
+    </saml:AuthnStatement>
+    <saml:AttributeStatement>
+        <saml:Attribute
+                FriendlyName="XSPA Subject"
+                Name="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">Dr. Franz Muller
+            </saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="XSPA Organization"
+                Name="urn:oasis:names:tc:xspa:1.0:subject:organization"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">Vienna AKH
+            </saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="XSPA Organization Id"
+                Name="urn:oasis:names:tc:xspa:1.0:subject:organization-id"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:anyURI">urn:oid:1.2.3.4.5.6.7
+            </saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="epSOS Healthcare Facility Type"
+                Name=" urn:epsos:names:wp3.4:subject:healthcare-facility-type"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">Hospital
+            </saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="XSPA permissions according with Hl7"
+                Name="urn:oasis:names:tc:xspa:1.0:subject:hl7:permission"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">urn:oasis:names:tc:xspa:1.0:hl7:PRD-006
+            </saml:AttributeValue>
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">urn:oasis:names:tc:xspa:1.0:hl7:PRD-017
+            </saml:AttributeValue>
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">urn:oasis:names:tc:xspa:1.0:hl7:PRD-010
+            </saml:AttributeValue>
+
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="XSPA Role"
+                Name="urn:oasis:names:tc:xacml:2.0:subject:role"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">Physician
+            </saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="XSPA Purpose of Use"
+                Name="urn:oasis:names:tc:xspa:1.0:subject:purposeofuse"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">TREATMENT
+            </saml:AttributeValue>
+        </saml:Attribute>
+        <saml:Attribute
+                FriendlyName="XSPA Locality"
+                Name="urn:oasis:names:tc:xspa:1.0:environment:locality"
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml:AttributeValue
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:type="xs:string">vienna-akh
+            </saml:AttributeValue>
+        </saml:Attribute>
+    </saml:AttributeStatement>
+</saml:Assertion>

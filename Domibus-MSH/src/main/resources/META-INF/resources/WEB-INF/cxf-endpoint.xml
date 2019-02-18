@@ -4,8 +4,11 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
        xmlns:cxf="http://cxf.apache.org/core"
        xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+       xmlns:util="http://www.springframework.org/schema/util"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd">
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
@@ -39,6 +42,15 @@
 
     <bean id="domibusReadyInterceptor" class="eu.domibus.ebms3.receiver.DomibusReadyInterceptor">
         <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
+    </bean>
+
+
+    <bean class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="wss4j.processor.map" value-ref="processorActions"/>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor">
@@ -140,6 +152,7 @@
         </jaxws:handlers>
 
         <jaxws:properties>
+            <entry key="ws-security.use.str.transform" value="false"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
             <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>

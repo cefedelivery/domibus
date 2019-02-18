@@ -31,6 +31,8 @@ import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
+import org.apache.wss4j.dom.engine.WSSConfig;
+import org.apache.wss4j.stax.ext.WSSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.bind.JAXBException;
@@ -95,6 +97,11 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             message.getInterceptorChain().abort();
             return;
         }
+
+        final WSSConfig wssConfig = WSSConfig.getNewInstance();
+        wssConfig.setProcessor(WSSConstants.TAG_SAML_ASSERTION, (Class<?>)null);
+        wssConfig.setProcessor(WSSConstants.TAG_SAML2_ASSERTION, (Class<?>)null);
+        message.put(WSSConfig.class.getName(), wssConfig);
 
         Messaging messaging = null;
         String policyName = null;

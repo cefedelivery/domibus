@@ -3,9 +3,11 @@ package eu.domibus.ebms3.common.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.*;
 import java.util.regex.Pattern;
@@ -39,6 +41,13 @@ public class Property extends AbstractBaseEntity implements Comparable<Property>
     @XmlValue
     @Column(name = "VALUE")
     protected String value;
+
+    @XmlTransient
+    @Lob
+    @Column(name = "TYPE_BLOB")
+    @NotAudited
+    byte[] valueBlob;
+
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME", nullable = false)
     protected String name;
@@ -81,6 +90,14 @@ public class Property extends AbstractBaseEntity implements Comparable<Property>
      */
     public void setName(final String value) {
         this.name = value;
+    }
+
+    public byte[] getValueBlob() {
+        return valueBlob;
+    }
+
+    public void setValueBlob(byte[] valueBlob) {
+        this.valueBlob = valueBlob;
     }
 
     @Override

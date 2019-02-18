@@ -6,6 +6,7 @@ import eu.domibus.plugin.Submission;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -39,7 +40,13 @@ public class SubmissionAS4Transformer {
         for (Submission.TypedProperty propertyEntry : submission.getMessageProperties()) {
             final Property prop = new Property();
             prop.setName(propertyEntry.getKey());
-            prop.setValue(propertyEntry.getValue());
+            if(propertyEntry.getKey().contains("saml")) {
+                prop.setValueBlob(propertyEntry.getValue().getBytes(StandardCharsets.UTF_8));
+            } else {
+                prop.setValue(propertyEntry.getValue());
+            }
+
+
             prop.setType(propertyEntry.getType());
             messageProperties.getProperty().add(prop);
         }

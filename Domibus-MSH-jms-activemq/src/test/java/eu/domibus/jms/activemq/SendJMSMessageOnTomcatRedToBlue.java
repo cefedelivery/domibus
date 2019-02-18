@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-public class SendJMSMessageOnTomcat {
+public class SendJMSMessageOnTomcatRedToBlue {
 
     public static void main(String[] args) {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61716");
         Connection connection;
         MessageProducer producer;
         try {
@@ -34,7 +34,7 @@ public class SendJMSMessageOnTomcat {
 
             // Declare message as submit
             messageMap.setStringProperty("username", "plugin_admin");
-            messageMap.setStringProperty("password", "123456");
+            messageMap.setStringProperty("password", "Test123456!");
 
             messageMap.setStringProperty("messageType", "submitMessage");
             messageMap.setStringProperty("messageId", UUID.randomUUID().toString());
@@ -51,14 +51,14 @@ public class SendJMSMessageOnTomcat {
             messageMap.setStringProperty("conversationId", "123");
             //messageMap.setStringProperty("fromPartyId", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue");
             //messageMap.setStringProperty("fromPartyType", ""); // Mandatory but empty here because it is in the value of the party ID
-            messageMap.setStringProperty("fromPartyId", "domibus-blue");
+            messageMap.setStringProperty("fromPartyId", "domibus-red");
             messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered"); // Mandatory
 
             messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
 
             //messageMap.setStringProperty("toPartyId", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red");
             //messageMap.setStringProperty("toPartyType", ""); // Mandatory but empty here because it is in the value of the party ID
-            messageMap.setStringProperty("toPartyId", "domibus-red");
+            messageMap.setStringProperty("toPartyId", "domibus-blue");
             messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered"); // Mandatory
 
             messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
@@ -67,24 +67,39 @@ public class SendJMSMessageOnTomcat {
             messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
             messageMap.setStringProperty("protocol", "AS4");
 
-            messageMap.setJMSCorrelationID("12345");
+//            messageMap.setJMSCorrelationID("12345");
             //Set up the payload properties
             messageMap.setStringProperty("totalNumberOfPayloads", "1");
-            messageMap.setStringProperty("payload_1_description", "message");
-            messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-            messageMap.setStringProperty("payload_1_mimeType", "text/xml");
 
-            //messageMap.setStringProperty("p1InBody", "true"); // If true payload_1 will be sent in the body of the AS4 message. Only XML payloads may be sent in the AS4 message body. Optional
+            messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+            messageMap.setStringProperty("payload_1_description", "message");
+            messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+//            messageMap.setStringProperty("p1InBody", "true"); // If true payload_1 will be sent in the body of the AS4 message. Only XML payloads may be sent in the AS4 message body. Optional
+
+
+//            messageMap.setStringProperty("payload_2_description", "message");
+//            messageMap.setStringProperty("payload_2_mimeContentId", "cid:message");
+//            messageMap.setStringProperty("payload_2_mimeType", "text/xml");
+
+            final Charset utf8Encoding = Charset.forName("UTF-8");
+            final String saml1 = IOUtils.toString(new ClassPathResource("saml1.xml").getInputStream(), utf8Encoding);
+            final String saml2 = IOUtils.toString(new ClassPathResource("saml2.xml").getInputStream(), utf8Encoding);
+
+
+            messageMap.setStringProperty("property_saml1", saml1);
+            messageMap.setStringProperty("property_saml2", saml2);
+
 
             //send the payload in the JMS message as byte array
             String pay1 = "<test>test</test>";
             byte[] payload = pay1.getBytes();
             messageMap.setBytes("payload_1", payload);
+//            messageMap.setBytes("payload_2", payload);
 
 
             //send the payload as a file system reference
-            //messageMap.setStringProperty("payload_1_fileName", "testJMS.txt");
-            //messageMap.setString("payload_1", "file:////C:/DEV/testJMS.txt");
+//            messageMap.setStringProperty("payload_1_fileName", "1_2GB.zip");
+//            messageMap.setString("payload_1", "file:////C:/DEV/1_2GB.zip");
 
             producer.send(messageMap);
 

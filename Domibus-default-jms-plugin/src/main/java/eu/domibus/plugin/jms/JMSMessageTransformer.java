@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Locale;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -182,7 +181,7 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
     /**
      * Transforms {@link javax.jms.MapMessage} to {@link eu.domibus.plugin.Submission}
      *
-     * @param messageIn the message ({@link javax.jms.MapMessage}) to be tranformed
+     * @param messageIn the message ({@link javax.jms.MapMessage}) to be transformed
      * @return the result of the transformation as {@link eu.domibus.plugin.Submission}
      */
     @Override
@@ -234,7 +233,8 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             while (allProps.hasMoreElements()) {
                 String key = allProps.nextElement();
                 if (key.startsWith(PROPERTY_PREFIX)) {
-                    target.addMessageProperty(key.substring(PROPERTY_PREFIX.length()), trim(messageIn.getStringProperty(key)), trim(messageIn.getStringProperty(PROPERTY_TYPE_PREFIX + key.substring(PROPERTY_PREFIX.length()))));
+                    final String propertyValue = messageIn.getStringProperty(key);
+                    target.addMessageProperty(key.substring(PROPERTY_PREFIX.length()), trim(propertyValue), trim(messageIn.getStringProperty(PROPERTY_TYPE_PREFIX + key.substring(PROPERTY_PREFIX.length()))));
                 }
             }
 

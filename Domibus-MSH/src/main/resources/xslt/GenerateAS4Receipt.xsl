@@ -196,7 +196,7 @@
                             <xsl:when test="/S12:Envelope/S12:Header/wsse:Security/ds:Signature">
                                 <ebbp:NonRepudiationInformation>
                                     <xsl:apply-templates
-                                            select="/S12:Envelope/S12:Header//ds:Reference"/>
+                                            select="/S12:Envelope/S12:Header/wsse:Security/ds:Signature/ds:SignedInfo/ds:Reference"/>
                                 </ebbp:NonRepudiationInformation>
                             </xsl:when>
                             <xsl:otherwise>

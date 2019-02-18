@@ -11,9 +11,11 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.OutgoingMessageTransformer;
 import eu.domibus.plugin.transformer.OutgoingMessageTransformerList;
 import eu.domibus.plugin.transformer.PluginHandler;
+import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.submission.plugin.PluginHandlerProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -64,6 +65,9 @@ public class EbMS3MessageBuilder {
 
     @Autowired
     protected PluginHandlerProvider pluginHandlerProvider;
+
+    @Autowired
+    protected SubmissionAS4Transformer submissionAS4Transformer;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -98,6 +102,24 @@ public class EbMS3MessageBuilder {
         return soapMessage;
     }
 
+    protected List<String> extractSamlTokens(UserMessage userMessage) {
+        List<String> result = new ArrayList<>();
+
+        final MessageProperties messageProperties = userMessage.getMessageProperties();
+        final Set<Property> properties = messageProperties.getProperty();
+        final Iterator<Property> iterator = properties.iterator();
+        while (iterator.hasNext()) {
+            Property next = iterator.next();
+            if(next.getName().contains("saml")) {
+                LOG.info("Removing saml property [{}]", next.getName());
+                result.add(new String(next.getValueBlob(), StandardCharsets.UTF_8));
+                iterator.remove();
+            }
+        }
+
+        return result;
+    }
+
     protected SOAPMessage buildSOAPMessage(final UserMessage userMessage) throws EbMS3Exception {
         final SOAPMessage message;
         try {
@@ -117,9 +139,10 @@ public class EbMS3MessageBuilder {
                 this.attachPayload(partInfo, message);
             }
 
+            final List<String> samlTokens = extractSamlTokens(messaging.getUserMessage());
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
 
-            transformBeforeSending(userMessage.getMessageInfo().getMessageId(), message);
+            transformBeforeSending(userMessage, message, samlTokens);
 
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
             messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
@@ -134,7 +157,8 @@ public class EbMS3MessageBuilder {
         return message;
     }
 
-    protected void transformBeforeSending(String messageId, SOAPMessage message) {
+    protected void transformBeforeSending(UserMessage userMessage, SOAPMessage message, List<String> samlTokens) {
+        String messageId = userMessage.getMessageInfo().getMessageId();
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         final PluginHandler pluginHandler = pluginHandlerProvider.getPluginHandler(backendName);
         if (pluginHandler == null) {
@@ -147,11 +171,21 @@ public class EbMS3MessageBuilder {
             LOG.debug("No outgoing message transformer found for backend [" + backendName + "]");
             return;
         }
+
+        final Submission submission = submissionAS4Transformer.transformFromMessaging(userMessage);
+        for (int i = 0; i < samlTokens.size(); i++) {
+            final String samlTokenValue = samlTokens.get(i);
+            submission.addMessageProperty("saml" + i, samlTokenValue );
+
+        }
+
         final List<OutgoingMessageTransformer> outgoingMessageTransformers = outgoingMessageTransformerList.getOutgoingMessageTransformers();
         for (OutgoingMessageTransformer outgoingMessageTransformer : outgoingMessageTransformers) {
-            outgoingMessageTransformer.transformOutgoingMessage(message);
+            outgoingMessageTransformer.transformOutgoingMessage(submission, message);
         }
     }
+
+
 
     protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) throws EbMS3Exception {
         final SOAPMessage message;
