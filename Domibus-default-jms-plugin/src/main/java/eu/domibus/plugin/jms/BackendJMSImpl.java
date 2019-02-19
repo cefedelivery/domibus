@@ -1,5 +1,6 @@
 package eu.domibus.plugin.jms;
 
+import com.google.common.io.CharStreams;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
@@ -19,21 +20,42 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wss4j.common.WSS4JConstants;
+import org.apache.wss4j.dom.WSConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
-import static eu.domibus.plugin.jms.JMSMessageConstants.*;
+import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
+import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -207,8 +229,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             try {
                 downloadMessage(messageId, mapMessage);
                 final String rawXmlByMessageId = nonRepudiationExtService.getRawXmlByMessageId(messageId);
-                mapMessage.setStringProperty(RAW_SOAP_REQUEST, rawXmlByMessageId);
-            } catch (final MessageNotFoundException e) {
+                final List<String> samlAssertions = getSamlAssertions(rawXmlByMessageId);
+                for (int i = 0; i < samlAssertions.size(); i++) {
+                    String assertion = samlAssertions.get(i);
+                    mapMessage.setStringProperty("saml" + i, assertion);
+                }
+            } catch (final Exception e) {
                 throw new DefaultJmsPluginException("Unable to create push message", e);
             }
             mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_INCOMING);
@@ -216,5 +242,44 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             mapMessage.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
             return mapMessage;
         }
+    }
+
+    protected List<String> getSamlAssertions(final String rawXml) throws SOAPException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        List<String> result = new ArrayList<>();
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setNamespaceAware(true);
+        DocumentBuilder builder = dbFactory.newDocumentBuilder();
+
+        try (StringReader stringReader = new StringReader(rawXml); InputStream targetStream =
+                new ByteArrayInputStream(CharStreams.toString(stringReader)
+                        .getBytes(Charsets.UTF_8.name()))) {
+            Document document = builder.parse(targetStream);
+            final NodeList assertionsNodeList = document.getDocumentElement().getElementsByTagNameNS(WSConstants.SAML2_NS, WSConstants.ASSERTION_LN);
+            final int length = assertionsNodeList.getLength();
+            if (length > 0) {
+                for (int i = 0; i < length; i++) {
+                    final Element assertionNode = (Element) assertionsNodeList.item(i);
+                    if (assertionNode.hasAttributeNS(WSS4JConstants.WSU_NS, "Id")) {
+                        assertionNode.removeAttributeNS(WSS4JConstants.WSU_NS, "Id");
+                    }
+                    final String rawXMLMessage = getRawXMLMessage(assertionNode);
+                    LOG.info("Added SAML assertion [[]]", rawXMLMessage);
+                    result.add(rawXMLMessage);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    protected String getRawXMLMessage(Node assertion) throws TransformerException {
+        final StringWriter sw = new StringWriter();
+
+        TransformerFactory.newInstance().newTransformer().transform(
+                new DOMSource(assertion),
+                new StreamResult(sw));
+
+        return  sw.toString();
     }
 }

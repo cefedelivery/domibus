@@ -173,6 +173,7 @@ public class SubmissionAS4Transformer {
                 result.addMessageProperty(property.getName(), property.getValue(), property.getType());
             }
         }
+
         return result;
     }
 
