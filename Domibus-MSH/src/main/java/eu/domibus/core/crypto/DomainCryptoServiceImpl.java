@@ -79,7 +79,6 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
         LOG.info("Active IAM provider identifier:[{}] for domain:[{}]", iamProvider.getIdentifier(), domain.getName());
     }
 
-
     @Override
     public X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException {
         return iamProvider.getCertificateFromKeyStore(alias);
