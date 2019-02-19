@@ -3,7 +3,7 @@ package eu.domibus.common.services;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.CompressionException;
-import eu.domibus.configuration.storage.Storage;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.Messaging;
 
 
@@ -13,6 +13,6 @@ import eu.domibus.ebms3.common.model.Messaging;
  */
 public interface MessagingService {
 
-    void storeMessage(Messaging messaging, MSHRole mshRole) throws CompressionException;
+    void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration) throws CompressionException;
 
 }

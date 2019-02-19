@@ -30,6 +30,8 @@ import java.util.Map;
 @Entity
 @Table(name = "TB_MESSAGING")
 @NamedQueries({
+        @NamedQuery(name = "Messaging.findUserMessageByGroupId",
+                query = "select messaging.userMessage from Messaging messaging where messaging.userMessage.messageFragment.groupId = :GROUP_ID order by messaging.userMessage.messageFragment.fragmentNumber asc"),
         @NamedQuery(name = "Messaging.findUserMessageByMessageId",
                 query = "select messaging.userMessage from Messaging messaging where messaging.userMessage.messageInfo.messageId = :MESSAGE_ID"),
         @NamedQuery(name = "Messaging.findMessageByMessageId",

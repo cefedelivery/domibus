@@ -31,7 +31,7 @@ public class UserPasswordPolicyAlertJob extends DomibusQuartzJobBean {
 
         LOG.debug("Executing job 'check password expiration' for users at " + LocalDateTime.now());
 
-        userService.sendAlerts();
+        userService.triggerPasswordAlerts();
     }
 
 }

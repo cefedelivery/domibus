@@ -1,26 +1,28 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
+import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Component(value="securityCustomAuthenticationProvider")
+@Component(value = "securityCustomAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
@@ -39,6 +41,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
+
+    @Autowired
+    PluginUserPasswordManager pluginUserPasswordValidator;
+
+    @Autowired
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -61,21 +69,39 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
-                Boolean res = false;
-                AuthenticationEntity basicAuthenticationEntity = securityAuthenticationDAO.findByUser(authentication.getName());
-                res = bcryptEncoder.matches((String) authentication.getCredentials(), basicAuthenticationEntity.getPasswd());
 
-                authentication.setAuthenticated(res);
+                AuthenticationEntity user = securityAuthenticationDAO.findByUser(authentication.getName());
+                boolean isPasswordExpired = false;
+                //check if password is correct
+                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), user.getPassword());
+                if (!isPasswordCorrect) {
+                    userAlertsService.triggerLoginFailureEvent(user);
+                } else {
+                    //check if password expired
+                    isPasswordExpired = isPasswordExpired(user);
+                }
 
-                ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntity.getOriginalUser());
+                authentication.setAuthenticated(isPasswordCorrect && !isPasswordExpired);
+
+                ((BasicAuthentication) authentication).setOriginalUser(user.getOriginalUser());
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
-        } catch (final Exception exception)  {
+        } catch (final Exception exception) {
             throw new AuthenticationServiceException("Couldn't authenticate the principal " + authentication.getPrincipal(), exception);
-
         }
         return authentication;
+    }
+
+    public boolean isPasswordExpired(AuthenticationEntity user) {
+        boolean isDefaultPassword = user.hasDefaultPassword();
+        LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
+        try {
+            pluginUserPasswordValidator.validatePasswordExpired(user.getUsername(), isDefaultPassword, passwordChangeDate);
+            return false;
+        } catch (CredentialsExpiredException ex) {
+            return true;
+        }
     }
 
     @Override
@@ -84,18 +110,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     private void setAuthority(Authentication authentication, List<AuthRole> authRoles) {
-        if(authRoles == null || authRoles.isEmpty())
+        if (authRoles == null || authRoles.isEmpty())
             return;
 
         List<GrantedAuthority> authorityList = new ArrayList<>();
-        for(AuthRole role : authRoles) {
+        for (AuthRole role : authRoles) {
             authorityList.add(new SimpleGrantedAuthority(role.name()));
         }
-        if(authentication instanceof BasicAuthentication) {
+        if (authentication instanceof BasicAuthentication) {
             ((BasicAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
-        } else if(authentication instanceof X509CertificateAuthentication) {
+        } else if (authentication instanceof X509CertificateAuthentication) {
             ((X509CertificateAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
-        } else if(authentication instanceof BlueCoatClientCertificateAuthentication) {
+        } else if (authentication instanceof BlueCoatClientCertificateAuthentication) {
             ((BlueCoatClientCertificateAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
         }
     }

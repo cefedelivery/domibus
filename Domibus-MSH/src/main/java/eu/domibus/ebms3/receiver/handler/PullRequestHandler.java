@@ -72,7 +72,8 @@ public class PullRequestHandler {
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
             LOG.info("Message id [{}] ", messageId);
-            return handleRequest(messageId, pullContext);
+            // Sonar Bug: ignored because the following call happens within a transaction that gets started by the web service calling this method
+            return handleRequest(messageId, pullContext); // NOSONAR
         } else {
             return notifyNoMessage(pullContext);
         }
@@ -82,22 +83,10 @@ public class PullRequestHandler {
         LOG.trace("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
         EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
                 "pulling from this MPC at this moment.", null, null);
-        return getSoapMessage(ebMS3Exception);
+        return messageBuilder.getSoapMessage(ebMS3Exception);
     }
 
-    public SOAPMessage getSoapMessage(EbMS3Exception ebMS3Exception) {
-        final SignalMessage signalMessage = new SignalMessage();
-        signalMessage.getError().add(ebMS3Exception.getFaultInfoError());
-        try {
-            return messageBuilder.buildSOAPMessage(signalMessage, null);
-        } catch (EbMS3Exception e) {
-            try {
-                return messageBuilder.buildSOAPFaultMessage(e.getFaultInfoError());
-            } catch (EbMS3Exception e1) {
-                throw new WebServiceException(e1);
-            }
-        }
-    }
+
 
     @Transactional
     public SOAPMessage handleRequest(String messageId, PullContext pullContext) {
@@ -117,7 +106,7 @@ public class PullRequestHandler {
                 leg = pullContext.filterLegOnMpc();
                 soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
-                if (pullRequestMatcher.matchReliableCallBack(leg) &&
+                if (pullRequestMatcher.matchReliableCallBack(leg.getReliability()) &&
                         leg.getReliability().isNonRepudiation()) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }

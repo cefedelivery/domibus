@@ -12,7 +12,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Quartz based worker responsible for the periodical execution of {@link eu.domibus.ebms3.sender.MessageSender#sendUserMessage(String)}
+ * Quartz based worker responsible for the periodical execution of {@link MessageSenderService#sendUserMessage(String, int)}
  *
  * @author Christian Koch, Stefan Mueller
  * @since 3.0

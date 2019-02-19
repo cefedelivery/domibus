@@ -17,7 +17,7 @@ import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
-import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.SignalMessage;

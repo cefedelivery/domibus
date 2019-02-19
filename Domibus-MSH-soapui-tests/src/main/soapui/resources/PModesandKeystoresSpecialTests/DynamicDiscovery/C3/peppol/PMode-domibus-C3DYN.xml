@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="pop000004">
+
+	<mpcs>
+		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="14400"/>
+	</mpcs>
+	<businessProcesses>
+		<roles>
+			<role name="defaultInitiatorRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+		</roles>
+		<parties>
+			<partyIdTypes>
+				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+				<partyIdType name="partyTypePeppol" value="urn:fdc:peppol.eu:2017:identifiers:ap"/>
+			</partyIdTypes>
+			<party name="pop000004" endpoint="http://localhost:8180/domibus/services/msh?domain=domain2" allowChunking="false">
+				<identifier partyId="pop000004" partyIdType="partyTypePeppol"/>
+			</party>
+		</parties>
+		<meps>
+			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+		</meps>
+		<properties>
+			<property name="originalSenderProperty" key="originalSender" datatype="string" required="true"/>
+			<property name="finalRecipientProperty" key="finalRecipient" datatype="string" required="true"/>
+			<propertySet name="ecodexPropertySet">
+				<propertyRef property="finalRecipientProperty"/>
+				<propertyRef property="originalSenderProperty"/>
+			</propertySet>
+		</properties>				
+		<payloadProfiles>
+			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
+			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/octet-stream"/>
+			<payloadProfile name="MessageProfile" maxSize="40894464">
+				<attachment name="businessContentPayload"/>
+				<attachment name="businessContentAttachment"/>
+			</payloadProfile>
+		</payloadProfiles>
+		<securities>
+			<security name="eDeliveryAS4Policy" policy="eDeliveryAS4Policy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy_BST" policy="eDeliveryAS4Policy_BST.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy_IS" policy="eDeliveryAS4Policy_IS.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy_BST_PKIP" policy="eDeliveryAS4Policy_BST_PKIP.xml" signatureMethod="RSA_SHA256"/>
+		</securities>
+		<errorHandlings>
+			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
+		</errorHandlings>
+		<agreements>
+			<agreement name="agreement1" value="A1" type=""/>
+			<agreement name="agreement2" value="A2" type=""/>
+			<agreement name="agreement3" value="A3" type=""/>
+			<agreement name="agreement_peppol" value="urn:fdc:peppol.eu:2017:agreements:tia:ap_provider" type=""/>
+		</agreements>
+		<services>
+			<service name="testService1" value="urn:www.cenbii.eu:profile:bii04:ver1.0" type="urn:fdc:peppol.eu:2017:identifiers:proc-id"/>
+		</services>
+		<actions>
+			<action name="tc1Action" value="busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0"/>
+		</actions>
+		<as4>
+			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
+			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+		</as4>
+		<legConfigurations>
+			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_BST" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+		</legConfigurations>
+		<process name="tc1Process" agreement="agreement_peppol" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<responderParties>
+				<responderParty name="pop000004"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase1tc1Action"/>
+			</legs>
+		</process>
+	</businessProcesses>
+</db:configuration>

@@ -20,6 +20,7 @@ import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
 import no.difi.vefa.peppol.mode.Mode;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -42,6 +43,7 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final String RESPONDER_ROLE = "urn:fdc:peppol.eu:2017:roles:ap:as4";
     private static final String PARTYID_TYPE = "urn:fdc:peppol.eu:2017:identifiers:ap";
+    public static final String SCHEME_DELIMITER = "::";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -71,13 +73,13 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             }
             final LookupClient smpClient = lookupClientBuilder.build();
             final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(participantId, Scheme.of(participantIdScheme));
-            final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
+            final DocumentTypeIdentifier documentIdentifier = getDocumentTypeIdentifier(documentId);
 
-            final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
+            final ProcessIdentifier processIdentifier = getProcessIdentifier(processId);
             LOG.debug("Getting the ServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
 
-            String transportProfileAS4 = domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, TransportProfile.AS4.getIdentifier());
+            String transportProfileAS4 = domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             LOG.debug("Getting the Endpoint from ServiceMetadata with transportprofile [{}]", transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.of(transportProfileAS4));
 
@@ -88,6 +90,30 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
         } catch (final PeppolParsingException | PeppolLoadingException | PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
             throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId, e);
         }
+    }
+
+    protected DocumentTypeIdentifier getDocumentTypeIdentifier(String documentId) throws PeppolParsingException {
+        DocumentTypeIdentifier result = null;
+        if(StringUtils.contains(documentId, DocumentTypeIdentifier.DEFAULT_SCHEME.getIdentifier())) {
+            LOG.debug("Getting DocumentTypeIdentifier by parsing the document Id [{}]", documentId);
+            result = DocumentTypeIdentifier.parse(documentId);
+        } else {
+            LOG.debug("Getting DocumentTypeIdentifier for the document Id [{}]", documentId);
+            result = DocumentTypeIdentifier.of(documentId);
+        }
+        return result;
+    }
+
+    protected ProcessIdentifier getProcessIdentifier(String processId) throws PeppolParsingException {
+        ProcessIdentifier result = null;
+        if(StringUtils.contains(processId, SCHEME_DELIMITER)) {
+            LOG.debug("Getting ProcessIdentifier by parsing the process Id [{}]", processId);
+            result = ProcessIdentifier.parse(processId);
+        } else {
+            LOG.debug("Getting ProcessIdentifier for process Id [{}]", processId);
+            result = ProcessIdentifier.of(processId);
+        }
+        return result;
     }
 
     @Override

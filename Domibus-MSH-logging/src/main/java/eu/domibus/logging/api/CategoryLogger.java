@@ -178,14 +178,14 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
 
         final Map<String, String> copyOfContextMap = MDC.getCopyOfContextMap();
         if (copyOfContextMap == null) {
-            LOG.debug("No MDC keys to clear");
+            LOG.trace("No MDC keys to clear");
             return;
         }
         final Set<String> keySet = copyOfContextMap.keySet();
         for (String key : keySet) {
             if (StringUtils.startsWith(key, mdcPropertyPrefix)) {
                 MDC.remove(key);
-                LOG.debug("Removed key [{}] from MDC", key);
+                LOG.trace("Removed key [{}] from MDC", key);
             }
         }
     }

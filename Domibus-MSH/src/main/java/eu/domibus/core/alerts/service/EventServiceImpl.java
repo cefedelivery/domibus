@@ -8,24 +8,18 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.dao.EventDao;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.common.AuthenticationEvent;
-import eu.domibus.core.alerts.model.common.CertificateEvent;
-import eu.domibus.core.alerts.model.common.EventType;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
+import eu.domibus.core.alerts.model.common.*;
+import eu.domibus.core.alerts.model.service.RepetitiveAlertModuleConfiguration;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ext.delegate.services.security.SecurityDefaultService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.logging.DomibusMessageCode;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,7 +31,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import static eu.domibus.core.alerts.model.common.AuthenticationEvent.LOGIN_TIME;
-import static eu.domibus.core.alerts.model.common.AuthenticationEvent.USER;
 import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 
 /**
@@ -64,8 +57,6 @@ public class EventServiceImpl implements EventService {
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
     public static final String EVENT_IDENTIFIER = "EVENT_IDENTIFIER";
-    public static final String USER = "USER";
-    public static final String EXPIRATION_DATE = "EXPIRATION_DATE";
 
     @Autowired
     private EventDao eventDao;
@@ -115,25 +106,29 @@ public class EventServiceImpl implements EventService {
      * {@inheritDoc}
      */
     @Override
-    public void enqueueLoginFailureEvent(
-            final String userName,
-            final Date loginTime,
-            final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, loginTime, Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
-        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
-}
+    public void enqueueLoginFailureEvent(final String userName, final Date loginTime, final boolean accountDisabled) {
+        enqueueLoginFailure(userName, UserBase.Type.CONSOLE.getName(), loginTime, accountDisabled, EventType.USER_LOGIN_FAILURE, LOGIN_FAILURE);
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void enqueueAccountDisabledEvent(
-            final String userName,
-            final Date accountDisabledTime,
-            final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, accountDisabledTime, Boolean.toString(accountDisabled), EventType.USER_ACCOUNT_DISABLED);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, ACCOUNT_DISABLED);
+    public void enqueueAccountDisabledEvent(final String userName, final Date accountDisabledTime, final boolean accountDisabled) {
+        enqueueLoginFailure(userName, UserBase.Type.CONSOLE.getName(), accountDisabledTime, accountDisabled, EventType.USER_ACCOUNT_DISABLED, ACCOUNT_DISABLED);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void enqueuePluginLoginFailureEvent(String userName, Date loginTime) {
+        enqueueLoginFailure(userName, UserBase.Type.PLUGIN.getName(), loginTime, false, EventType.PLUGIN_USER_LOGIN_FAILURE, LOGIN_FAILURE);
+    }
+
+    private void enqueueLoginFailure(String userName, String userType, Date loginTime, boolean accountDisabled, EventType eventType, String selector) {
+        Event event = prepareAuthenticatorEvent(userName, userType, loginTime, Boolean.toString(accountDisabled), eventType);
+        jmsManager.convertAndSendToQueue(event, alertMessageQueue, selector);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
@@ -214,29 +209,21 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
-    private Event prepareAuthenticatorEvent(
-            final String userName,
-            final Date loginTime,
-            final String accountDisabled,
-            final EventType eventType) {
+    private Event prepareAuthenticatorEvent(final String userName, final String userType, final Date loginTime, final String accountDisabled, final EventType eventType) {
         Event event = new Event(eventType);
         event.addStringKeyValue(AuthenticationEvent.USER.name(), userName);
+        event.addStringKeyValue(AuthenticationEvent.USER_TYPE.name(), userType);
         event.addDateKeyValue(LOGIN_TIME.name(), loginTime);
         event.addStringKeyValue(AuthenticationEvent.ACCOUNT_DISABLED.name(), accountDisabled);
         return event;
     }
 
     @Override
-    public void enqueuePasswordExpiredEvent(User user, Integer maxPasswordAgeInDays) {
-        enqueuePasswordEvent(EventType.PASSWORD_EXPIRED, user, maxPasswordAgeInDays);
+    public void enqueuePasswordExpirationEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays) {
+        enqueuePasswordEvent(eventType, user, maxPasswordAgeInDays);
     }
 
-    @Override
-    public void enqueuePasswordImminentExpirationEvent(User user, Integer maxPasswordAgeInDays) {
-        enqueuePasswordEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, user, maxPasswordAgeInDays);
-    }
-
-    protected void enqueuePasswordEvent(EventType eventType, User user, Integer maxPasswordAgeInDays) {
+    protected void enqueuePasswordEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays) {
 
         Event event = preparePasswordEvent(user, eventType, maxPasswordAgeInDays);
         eu.domibus.core.alerts.model.persist.Event entity = getPersistedEvent(event);
@@ -248,13 +235,13 @@ public class EventServiceImpl implements EventService {
         entity.setLastAlertDate(LocalDate.now());
         eventDao.update(entity);
 
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, EventType.getQueueSelectorFromEventType(eventType));
+        jmsManager.convertAndSendToQueue(event, alertMessageQueue, eventType.getQueueSelector());
 
-        LOG.securityInfo(EventType.getSecurityMessageCode(eventType), user.getUserName(), event.findOptionalProperty(EXPIRATION_DATE));
+        LOG.securityInfo(eventType.getSecurityMessageCode(), user.getUserName(), event.findOptionalProperty(PasswordExpirationEventProperties.EXPIRATION_DATE.name()));
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
-        String id = event.findStringProperty(EVENT_IDENTIFIER).get();
+        String id = event.findStringProperty(EVENT_IDENTIFIER).orElse("");
         eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), EVENT_IDENTIFIER, id);
 
         if (entity == null) {
@@ -266,8 +253,8 @@ public class EventServiceImpl implements EventService {
 
     protected boolean shouldCreateAlert(eu.domibus.core.alerts.model.persist.Event entity) {
 
-        AlertType alertType = AlertType.getAlertTypeFromEventType(entity.getType());
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(alertType);
+        AlertType alertType = AlertType.getByEventType(entity.getType());
+        final RepetitiveAlertModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(alertType);
         if (!eventConfiguration.isActive()) {
             return false;
         }
@@ -287,22 +274,22 @@ public class EventServiceImpl implements EventService {
         return false;
     }
 
-    private Event preparePasswordEvent(User user, EventType eventType, Integer maxPasswordAgeInDays) {
+    private Event preparePasswordEvent(UserBase user, EventType eventType, Integer maxPasswordAgeInDays) {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
 
         event.addStringKeyValue(EVENT_IDENTIFIER, getUniqueIdentifier(user));
-
-        event.addStringKeyValue(USER, user.getUserName());
+        event.addStringKeyValue(PasswordExpirationEventProperties.USER_TYPE.name(), user.getType().getName());
+        event.addStringKeyValue(PasswordExpirationEventProperties.USER.name(), user.getUserName());
 
         LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
-        event.addDateKeyValue(EXPIRATION_DATE, Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        event.addDateKeyValue(PasswordExpirationEventProperties.EXPIRATION_DATE.name(), Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         return event;
     }
 
-    private String getUniqueIdentifier(User user) {
-        return user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate();
+    private String getUniqueIdentifier(UserBase user) {
+        return user.getType().getCode() + "/" + user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate();
     }
 
 }

@@ -3,7 +3,7 @@ package eu.domibus.core.replication;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -144,7 +144,8 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
      */
     @Override
     public void saveOrUpdate(final UIMessageEntity uiMessageEntity) {
-        UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId());
+        // Sonar Bug: ignored because the following call happens within a transaction that gets started by the service calling this method
+        UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId()); //NOSONAR
         if (uiMessageEntityFound != null) {
             uiMessageEntity.setEntityId(uiMessageEntityFound.getEntityId());
             uiMessageEntity.setLastModified(uiMessageEntityFound.getLastModified());

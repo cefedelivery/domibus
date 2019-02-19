@@ -2,7 +2,7 @@ package eu.domibus.common.util;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import junit.framework.Assert;
+import org.junit.Assert;
 import mockit.Injectable;
 import mockit.NonStrictExpectations;
 import mockit.Tested;

@@ -36,7 +36,7 @@ public class FSProcessFileService {
     @Autowired
     private FSFilesManager fsFilesManager;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     public void processFile(FileObject processableFile) throws FileSystemException, JAXBException, MessagingProcessingException {
         try(FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME);) {
             if (metadataFile.exists()) {

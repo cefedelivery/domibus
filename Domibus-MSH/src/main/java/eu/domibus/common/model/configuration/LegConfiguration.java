@@ -249,7 +249,7 @@ public class LegConfiguration extends AbstractBaseEntity {
         if(splittings != null) {
             this.splitting = splittings
                     .stream()
-                    .filter(splitting1 -> splitting.getName().equalsIgnoreCase(this.splittingXml))
+                    .filter(currentSplitting -> currentSplitting.getName().equalsIgnoreCase(this.splittingXml))
                     .findFirst()
                     .orElse(null);
         }

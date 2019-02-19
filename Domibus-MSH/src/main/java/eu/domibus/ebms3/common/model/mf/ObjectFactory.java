@@ -27,7 +27,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _MessageFragment_QNAME = new QName("http://docs.oasis-open.org/ebxml-msg/ns/v3.0/mf/2010/04/", "MessageFragment");
+    public final static QName _MessageFragment_QNAME = new QName("http://docs.oasis-open.org/ebxml-msg/ns/v3.0/mf/2010/04/", "MessageFragment");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: eu.domibus.ebms3.common.model

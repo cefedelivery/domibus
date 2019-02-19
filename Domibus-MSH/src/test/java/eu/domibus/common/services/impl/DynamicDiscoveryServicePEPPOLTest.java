@@ -93,7 +93,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             result = transportProfileAS4;
         }};
 
@@ -120,7 +120,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             result = transportProfileAS4;
         }};
 
@@ -172,5 +172,45 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
         ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
         return sm;
+    }
+
+    @Test
+    public void testGetDocumentTypeIdentifierWithScheme() throws PeppolParsingException {
+        String documentId = "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1";
+        dynamicDiscoveryServicePEPPOL.getDocumentTypeIdentifier(documentId);
+
+        new Verifications() {{
+            DocumentTypeIdentifier.parse(documentId);
+        }};
+    }
+
+    @Test
+    public void testGetDocumentTypeIdentifier() throws PeppolParsingException {
+        String documentId = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1";
+        dynamicDiscoveryServicePEPPOL.getDocumentTypeIdentifier(documentId);
+
+        new Verifications() {{
+            DocumentTypeIdentifier.of(documentId);
+        }};
+    }
+
+    @Test
+    public void testGeProcessIdentifierWithScheme() throws PeppolParsingException {
+        String processId = "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii05:ver2.0";
+        dynamicDiscoveryServicePEPPOL.getProcessIdentifier(processId);
+
+        new Verifications() {{
+            ProcessIdentifier.parse(processId);
+        }};
+    }
+
+    @Test
+    public void testGeProcessIdentifier() throws PeppolParsingException {
+        String processId = "urn:www.cenbii.eu:profile:bii05:ver2.0";
+        dynamicDiscoveryServicePEPPOL.getProcessIdentifier(processId);
+
+        new Verifications() {{
+            ProcessIdentifier.of(processId);
+        }};
     }
 }

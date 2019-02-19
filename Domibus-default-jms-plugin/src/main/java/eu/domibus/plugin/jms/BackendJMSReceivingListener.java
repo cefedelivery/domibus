@@ -46,7 +46,7 @@ public class BackendJMSReceivingListener {
      */
     @JmsListener(destination = "${jmsplugin.queue.in}", containerFactory = "backendJmsListenerContainerFactory")
     //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     public void receiveMessage(final MapMessage map) {
         if (domibusConfigurationExtService.isMultiTenantAware()) {
             LOG.clearCustomKeys();

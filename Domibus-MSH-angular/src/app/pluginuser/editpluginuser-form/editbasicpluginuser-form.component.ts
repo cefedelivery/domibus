@@ -70,7 +70,7 @@ export class EditbasicpluginuserFormComponent implements OnInit {
   }
 
   async ngOnInit () {
-    const passwordPolicy = await this.securityService.getPasswordPolicy();
+    const passwordPolicy = await this.securityService.getPluginPasswordPolicy();
     this.passwordPattern = passwordPolicy.pattern;
     this.passwordValidationMessage = passwordPolicy.validationMessage;
   }

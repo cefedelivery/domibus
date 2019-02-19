@@ -94,7 +94,87 @@
                                  referencedColumnNames="ID_PK" referencedTableName="TB_SPLITTING"/>
 
 
+        <createTable tableName="TB_MESSAGE_HEADER">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BOUNDARY" type="VARCHAR(255)"/>
+            <column name="START" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="TB_MESSAGE_GROUP">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SOURCE_MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="MESSAGE_SIZE" type="BIGINT"/>
+            <column name="FRAGMENT_COUNT" type="INT"/>
+            <column name="RECEIVED_FRAGMENTS" type="INT"/>
+            <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)"/>
+            <column name="COMPRESSED_MESSAGE_SIZE" type="BIGINT"/>
+            <column name="SOAP_ACTION" type="VARCHAR(255)"/>
+            <column name="FK_MESSAGE_HEADER_ID" type="INT"/>
+            <column name="REJECTED" type="BOOLEAN"/>
+        </createTable>
+        <createIndex indexName="FK_MG_MH" tableName="TB_MESSAGE_GROUP">
+            <column name="FK_MESSAGE_HEADER_ID"/>
+        </createIndex>
+
+        <addColumn tableName="TB_USER_MESSAGE">
+            <column name="FK_MESSAGE_FRAGMENT_ID" type="INT"/>
+            <column name="SPLIT_AND_JOIN" type="BOOLEAN"/>
+        </addColumn>
+        <createIndex indexName="FK_UM_MF" tableName="TB_USER_MESSAGE">
+            <column name="FK_MESSAGE_FRAGMENT_ID"/>
+        </createIndex>
+
+        <createTable tableName="TB_MESSAGE_FRAGMENT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(255)"/>
+            <column name="FRAGMENT_NUMBER" type="INT"/>
+        </createTable>
+        <createIndex indexName="IDX_MF_GRP_ID" tableName="TB_MESSAGE_FRAGMENT">
+            <column name="GROUP_ID"/>
+        </createIndex>
     </changeSet>
 
+
+    <changeSet author="nperpion" id="EDELIVERY-3979">
+
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </addColumn>
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="DEFAULT_PASSWORD" type="BOOLEAN" defaultValueBoolean="false" />
+        </addColumn>
+
+        <createTable tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="IDX_PLUGIN_USER_ID" tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_PLUGIN_USER_PASSWORD_HISTORY"
+                                 constraintName="FK_PLUGIN_USER_PASSWORD_HISTORY" deferrable="false" initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_AUTHENTICATION_ENTRY"/>
+
+    </changeSet>
 
 </databaseChangeLog>

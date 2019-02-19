@@ -35,6 +35,10 @@
 
     <amq:queue id="sendMessageQueue"
                physicalName="domibus.internal.dispatch.queue"/>
+    <amq:queue id="sendLargeMessageQueue"
+               physicalName="domibus.internal.largeMessage.queue"/>
+    <amq:queue id="splitAndJoinQueue"
+               physicalName="domibus.internal.splitAndJoin.queue"/>
     <amq:queue id="pullMessageQueue"
                physicalName="domibus.internal.pull.queue"/>
     <amq:queue id="alertMessageQueue"

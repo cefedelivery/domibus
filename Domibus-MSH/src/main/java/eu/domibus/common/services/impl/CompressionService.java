@@ -5,6 +5,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.ebms3.common.model.CompressionMimeTypeBlacklist;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -32,69 +33,69 @@ public class CompressionService {
     public static final String COMPRESSION_PROPERTY_KEY = "CompressionType";
     public static final String COMPRESSION_PROPERTY_VALUE = "application/gzip";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CompressionService.class);
+
     @Autowired
     private CompressionMimeTypeBlacklist blacklist;
 
+    @Autowired
+    protected SplitAndJoinService splitAndJoinService;
 
-    /**
-     * This method is responsible for compression of payloads in a ebMS3 AS4 comformant way in case of {@link eu.domibus.common.MSHRole#SENDING}
-     *
-     * @param ebmsMessage         the sending {@link UserMessage} with all payloads
-     * @param legConfigForMessage legconfiguration for this message
-     * @return {@code true} if compression was applied properly and {@code false} if compression was not enabled in the corresponding pmode
-     * @throws EbMS3Exception if an problem occurs during the compression or the mimetype was missing
-     */
-    public boolean handleCompression(final UserMessage ebmsMessage, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
+    public boolean handleCompression(String messageId, PartInfo partInfo, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
+        if(partInfo == null) {
+            return false;
+        }
 
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
+            LOG.debug("Compression is not configured for message [{}]");
             return false;
         }
 
-        if(ebmsMessage.getPayloadInfo() == null) {
+        if (partInfo.isInBody()) {
+            LOG.debug("Compression is not used for body payloads");
             return false;
         }
 
-        for (final PartInfo partInfo : ebmsMessage.getPayloadInfo().getPartInfo()) {
-            if (partInfo.isInBody()) {
-                continue;
-            }
-
-            if(partInfo.getPartProperties() == null) {
-                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId());
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
-                ex.setMshRole(MSHRole.SENDING);
-                throw ex;
-            }
-
-            String mimeType = null;
-            for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (Property.MIME_TYPE.equalsIgnoreCase(property.getName())) {
-                    mimeType = property.getValue();
-                    break;
-                }
-            }
-
-            if (mimeType == null || mimeType.isEmpty()) {
-                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId());
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), ebmsMessage.getMessageInfo().getMessageId(), null);
-                ex.setMshRole(MSHRole.SENDING);
-                throw ex;
-            }
-
-            //if mimetype of payload is not considered to be compressed, skip
-            if (this.blacklist.getEntries().contains(mimeType)) {
-                continue;
-            }
-
-            final Property compressionProperty = new Property();
-            compressionProperty.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
-            compressionProperty.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);
-            partInfo.getPartProperties().getProperties().add(compressionProperty);
-            DataHandler gZipDataHandler = new DataHandler(new CompressedDataSource(partInfo.getPayloadDatahandler().getDataSource()));
-            partInfo.setPayloadDatahandler(gZipDataHandler);
-            CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be compressed");
+        final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfigForMessage);
+        if(mayUseSplitAndJoin) {
+            LOG.debug("SplitAndJoin compression is only applied for the multipart message");
+            return false;
         }
+
+        if(partInfo.getPartProperties() == null) {
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), messageId);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), messageId, null);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
+        }
+
+        String mimeType = null;
+        for (final Property property : partInfo.getPartProperties().getProperties()) {
+            if (Property.MIME_TYPE.equalsIgnoreCase(property.getName())) {
+                mimeType = property.getValue();
+                break;
+            }
+        }
+
+        if (mimeType == null || mimeType.isEmpty()) {
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), messageId);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), messageId, null);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
+        }
+
+        //if mimetype of payload is not considered to be compressed, skip
+        if (this.blacklist.getEntries().contains(mimeType)) {
+            return false;
+        }
+
+        final Property compressionProperty = new Property();
+        compressionProperty.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
+        compressionProperty.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);
+        partInfo.getPartProperties().getProperties().add(compressionProperty);
+        DataHandler gZipDataHandler = new DataHandler(new CompressedDataSource(partInfo.getPayloadDatahandler().getDataSource()));
+        partInfo.setPayloadDatahandler(gZipDataHandler);
+        CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be compressed");
 
         return true;
     }
