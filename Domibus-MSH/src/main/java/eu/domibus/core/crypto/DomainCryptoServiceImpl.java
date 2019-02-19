@@ -57,7 +57,8 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     public void init() {
         String spiIdentifier = domibusPropertyProvider.getDomainProperty(IAM_IDENTIFIER);
         final List<DomainCryptoServiceSpi> providerList = domainCryptoServiceSpiList.stream().
-                filter(domainCryptoServiceSpi -> spiIdentifier.equals(domainCryptoServiceSpi.getIdentifier())).collect(Collectors.toList());
+                filter(domainCryptoServiceSpi -> spiIdentifier.equals(domainCryptoServiceSpi.getIdentifier())).
+                collect(Collectors.toList());
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("IAM spi:");
@@ -65,12 +66,10 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
         }
 
         if (providerList.size() > 1) {
-            LOG.error("More than one IAM service provider for identifier:[{}]", spiIdentifier);
-            throw new IllegalStateException("More than one IAM service provider for given identifier");
+            throw new IllegalStateException(String.format("More than one IAM service provider for identifier:[%s]", spiIdentifier));
         }
         if (providerList.isEmpty()) {
-            LOG.error("No IAM service provider found for given identifier:[{}]", spiIdentifier);
-            throw new IllegalStateException("No IAM service provider found for given identifier");
+            throw new IllegalStateException(String.format("No IAM service provider found for given identifier:[%s]", spiIdentifier));
         }
 
         iamProvider = providerList.get(0);

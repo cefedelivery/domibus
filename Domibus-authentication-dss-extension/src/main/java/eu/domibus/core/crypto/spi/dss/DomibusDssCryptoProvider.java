@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
  * Future DSS IAM provider implementation.
  */
 
-
 @Component
 public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi{
 
