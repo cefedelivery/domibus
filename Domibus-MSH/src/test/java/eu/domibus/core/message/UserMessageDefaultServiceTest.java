@@ -56,6 +56,9 @@ public class UserMessageDefaultServiceTest {
     private Queue sendMessageQueue;
 
     @Injectable
+    private Queue sendPullReceiptQueue;
+
+    @Injectable
     private UserMessageLogDao userMessageLogDao;
 
     @Injectable
@@ -347,6 +350,20 @@ public class UserMessageDefaultServiceTest {
 
         new Verifications() {{
             jmsManager.sendMessageToQueue(jmsMessage, sendMessageQueue);
+        }};
+
+    }
+
+    @Test
+    public void testSchedulePullReceiptSending(@Injectable final JmsMessage jmsMessage) throws Exception {
+        final String messageId = "1";
+        final String pModeKey = "pModeKey";
+
+
+        userMessageDefaultService.scheduleSendingPullReceipt(messageId, pModeKey);
+
+        new Verifications() {{
+            jmsManager.sendMessageToQueue((JmsMessage)any, sendPullReceiptQueue);
         }};
 
     }

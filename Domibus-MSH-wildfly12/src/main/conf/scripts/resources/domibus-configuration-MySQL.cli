@@ -57,6 +57,7 @@ data-source enable --name=eDeliveryMysqlNonXADS
 /subsystem=messaging-activemq/server=default/jms-queue=DomibusPluginToBackendQueue:add(durable=true,entries=[java:/jms/domibus.backend.jms.replyQueue,java:/jms/queue/DomibusPluginToBackendQueue])
 /subsystem=messaging-activemq/server=default/jms-queue=DomibusSendMessageQueue:add(durable=true,entries=[java:/jms/domibus.internal.dispatch.queue,java:/jms/queue/DomibusSendMessageQueue])
 /subsystem=messaging-activemq/server=default/jms-queue=DomibusPullMessageQueue:add(durable=true,entries=[java:/jms/domibus.internal.pull.queue,java:/jms/queue/DomibusPullMessageQueue])
+/subsystem=messaging-activemq/server=default/jms-queue=DomibusPullMessageQueue:add(durable=true,entries=[java:/jms/domibus.internal.pull.receipt.queue,java:/jms/queue/DomibusPullReceiptQueue])
 /subsystem=messaging-activemq/server=default/jms-queue=DomibusAlertMessageQueue:add(durable=true,entries=[java:/jms/domibus.internal.alert.queue,java:/jms/queue/DomibusAlertMessageQueue])
 /subsystem=messaging-activemq/server=default/jms-queue=DomibusUIReplicationQueue:add(durable=true,entries=[java:/jms/domibus.internal.ui.replication.queue,java:/jms/queue/DomibusUIReplicationQueue])
 /subsystem=messaging-activemq/server=default/jms-queue=DomibusNotifyBackendWebServiceQueue:add(durable=true,entries=[java:/jms/domibus.notification.webservice,java:/jms/queue/DomibusNotifyBackendWebServiceQueue])

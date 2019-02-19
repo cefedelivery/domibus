@@ -3,6 +3,7 @@ package eu.domibus.core.message;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
@@ -25,6 +26,7 @@ import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -57,6 +59,10 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     @Qualifier("sendMessageQueue")
     private Queue sendMessageQueue;
+
+    @Autowired
+    @Qualifier("sendPullReceiptQueue")
+    private Queue sendPullReceiptQueue;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -211,6 +217,16 @@ public class UserMessageDefaultService implements UserMessageService {
     @Override
     public void scheduleSending(String messageId, Long delay) {
         jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
+    }
+
+    @Override
+    public void scheduleSendingPullReceipt(String messageId, String pmodeKey) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(PULL_RECEIPT_REF_TO_MESSAGE_ID, messageId)
+                .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, sendPullReceiptQueue);
     }
 
     @Override

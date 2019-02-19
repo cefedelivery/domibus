@@ -27,4 +27,10 @@ public class MessageListenerContainerFactoryImpl implements MessageListenerConta
         return (DefaultMessageListenerContainer)applicationContext.getBean("dispatchContainer", domain);
     }
 
+    @Override
+    public MessageListenerContainer createPullReceiptListenerContainer(Domain domain) {
+        LOG.debug("Creating the PullReceiptListenerContainer for domain [{}]", domain);
+        return (DefaultMessageListenerContainer)applicationContext.getBean("pullReceiptContainer", domain);
+    }
+
 }

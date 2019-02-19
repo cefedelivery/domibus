@@ -39,6 +39,8 @@
                    physicalName="domibus.internal.dispatch.queue"/>
             <queue id="pullMessageQueue"
                    physicalName="domibus.internal.pull.queue"/>
+            <queue id="sendPullReceiptQueue"
+                   physicalName="domibus.internal.pull.receipt.queue"/>
             <queue id="alertMessageQueue"
                    physicalName="domibus.internal.alert.queue"/>
 
@@ -126,6 +128,7 @@
                         <redeliveryPolicyEntries>
                             <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
+                            <redeliveryPolicy queue="domibus.internal.pull.receipt.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.alert.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.ui.replication.queue" maximumRedeliveries="1" redeliveryDelay="10000"/>
                         </redeliveryPolicyEntries>

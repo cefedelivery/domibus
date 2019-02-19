@@ -11,6 +11,8 @@ import java.util.List;
  */
 public interface UserMessageService {
 
+    public static final String PULL_RECEIPT_REF_TO_MESSAGE_ID = "pullReceiptRefToMessageId";
+
     String getFinalRecipient(final String messageId);
 
     List<String> getFailedMessages(String finalRecipient);
@@ -34,6 +36,11 @@ public interface UserMessageService {
     void scheduleSending(String messageId, Long delay);
 
     void scheduleSending(String messageId, int retryCount);
+
+    /*
+    * Schedule the sending of the asynchronous Pull Receipt
+     */
+    void scheduleSendingPullReceipt(String messageId, String pmodeKey);
 
     /**
      * Gets a User Message based on the {@code messageId}

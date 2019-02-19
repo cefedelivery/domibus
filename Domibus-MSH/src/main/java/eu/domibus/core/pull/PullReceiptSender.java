@@ -37,7 +37,7 @@ public class PullReceiptSender {
     @Autowired
     private DomainContextProvider domainContextProvider;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void sendReceipt(final SOAPMessage soapMessage, final String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey, final String messsageId, String domainCode) {
         domainContextProvider.setCurrentDomain(domainCode);
         LOG.trace("[sendReceipt] Message:[{}] dispatch receipt", messsageId);
@@ -49,6 +49,8 @@ public class PullReceiptSender {
         } catch (EbMS3Exception e) {
             LOG.error("[sendReceipt] Message:[{}]", messsageId, e);
         }
+
+        LOG.trace("[sendReceipt] ~~~ the end ~~~");
     }
 
     private void handleDispatchReceiptResult(SOAPMessage acknowledgementResult) throws EbMS3Exception {

@@ -18,6 +18,9 @@
     <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
     </bean>
+    <bean id="sendPullReceiptQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.pull.receipt.queue"/>
+    </bean>
     <bean id="alertMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.alert.queue"/>
     </bean>

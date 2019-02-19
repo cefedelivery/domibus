@@ -37,6 +37,7 @@ public class MessageListenerContainerInitializer {
         final List<Domain> domains = domainService.getDomains();
         for (Domain domain : domains) {
             createMessageListenerContainer(domain);
+            createPullReceiptListenerContainer(domain);
         }
     }
 
@@ -58,6 +59,13 @@ public class MessageListenerContainerInitializer {
         instance.start();
         instances.put(domain, instance);
         LOG.info("MessageListenerContainer initialized for domain [{}]", domain);
+    }
+
+    public void createPullReceiptListenerContainer(Domain domain) {
+        MessageListenerContainer instance = messageListenerContainerFactory.createPullReceiptListenerContainer(domain);
+        instance.start();
+        instances.put(domain, instance);
+        LOG.info("PullReceiptListenerContainer initialized for domain [{}]", domain);
     }
 
 

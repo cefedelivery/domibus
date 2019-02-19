@@ -610,6 +610,11 @@
                         <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
                         <durable>true</durable>
                     </jms-queue>
+                    <jms-queue name="DomibusPullReceiptQueue">
+                        <entry name="java:/jms/domibus.internal.pull.receipt.queue"/>
+                        <entry name="java:/jms/queue/DomibusPullReceiptQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
                     <jms-queue name="DomibusAlertMessageQueue">
                         <entry name="java:/jms/domibus.internal.alert.queue"/>
                         <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>

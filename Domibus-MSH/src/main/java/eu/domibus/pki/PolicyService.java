@@ -2,6 +2,7 @@
 package eu.domibus.pki;
 
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import org.apache.neethi.Policy;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -16,5 +17,9 @@ public interface PolicyService {
     @Cacheable("policyCache")
     Policy parsePolicy(final String location) throws ConfigurationException;
 
+    /*
+    * Returns the security policy based on the leg configured in the pMode
+     */
+    Policy getPolicy(final LegConfiguration legConfiguration) throws ConfigurationException;
 
 }
