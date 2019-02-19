@@ -31,6 +31,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -147,6 +148,9 @@ public class IncomingPullReceiptHandlerTest {
 
     @Injectable
     MessageUtil messageUtil;
+
+    @Injectable
+    SoapUtil soapUtil;
 
     @Test
     public void testHandlePullRequestReceiptHappyFlow(@Mocked final SOAPMessage request,

@@ -13,13 +13,12 @@ import java.util.List;
  * @author Cosmin Baciu
  * @since 4.1
  */
-@RunWith(JMockit.class)
+//@RunWith(JMockit.class)
 public class CompressTest {
 
-    @Test
+//    @Test
     public void splitFile() throws IOException {
         RandomAccessFile raf = new RandomAccessFile("c:/DEV/_work/compression/compressed", "r");
-//        RandomAccessFile raf = new RandomAccessFile("c:/DEV/_work/compression/test-e38f79d9-e3c9-4639-a08a-b8f782c99d44", "r");
         long numSplits = 3; //from user input, extract it from args
         long sourceSize = raf.length();
         long bytesPerSplit = sourceSize / numSplits;
@@ -59,7 +58,7 @@ public class CompressTest {
 
     }
 
-    @Test
+//    @Test
     public void joinFiles() throws IOException {
         File output = new File("c:/DEV/_work/compression/joined");
 
@@ -92,7 +91,7 @@ public class CompressTest {
         }
     }
 
-    @Test
+//    @Test
     public void testSplit() {
         long sourceSize = 419430400;
         long mbInBytes = 1048576;

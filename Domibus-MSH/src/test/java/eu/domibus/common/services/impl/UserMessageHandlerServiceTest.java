@@ -230,6 +230,9 @@ public class UserMessageHandlerServiceTest {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
         new Expectations(userMessageHandlerService) {{
+            legConfiguration.getReliability().getReplyPattern();
+            result = ReplyPattern.RESPONSE;
+
             messaging.getUserMessage();
             result = userMessage;
 
@@ -242,7 +245,7 @@ public class UserMessageHandlerServiceTest {
             compressionService.handleDecompression(userMessage, legConfiguration);
             result = true;
 
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.RESPONSE, anyBoolean, anyBoolean, anyBoolean);
             result = soapResponseMessage;
 
             userMessageHandlerService.checkSelfSending(pmodeKey);
@@ -304,6 +307,9 @@ public class UserMessageHandlerServiceTest {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         new Expectations(userMessageHandlerService) {{
+            legConfiguration.getReliability().getReplyPattern();
+            result = ReplyPattern.RESPONSE;
+
             messaging.getUserMessage().getMessageInfo().getMessageId();
             result = "TestMessage123";
 
@@ -319,7 +325,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = false;
 
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.RESPONSE, anyBoolean, anyBoolean, anyBoolean);
             result = soapResponseMessage;
 
             userMessageHandlerService.checkSelfSending(pmodeKey);
@@ -335,7 +341,7 @@ public class UserMessageHandlerServiceTest {
             times = 1;
 //            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
 //            times = 0;
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, false, false);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.RESPONSE, anyBoolean, false, false);
         }};
     }
 
@@ -695,8 +701,8 @@ public class UserMessageHandlerServiceTest {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
         new Expectations(userMessageHandlerService) {{
-            legConfiguration.getReliability();
-            result = reliability;
+            legConfiguration.getReliability().getReplyPattern();
+            result = ReplyPattern.RESPONSE;
 
             messaging.getUserMessage().getMessageInfo().getMessageId();
             result = "TestMessage123";
@@ -713,7 +719,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkSelfSending(pmodeKey);
             result = false;
 
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.RESPONSE, anyBoolean, anyBoolean, anyBoolean);
             result = soapResponseMessage;
         }};
 
@@ -726,7 +732,7 @@ public class UserMessageHandlerServiceTest {
             times = 0;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
-            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.CALLBACK, anyBoolean, anyBoolean, anyBoolean);
+            as4ReceiptService.generateReceipt(withAny(soapRequestMessage), messaging, ReplyPattern.RESPONSE, anyBoolean, anyBoolean, anyBoolean);
             backendNotificationService.notifyMessageReceivedFailure(withAny(new UserMessage()), (ErrorResult) any);
             times = 0;
         }};
