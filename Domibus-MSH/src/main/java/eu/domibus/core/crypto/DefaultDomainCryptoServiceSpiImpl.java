@@ -69,7 +69,6 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
         }
     }
 
-
     @Override
     public X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException {
         return (X509Certificate) getKeyStore().getCertificate(alias);
