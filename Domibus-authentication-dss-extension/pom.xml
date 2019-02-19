@@ -9,24 +9,23 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>domibus-iam-dss</artifactId>
+    <artifactId>domibus-authentication-dss-extension</artifactId>
+
     <properties>
         <dss.version>5.4</dss.version>
     </properties>
 
-    <name>Domibus IAM DSS</name>
+    <name>Domibus authentication dss extension</name>
 
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-iam-api</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -38,13 +37,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.wss4j</groupId>
             <artifactId>wss4j-ws-security-common</artifactId>
-            <version>${wss4j.ws.security.common}</version>
             <scope>provided</scope>
         </dependency>
         <!-- DSS libraries -->
