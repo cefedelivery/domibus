@@ -129,7 +129,7 @@ public class CheckReleaseSQLScriptsGenerationIT {
     protected String retrieveDomibusArtifactVersion() {
         /*During Maven compile phase the domibus.properties file in the target folder with the artefact version copied from the POM*/
         DomibusPropertiesService domibusPropertiesService = new DomibusPropertiesService();
-        String domibusArtifactVersion = domibusPropertiesService.getImplVersion();
+        String domibusArtifactVersion = domibusPropertiesService.getArtifactVersion();
         if (StringUtils.isBlank(domibusArtifactVersion)) {
             LOG.error("Domibus artefact version could not be loaded!!!");
             Assert.fail("Domibus artefact version could not be loaded!!!");

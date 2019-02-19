@@ -1,6 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Collections2;
+import eu.domibus.api.multitenancy.UserDomain;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Ion Perpegel
@@ -128,15 +130,17 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     protected void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
         // validate user not already in general schema
-        //get all users from user-domains table in general schema
-        List<String> allUserNames = userDomainService.getAllUserNames();
+        // get all users from user-domains table in general schema
+        List<UserDomain> allUsers = userDomainService.getAllUserDomainMappings();
         for (eu.domibus.api.user.User user : newUsers) {
-            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName()))) {
-                String errorMessage = "Cannot add user " + user.getUserName() + " because this name already exists in the "
-                        + user.getDomain() + " domain.";
-                if (user.isDeleted()) {
-                    errorMessage += "(it is deleted)";
-                }
+            List<UserDomain> existing = allUsers.stream()
+                    .filter(userDomain -> userDomain.getUserName().equalsIgnoreCase(user.getUserName()))
+                    .collect(Collectors.toList());
+
+            if (!existing.isEmpty()) {
+                UserDomain existingUser = existing.get(0);
+                String errorMessage = "Cannot add user " + existingUser.getUserName() + " because this name already exists in the "
+                        + existingUser.getDomain() + " domain.";
                 throw new UserManagementException(errorMessage);
             }
         }

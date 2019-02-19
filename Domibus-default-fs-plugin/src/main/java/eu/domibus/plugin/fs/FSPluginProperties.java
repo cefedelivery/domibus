@@ -26,7 +26,7 @@ public class FSPluginProperties {
     private static final String PROPERTY_PREFIX = "fsplugin.";
 
     private static final String DOMAIN_PREFIX = "fsplugin.domains.";
-    
+
     private static final String LOCATION = "messages.location";
 
     private static final String SENT_ACTION = "messages.sent.action";
@@ -47,6 +47,10 @@ public class FSPluginProperties {
 
     private static final String USER = "messages.user";
 
+    private static final String PAYLOAD_ID = "messages.payload.id";
+
+    private static final String DEFAULT_CONTENT_ID = "cid:message";
+
     // Sonar confuses this constant with an actual password
     @SuppressWarnings("squid:S2068")
     private static final String PASSWORD = "messages.password";
@@ -63,7 +67,7 @@ public class FSPluginProperties {
 
     @Resource(name = "fsPluginProperties")
     private Properties properties;
-    
+
     private List<String> domains;
 
     public static final String ACTION_DELETE = "delete";
@@ -201,6 +205,17 @@ public class FSPluginProperties {
      */
     public String getUser(String domain) {
         return getDomainProperty(domain, USER, null);
+    }
+
+    /**
+     * Returns the payload identifier for messages belonging to a particular domain or the default payload identifier if none is defined.
+     *
+     * @param domain the domain property qualifier; {@code null} for the non-multitenant default domain
+     *
+     * @return The identifier used to reference payloads of messages belonging to a particular domain.
+     */
+    public String getPayloadId(String domain) {
+        return getDomainProperty(domain, PAYLOAD_ID, DEFAULT_CONTENT_ID);
     }
 
     /**

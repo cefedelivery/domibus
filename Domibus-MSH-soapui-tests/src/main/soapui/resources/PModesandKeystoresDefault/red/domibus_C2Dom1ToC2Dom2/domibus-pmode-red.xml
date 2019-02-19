@@ -27,7 +27,7 @@
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 				<partyIdType name="partyTypeEmpty" value=""/>
 			</partyIdTypes>
-			<party name="red_gw" endpoint="http://localhost:8180/domibus/services/msh?domain=domibus_C2Dom2" allowChunking="false">
+			<party name="red_gw" endpoint="http://localhost:8080/domibus/services/msh?domain=domibus_C2Dom2" allowChunking="false">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="blue_gw" endpoint="http://localhost:8080/domibus/services/msh?domain=domibus_C2Dom1" allowChunking="false">

@@ -61,7 +61,7 @@
             **/api/usermessage/domain/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
-        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
+        <sonar.host.url>http://localhost:9000/sonar/</sonar.host.url>
         <sonar.ws.timeout>300</sonar.ws.timeout>
         <jacoco.maven.plugin.version>0.7.7.201606060606</jacoco.maven.plugin.version>
         <!--   Enable the proxy when running sonar from within the EC network -->
