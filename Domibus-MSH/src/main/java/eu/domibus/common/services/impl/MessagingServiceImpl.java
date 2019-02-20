@@ -101,6 +101,8 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setLength(fileLength);
         }
 
+
+
         // Log Payload size
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
     }
@@ -108,11 +110,6 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected void storeOutgoingPayload(PartInfo partInfo, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
         String messageId = userMessage.getMessageInfo().getMessageId();
-
-        partInfo.setMime(partInfo.getPayloadDatahandler().getContentType());
-        if (partInfo.getMime() == null) {
-            partInfo.setMime("application/unknown");
-        }
 
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
@@ -138,6 +135,11 @@ public class MessagingServiceImpl implements MessagingService {
                 final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
                 partInfo.setLength(fileLength);
             }
+        }
+
+        partInfo.setMime(partInfo.getPayloadDatahandler().getContentType());
+        if (partInfo.getMime() == null) {
+            partInfo.setMime("application/unknown");
         }
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
