@@ -186,7 +186,7 @@ public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
 
         UserPasswordHistoryDao dao = getUserHistoryDao();
         dao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-        dao.removePasswords(user, passwordsToKeep - 1);
+        dao.removePasswords(user, passwordsToKeep);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
