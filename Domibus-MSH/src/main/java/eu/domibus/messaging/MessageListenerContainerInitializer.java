@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,7 @@ public class MessageListenerContainerInitializer {
     @Autowired
     protected DomainService domainService;
 
-    protected Map<Domain, MessageListenerContainer> messageListenerInstances = new HashMap<>();
-    protected Map<Domain, MessageListenerContainer> pullReceiptListenerInstances = new HashMap<>();
+    protected List<MessageListenerContainer> instances = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -44,14 +44,9 @@ public class MessageListenerContainerInitializer {
 
     @PreDestroy
     public void destroy() throws InterruptedException {
-        destroy(messageListenerInstances);
-        destroy(pullReceiptListenerInstances);
-    }
-
-    public void destroy(Map<Domain, MessageListenerContainer> instances) throws InterruptedException {
         LOG.info("Shutting down MessageListenerContainer instances");
 
-        for (MessageListenerContainer instance: instances.values()) {
+        for (MessageListenerContainer instance: instances) {
             try {
                 ((AbstractJmsListeningContainer) instance).shutdown();
             }catch(Exception e) {
@@ -63,14 +58,14 @@ public class MessageListenerContainerInitializer {
     public void createMessageListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createMessageListenerContainer(domain);
         instance.start();
-        messageListenerInstances.put(domain, instance);
+        instances.add(instance);
         LOG.info("MessageListenerContainer initialized for domain [{}]", domain);
     }
 
     public void createPullReceiptListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createPullReceiptListenerContainer(domain);
         instance.start();
-        pullReceiptListenerInstances.put(domain, instance);
+        instances.add(instance);
         LOG.info("PullReceiptListenerContainer initialized for domain [{}]", domain);
     }
 
