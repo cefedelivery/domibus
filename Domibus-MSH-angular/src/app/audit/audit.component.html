@@ -5,30 +5,27 @@
 
     <md-card-content>
       <div class="panel">
-        <md2-select mdInput placeholder="Table" id="table_id" multiple [(ngModel)]="auditTarget">
+        <md2-select mdInput placeholder="Table" id="table_id" multiple [(ngModel)]="filter.auditTarget">
           <md2-option *ngFor="let item of existingAuditTargets" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <md2-select mdInput placeholder="User" id="user_id" multiple [(ngModel)]="users">
+        <md2-select mdInput placeholder="User" id="user_id" multiple [(ngModel)]="filter.users">
           <md2-option *ngFor="let item of existingUsers" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <md2-select mdInput placeholder="Action" id="user_id" multiple [(ngModel)]="actions">
+        <md2-select mdInput placeholder="Action" id="user_id" multiple [(ngModel)]="filter.actions">
           <md2-option *ngFor="let item of existingActions" [value]="item">{{item}}</md2-option>
         </md2-select>
         <md2-datepicker placeholder="Changed from:" appClearInvalid
-                        [(ngModel)]="from"
-                        name="from"
-                        [type]="'datetime'"
+                        [(ngModel)]="filter.from" name="from" [type]="'datetime'"
                         #timestampControl="ngModel" id="from_id" *ngIf="advancedSearch">
           <!--(change)='onTimestampFromChange($event)'-->
         </md2-datepicker>
         <md2-datepicker placeholder=" Changed to:" appClearInvalid
-                        [(ngModel)]="to"
-                        name="to"
-                        [type]="'datetime'"
+                        [(ngModel)]="filter.to" name="to" [type]="'datetime'"
                         #timestampControl="ngModel" id="to_id" *ngIf="advancedSearch">
         </md2-datepicker>
+
         <div class="searchArea">
-          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()" button-click-behaviour>
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -50,7 +47,7 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()" button-click-behaviour
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>
@@ -72,8 +69,6 @@
   [externalSorting]="true"
   [loadingIndicator]="loading"
   [count]="count"
-  [offset]="offset"
-  [limit]="rowLimiter.pageSize"
   [offset]="offset"
   [limit]="rowLimiter.pageSize"
   (page)='onPage($event)'

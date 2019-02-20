@@ -2,7 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.service.Event;
 
@@ -31,23 +31,15 @@ public interface EventService {
      * @param loginTime       the login failure time.
      * @param accountDisabled whether the account has been disable or not.
      */
-    void enqueueLoginFailureEvent(
-            String userName,
-            Date loginTime,
-            boolean accountDisabled);
-
+    void enqueueLoginFailureEvent(UserEntityBase.Type type, String userName, Date loginTime, boolean accountDisabled);
 
     /**
      * Will create a account disabled event and enqueue it to the alert/event monitoring queue.
      *
      * @param userName            the user name that had a failure login
      * @param accountDisabledTime the account disabled time.
-     * @param accountDisabled     whether the account has been disable or not.
      */
-    void enqueueAccountDisabledEvent(
-            String userName,
-            Date accountDisabledTime,
-            boolean accountDisabled);
+    void enqueueAccountDisabledEvent(UserEntityBase.Type type, String userName, Date accountDisabledTime);
 
     /**
      * Will create a certificate imminent expiration event and enqueue it to the alert/event monitoring queue.
@@ -84,17 +76,10 @@ public interface EventService {
     /**
      * Will create an expiration event and enqueue it to the alert/event monitoring queue.
      *
-     * @param eventType    the specific type of expiration event: expired and imminent expiration for console or plugin users
-     * @param user          the user for which the event is triggered
+     * @param eventType            the specific type of expiration event: expired and imminent expiration for console or plugin users
+     * @param user                 the user for which the event is triggered
      * @param maxPasswordAgeInDays the number of days the password is not expired
      */
-    void enqueuePasswordExpirationEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays);
+    void enqueuePasswordExpirationEvent(EventType eventType, UserEntityBase user, Integer maxPasswordAgeInDays);
 
-    /**
-     * Will create login failure event for plugin user and enqueue it to the alert/event monitoring queue.
-     *
-     * @param userName        the user name that had a failure login
-     * @param loginTime       the login failure time.
-     */
-    void enqueuePluginLoginFailureEvent(String userName, Date loginTime);
 }

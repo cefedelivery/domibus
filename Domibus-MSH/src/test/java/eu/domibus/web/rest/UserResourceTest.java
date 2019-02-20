@@ -97,17 +97,21 @@ public class UserResourceTest {
     public void testGetCsv() throws EbMS3Exception {
         // Given
         List<UserResponseRO> usersResponseROList = new ArrayList<>();
-        UserResponseRO userResponseRO = new UserResponseRO("user1", "email@email.com", true);
+        UserResponseRO userResponseRO = new UserResponseRO() {{
+            setUserName("user1");
+            setEmail("email@email.com");
+            setActive(true);
+        }};
         List<String> roles = new ArrayList<>();
         roles.add("ROLE_ADMIN");
         userResponseRO.setAuthorities(roles);
         usersResponseROList.add(userResponseRO);
         new Expectations(userResource) {{
-           userResource.users();
-           result = usersResponseROList;
-           csvServiceImpl.exportToCSV(usersResponseROList, UserResponseRO.class, (Map<String, String>)any, (List<String>)any);
-           result = "Username, Email, Active, Roles" + System.lineSeparator() +
-                   "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator();
+            userResource.users();
+            result = usersResponseROList;
+            csvServiceImpl.exportToCSV(usersResponseROList, UserResponseRO.class, (Map<String, String>) any, (List<String>) any);
+            result = "Username, Email, Active, Roles" + System.lineSeparator() +
+                    "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator();
         }};
 
         // When

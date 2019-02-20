@@ -1,5 +1,7 @@
 package eu.domibus.plugin.fs.worker;
 
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
@@ -14,6 +16,7 @@ import eu.domibus.plugin.fs.exception.FSSetUpException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.apache.tika.io.IOExceptionWithCause;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,10 +44,10 @@ public class FSSendMessagesService {
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
-
+    
     @Autowired
     private FSFilesManager fsFilesManager;
-
+    
     @Autowired
     private FSProcessFileService fsProcessFileService;
 
@@ -66,7 +69,7 @@ public class FSSendMessagesService {
         LOG.debug("Sending file system messages...");
 
         sendMessages(null);
-
+        
         for (String domain : fsPluginProperties.getDomains()) {
             if (fsMultiTenancyService.verifyDomainExists(domain)) {
                 sendMessages(domain);
@@ -75,21 +78,19 @@ public class FSSendMessagesService {
     }
 
     private void sendMessages(String domain) {
-        FileObject[] contentFiles = null;
-
-        if (domibusConfigurationExtService.isMultiTenantAware()) {
-            if (domain == null) {
+        if(domibusConfigurationExtService.isMultiTenantAware()) {
+            if(domain == null) {
                 domain = DEFAULT_DOMAIN;
             }
 
             String authenticationUser = fsPluginProperties.getAuthenticationUser(domain);
-            if (authenticationUser == null) {
+            if(authenticationUser == null) {
                 LOG.error("Authentication User not defined for domain [{}]", domain);
                 return;
             }
 
             String authenticationPassword = fsPluginProperties.getAuthenticationPassword(domain);
-            if (authenticationPassword == null) {
+            if(authenticationPassword == null) {
                 LOG.error("Authentication Password not defined for domain [{}]", domain);
                 return;
             }
@@ -97,8 +98,9 @@ public class FSSendMessagesService {
             authenticationExtService.basicAuthenticate(authenticationUser, authenticationPassword);
         }
 
+        FileObject[] contentFiles = null;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
+                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
 
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.trace("{}", contentFiles);
@@ -123,7 +125,7 @@ public class FSSendMessagesService {
     private void processFileSafely(FileObject processableFile, String domain) {
         String errorMessage = null;
         try {
-            fsProcessFileService.processFile(processableFile);
+            fsProcessFileService.processFile(processableFile, domain);
         } catch (JAXBException ex) {
             errorMessage = buildErrorMessage("Invalid metadata file: " + ex.toString()).toString();
             LOG.error(errorMessage, ex);
@@ -134,7 +136,7 @@ public class FSSendMessagesService {
             errorMessage = buildErrorMessage("Error processing file. Skipped it. Error message is: " + ex.getMessage()).toString();
             LOG.error(errorMessage, ex);
         } finally {
-            if (errorMessage != null) {
+            if(errorMessage != null) {
                 handleSendFailedMessage(processableFile, domain, errorMessage);
             }
         }
@@ -142,7 +144,7 @@ public class FSSendMessagesService {
 
     public void handleSendFailedMessage(FileObject processableFile, String domain, String errorMessage) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain)) {
-            if (processableFile != null) {
+             if (processableFile != null) {
                 String baseName = processableFile.getName().getBaseName();
                 String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ERROR_EXTENSION;
 
@@ -184,18 +186,18 @@ public class FSSendMessagesService {
             sb.append("errorCode: ").append(errorCode).append(LS);
         }
         sb.append("errorDetail: ").append(errorDetail).append(LS);
-        if (messageId != null) {
+        if(messageId != null) {
             sb.append("messageInErrorId: ").append(messageId).append(LS);
         }
-        if (mshRole != null) {
+        if(mshRole != null) {
             sb.append("mshRole: ").append(mshRole).append(LS);
         } else {
             sb.append("mshRole: ").append(MSHRole.SENDING).append(LS);
         }
-        if (notified != null) {
+        if(notified != null) {
             sb.append("notified: ").append(notified).append(LS);
         }
-        if (timestamp != null) {
+        if(timestamp != null) {
             sb.append("timestamp: ").append(timestamp).append(LS);
         } else {
             sb.append("timestamp: ").append(LocalDateTime.now()).append(LS);
@@ -207,17 +209,17 @@ public class FSSendMessagesService {
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
         List<FileObject> filteredFiles = new LinkedList<>();
-
+        
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
-
+            
             if (!StringUtils.equals(baseName, METADATA_FILE_NAME)
                     && !FSFileNameHelper.isAnyState(baseName)
                     && !FSFileNameHelper.isProcessed(baseName)) {
                 filteredFiles.add(file);
             }
         }
-
+        
         return filteredFiles;
     }
 

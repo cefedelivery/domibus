@@ -1,28 +1,24 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
-import eu.domibus.common.validators.ConsoleUserPasswordManager;
-import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
-import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
+import eu.domibus.security.ConsoleUserSecurityPolicyManager;
 import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
-import eu.domibus.core.alerts.service.EventService;
-import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -31,10 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
 
 /**
  * @author Thomas Dussart
@@ -46,9 +39,7 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
 
-    protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
-
-    protected static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+//    protected static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
     @Autowired
     protected UserDao userDao;
@@ -72,19 +63,13 @@ public class UserManagementServiceImpl implements UserService {
     protected UserPersistenceService userPersistenceService;
 
     @Autowired
-    private MultiDomainAlertConfigurationService alertConfiguration;
-
-    @Autowired
-    private EventService eventService;
-
-    @Autowired
     protected UserDomainService userDomainService;
 
     @Autowired
     protected DomainService domainService;
 
     @Autowired
-    ConsoleUserPasswordManager userPasswordManager;
+    ConsoleUserSecurityPolicyManager userPasswordManager;
 
     @Autowired
     ConsoleUserAlertsServiceImpl userAlertsService;
@@ -135,93 +120,7 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional
     public UserLoginErrorReason handleWrongAuthentication(final String userName) {
-        User user = userDao.loadUserByUsername(userName);
-        UserLoginErrorReason userLoginErrorReason = getUserLoginFailureReason(userName, user);
-        if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
-            applyAccountLockingPolicy(user);
-        }
-        userDao.flush();
-        triggerEvent(userName, userLoginErrorReason);
-        return userLoginErrorReason;
-    }
-
-    protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
-        final LoginFailureModuleConfiguration loginFailureConfiguration = alertConfiguration.getLoginFailureConfiguration();
-        LOG.debug("loginFailureConfiguration.isActive : [{}]", loginFailureConfiguration.isActive());
-        switch (userLoginErrorReason) {
-            case BAD_CREDENTIALS:
-                if (loginFailureConfiguration.isActive()) {
-                    eventService.enqueueLoginFailureEvent(userName, new Date(), false);
-                }
-                break;
-            case INACTIVE:
-            case SUSPENDED:
-                final AccountDisabledModuleConfiguration accountDisabledConfiguration = alertConfiguration.getAccountDisabledConfiguration();
-                if(accountDisabledConfiguration.isActive()) {
-                    if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
-                        eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
-                    } else if (loginFailureConfiguration.isActive()) {
-                        eventService.enqueueLoginFailureEvent(userName, new Date(), true);
-                    }
-                }
-                break;
-            case UNKNOWN:
-                break;
-        }
-    }
-
-    UserLoginErrorReason getUserLoginFailureReason(String userName, User user) {
-
-        if (user == null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
-            return UserLoginErrorReason.UNKNOWN;
-        }
-        if (!user.isEnabled() && user.getSuspensionDate() == null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
-            return UserLoginErrorReason.INACTIVE;
-        }
-        if (!user.isEnabled() && user.getSuspensionDate() != null) {
-            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
-            return UserLoginErrorReason.SUSPENDED;
-        }
-
-        LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_BAD_CREDENTIALS, userName);
-        return BAD_CREDENTIALS;
-    }
-
-    protected void applyAccountLockingPolicy(User user) {
-        final Domain domain = getCurrentOrDefaultDomainForUser(user);
-
-        int maxAttemptAmount = domibusPropertyProvider.getIntegerDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT);
-
-        user.setAttemptCount(user.getAttemptCount() + 1);
-        if (user.getAttemptCount() >= maxAttemptAmount) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]", maxAttemptAmount, user.getUserName());
-            }
-            user.setActive(false);
-            final Date suspensionDate = new Date(System.currentTimeMillis());
-            user.setSuspensionDate(suspensionDate);
-            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
-
-            final AccountDisabledModuleConfiguration accountDisabledConfiguration = alertConfiguration.getAccountDisabledConfiguration();
-            if (accountDisabledConfiguration.isActive()) {
-                eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
-            }
-
-        }
-        userDao.update(user);
-    }
-
-    private Domain getCurrentOrDefaultDomainForUser(User user) {
-        String domainCode;
-        boolean isSuperAdmin = user.isSuperAdmin();
-        if (isSuperAdmin) {
-            domainCode = DomainService.DEFAULT_DOMAIN.getCode();
-        } else {
-            domainCode = userDomainService.getDomainForUser(user.getUserName());
-        }
-        return domainService.getDomain(domainCode);
+        return userPasswordManager.handleWrongAuthentication(userName);
     }
 
     /**
@@ -230,31 +129,7 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional
     public void reactivateSuspendedUsers() {
-        Domain domain = domainContextProvider.getCurrentDomainSafely();
-
-        int suspensionInterval;
-        if (domain == null) { //it is called for super-users so we read from default domain
-            suspensionInterval = domibusPropertyProvider.getIntegerProperty(LOGIN_SUSPENSION_TIME);
-        } else { //for normal users the domain is set as current Domain
-            suspensionInterval = domibusPropertyProvider.getIntegerDomainProperty(LOGIN_SUSPENSION_TIME);
-        }
-
-        //user will not be reactivated.
-        if (suspensionInterval <= 0) {
-            return;
-        }
-
-        Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - (suspensionInterval * 1000));
-
-        List<User> users = userDao.getSuspendedUsers(currentTimeMinusSuspensionInterval);
-        for (User user : users) {
-            LOG.debug("Suspended user [{}] is going to be reactivated.", user.getUserName());
-
-            user.setSuspensionDate(null);
-            user.setAttemptCount(0);
-            user.setActive(true);
-        }
-        userDao.update(users);
+        userPasswordManager.reactivateSuspendedUsers();
     }
 
     /**
@@ -262,16 +137,7 @@ public class UserManagementServiceImpl implements UserService {
      */
     @Override
     public void handleCorrectAuthentication(final String userName) {
-        User user = userDao.loadActiveUserByUsername(userName);
-        LOG.debug("handleCorrectAuthentication for user [{}]", userName);
-        if (user.getAttemptCount() > 0) {
-            LOG.debug("user [{}] has [{}] attempt ", userName, user.getAttemptCount());
-            LOG.debug("resetting to 0");
-            user.setAttemptCount(0);
-            userDao.update(user);
-        }
-
-        userDao.flush();
+        userPasswordManager.handleCorrectAuthentication(userName);
     }
 
     /**
@@ -279,7 +145,7 @@ public class UserManagementServiceImpl implements UserService {
      */
     @Override
     public void validateExpiredPassword(final String userName) {
-        User user = userDao.loadActiveUserByUsername(userName);
+        UserEntityBase user = getUserWithName(userName);
         boolean defaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
@@ -288,7 +154,7 @@ public class UserManagementServiceImpl implements UserService {
 
     @Override
     public Integer getDaysTillExpiration(String userName) {
-        User user = userDao.loadActiveUserByUsername(userName);
+        UserEntityBase user = getUserWithName(userName);
         boolean isDefaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
@@ -307,4 +173,11 @@ public class UserManagementServiceImpl implements UserService {
         userPersistenceService.changePassword(username, currentPassword, newPassword);
     }
 
+    private UserEntityBase getUserWithName(String userName) {
+        UserEntityBase user = userDao.findByUserName(userName);
+        if (user == null) {
+            throw new UserManagementException("Could not find console user with the name " + userName);
+        }
+        return user;
+    }
 }

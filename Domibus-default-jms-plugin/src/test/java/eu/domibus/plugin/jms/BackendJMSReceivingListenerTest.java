@@ -32,23 +32,21 @@ public class BackendJMSReceivingListenerTest {
     @Injectable
     protected AuthenticationExtService authenticationExtService;
 
-    @Injectable
-    private DomibusConfigurationExtService domibusConfigurationExtService;
-
     @Tested
     BackendJMSReceivingListener backendJMSReceivingListener;
 
     @Test
     public void receiveMessage(@Injectable MapMessage map, @Mocked DomibusLogger LOG) {
         new Expectations(backendJMSReceivingListener) {{
-            domibusConfigurationExtService.isMultiTenantAware();
-            result = true;
+            authenticationExtService.isUnsecureLoginAllowed();
+            result = false;
 
             backendJMSReceivingListener.authenticate(map);
         }};
         backendJMSReceivingListener.receiveMessage(map);
 
         new FullVerificationsInOrder() {{
+            LOG.debug("Performing authentication");
             LOG.clearCustomKeys();
             backendJMSReceivingListener.authenticate(map);
             backendJMS.receiveMessage(map);

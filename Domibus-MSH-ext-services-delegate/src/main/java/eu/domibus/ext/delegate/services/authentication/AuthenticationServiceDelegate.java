@@ -1,5 +1,6 @@
 package eu.domibus.ext.delegate.services.authentication;
 
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.exceptions.AuthenticationExtException;
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.logging.DomibusLogger;
@@ -21,6 +22,9 @@ public class AuthenticationServiceDelegate implements AuthenticationExtService {
     @Autowired
     private eu.domibus.api.security.AuthenticationService authenticationService;
 
+    @Autowired
+    protected AuthUtils authUtils;
+
     @Override
     public void authenticate(HttpServletRequest httpRequest) throws AuthenticationExtException {
         try {
@@ -40,5 +44,10 @@ public class AuthenticationServiceDelegate implements AuthenticationExtService {
             //already logged by the authentication service
             throw new AuthenticationExtException(e);
         }
+    }
+
+    @Override
+    public boolean isUnsecureLoginAllowed() {
+        return authUtils.isUnsecureLoginAllowed();
     }
 }

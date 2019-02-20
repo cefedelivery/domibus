@@ -1,21 +1,18 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.model.security.UserBase;
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.security.AuthenticationDAO;
-import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.VerificationsInOrder;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Thomas Dussart
@@ -31,7 +28,7 @@ public class PluginUserAlertsServiceImplTest {
     private AuthenticationDAO userDao;
 
     @Injectable
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertsConfiguration;
 
     @Injectable
     private EventService eventService;
@@ -70,4 +67,27 @@ public class PluginUserAlertsServiceImplTest {
         Assert.assertEquals(AlertType.PLUGIN_PASSWORD_EXPIRED, val);
     }
 
+    @Test
+    public void testGetEventTypeForPasswordExpired() {
+        EventType val = userAlertsService.getEventTypeForPasswordExpired();
+
+        Assert.assertEquals(EventType.PLUGIN_PASSWORD_EXPIRED, val);
+    }
+
+    @Test
+    public void testGetUserType() {
+        UserEntityBase.Type val = userAlertsService.getUserType();
+
+        Assert.assertEquals( UserEntityBase.Type.PLUGIN, val);
+    }
+
+    @Test
+    public void testGetAccountDisabledConfiguration() {
+        AccountDisabledModuleConfiguration val = userAlertsService.getAccountDisabledConfiguration();
+
+        new VerificationsInOrder() {{
+            alertsConfiguration.getPluginAccountDisabledConfiguration();
+            times = 1;
+        }};
+    }
 }

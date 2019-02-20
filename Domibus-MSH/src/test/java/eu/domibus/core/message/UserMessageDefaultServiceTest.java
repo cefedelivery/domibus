@@ -321,20 +321,19 @@ public class UserMessageDefaultServiceTest {
     @Test
     public void testComputeMaxAttempts(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
-        final Integer messageAttempts = 2;
         final Integer pModeMaxAttempts = 5;
 
         new Expectations(userMessageDefaultService) {{
             userMessageDefaultService.getMaxAttemptsConfiguration(messageId);
             result = pModeMaxAttempts;
 
-            userMessageLog.getSendAttempts();
-            result = messageAttempts;
+            userMessageLog.getSendAttemptsMax();
+            result = pModeMaxAttempts;
 
         }};
 
         final Integer maxAttemptsConfiguration = userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
-        Assert.assertTrue(maxAttemptsConfiguration == 7);
+        Assert.assertTrue(maxAttemptsConfiguration == 11);
     }
 
     @Test

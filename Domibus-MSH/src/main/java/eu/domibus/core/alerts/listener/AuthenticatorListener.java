@@ -32,14 +32,8 @@ public class AuthenticatorListener {
     private DomainContextProvider domainContextProvider;
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
-            selector = "selector = 'loginFailure'")
+            selector = "selector = 'loginFailure' or selector = 'accountDisabled'")
     public void onLoginFailure(final Event event, final @Header(name = "DOMAIN", required = false) String domain) {
-        saveEventAndTriggerAlert(event, domain);
-    }
-
-    @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
-            selector = "selector = 'accountDisabled'")
-    public void onAccountDisabled(final Event event, @Header(name = "DOMAIN", required = false) String domain) {
         saveEventAndTriggerAlert(event, domain);
     }
 

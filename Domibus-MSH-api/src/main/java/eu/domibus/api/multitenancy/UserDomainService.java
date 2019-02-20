@@ -23,4 +23,6 @@ public interface UserDomainService {
     List<User> getSuperUsers();
 
     List<String> getAllUserNames();
+
+    List<UserDomain> getAllUserDomainMappings();
 }

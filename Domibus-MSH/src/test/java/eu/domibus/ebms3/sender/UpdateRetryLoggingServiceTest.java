@@ -16,6 +16,7 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import junit.framework.Assert;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import java.util.UUID;
 
 import static eu.domibus.ebms3.sender.UpdateRetryLoggingService.DELETE_PAYLOAD_ON_SEND_FAILURE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JMockit.class)
 public class UpdateRetryLoggingServiceTest {
@@ -78,6 +80,8 @@ public class UpdateRetryLoggingServiceTest {
             result = RETRY_TIMEOUT_IN_MINUTES;
             legConfiguration.getReceptionAwareness().getRetryCount();
             result = RETRY_COUNT;
+            domibusPropertyProvider.getIntegerProperty(updateRetryLoggingService.MESSAGE_EXPIRATION_DELAY);
+            result = 6000;
         }};
     }
 
@@ -410,13 +414,13 @@ public class UpdateRetryLoggingServiceTest {
 
     }
 
-
     @Test
-    public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
-        final long currentTime = System.currentTimeMillis();
+    public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) throws InterruptedException {
         final int timeOut = 10;
-        final long timeOutInMillis = 60000 * timeOut;
-        final Date expectedDate = new Date(currentTime + timeOutInMillis);
+        final long timeOutInMillis = 60000 * timeOut ;
+        int delay = domibusPropertyProvider.getIntegerProperty(updateRetryLoggingService.MESSAGE_EXPIRATION_DELAY);
+        final long currentTime = System.currentTimeMillis() - (timeOutInMillis + delay) ;
+        final Date expectedDate = new Date(currentTime+timeOutInMillis);
         new NonStrictExpectations() {{
             userMessageLog.getRestored();
             result = currentTime;
@@ -425,6 +429,7 @@ public class UpdateRetryLoggingServiceTest {
 
         }};
         assertEquals(expectedDate, updateRetryLoggingService.getMessageExpirationDate(userMessageLog, legConfiguration));
+        assertTrue(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog));
     }
 
     private static class SystemMockFirstOfJanuary2016 extends MockUp<System> {

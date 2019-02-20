@@ -14,7 +14,9 @@ import org.junit.runner.RunWith;
 
 import java.security.cert.X509Certificate;
 
+import static eu.domibus.core.certificate.CertificateTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.assertNotNull;
+
 
 /**
  * @author idragusa
@@ -66,10 +68,11 @@ public class X509CertificateServiceImplTest {
     }
 
     private X509Certificate[] createCertificates(String keystore_path, String alias, String password) {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore_path, alias, password);
+        X509Certificate certificate = loadCertificateFromJKSFile(keystore_path, alias, password);
         assertNotNull(certificate);
         X509Certificate[] certificates = new X509Certificate[1];
         certificates[0] = certificate;
         return certificates;
     }
+
 }

@@ -55,7 +55,6 @@
 
     <import resource="classpath*:config/*-plugin.xml"/>
     <import resource="file:///${domibus.config.location}/plugins/config/*-plugin.xml" />
-    <import resource="domibus-security.xml"/>
     <import resource="domibus-configuration.xml"/>
 
     <import resource="domibus-plugins.xml"/>
@@ -64,7 +63,6 @@
     <import resource="jpa-config.xml"/>
     <import resource="msh-config.xml"/>
     <import resource="cxf-endpoint.xml"/>
-    <import resource="spring-security.xml"/>
 
 
     <cache:annotation-driven/>

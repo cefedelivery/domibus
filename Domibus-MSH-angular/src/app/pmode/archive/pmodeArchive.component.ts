@@ -1,9 +1,9 @@
-import {Component, OnInit, SecurityContext, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {Http, Headers, Response} from '@angular/http';
-import {AlertService} from 'app/alert/alert.service';
-import {MdDialog, MdDialogRef} from '@angular/material';
+import {AlertService} from 'app/common/alert/alert.service';
+import {MdDialog} from '@angular/material';
 import {isNullOrUndefined} from 'util';
 import {PmodeUploadComponent} from '../pmode-upload/pmode-upload.component';
 import * as FileSaver from 'file-saver';
@@ -12,9 +12,9 @@ import {ActionDirtyDialogComponent} from 'app/pmode/action-dirty-dialog/action-d
 import {SaveDialogComponent} from 'app/common/save-dialog/save-dialog.component';
 import {DirtyOperations} from 'app/common/dirty-operations';
 import {Observable} from 'rxjs/Observable';
-import {DateFormatService} from 'app/customDate/dateformat.service';
-import {DownloadService} from 'app/download/download.service';
-import {AlertComponent} from 'app/alert/alert.component';
+import {DateFormatService} from 'app/common/customDate/dateformat.service';
+import {DownloadService} from 'app/common/download.service';
+import {AlertComponent} from 'app/common/alert/alert.component';
 import {RestoreDialogComponent} from '../restore-dialog/restore-dialog.component';
 import {PmodeViewComponent} from './pmode-view/pmode-view.component';
 import {CurrentPModeComponent} from '../current/currentPMode.component';
@@ -43,8 +43,6 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
-
-  private headers = new Headers({'Content-Type': 'application/json'});
 
   loading: boolean;
 
@@ -79,13 +77,13 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param {AlertService} alertService Alert Service object used for alerting success and error messages
    * @param {MdDialog} dialog Object used for opening dialogs
    */
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog, private domainService: DomainService) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, private domainService: DomainService) {
   }
 
   /**
    * NgOnInit method
    */
-  ngOnInit () {
+  ngOnInit() {
     this.loading = false;
 
     this.allPModes = [];
@@ -115,7 +113,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Initialize columns and gets all PMode entries from database
    */
-  initializeArchivePmodes () {
+  initializeArchivePmodes() {
     this.columnPicker.allColumns = [
       {
         cellTemplate: this.rowWithDateFormatTpl,
@@ -150,7 +148,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Change Page size for a @newPageLimit value
    * @param {number} newPageLimit New value for page limit
    */
-  changePageSize (newPageLimit: number) {
+  changePageSize(newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
     this.rowLimiter.pageSize = newPageLimit;
     this.page(0, newPageLimit);
@@ -160,7 +158,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Gets all the PMode
    * @returns {Observable<Response>}
    */
-  getResultObservable (): Observable<Response> {
+  getResultObservable(): Observable<Response> {
     return this.http.get(PModeArchiveComponent.PMODE_URL + '/list')
       .publishReplay(1).refCount();
   }
@@ -168,31 +166,32 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Gets all the PModes Entries
    */
-  getAllPModeEntries () {
+  async getAllPModeEntries() {
     this.loading = true;
-    this.getResultObservable().subscribe((response: Response) => {
-        this.offset = 0;
-        this.actualRow = 0;
-        this.actualId = undefined;
 
-        this.allPModes = response.json();
-        this.count = this.allPModes.length;
-        if (this.count > 0) {
-          this.allPModes[0].current = true;
-          this.actualId = this.allPModes[0].id;
-        }
-      },
-      () => {
-        this.loading = false;
-      },
-      () => {
-        this.tableRows = this.allPModes.slice(0, this.rowLimiter.pageSize);
-        if (this.tableRows.length > 0) {
-          this.tableRows[0].current = true;
-          this.tableRows[0].description = '[CURRENT]: ' + this.allPModes[0].description;
-        }
-        this.loading = false;
-      });
+    try {
+      const response = await this.getResultObservable().toPromise();
+
+      this.offset = 0;
+      this.actualRow = 0;
+      this.actualId = undefined;
+
+      this.allPModes = response.json();
+      this.count = this.allPModes.length;
+      if (this.count > 0) {
+        this.allPModes[0].current = true;
+        this.actualId = this.allPModes[0].id;
+      }
+      this.tableRows = this.allPModes.slice(0, this.rowLimiter.pageSize);
+      if (this.tableRows.length > 0) {
+        this.tableRows[0].current = true;
+        this.tableRows[0].description = '[CURRENT]: ' + this.allPModes[0].description;
+      }
+      this.loading = false;
+    } catch (e) {
+      this.loading = false;
+      this.alertService.exception('Error while fetching all pmode entries.', e);
+    }
   }
 
   /**
@@ -200,7 +199,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param offset
    * @param pageSize
    */
-  page (offset, pageSize) {
+  page(offset, pageSize) {
     this.loading = true;
 
     this.offset = offset;
@@ -215,7 +214,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    *
    * @param event
    */
-  onPage (event) {
+  onPage(event) {
     console.log('Page Event', event);
     this.page(event.offset, event.pageSize);
   }
@@ -224,7 +223,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Disable All the Buttons
    * used mainly when no row is selected
    */
-  private disableAllButtons () {
+  private disableAllButtons() {
     this.disabledSave = true;
     this.disabledCancel = true;
     this.disabledDownload = true;
@@ -236,7 +235,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Enable Save and Cancel buttons
    * used when changes occurred (deleted entries)
    */
-  private enableSaveAndCancelButtons () {
+  private enableSaveAndCancelButtons() {
     this.disabledSave = false;
     this.disabledCancel = false;
     this.disabledDownload = true;
@@ -248,7 +247,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called by NgxDatatable on selection/deselection
    * @param {any} selected selected/unselected object
    */
-  onSelect ({selected}) {
+  onSelect({selected}) {
     if (isNullOrUndefined(selected) || selected.length === 0) {
       this.disableAllButtons();
       return;
@@ -262,7 +261,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Method used when button save is clicked
    */
-  saveButton (withDownloadCSV: boolean) {
+  saveButton(withDownloadCSV: boolean) {
     this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
       if (result) {
         this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(() => {
@@ -293,7 +292,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Method used when Cancel button is clicked
    */
-  cancelButton () {
+  cancelButton() {
     this.dialog.open(CancelDialogComponent).afterClosed().subscribe(result => {
       if (result) {
         this.deleteList = [];
@@ -315,7 +314,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Download button is clicked
    * @param row The selected row
    */
-  downloadArchive (rowIndex) {
+  downloadArchive(rowIndex) {
     this.download(this.tableRows[rowIndex]);
   }
 
@@ -323,7 +322,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Action Delete icon is clicked
    * @param row Row where Delete icon is located
    */
-  deleteArchiveAction (row) {
+  deleteArchiveAction(row) {
     // workaround to delete one entry from the array
     // since "this.rows.splice(row, 1);" doesn't work...
     let array = this.tableRows.slice();
@@ -348,7 +347,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Delete button is clicked
    * All the selected rows will be deleted
    */
-  deleteArchive () {
+  deleteArchive() {
     for (let i = this.selected.length - 1; i >= 0; i--) {
       let array = this.tableRows.slice();
       // index is changed if selected items are not sorted recalculate new index
@@ -374,7 +373,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * are null or undefined or if is empty.
    *
    */
-  isPageEmpty (): boolean {
+  isPageEmpty(): boolean {
     if (this.tableRows || this.tableRows.length) {
       for (let i = 0; i < this.tableRows.length; i++) {
         if (this.tableRows[i]) {
@@ -393,7 +392,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    *
    * @param selectedRow Selected Row
    */
-  restoreArchive (selectedRow) {
+  restoreArchive(selectedRow) {
     if (!this.isDirty()) {
       this.dialog.open(RestoreDialogComponent).afterClosed().subscribe(ok => {
         if (ok) {
@@ -422,25 +421,30 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         }
       });
     }
-    this.page(0, this.rowLimiter.pageSize);
+    //this.page(0, this.rowLimiter.pageSize);
   }
 
-  private restore (selectedRow) {
+  private async restore(selectedRow) {
     this.allPModes[this.actualRow].current = false;
-    this.http.put(PModeArchiveComponent.PMODE_URL + '/restore/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-        this.deleteList = [];
-        this.disableAllButtons();
-        this.selected = [];
-        this.actualRow = 0;
+    try {
+      await this.http.put(PModeArchiveComponent.PMODE_URL + '/restore/' + selectedRow.id, null)
+        .toPromise();
 
-        this.getAllPModeEntries();
-      },
-      error => {
-        this.alertService.error('The operation \'restore pmode\' not completed successfully.');
-      });
+      this.deleteList = [];
+      this.disableAllButtons();
+      this.selected = [];
+      this.actualRow = 0;
+
+      const offset = this.offset;
+      await this.getAllPModeEntries();
+      this.page(offset, this.rowLimiter.pageSize);
+
+    } catch (e) {
+      this.alertService.exception('The operation \'restore pmode\' not completed successfully.', e);
+    }
   }
 
-  private uploadPmode () {
+  private uploadPmode() {
     this.dialog.open(PmodeUploadComponent)
       .afterClosed().subscribe(result => {
       this.getAllPModeEntries();
@@ -452,7 +456,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Download button or icon is clicked
    * @param id The id of the selected entry on the DB
    */
-  download (row) {
+  download(row) {
     this.http.get(PModeArchiveComponent.PMODE_URL + '/' + row.id).subscribe(res => {
       const uploadDateStr = DateFormatService.format(new Date(row.configurationDate));
       PModeArchiveComponent.downloadFile(res.text(), this.currentDomain.name, uploadDateStr);
@@ -464,7 +468,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Saves the content of the datatable into a CSV file
    */
-  saveAsCSV () {
+  saveAsCSV() {
     if (this.isDirty()) {
       this.saveButton(true);
     } else {
@@ -483,7 +487,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param domain
    * @param date
    */
-  private static downloadFile (data: any, domain: string, date: string) {
+  private static downloadFile(data: any, domain: string, date: string) {
     const blob = new Blob([data], {type: 'text/xml'});
     let filename = 'PMode';
     if (domain) {
@@ -500,7 +504,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * IsDirty method used for the IsDirtyOperations
    * @returns {boolean}
    */
-  isDirty (): boolean {
+  isDirty(): boolean {
     return !this.disabledCancel;
   }
 
@@ -508,7 +512,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called every time a tab changes
    * @param value Tab Position
    */
-  selectedIndexChange (value) {
+  selectedIndexChange(value) {
     if (value === 1 && this.uploaded) { // Archive Tab
       this.getResultObservable().map((response: Response) => response.json()).map((response) => response.slice(this.offset * this.rowLimiter.pageSize, (this.offset + 1) * this.rowLimiter.pageSize))
         .subscribe((response) => {
@@ -529,14 +533,14 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     }
   }
 
-  onActivate (event) {
+  onActivate(event) {
     if ('dblclick' === event.type) {
       const current = event.row;
       this.preview(current);
     }
   }
 
-  private preview (row) {
+  private preview(row) {
     this.http.get(CurrentPModeComponent.PMODE_URL + '/' + row.id + '?noAudit=true ').subscribe(res => {
       const HTTP_OK = 200;
       if (res.status === HTTP_OK) {

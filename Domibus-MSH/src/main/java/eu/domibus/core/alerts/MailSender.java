@@ -8,8 +8,10 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -65,7 +67,7 @@ public class MailSender {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         final String sendEmailActivePropertyName = multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
-        final boolean mailActive=Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
+        final boolean mailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
         if (alertModuleEnabled && mailActive) {
             //static properties.
             final String url = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_URL);
@@ -95,36 +97,49 @@ public class MailSender {
         }
     }
 
-    //TODO add unit test here.
     public <T extends MailModel> void sendMail(final T model, final String from, final String to) {
-        if(!mailSenderInitiated){
-            mailSenderInitiated=true;
+        if (StringUtils.isBlank(to)) {
+            throw new IllegalArgumentException("The 'to' property cannot be null");
+        }
+        if (StringUtils.isBlank(from)) {
+            throw new IllegalArgumentException("The 'from' property cannot be null");
+        }
+
+        if (!this.mailSenderInitiated) {
+            this.mailSenderInitiated = true;
             try {
                 initMailSender();
-            }catch (Exception ex){
-                LOG.error("Could not initiate mail sender",ex);
+            } catch (Exception ex) {
+                LOG.error("Could not initiate mail sender", ex);
             }
-
         }
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name());
+            MimeMessageHelper helper = getMimeMessageHelper(message);
 
             Template template = freemarkerConfig.getTemplate(model.getTemplatePath());
             final Object model1 = model.getModel();
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
-            helper.setTo(to);
+            if (to.contains(";")) {
+                helper.setTo(to.split(";"));
+            } else {
+                helper.setTo(to);
+            }
             helper.setText(html, true);
             helper.setSubject(model.getSubject());
             helper.setFrom(from);
             javaMailSender.send(message);
-        } catch (IOException | MessagingException | TemplateException e) {
+        } catch (IOException | MessagingException | TemplateException | MailException e) {
             LOG.error("Exception while sending mail from[{}] to[{}]", from, to, e);
             throw new AlertDispatchException(e);
         }
+    }
+
+    MimeMessageHelper getMimeMessageHelper(MimeMessage message) throws MessagingException {
+        return new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
     }
 
 

@@ -5,7 +5,6 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.model.security.UserDetail;
-import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -26,6 +25,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -35,13 +35,15 @@ import org.springframework.security.web.authentication.logout.CookieClearingLogo
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * @author Cosmin Baciu
+ * @author Cosmin Baciu, Catalin Enache
  * @since 3.3
  */
 @RestController
@@ -114,19 +116,9 @@ public class AuthenticationResource {
             LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
         }
 
-        //Parse Granted authorities to a list of string authorities
-        List<String> authorities = new ArrayList<>();
-        for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
-            authorities.add(grantedAuthority.getAuthority());
-        }
-
-        UserRO userRO = new UserRO();
-        userRO.setUsername(loginRO.getUsername());
-        userRO.setAuthorities(authorities);
-        userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
-        userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
-        return userRO;
+        return createUserRO(principal, loginRO.getUsername());
     }
+
 
     @RequestMapping(value = "authentication", method = RequestMethod.DELETE)
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -143,9 +135,17 @@ public class AuthenticationResource {
         LOG.debug("Logged out");
     }
 
+    @RequestMapping(value = "username", method = RequestMethod.GET)
+    public String getUsername() {
+        return Optional.ofNullable(getLoggedUser()).map(UserDetail::getUsername).orElse(null);
+    }
+
     @RequestMapping(value = "user", method = RequestMethod.GET)
-    public String getUser() {
-        return getLoggedUser().getUsername();
+    public UserRO getUser() {
+        LOG.debug("get user - start");
+        UserDetail userDetail = getLoggedUser();
+
+        return createUserRO(userDetail, userDetail.getUsername());
     }
 
     /**
@@ -187,9 +187,19 @@ public class AuthenticationResource {
         loggedUser.setDefaultPasswordUsed(false);
     }
 
+    /**
+     * It will return the Principal from {@link SecurityContextHolder}
+     * if different from {@link AnonymousAuthenticationToken}
+     * @return
+     */
     UserDetail getLoggedUser() {
-        UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return securityUser;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication!= null && !(authentication instanceof AnonymousAuthenticationToken)) {
+            UserDetail userDetail = (UserDetail) authentication.getPrincipal();
+            LOG.debug("Principal found on SecurityContextHolder: {}", userDetail);
+            return userDetail;
+        }
+        return null;
     }
 
     UserService getUserService() {
@@ -198,6 +208,23 @@ public class AuthenticationResource {
         } else {
             return userManagementService;
         }
+    }
+
+
+    private UserRO createUserRO(UserDetail principal, String username) {
+        //Parse Granted authorities to a list of string authorities
+        List<String> authorities = new ArrayList<>();
+        for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
+            authorities.add(grantedAuthority.getAuthority());
+        }
+
+        UserRO userRO = new UserRO();
+        userRO.setUsername(username);
+        userRO.setAuthorities(authorities);
+        userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
+        userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
+        userRO.setExternalAuthProvider(principal.isExternalAuthProvider());
+        return userRO;
     }
 
 }

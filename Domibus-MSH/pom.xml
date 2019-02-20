@@ -21,6 +21,8 @@
         <xstream.version>1.4.10</xstream.version>
         <freemarker.version>2.3.23</freemarker.version>
         <mail.version>1.6.1</mail.version>
+        <peppol.version>1.1.1</peppol.version>
+        <dynamic.discovery.client.version>1.10</dynamic.discovery.client.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
@@ -256,20 +258,20 @@
         <!-- Difi libraries -->
         <dependency>
             <groupId>no.difi.vefa</groupId>
-            <artifactId>sbdh</artifactId>
-            <version>0.9.3</version>
+            <artifactId>peppol-sbdh</artifactId>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
-            <version>1.0.1</version>
+            <version>${peppol.version}</version>
         </dependency>
 
         <!-- eDelivery SMP profile  -->
         <dependency>
             <groupId>eu.europa.ec.dynamic-discovery</groupId>
             <artifactId>dynamic-discovery-client</artifactId>
-            <version>1.5</version>
+            <version>${dynamic.discovery.client.version}</version>
         </dependency>
         <!-- End Difi libraries -->
 

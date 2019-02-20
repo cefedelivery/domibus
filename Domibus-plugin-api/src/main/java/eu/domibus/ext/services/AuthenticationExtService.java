@@ -13,4 +13,7 @@ public interface AuthenticationExtService {
     void authenticate(HttpServletRequest httpRequest) throws AuthenticationExtException;
 
     void basicAuthenticate(String username, String password) throws AuthenticationExtException;
+
+    boolean isUnsecureLoginAllowed();
+
 }

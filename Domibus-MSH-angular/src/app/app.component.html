@@ -52,7 +52,7 @@
       <md-icon md-tooltip="Truststore" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">vpn_key</md-icon>
       <span>Truststore</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="isAdmin()" id="user_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="isAdmin() && !isExtAuthProviderEnabled()" id="user_id">
       <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people</md-icon>
       <span>Users</span>
     </button>
@@ -131,7 +131,7 @@
 
             <hr/>
 
-            <button md-menu-item (click)="changePassword()" id="changePassword_id">
+            <button md-menu-item (click)="changePassword()" id="changePassword_id" *ngIf="!isExtAuthProviderEnabled()">
               <md-icon>edit</md-icon>
               <span>Change Password</span>
             </button>

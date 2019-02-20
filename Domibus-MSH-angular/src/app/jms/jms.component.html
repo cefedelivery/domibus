@@ -6,13 +6,13 @@
 
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
                    id="jmsQueueSelector" style="width:40%;">
-          <md-option *ngFor="let queue of orderedQueues" [value]="queue" class="queue-combo-item">
+          <md-option *ngFor="let queue of queues" [value]="queue" class="queue-combo-item">
             {{queue.internal ? "[internal]" :""}} {{queue.name}} {{queue.numberOfMessages != -1 ? "(" + queue.numberOfMessages + ")" : ""}}
           </md-option>
         </md-select>
         <md2-datepicker id="jmsFromDatePicker" appClearInvalid
                         placeholder="Received From:"
-                        [(ngModel)]="request.fromDate"
+                        [(ngModel)]="filter.fromDate"
                         name="receivedFrom"
                         [type]="'datetime'"
                         [max]="timestampFromMaxDate"
@@ -21,7 +21,7 @@
         </md2-datepicker>
         <md2-datepicker id="jmsToDatePicker" appClearInvalid
                         placeholder="Received Up To:"
-                        [(ngModel)]="request.toDate"
+                        [(ngModel)]="filter.toDate"
                         name="receivedTo"
                         [min]="timestampToMinDate"
                         [max]="timestampToMaxDate"
@@ -31,15 +31,16 @@
         </md2-datepicker>
 
         <md-input-container id="jmsSelector">
-          <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="request.selector">
+          <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="filter.selector">
         </md-input-container>
 
         <md-input-container id="jmsType">
-          <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="request.jmsType">
+          <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="filter.jmsType">
         </md-input-container>
 
         <div class="searchArea">
-          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()" [disabled]="!canSearch()">
+          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()" [disabled]="!canSearch()"
+                  button-click-behaviour>
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -59,7 +60,7 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                        (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()" button-click-behaviour
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>
@@ -79,9 +80,13 @@
     [selectionType]="'multi'"
     [selected]="selectedMessages"
     [limit]="rowLimiter.pageSize"
+    [offset]="offset"
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+    (sort)="onSort()"
     (activate)="onActivate($event)"
-    (select)="onSelect($event)">
+    (select)="onSelect($event)"
+    (page)="onPage($event)"
+  >
   </ngx-datatable>
 
   <ng-template #rowWithJSONTpl let-row="row" let-value="value" ngx-datatable-cell-template>
@@ -105,22 +110,22 @@
 
   <div class="group-action-button">
     <button id="jmsCancelButton" md-raised-button color="primary" (click)="cancel()"
-            [disabled]="markedForDeletionMessages.length == 0">
+            [disabled]="markedForDeletionMessages.length == 0" button-click-behaviour>
       <md-icon>cancel</md-icon>
       <span>Cancel</span>
     </button>
     <button id="jmsSaveButton" md-raised-button color="primary" (click)="save()"
-            [disabled]="markedForDeletionMessages.length == 0">
+            [disabled]="markedForDeletionMessages.length == 0" button-click-behaviour>
       <md-icon>save</md-icon>
       <span>Save</span>
     </button>
     <button id="jmsMoveButton" md-raised-button color="primary" (click)="move()"
-            [disabled]="selectedMessages.length == 0">
+            [disabled]="selectedMessages.length == 0" button-click-behaviour>
       <md-icon>move_to_inbox</md-icon>
       <span>Move</span>
     </button>
     <button id="jmsDeleteButton" md-raised-button color="primary" (click)="delete()"
-            [disabled]="selectedMessages.length == 0">
+            [disabled]="selectedMessages.length == 0" button-click-behaviour>
       <md-icon>delete</md-icon>
       <span>Delete</span>
     </button>

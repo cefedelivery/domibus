@@ -1,10 +1,12 @@
 package eu.domibus.ebms3.sender;
 
-import com.google.common.base.Strings;
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.proxy.DomibusProxy;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
@@ -62,6 +64,10 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    @Qualifier("domibusProxyService")
+    protected DomibusProxyService domibusProxyService;
+
     @Cacheable(value = "dispatchClient", key = "#domain + #endpoint + #pModeKey", condition = "#cacheable")
     @Override
     public Dispatch<SOAPMessage> getClient(String domain, String endpoint, String algorithm, Policy policy, final String pModeKey, boolean cacheable) {
@@ -85,12 +91,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             }
         }
 
-        if (domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED)) {
-            LOG.info("Usage of Proxy required");
-            configureProxy(httpClientPolicy, httpConduit);
-        } else {
-            LOG.info("No proxy configured");
-        }
+        configureProxy(httpClientPolicy, httpConduit);
         return dispatch;
     }
 
@@ -130,7 +131,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
         ConnectionType connectionType = ConnectionType.CLOSE;
-        if (keepAlive) {
+        if(keepAlive) {
             connectionType = ConnectionType.KEEP_ALIVE;
         }
         httpClientPolicy.setConnection(connectionType);
@@ -145,23 +146,26 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
-        String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-        String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-        String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-        String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-        String httpNonProxyHosts = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_NON_PROXY_HOSTS);
-        if (!Strings.isNullOrEmpty(httpProxyHost) && !Strings.isNullOrEmpty(httpProxyPort)) {
-            httpClientPolicy.setProxyServer(httpProxyHost);
-            httpClientPolicy.setProxyServerPort(Integer.valueOf(httpProxyPort));
-            httpClientPolicy.setProxyServerType(org.apache.cxf.transports.http.configuration.ProxyServerType.HTTP);
+        if(!domibusProxyService.useProxy()) {
+            LOG.debug("Usage of proxy not required");
+            return ;
         }
-        if (!Strings.isNullOrEmpty(httpProxyHost)) {
-            httpClientPolicy.setNonProxyHosts(httpNonProxyHosts);
+
+        DomibusProxy domibusProxy = domibusProxyService.getDomibusProxy();
+        LOG.debug("Configuring proxy [{}] [{}] [{}] [{}] ", domibusProxy.getHttpProxyHost(),
+                domibusProxy.getHttpProxyPort(), domibusProxy.getHttpProxyUser(), domibusProxy.getNonProxyHosts());
+        httpClientPolicy.setProxyServer(domibusProxy.getHttpProxyHost());
+        httpClientPolicy.setProxyServerPort(domibusProxy.getHttpProxyPort());
+        httpClientPolicy.setProxyServerType(org.apache.cxf.transports.http.configuration.ProxyServerType.HTTP);
+
+        if (!StringUtils.isBlank(domibusProxy.getNonProxyHosts())) {
+            httpClientPolicy.setNonProxyHosts(domibusProxy.getNonProxyHosts());
         }
-        if (!Strings.isNullOrEmpty(httpProxyUser) && !Strings.isNullOrEmpty(httpProxyPassword)) {
+
+        if (!domibusProxyService.isProxyUserSet()) {
             ProxyAuthorizationPolicy policy = new ProxyAuthorizationPolicy();
-            policy.setUserName(httpProxyUser);
-            policy.setPassword(httpProxyPassword);
+            policy.setUserName(domibusProxy.getHttpProxyUser());
+            policy.setPassword(domibusProxy.getHttpProxyPassword());
             httpConduit.setProxyAuthorization(policy);
         }
     }
@@ -173,6 +177,5 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         final Dispatch<SOAPMessage> dispatch = service.createDispatch(LOCAL_PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
         return dispatch;
     }
-
 
 }

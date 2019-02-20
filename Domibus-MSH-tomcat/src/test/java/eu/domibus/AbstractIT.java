@@ -16,6 +16,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.proxy.DomibusProxyService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +42,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -74,6 +76,7 @@ import static org.awaitility.Awaitility.with;
 @ContextConfiguration("classpath:spring-context.xml")
 @DirtiesContext
 @Rollback
+@TestPropertySource("classpath:domibus.properties")
 public abstract class AbstractIT {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
@@ -91,6 +94,9 @@ public abstract class AbstractIT {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusProxyService domibusProxyService;
 
     @BeforeClass
     public static void init() throws IOException {

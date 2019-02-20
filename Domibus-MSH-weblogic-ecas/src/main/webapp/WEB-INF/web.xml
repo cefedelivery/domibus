@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+    <resource-ref id="DomibusWorkManager">
+        <res-ref-name>DomibusWorkManager</res-ref-name>
+        <res-type>commonj.work.WorkManager</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Unshareable</res-sharing-scope>
+    </resource-ref>
+    <resource-ref id="QuartzWorkManager">
+        <res-ref-name>QuartzWorkManager</res-ref-name>
+        <res-type>commonj.work.WorkManager</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Unshareable</res-sharing-scope>
+    </resource-ref>
+
+
+    <!-- ECAS security -->
+    <!-- Here we specify which URLs are protected by ECAS and which application server role is used. -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Domibus</web-resource-name>
+            <description>Require users to authenticate</description>
+            <url-pattern>/index.html</url-pattern>
+            <url-pattern>/pmode-current</url-pattern>
+            <url-pattern>/pmode-archive</url-pattern>
+            <url-pattern>/pmode-party</url-pattern>
+            <url-pattern>/jms</url-pattern>
+            <url-pattern>/messagefilter</url-pattern>
+            <url-pattern>/truststore</url-pattern>
+            <url-pattern>/messagelog</url-pattern>
+            <url-pattern>/user</url-pattern>
+            <url-pattern>/pluginuser</url-pattern>
+            <url-pattern>/errorlog</url-pattern>
+            <url-pattern>/audit</url-pattern>
+            <url-pattern>/alerts</url-pattern>
+            <url-pattern>/errorlog</url-pattern>
+            <url-pattern>/testservice</url-pattern>
+            <url-pattern>/changePassword</url-pattern>
+            <url-pattern>/logging</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <description>Ensures that the principal is authenticated</description>
+            <role-name>*</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <description>Encryption is not required for the application in general.</description>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Domibus services</web-resource-name>
+            <url-pattern>/services</url-pattern>
+        </web-resource-collection>
+    </security-constraint>
+
+    <!-- for ECAS/Weblogic to not intercept BASIC authentication requests (calls to ws-plugin) -->
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>Whatever</realm-name>
+        <form-login-config>
+            <form-login-page>/whatever</form-login-page>
+            <form-error-page>/whatever</form-error-page>
+        </form-login-config>
+    </login-config>
+</web-app>

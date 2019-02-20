@@ -13,6 +13,6 @@ public interface HttpUtil {
 
     ByteArrayInputStream downloadURLDirect(String url) throws IOException;
 
-    ByteArrayInputStream downloadURLViaProxy(String url, String proxyHost, Integer proxyPort, String proxyUser, String proxyPassword) throws IOException;
+    ByteArrayInputStream downloadURLViaProxy(String url) throws IOException;
 
 }

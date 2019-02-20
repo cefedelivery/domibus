@@ -4,7 +4,7 @@ import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {IdentifierRo, PartyResponseRo, ProcessInfoRo} from '../party';
 import {PartyIdentifierDetailsComponent} from '../party-identifier-details/party-identifier-details.component';
 import {PartyService} from '../party.service';
-import {AlertService} from '../../alert/alert.service';
+import {AlertService} from '../../common/alert/alert.service';
 
 @Component({
   selector: 'app-party-details',
@@ -28,11 +28,13 @@ export class PartyDetailsComponent implements OnInit {
   @ViewChild('fileInput')
   private fileInput;
 
-  constructor (public dialogRef: MdDialogRef<PartyDetailsComponent>,
-               @Inject(MD_DIALOG_DATA) public data: any,
-               private dialog: MdDialog,
-               public partyService: PartyService,
-               public alertService: AlertService) {
+  endpointPattern = '^(?:(?:(?:https?|ftp):)?\\/\\/)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:(\\.)?(?:[a-z\u00a1-\uffff]{2,})))(?::\\d{2,5})?(?:[/?#]\\S*)?$';
+
+  constructor(public dialogRef: MdDialogRef<PartyDetailsComponent>,
+              @Inject(MD_DIALOG_DATA) public data: any,
+              private dialog: MdDialog,
+              public partyService: PartyService,
+              public alertService: AlertService) {
     this.party = data.edit;
     this.identifiers = this.party.identifiers;
     this.allProcesses = data.allProcesses;
@@ -41,7 +43,7 @@ export class PartyDetailsComponent implements OnInit {
   }
 
   // transform processes to view-model
-  private formatProcesses () {
+  private formatProcesses() {
     const processesWithPartyAsInitiator = this.party.processesWithPartyAsInitiator.map(el => el.name);
     const processesWithPartyAsResponder = this.party.processesWithPartyAsResponder.map(el => el.name);
     for (const proc of this.allProcesses) {
@@ -67,11 +69,11 @@ export class PartyDetailsComponent implements OnInit {
     );
   }
 
-  ngOnInit () {
+  ngOnInit() {
     this.initColumns();
   }
 
-  uploadCertificate () {
+  uploadCertificate() {
     const fi = this.fileInput.nativeElement;
     const file = fi.files[0];
 
@@ -98,7 +100,7 @@ export class PartyDetailsComponent implements OnInit {
     reader.readAsArrayBuffer(file);
   }
 
-  initColumns () {
+  initColumns() {
     this.identifiersRowColumnPicker.allColumns = [
       {
         name: 'Party Id',
@@ -121,12 +123,12 @@ export class PartyDetailsComponent implements OnInit {
     });
   }
 
-  async editIdentifier (): Promise<boolean> {
+  async editIdentifier(): Promise<boolean> {
     const identifierRow = this.selectedIdentifiers[0];
     if (!identifierRow) return;
 
     const rowClone = JSON.parse(JSON.stringify(identifierRow));
-    
+
     const dialogRef: MdDialogRef<PartyIdentifierDetailsComponent> = this.dialog.open(PartyIdentifierDetailsComponent, {
       data: {
         edit: rowClone
@@ -141,7 +143,7 @@ export class PartyDetailsComponent implements OnInit {
     return ok;
   }
 
-  removeIdentifier () {
+  removeIdentifier() {
     const identifierRow = this.selectedIdentifiers[0];
     if (!identifierRow) return;
 
@@ -149,7 +151,7 @@ export class PartyDetailsComponent implements OnInit {
     this.selectedIdentifiers.length = 0;
   }
 
-  async addIdentifier () {
+  async addIdentifier() {
     const identifierRow = {entityId: 0, partyId: '', partyIdType: {name: '', value: ''}};
 
     this.party.identifiers.push(identifierRow);
@@ -162,13 +164,13 @@ export class PartyDetailsComponent implements OnInit {
     }
   }
 
-  ok () {
+  ok() {
     this.persistProcesses();
     this.party.joinedIdentifiers = this.party.identifiers.map(el => el.partyId).join(', ');
     this.dialogRef.close(true);
   }
 
-  persistProcesses () {
+  persistProcesses() {
     this.party.processesWithPartyAsInitiator = [];
     this.party.processesWithPartyAsResponder = [];
     const rowsToProcess = this.processesRows.filter(el => el.isResponder || el.isInitiator);
@@ -195,11 +197,11 @@ export class PartyDetailsComponent implements OnInit {
       this.party.joinedProcesses = this.party.joinedProcesses.substr(0, this.party.joinedProcesses.length - 2);
   }
 
-  cancel () {
+  cancel() {
     this.dialogRef.close(false);
   }
 
-  onActivate (event) {
+  onActivate(event) {
     if ('dblclick' === event.type) {
       this.editIdentifier();
     }

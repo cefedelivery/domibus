@@ -1,17 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {MdDialog, MdDialogRef} from '@angular/material';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {Http, Headers, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {MessageFilterResult} from './messagefilterresult';
 import {BackendFilterEntry} from './backendfilterentry';
 import {RoutingCriteriaEntry} from './routingcriteriaentry';
-import {isNullOrUndefined, isUndefined} from 'util';
+import {isNullOrUndefined} from 'util';
 import {EditMessageFilterComponent} from './editmessagefilter-form/editmessagefilter-form.component';
 import {DirtyOperations} from '../common/dirty-operations';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 
 @Component({
   moduleId: module.id,
@@ -155,7 +155,8 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
   private findRowsIndex (backendEntry: BackendFilterEntry): number {
     for (let i = 0; i < this.rows.length; i++) {
       let currentRow = this.rows[i];
-      if (currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
+      if (currentRow.backendName === backendEntry.backendName 
+        && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
         return i;
       }
     }
@@ -163,11 +164,14 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
   }
 
   private compareRoutingCriterias (criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
-    let result: boolean = true;
+    let found: boolean = true;
     for (let entry of criteriasA) {
-      result = result && this.findRoutingCriteria(entry, criteriasB);
+      found = found && this.findRoutingCriteria(entry, criteriasB);
     }
-    return result;
+    for (let entry of criteriasB) {
+      found = found && this.findRoutingCriteria(entry, criteriasA);
+    }
+    return found;
   }
 
   private findRoutingCriteria (toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {

@@ -1,9 +1,12 @@
 package eu.domibus.core.alerts.service;
 
+import eu.domibus.api.user.UserBase;
 import eu.domibus.common.dao.security.UserDaoBase;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.logging.DomibusLogger;
@@ -35,6 +38,9 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService alertsConfiguration;
 
 
     @Override
@@ -73,14 +79,18 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    // TODO: move this code to base class to use the same code for console and plugin users
-    public void triggerLoginFailureEvent(UserBase user) {
-        final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
-        LOG.debug("Plugin login Failure Configuration active() : [{}]", configuration.isActive());
-
-        if (configuration.isActive()) {
-            eventService.enqueuePluginLoginFailureEvent(user.getUserName(), new Date());
-        }
+    protected UserEntityBase.Type getUserType() {
+        return UserEntityBase.Type.PLUGIN;
     }
+
+    @Override
+    protected AccountDisabledModuleConfiguration getAccountDisabledConfiguration() {
+        return alertsConfiguration.getPluginAccountDisabledConfiguration();
+    }
+
+    @Override
+    protected LoginFailureModuleConfiguration getLoginFailureConfiguration() {
+        return alertsConfiguration.getPluginLoginFailureConfiguration();
+    }
+
 }

@@ -9,6 +9,16 @@ Domibus 4.1
 - Default password policy enforcement for all users at the back-end level;
 - Added route and component for changing password when default used or about to expire for all users.
 - Renamed property "message.retention.downloaded.max.delete" to "domibus.retentionWorker.message.retention.downloaded.max.delete" and property "message.retention.not_downloaded.max.delete" to "domibus.retentionWorker.message.retention.not_downloaded.max.delete"
+- New property "domibus.msh.retry.messageExpirationDelay" to grant a few seconds for schedulling the retry of the last attempt
+Domibus 4.0.2
+- Improved the logging in the Default JMS Plugin
+- Allow sending an XML payload in the Soap body
+- Adapt the configuration for the connection pooling in Tomcat
+- Fixed the caching for the downloaded CRLs
+- Allow proxy configuration without user/password
+- Improved the duplicate detection
+- Default FS Plugin: add configuration for message payload identifiers
+- Allow proxy configuration without user/password
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
@@ -16,8 +26,8 @@ Domibus 4.0.1
 - Add email alert support for super user login failure and account disabled.
 - WebLogic cluster: fixed the PMode and truststore refresh when the WebLogic cluster was composed of more than 2 managed servers
   The uniform distributed topics do not work correctly in WebLogic 12.1.3. JMS messages are not correctly replicated to all managed servers when the cluster is composed of more than 2 managed servers.
-- Fix the retry issue for restored messages.
 - Fixed submitting of messages via the Default JMS Plugin in in multi-tenancy mode
+- Fix the retry issue for restored messages.
 - Increase to 5 minutes the transaction timeout of ListPendingMessages operation in the Default WS Plugin
 - Add configurable property for AS4 transport profile in the dynamic discovery process
 - Fixed the parsing of service and action values in case of Peppol dynamic discovery

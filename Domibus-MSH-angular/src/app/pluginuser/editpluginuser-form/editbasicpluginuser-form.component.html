@@ -5,7 +5,7 @@
 
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="User Name" name="username" id="username_id" [(ngModel)]="user.username"
+          <input mdInput placeholder="User Name" name="userName" id="username_id" [(ngModel)]="user.userName"
                  [formControl]="userForm.controls['userName']" maxlength="255" required>
           <div *ngIf="userForm.controls['userName'].hasError('required')" style="color:red; font-size: 70%">You should type an username</div>
         </md-input-container>
@@ -45,6 +45,10 @@
           <div *ngIf="!editMode && userForm.controls['confirmation'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['confirmation'].hasError('confirmation')" style="color:red; font-size: 70%">Passwords do not match</div>
         </md-input-container>
+      </div>
+
+      <div style="margin-bottom: 20px;margin-top: 10px;">
+        Active<input type="checkbox" [checked]="user.active" (blur)="updateActive($event)" [formControl]="userForm.controls['active']">
       </div>
 
       <table class="buttonsRow">

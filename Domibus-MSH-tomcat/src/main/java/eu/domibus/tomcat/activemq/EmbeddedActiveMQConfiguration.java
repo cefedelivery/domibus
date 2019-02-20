@@ -4,7 +4,11 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.activemq.xbean.BrokerFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
@@ -13,7 +17,6 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @since 3.3
  */
 @Configuration
-@PropertySource(value="file:///${domibus.config.location}/domibus.properties")
 public class EmbeddedActiveMQConfiguration implements Condition {
 
     private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(EmbeddedActiveMQConfiguration.class);

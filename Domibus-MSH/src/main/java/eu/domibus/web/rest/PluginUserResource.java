@@ -90,6 +90,7 @@ public class PluginUserResource {
         List<AuthenticationEntity> addedUsers = domainConverter.convert(addedUsersRO, AuthenticationEntity.class);
         List<AuthenticationEntity> updatedUsers = domainConverter.convert(updatedUsersRO, AuthenticationEntity.class);
         List<AuthenticationEntity> removedUsers = domainConverter.convert(removedUsersRO, AuthenticationEntity.class);
+
         pluginUserService.updateUsers(addedUsers, updatedUsers, removedUsers);
     }
 
@@ -132,20 +133,28 @@ public class PluginUserResource {
      * @return a list of PluginUserROs and the pagination info
      */
     private PluginUserResultRO prepareResponse(List<AuthenticationEntity> users, Long count, int pageStart, int pageSize) {
-        List<PluginUserRO> pluginUserROs = domainConverter.convert(users, PluginUserRO.class);
-        for (PluginUserRO pluginUserRO : pluginUserROs) {
-            pluginUserRO.setStatus(UserState.PERSISTED.name());
-            pluginUserRO.setPassword(null);
-            if (StringUtils.isEmpty(pluginUserRO.getCertificateId())) {
-                pluginUserRO.setAuthenticationType(AuthType.BASIC.name());
+        List<PluginUserRO> userROs = domainConverter.convert(users, PluginUserRO.class);
+
+        // this is business, should be located somewhere else
+        for (int i = 0; i < users.size(); i++ ){
+            PluginUserRO userRO = userROs.get(i);
+            AuthenticationEntity entity = users.get(i);
+
+            userRO.setStatus(UserState.PERSISTED.name());
+            userRO.setPassword(null);
+            if (StringUtils.isEmpty(userRO.getCertificateId())) {
+                userRO.setAuthenticationType(AuthType.BASIC.name());
             } else {
-                pluginUserRO.setAuthenticationType(AuthType.CERTIFICATE.name());
+                userRO.setAuthenticationType(AuthType.CERTIFICATE.name());
             }
+
+            boolean isSuspended = !entity.isActive() && entity.getSuspensionDate() != null;
+            userRO.setSuspended(isSuspended);
         }
 
         PluginUserResultRO result = new PluginUserResultRO();
 
-        result.setEntries(pluginUserROs);
+        result.setEntries(userROs);
         result.setCount(count);
         result.setPage(pageStart);
         result.setPageSize(pageSize);

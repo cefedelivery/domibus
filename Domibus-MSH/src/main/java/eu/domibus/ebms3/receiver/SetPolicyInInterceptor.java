@@ -5,19 +5,20 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.SoapService;
+import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.binding.soap.saaj.SAAJInInterceptor;
-import org.apache.cxf.common.util.StringUtils;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AttachmentInInterceptor;
 import org.apache.cxf.interceptor.Fault;
@@ -27,12 +28,15 @@ import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.BindingInfo;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.service.model.EndpointInfo;
+import org.apache.cxf.transport.http.AbstractHTTPDestination;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.AttachmentPart;
@@ -60,6 +64,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     @Autowired
     private PolicyService policyService;
+
+    @Autowired
+    private DomibusPropertiesService domibusPropertiesService;
 
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
@@ -89,10 +96,17 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     public void handleMessage(final SoapMessage message) throws Fault {
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
-        if(org.apache.commons.lang3.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
+        if (StringUtils.containsIgnoreCase(httpMethod, HttpMethod.GET)) {
             LOG.debug("Detected GET request on MSH: aborting the interceptor chain");
-            message.put(SoapMessage.RESPONSE_CODE, 200);
             message.getInterceptorChain().abort();
+
+            final HttpServletResponse response = (HttpServletResponse) message.get(AbstractHTTPDestination.HTTP_RESPONSE);
+            response.setStatus(HttpServletResponse.SC_OK);
+            try {
+                response.getWriter().println(domibusPropertiesService.getDisplayVersion());
+            } catch (IOException ex) {
+                throw new Fault(ex);
+            }
             return;
         }
 
@@ -102,13 +116,13 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         try {
 
-            messaging=soapService.getMessage(message);
+            messaging = soapService.getMessage(message);
             LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
-            if(legConfigurationExtractor ==null)return;
+            if (legConfigurationExtractor == null) return;
 
-            final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
+            final LegConfiguration legConfiguration = legConfigurationExtractor.extractMessageConfiguration();
             policyName = legConfiguration.getSecurity().getPolicy();
-            Policy policy = policyService.parsePolicy("policies"+File.separator + policyName);
+            Policy policy = policyService.parsePolicy("policies" + File.separator + policyName);
 
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
@@ -132,7 +146,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ex);
         }
-
     }
 
     //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.

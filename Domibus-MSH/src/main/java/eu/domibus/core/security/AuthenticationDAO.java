@@ -3,7 +3,7 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.dao.security.UserDaoBase;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,13 +15,14 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository("securityAuthenticationDAO")
 @Transactional
-public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements UserDaoBase {
+public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements UserDaoBase<AuthenticationEntity> {
 
     public AuthenticationDAO() {
         super(AuthenticationEntity.class);
@@ -134,7 +135,7 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
         return predicates;
     }
 
-    public List<UserBase> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
+    public List<UserEntityBase> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
         TypedQuery<AuthenticationEntity> namedQuery = em.createNamedQuery("AuthenticationEntity.findWithPasswordChangedBetween", AuthenticationEntity.class);
         namedQuery.setParameter("START_DATE", from.atStartOfDay());
         namedQuery.setParameter("END_DATE", to.atStartOfDay());
@@ -143,7 +144,26 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
     }
 
     @Override
-    public UserBase findByUserName(String userName) {
+    public void update(AuthenticationEntity user, boolean flush) {
+        super.update(user);
+    }
+
+    @Override
+    public List<UserEntityBase> getSuspendedUsers(Date currentTimeMinusSuspensionInterval) {
+        TypedQuery<AuthenticationEntity> namedQuery = em.createNamedQuery("AuthenticationEntity.findSuspendedUsers", AuthenticationEntity.class);
+        namedQuery.setParameter("SUSPENSION_INTERVAL", currentTimeMinusSuspensionInterval);
+        return namedQuery.getResultList().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public void update(final List<AuthenticationEntity> users) {
+        for (final AuthenticationEntity u : users) {
+            super.update(u);
+        }
+    }
+
+    @Override
+    public UserEntityBase findByUserName(String userName) {
         return findByUser(userName);
     }
 

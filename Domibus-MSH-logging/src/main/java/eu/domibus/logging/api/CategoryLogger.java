@@ -172,7 +172,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
 
     public void clearCustomKeys() {
         if (mdcPropertyPrefix == null) {
-            LOG.debug("No custom keys defined: mdcPropertyPrefix is empty");
+            LOG.trace("No custom keys defined: mdcPropertyPrefix is empty");
             return;
         }
 
@@ -192,6 +192,6 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
 
     public void clearAll() {
         MDC.clear();
-        LOG.debug("Cleared MDC");
+        LOG.trace("Cleared MDC");
     }
 }

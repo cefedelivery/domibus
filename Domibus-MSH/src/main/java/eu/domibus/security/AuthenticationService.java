@@ -1,91 +1,14 @@
 package eu.domibus.security;
 
-import eu.domibus.api.multitenancy.DomainException;
-import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.model.security.UserDetail;
-import eu.domibus.common.model.security.UserLoginErrorReason;
-import eu.domibus.common.services.UserService;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.authentication.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class AuthenticationService {
+/**
+ * @author Catalin Enache
+ * @since 4.1
+ */
+public interface AuthenticationService {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationService.class);
+    UserDetail authenticate(String username, String password, String domain);
 
-    public static final String INACTIVE = "Inactive";
-
-    public static final String SUSPENDED = "Suspended";
-
-    @Autowired
-    @Qualifier("authenticationManagerForAdminConsole")
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private DomainService domainService;
-
-    @Transactional(noRollbackFor = AuthenticationException.class)
-    public UserDetail authenticate(String username, String password, String domain) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        UserDetail principal = null;
-        Authentication authentication = null;
-        try {
-            authentication = authenticationManager.authenticate(authenticationToken);
-            principal = (UserDetail) authentication.getPrincipal();
-            userService.validateExpiredPassword(username);
-            userService.handleCorrectAuthentication(username);
-        } catch (CredentialsExpiredException ex) {
-            LOG.trace("Caught CredentialsExpiredException: [{}]", ex);
-            throw ex;
-        } catch (AuthenticationException ae) {
-            LOG.trace("Caught AuthenticationException: [{}]", ae.getClass().getName());
-            UserLoginErrorReason userLoginErrorReason = userService.handleWrongAuthentication(username);
-            if (UserLoginErrorReason.INACTIVE.equals(userLoginErrorReason)) {
-                throw new DisabledException(INACTIVE, ae);
-            } else if (UserLoginErrorReason.SUSPENDED.equals(userLoginErrorReason)) {
-                throw new LockedException(SUSPENDED, ae);
-            }
-            LOG.trace("AuthenticationException: {}", ae.getMessage());
-            throw ae;
-        }
-
-        principal.setDomain(domain);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return principal;
-    }
-
-
-    /**
-     * Set the domain in the current security context
-     *
-     * @param domainCode the code of the new current domain
-     */
-    public void changeDomain(String domainCode) {
-
-        if (StringUtils.isEmpty(domainCode)) {
-            throw new DomainException("Could not set current domain: domain is empty");
-        }
-        if (!domainService.getDomains().stream().anyMatch(d -> domainCode.equalsIgnoreCase(d.getCode()))) {
-            throw new DomainException("Could not set current domain: unknown domain (" + domainCode + ")");
-        }
-
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetail securityUser = (UserDetail) authentication.getPrincipal();
-        securityUser.setDomain(domainCode);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-
+    void changeDomain(String domainCode);
 }

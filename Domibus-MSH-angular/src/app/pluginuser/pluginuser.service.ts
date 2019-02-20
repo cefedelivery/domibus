@@ -6,7 +6,7 @@ import {UserState} from '../user/user';
 import {UserService} from '../user/user.service';
 import {SecurityService} from '../security/security.service';
 import {UserComponent} from '../user/user.component';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 
 @Injectable()
 export class PluginUserService {
@@ -61,7 +61,9 @@ export class PluginUserService {
   createNew (): PluginUserRO {
     const item = new PluginUserRO();
     item.status = UserState[UserState.NEW];
-    item.username = '';
+    item.userName = '';
+    item.active = true;
+    item.suspended = false;
     return item;
   }
 

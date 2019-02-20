@@ -1,5 +1,6 @@
 package eu.domibus.ext.delegate.services.authentication;
 
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.exceptions.AuthenticationExtException;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -23,6 +24,9 @@ public class AuthenticationServiceDelegateTest {
 
     @Injectable
     eu.domibus.api.security.AuthenticationService authenticationService;
+
+    @Injectable
+    protected AuthUtils authUtils;
 
     @Test
     public void testAuthenticate(@Injectable final HttpServletRequest httpRequest) throws Exception {

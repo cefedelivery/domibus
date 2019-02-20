@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * @author Cosmin Baciu
+ * @author Cosmin Baciu, Catalin Enache
  * @since 3.3
  * <p>
  * Rest for getting application related information
@@ -70,6 +70,7 @@ public class ApplicationResource {
         LOG.debug("Getting application info");
         final DomibusInfoRO domibusInfoRO = new DomibusInfoRO();
         domibusInfoRO.setVersion(domibusPropertiesService.getDisplayVersion());
+        domibusInfoRO.setVersionNumber(domibusPropertiesService.getVersionNumber());
         return domibusInfoRO;
     }
 
@@ -118,6 +119,17 @@ public class ApplicationResource {
     public boolean getFourCornerModelEnabled() {
         LOG.debug("Getting four corner enabled");
         return domibusConfigurationService.isFourCornerEnabled();
+    }
+
+    /**
+     * Returns true is an external Authentication Provider (e.g. ECAS) is enabled
+     *
+     * @return
+     */
+    @RequestMapping(value = "extauthproviderenabled", method = RequestMethod.GET)
+    public boolean getExtAuthProviderEnabled() {
+        LOG.debug("Getting external authentication provider enabled");
+        return domibusConfigurationService.isExtAuthProviderEnabled();
     }
 
     /**

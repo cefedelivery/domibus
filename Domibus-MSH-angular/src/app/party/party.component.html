@@ -5,25 +5,26 @@
       <form (submit)="searchIfOK()">
         <div class="panel">
           <md-input-container>
-            <input mdInput placeholder="Name" [(ngModel)]="name" name="name" id="name_id">
+            <input mdInput placeholder="Name" [(ngModel)]="filter.name" name="name" id="name_id">
           </md-input-container>
           <md-input-container>
-            <input mdInput placeholder="End Point" [(ngModel)]="endPoint" name="endPoint" id="endPoint_id">
+            <input mdInput placeholder="End Point" [(ngModel)]="filter.endPoint" name="endPoint" id="endPoint_id">
           </md-input-container>
           <md-input-container>
-            <input mdInput placeholder="Party Id" [(ngModel)]="partyID" name="partyID" id="partyID_id">
+            <input mdInput placeholder="Party Id" [(ngModel)]="filter.partyID" name="partyID" id="partyID_id">
           </md-input-container>
           <md-input-container>
-            <input mdInput placeholder="Process" [(ngModel)]="process" name="process" id="process_id">
+            <input mdInput placeholder="Process" [(ngModel)]="filter.process" name="process" id="process_id">
           </md-input-container>
-          <md-select placeholder="Process Role" [(ngModel)]="process_role" name="process_role" id="process_role_id" style="width:120px;">
+          <md-select placeholder="Process Role" [(ngModel)]="filter.process_role" name="process_role" id="process_role_id" style="width:120px;">
             <md-option [value]="''"></md-option>
             <md-option [value]="'(I)'">I</md-option>
             <md-option [value]="'(R)'">R</md-option>
             <md-option [value]="'(IR)'">IR</md-option>
           </md-select>
+
           <div class="searchArea">
-            <button md-raised-button color="primary" id="searchbutton_id">
+            <button md-raised-button color="primary" id="searchbutton_id" button-click-behaviour>
               <md-icon>search</md-icon>
               <span>Search</span>
             </button>
@@ -44,7 +45,7 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()" button-click-behaviour
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>
@@ -68,6 +69,7 @@
   [offset]="offset"
   [limit]="rowLimiter.pageSize"
   (page)="onPageChange($event)"
+  (sort)="OnSort()"
   [selected]="selected"
   [selectionType]="'single'"
   (activate)="onActivate($event)"
@@ -76,23 +78,23 @@
 <table class="group-action-button">
   <tr>
     <td>
-      <button md-raised-button (click)="cancel()" color="primary" [disabled]="!canCancel()">
+      <button md-raised-button (click)="cancel()" color="primary" [disabled]="!canCancel()" button-click-behaviour>
         <md-icon>cancel</md-icon>
         <span>Cancel</span>
       </button>
-      <button md-raised-button (click)="save()" color="primary" [disabled]="!canSave()">
+      <button md-raised-button (click)="save()" color="primary" [disabled]="!canSave()" button-click-behaviour>
         <md-icon>save</md-icon>
         <span>Save</span>
       </button>
-      <button md-raised-button (click)="add()" color="primary" [disabled]="!canAdd()">
+      <button md-raised-button (click)="add()" color="primary" [disabled]="!canAdd()" button-click-behaviour>
         <md-icon>add</md-icon>
         <span>New</span>
       </button>
-      <button md-raised-button (click)="edit(null)" color="primary" [disabled]="!canEdit()">
+      <button md-raised-button (click)="edit(null)" color="primary" [disabled]="!canEdit()" button-click-behaviour>
         <md-icon>edit</md-icon>
         <span>Edit</span>
       </button>
-      <button md-raised-button (click)="remove()" color="primary" [disabled]="!canDelete()">
+      <button md-raised-button (click)="remove()" color="primary" [disabled]="!canDelete()" button-click-behaviour>
         <md-icon>delete</md-icon>
         <span>Delete</span>
       </button>

@@ -58,35 +58,13 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     }
 
     @Override
-    public boolean useProxy() {
-        Boolean useProxy = domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED);
-        if (!useProxy) {
-            LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
-            return false;
-        }
-
-        String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-        String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-        String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-        String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-
-        if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
-                || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
-
-            LOG.error("Proxy is enabled but the configuration is invalid:" + httpProxyHost + " " + httpProxyPort + " " +
-                    httpProxyUser);
-
-            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_006, "Proxy is enabled but the configuration is invalid.");
-        }
-        LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                httpProxyUser);
-
-        return useProxy;
+    public boolean isFourCornerEnabled() {
+        return domibusPropertyProvider.getBooleanProperty(FOURCORNERMODEL_ENABLED_KEY);
     }
 
     @Override
-    public boolean isFourCornerEnabled() {
-        return domibusPropertyProvider.getBooleanProperty(FOURCORNERMODEL_ENABLED_KEY);
+    public boolean isExtAuthProviderEnabled() {
+        return domibusPropertyProvider.getBooleanProperty(EXTERNAL_AUTH_PROVIDER);
     }
 
 }
