@@ -77,10 +77,8 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     protected void storeIncomingPayload(PartInfo partInfo, String messageId) throws IOException {
-        partInfo.setMime(partInfo.getPayloadDatahandler().getContentType());
-        if (partInfo.getMime() == null) {
-            partInfo.setMime("application/unknown");
-        }
+        setContentType(partInfo);
+
         InputStream is = partInfo.getPayloadDatahandler().getInputStream();
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
@@ -137,10 +135,7 @@ public class MessagingServiceImpl implements MessagingService {
             }
         }
 
-        partInfo.setMime(partInfo.getPayloadDatahandler().getContentType());
-        if (partInfo.getMime() == null) {
-            partInfo.setMime("application/unknown");
-        }
+        setContentType(partInfo);
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
 
@@ -148,6 +143,15 @@ public class MessagingServiceImpl implements MessagingService {
         if (hasCompressionProperty) {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
+    }
+
+    protected void setContentType(PartInfo partInfo) {
+        String contentType = partInfo.getPayloadDatahandler().getContentType();
+        if(StringUtils.isBlank(contentType)) {
+            contentType = "application/unknown";
+        }
+        LOG.debug("Setting the payload [{}] content type to [{}]", partInfo.getHref(), contentType);
+        partInfo.setMime(contentType);
     }
 
     protected long saveIncomingFileToDisk(File file, InputStream is) throws IOException {
