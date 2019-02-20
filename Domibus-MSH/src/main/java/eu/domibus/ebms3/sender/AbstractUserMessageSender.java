@@ -145,15 +145,22 @@ public abstract class AbstractUserMessageSender implements MessageSender {
             throw t;
         } finally {
             try {
+                getLog().debug("Finally handle reliability");
                 reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
-                attempt.setError(attemptError);
-                attempt.setStatus(attemptStatus);
-                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                messageAttemptService.create(attempt);
+                updateAndCreateAttempt(attempt, attemptError, attemptStatus);
             } catch (Exception ex) {
-                getLog().error("Finally: ", ex);
+                getLog().warn("Finally exception when handlingReliability: ", ex);
+                reliabilityService.handleReliabilityInNewTransaction(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
+                updateAndCreateAttempt(attempt, attemptError, attemptStatus);
             }
         }
+    }
+
+    protected void updateAndCreateAttempt(MessageAttempt attempt, String attemptError, MessageAttemptStatus attemptStatus) {
+        attempt.setError(attemptError);
+        attempt.setStatus(attemptStatus);
+        attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
+        messageAttemptService.create(attempt);
     }
 
     protected abstract SOAPMessage createSOAPMessage(final UserMessage userMessage, LegConfiguration legConfiguration) throws EbMS3Exception;
