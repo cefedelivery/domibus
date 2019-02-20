@@ -30,7 +30,8 @@ public class MessageListenerContainerInitializer {
     @Autowired
     protected DomainService domainService;
 
-    protected Map<Domain, MessageListenerContainer> instances = new HashMap<>();
+    protected Map<Domain, MessageListenerContainer> messageListenerInstances = new HashMap<>();
+    protected Map<Domain, MessageListenerContainer> pullReceiptListenerInstances = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -43,6 +44,11 @@ public class MessageListenerContainerInitializer {
 
     @PreDestroy
     public void destroy() throws InterruptedException {
+        destroy(messageListenerInstances);
+        destroy(pullReceiptListenerInstances);
+    }
+
+    public void destroy(Map<Domain, MessageListenerContainer> instances) throws InterruptedException {
         LOG.info("Shutting down MessageListenerContainer instances");
 
         for (MessageListenerContainer instance: instances.values()) {
@@ -57,14 +63,14 @@ public class MessageListenerContainerInitializer {
     public void createMessageListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createMessageListenerContainer(domain);
         instance.start();
-        instances.put(domain, instance);
+        messageListenerInstances.put(domain, instance);
         LOG.info("MessageListenerContainer initialized for domain [{}]", domain);
     }
 
     public void createPullReceiptListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createPullReceiptListenerContainer(domain);
         instance.start();
-        instances.put(domain, instance);
+        pullReceiptListenerInstances.put(domain, instance);
         LOG.info("PullReceiptListenerContainer initialized for domain [{}]", domain);
     }
 
