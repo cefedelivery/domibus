@@ -23,6 +23,10 @@ import javax.xml.soap.SOAPMessage;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author idragusa
+ * @since 4.1
+ */
 @RunWith(JMockit.class)
 public class PullReceiptListenerTest {
 

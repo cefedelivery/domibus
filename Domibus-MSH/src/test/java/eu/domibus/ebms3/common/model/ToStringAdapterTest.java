@@ -1,19 +1,21 @@
 package eu.domibus.ebms3.common.model;
 
-import eu.domibus.util.SoapUtil;
 import mockit.Tested;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Node;
 
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author idragusa
+ * @since 4.1
+ */
 public class ToStringAdapterTest {
 
     @Tested
