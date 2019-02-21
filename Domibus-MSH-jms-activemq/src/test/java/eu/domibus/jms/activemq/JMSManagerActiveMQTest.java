@@ -231,8 +231,10 @@ public class JMSManagerActiveMQTest {
     @Test
     public void testConvertCompositeData(final @Injectable CompositeData data,
                                          final @Injectable Map stringProperties,
+                                         final @Injectable Map intProperties,
                                          final @Injectable CompositeDataSupport dataSupport1,
-                                         final @Injectable CompositeDataSupport dataSupport2) throws Exception {
+                                         final @Injectable CompositeDataSupport dataSupport2,
+                                         final @Injectable CompositeDataSupport dataSupport3) throws Exception {
         final String jmsType = "mytype";
         final Date jmsTimestamp = new Date();
         final String jmsId1 = "jmsId1";
@@ -253,7 +255,7 @@ public class JMSManagerActiveMQTest {
                 result = textMessage;
 
                 Set<String> allPropertyNames = new HashSet<>();
-                allPropertyNames.add("JMSProp1");
+                allPropertyNames.addAll(Arrays.asList("JMSProp1", "StringProperties", "IntProperties"));
                 data.getCompositeType().keySet();
                 result = allPropertyNames;
 
@@ -262,6 +264,9 @@ public class JMSManagerActiveMQTest {
 
                 data.get("StringProperties");
                 result = stringProperties;
+
+                data.get("IntProperties");
+                result = intProperties;
 
                 dataSupport1.get("key");
                 result = "key1";
@@ -273,24 +278,33 @@ public class JMSManagerActiveMQTest {
                 dataSupport2.get("value");
                 result = "value2";
 
+                dataSupport3.get("key");
+                result = "intKey";
+                dataSupport3.get("value");
+                result = 5;
+
                 stringProperties.values();
                 result = Arrays.asList(new CompositeDataSupport[]{dataSupport1, dataSupport2});
+
+                intProperties.values();
+                result = Arrays.asList(new CompositeDataSupport[]{dataSupport3});
             }
         };
 
 
         InternalJmsMessage internalJmsMessage = jmsManagerActiveMQ.convertCompositeData(data);
 
-        assertEquals(internalJmsMessage.getType(), jmsType);
-        assertEquals(internalJmsMessage.getTimestamp(), jmsTimestamp);
-        assertEquals(internalJmsMessage.getId(), jmsId1);
-        assertEquals(internalJmsMessage.getContent(), textMessage);
+        assertEquals(jmsType, internalJmsMessage.getType());
+        assertEquals(jmsTimestamp, internalJmsMessage.getTimestamp());
+        assertEquals(jmsId1, internalJmsMessage.getId());
+        assertEquals(textMessage, internalJmsMessage.getContent());
 
         Map<String, Object> properties = internalJmsMessage.getProperties();
-        assertEquals(properties.size(), 3);
-        assertEquals(properties.get("key1"), "value1");
-        assertEquals(properties.get("key2"), "value2");
-        assertEquals(properties.get("JMSProp1"), "JMSValue1");
+        assertEquals(4, properties.size());
+        assertEquals("value1", properties.get("key1"));
+        assertEquals("value2", properties.get("key2"));
+        assertEquals("JMSValue1", properties.get("JMSProp1"));
+        assertEquals(5, properties.get("intKey"));
     }
 
     @Test
@@ -312,7 +326,7 @@ public class JMSManagerActiveMQTest {
     @Test
     public void testConvertCompositeDataArrayWhenAMessageCannotBeConverted(final @Injectable CompositeData data1,
                                                                            final @Injectable CompositeData data2,
-                                              final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
+                                                                           final @Injectable InternalJmsMessage internalJmsMessage1) throws Exception {
         CompositeData[] compositeDatas = new CompositeData[]{data1, data2};
 
         new Expectations(jmsManagerActiveMQ) {{
