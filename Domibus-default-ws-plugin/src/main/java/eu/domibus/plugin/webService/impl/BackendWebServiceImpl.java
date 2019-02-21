@@ -29,9 +29,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
-
 @SuppressWarnings("ValidExternallyBoundObject")
 @javax.jws.WebService(
         serviceName = "BackendService_1_1",
@@ -234,7 +231,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
 
-        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t", "");
+        String trimmedMessageId = messageExtService.cleanMessageIdentifier(retrieveMessageRequest.getMessageID());
 
         try {
             userMessage = downloadMessage(trimmedMessageId, null);
@@ -315,7 +312,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.error(MESSAGE_ID_EMPTY);
             throw new StatusFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
-        return defaultTransformer.transformFromMessageStatus(messageRetriever.getStatus(statusRequest.getMessageID()));
+        String trimmedMessageId = messageExtService.cleanMessageIdentifier(statusRequest.getMessageID());
+        return defaultTransformer.transformFromMessageStatus(messageRetriever.getStatus(trimmedMessageId));
     }
 
     @Override
