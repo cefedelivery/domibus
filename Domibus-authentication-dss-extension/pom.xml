@@ -16,7 +16,8 @@
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-iam-api</artifactId>
+            <artifactId>domibus-iam-spi</artifactId>
+            <version>4.1-RC1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
