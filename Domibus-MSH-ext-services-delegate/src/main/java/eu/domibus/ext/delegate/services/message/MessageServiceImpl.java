@@ -16,6 +16,6 @@ public class MessageServiceImpl implements MessageExtService {
      */
     @Override
     public String cleanMessageIdentifier(String messageId) {
-        return StringUtils.stripToEmpty(StringUtils.trimToEmpty(messageId));
+        return StringUtils.trimToEmpty(messageId);
     }
 }
