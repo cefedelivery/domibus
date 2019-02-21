@@ -11,11 +11,19 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class MessageFilterModal extends EditModal {
 	public MessageFilterModal(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
-		log.info("Filter details popup initialized!");
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		log.info("Filter details popup initialized");
 	}
 
 	@FindBy(id = "backendfilter_id")
@@ -85,7 +93,7 @@ public class MessageFilterModal extends EditModal {
 		return new DObject(driver, serviceErrMess);
 	}
 
-	public void fillForm(String plugin, String from, String to, String action, String service) throws Exception{
+	public void fillForm(String plugin, String from, String to, String action, String service) throws Exception {
 		getPluginSelect().selectOptionByText(plugin);
 		getFromInput().fill(from);
 		getToInput().fill(to);
@@ -93,7 +101,7 @@ public class MessageFilterModal extends EditModal {
 		getServiceInput().fill(service);
 	}
 
-	public void fillFormPressOK(String plugin, String from, String to, String action, String service) throws Exception{
+	public void fillFormPressOK(String plugin, String from, String to, String action, String service) throws Exception {
 		fillForm(plugin, from, to, action, service);
 		clickOK();
 	}

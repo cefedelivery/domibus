@@ -1,25 +1,32 @@
 package ddsl.dcomponents.grid;
 
-		import ddsl.dcomponents.DComponent;
-		import ddsl.dobjects.DObject;
-		import org.openqa.selenium.By;
-		import org.openqa.selenium.WebDriver;
-		import org.openqa.selenium.WebElement;
-		import org.openqa.selenium.interactions.Actions;
-		import org.openqa.selenium.support.FindBy;
-		import org.openqa.selenium.support.PageFactory;
-		import org.openqa.selenium.support.pagefactory.DefaultElementLocatorFactory;
+import ddsl.dcomponents.DComponent;
+import ddsl.dobjects.DObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.pagefactory.DefaultElementLocatorFactory;
 
-		import java.util.ArrayList;
-		import java.util.HashMap;
-		import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+
+/**
+ * @author Catalin Comanici
+ * @version 4.1
+ */
+
 
 public class DGrid extends DComponent {
 
 	public DGrid(WebDriver driver, WebElement container) {
 		super(driver);
 		log.info("init grid ...");
-		PageFactory.initElements( new DefaultElementLocatorFactory(container) , this);
+		PageFactory.initElements(new DefaultElementLocatorFactory(container), this);
 	}
 
 	@FindBy(css = "span.datatable-header-cell-wrapper > span")
@@ -31,11 +38,11 @@ public class DGrid extends DComponent {
 
 	protected By cellSelector = By.tagName("datatable-body-cell");
 
-	public Pagination getPagination(){
+	public Pagination getPagination() {
 		return new Pagination(driver);
 	}
 
-	public boolean isPresent(){
+	public boolean isPresent() {
 		boolean isPresent = false;
 		try {
 			isPresent = getColumnNames().size() > 0;
@@ -45,7 +52,7 @@ public class DGrid extends DComponent {
 		return isPresent;
 	}
 
-	protected ArrayList<String> getColumnNames() throws Exception{
+	protected ArrayList<String> getColumnNames() throws Exception {
 		ArrayList<String> columnNames = new ArrayList<>();
 		for (int i = 0; i < gridHeaders.size(); i++) {
 			columnNames.add(new DObject(driver, gridHeaders.get(i)).getText());
@@ -53,27 +60,32 @@ public class DGrid extends DComponent {
 		return columnNames;
 	}
 
-	public void selectRow(int rowNumber)throws Exception{
+	public void selectRow(int rowNumber) throws Exception {
 		log.info("selecting row with number ... " + rowNumber);
-		if(rowNumber>=gridRows.size()){return;}
-		new DObject(driver, gridRows.get(rowNumber)).click();
+		if (rowNumber < gridRows.size()) {
+			new DObject(driver, gridRows.get(rowNumber)).click();
+		}
 	}
 
-	public void doubleClickRow(int rowNumber) throws Exception{
+	public void doubleClickRow(int rowNumber) throws Exception {
 
 		log.info("double clicking row ... " + rowNumber);
-		if(rowNumber<0){throw new Exception("Row number too low " + rowNumber);}
-		if(rowNumber>=gridRows.size()){throw new Exception("Row number too high " + rowNumber);}
+		if (rowNumber < 0) {
+			throw new Exception("Row number too low " + rowNumber);
+		}
+		if (rowNumber >= gridRows.size()) {
+			throw new Exception("Row number too high " + rowNumber);
+		}
 
 		Actions action = new Actions(driver);
 		action.doubleClick(gridRows.get(rowNumber)).perform();
 	}
 
-	public int getRowsNo(){
+	public int getRowsNo() {
 		return gridRows.size();
 	}
 
-	public void waitForRowsToLoad(){
+	public void waitForRowsToLoad() {
 		wait.forElementToBeVisible(gridRows.get(0));
 	}
 
@@ -81,7 +93,7 @@ public class DGrid extends DComponent {
 		for (int i = 0; i < gridRows.size(); i++) {
 			WebElement rowContainer = gridRows.get(i);
 			String rowValue = new DObject(driver, rowContainer.findElements(cellSelector).get(columnIndex)).getText();
-			if(rowValue.equalsIgnoreCase(value)){
+			if (rowValue.equalsIgnoreCase(value)) {
 				return i;
 			}
 		}
@@ -90,13 +102,13 @@ public class DGrid extends DComponent {
 
 	public int scrollTo(String columnName, String value) throws Exception {
 		ArrayList<String> columnNames = getColumnNames();
-		if(!columnNames.contains(columnName)){
-			throw new Exception("Selected column name '"+columnName+"' is not visible in the present grid");
+		if (!columnNames.contains(columnName)) {
+			throw new Exception("Selected column name '" + columnName + "' is not visible in the present grid");
 		}
 
 		int columnIndex = -1;
 		for (int i = 0; i < columnNames.size(); i++) {
-			if(columnNames.get(i).equalsIgnoreCase(columnName)){
+			if (columnNames.get(i).equalsIgnoreCase(columnName)) {
 				columnIndex = i;
 			}
 		}
@@ -105,7 +117,7 @@ public class DGrid extends DComponent {
 		pagination.skipToFirstPage();
 		int index = getIndexOf(columnIndex, value);
 
-		while (index < 0 && pagination.hasNextPage()){
+		while (index < 0 && pagination.hasNextPage()) {
 			pagination.goToNextPage();
 			index = getIndexOf(columnIndex, value);
 		}
@@ -119,8 +131,12 @@ public class DGrid extends DComponent {
 	}
 
 	public HashMap<String, String> getRowInfo(int rowNumber) throws Exception {
-		if(rowNumber<0){throw new Exception("Row number too low " + rowNumber);}
-		if(rowNumber>gridRows.size()){throw new Exception("Row number too high " + rowNumber);}
+		if (rowNumber < 0) {
+			throw new Exception("Row number too low " + rowNumber);
+		}
+		if (rowNumber > gridRows.size()) {
+			throw new Exception("Row number too high " + rowNumber);
+		}
 		HashMap<String, String> info = new HashMap<>();
 
 		List<String> columns = getColumnNames();
@@ -138,18 +154,15 @@ public class DGrid extends DComponent {
 	}
 
 	public void sortBy(String columnName) throws Exception {
-		if(!getColumnNames().contains(columnName)){
+		if (!getColumnNames().contains(columnName)) {
 			throw new Exception("Column not found in grid " + columnName);
 		}
-
-
 	}
 
-	public void scrollToAndDoubleClick(String columnName, String value)throws Exception{
+	public void scrollToAndDoubleClick(String columnName, String value) throws Exception {
 		int index = scrollTo(columnName, value);
 		doubleClickRow(index);
 	}
-
 
 
 }

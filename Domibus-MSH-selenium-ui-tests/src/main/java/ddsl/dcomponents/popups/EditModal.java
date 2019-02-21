@@ -10,10 +10,18 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class EditModal extends DComponent {
 	public EditModal(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 		wait.forXMillis(300);
 	}
 
@@ -35,24 +43,23 @@ public class EditModal extends DComponent {
 		return new DButton(driver, cancelBtn);
 	}
 
-	public String getTitle() throws Exception{
+	public String getTitle() throws Exception {
 		return new DObject(driver, title).getText();
 	}
 
-	public void clickOK()throws Exception{
+	public void clickOK() throws Exception {
 		getOkBtn().click();
 		wait.forElementToBeGone(okBtn);
 	}
 
-	public void clickCancel()throws Exception{
+	public void clickCancel() throws Exception {
 		getCancelBtn().click();
 		wait.forElementToBeGone(cancelBtn);
 	}
 
-	public boolean isOKBtnEnabled() throws Exception{
+	public boolean isOKBtnEnabled() throws Exception {
 		return getOkBtn().isEnabled();
 	}
-
 
 
 }

@@ -10,11 +10,19 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
-public class InfoModal  extends DComponent {
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
+public class InfoModal extends DComponent {
 
 	public InfoModal(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 		wait.forElementToBeVisible(closeBtn);
 	}
 
@@ -28,11 +36,11 @@ public class InfoModal  extends DComponent {
 		return new DButton(driver, closeBtn);
 	}
 
-	public String getTitle() throws Exception{
+	public String getTitle() throws Exception {
 		return new DObject(driver, title).getText();
 	}
 
-	public void closeModal() throws Exception{
+	public void closeModal() throws Exception {
 		getCloseBtn().click();
 		wait.forElementToBeGone(closeBtn);
 	}

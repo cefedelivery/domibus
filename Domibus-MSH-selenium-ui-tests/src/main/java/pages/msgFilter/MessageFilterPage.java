@@ -11,14 +11,20 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class MessageFilterPage extends DomibusPage {
 	public MessageFilterPage(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
-		log.info("Message filter grid initializing!!!");
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		log.info("Message filter grid initializing");
 	}
-	
-	
 
 
 	@FindBy(id = "messageFilterTable")
@@ -78,8 +84,8 @@ public class MessageFilterPage extends DomibusPage {
 	}
 
 
-	public boolean isLoaded() throws Exception{
-		return (grid().getRowsNo() >0
+	public boolean isLoaded() throws Exception {
+		return (grid().getRowsNo() > 0
 				&& getMoveUpBtn().isPresent()
 				&& getMoveDownBtn().isPresent()
 				&& getCancelBtn().isPresent()
@@ -87,17 +93,17 @@ public class MessageFilterPage extends DomibusPage {
 				&& getEditBtn().isPresent()
 				&& getDeleteBtn().isPresent()
 				&& getNewBtn().isEnabled()
-				);
+		);
 	}
 
-	public void saveAndConfirmChanges() throws Exception{
+	public void saveAndConfirmChanges() throws Exception {
 		getSaveBtn().click();
 		log.info("saving");
 		new Dialog(driver).confirm();
 		log.info("confirming");
 	}
 
-	public void cancelChangesAndConfirm() throws Exception{
+	public void cancelChangesAndConfirm() throws Exception {
 		log.info("cancelling");
 		getCancelBtn().click();
 		new Dialog(driver).confirm();

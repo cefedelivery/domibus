@@ -21,13 +21,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class DomibusRestClient {
 
 	private static Client client = Client.create();
 	private static WebResource resource = client.resource(PROPERTIES.UI_BASE_URL);
 	private static TestDataProvider dataProvider = new TestDataProvider();
 
-	private String sanitizeResponse(String response){
+	private String sanitizeResponse(String response) {
 		return response.replaceFirst("\\)]}',\n", "");
 	}
 
@@ -74,12 +82,10 @@ public class DomibusRestClient {
 			object = new JSONObject(params);
 		}
 
-		ClientResponse response = builder
+		return builder
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.type(MediaType.APPLICATION_JSON_TYPE)
 				.post(ClientResponse.class, object.toString());
-
-		return response;
 	}
 
 	private ClientResponse requestPOST(WebResource resource, String params, List<NewCookie> cookies) {
@@ -101,12 +107,10 @@ public class DomibusRestClient {
 		}
 
 
-		ClientResponse response = builder
+		return builder
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.type(MediaType.APPLICATION_JSON_TYPE)
 				.post(ClientResponse.class, params);
-
-		return response;
 	}
 
 	private ClientResponse requestPOSTFile(WebResource resource, String filePath, HashMap<String, String> fields, List<NewCookie> cookies) {
@@ -136,11 +140,10 @@ public class DomibusRestClient {
 		}
 		MultiPart multipart = multipartEntity.bodyPart(filePart);
 
-		ClientResponse response = builder.type(MediaType.MULTIPART_FORM_DATA_TYPE)
+		return builder.type(MediaType.MULTIPART_FORM_DATA_TYPE)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.accept(MediaType.TEXT_PLAIN_TYPE)
 				.post(ClientResponse.class, multipartEntity);
-		return response;
 	}
 
 	private ClientResponse requestPUT(WebResource resource, String params, List<NewCookie> cookies) {
@@ -161,37 +164,37 @@ public class DomibusRestClient {
 			builder = builder.header("X-XSRF-TOKEN", xrfTokenValue);
 		}
 
-		ClientResponse response = builder
+		return builder
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.type(MediaType.APPLICATION_JSON_TYPE)
 				.put(ClientResponse.class, params);
-
-		return response;
 	}
 
-	public List<NewCookie> login(String username, String password){
+	public List<NewCookie> login(String username, String password) {
 		HashMap<String, String> params = new HashMap<>();
 		params.put("username", username);
 		params.put("password", password);
 
 		ClientResponse response = requestPOST(resource.path(RestServicePaths.LOGIN), params, null);
 
-		if(response.getStatus() == 200){
+		if (response.getStatus() == 200) {
 			return response.getCookies();
 		}
 		return null;
 	}
 
-	private HashMap<String, String> getAdminUser(){
+	private HashMap<String, String> getAdminUser() {
 		return dataProvider.getAdminUser();
 	}
 
-	public JSONArray getUsers(){
+	public JSONArray getUsers() {
 		HashMap<String, String> user = getAdminUser();
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
 
 		ClientResponse response = requestGET(resource.path(RestServicePaths.USERS), null, cookies);
-		if(response.getStatus() != 200){ throw new RuntimeException("Could not get users ");}
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Could not get users ");
+		}
 
 		try {
 			String rawResp = response.getEntity(String.class);
@@ -202,13 +205,15 @@ public class DomibusRestClient {
 		return null;
 	}
 
-	public void createUser(String username, String role, String pass, String domain){
+	public void createUser(String username, String role, String pass, String domain) {
 		HashMap<String, String> user = getAdminUser();
 
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
-		}else{domain = "default";}
+		} else {
+			domain = "default";
+		}
 
 		String payloadTemplate = "[{\"roles\":\"%s\",\"domain\":\"%s\",\"userName\":\"%s\",\"email\":\"\",\"password\":\"%s\",\"status\":\"NEW\",\"active\":true,\"suspended\":false,\"authorities\":[],\"deleted\":false,\"$$index\":2}]";
 		int index = getUsers().length();
@@ -216,15 +221,17 @@ public class DomibusRestClient {
 
 
 		ClientResponse response = requestPUT(resource.path(RestServicePaths.USERS), payload, cookies);
-		if(response.getStatus() != 200){ throw new RuntimeException("Could not create user");}
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Could not create user");
+		}
 	}
 
-	public void deleteUser(String username, String domain)throws Exception{
+	public void deleteUser(String username, String domain) throws Exception {
 		HashMap<String, String> user = getAdminUser();
 
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
 
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 
@@ -233,7 +240,7 @@ public class DomibusRestClient {
 		JSONArray pusers = new JSONArray(sanitizeResponse(getResponse));
 		JSONArray toDelete = new JSONArray();
 		for (int i = 0; i < pusers.length(); i++) {
-			if(pusers.getJSONObject(i).getString("userName").equalsIgnoreCase(username)){
+			if (pusers.getJSONObject(i).getString("userName").equalsIgnoreCase(username)) {
 				JSONObject tmpUser = pusers.getJSONObject(i);
 				tmpUser.put("status", "REMOVED");
 				tmpUser.put("deleted", true);
@@ -243,30 +250,34 @@ public class DomibusRestClient {
 		}
 
 		ClientResponse response = requestPUT(resource.path(RestServicePaths.USERS), toDelete.toString(), cookies);
-		if(response.getStatus() != 200){ throw new RuntimeException("Could not delete user");}
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Could not delete user");
+		}
 	}
 
 
-	public void createPluginUser(String username, String role, String pass, String domain){
+	public void createPluginUser(String username, String role, String pass, String domain) {
 		HashMap<String, String> user = getAdminUser();
 		String payloadTemplate = "[{\"status\":\"NEW\",\"username\":\"%s\",\"authenticationType\":\"BASIC\",\"$$index\":0,\"authRoles\":\"%s\",\"passwd\":\"%s\"}]";
 		String payload = String.format(payloadTemplate, username, role, pass);
 
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
 
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 		ClientResponse response = requestPUT(resource.path(RestServicePaths.PLUGIN_USERS), payload, cookies);
-		if(response.getStatus() != 204){ throw new RuntimeException("Could not create plugin user");}
+		if (response.getStatus() != 204) {
+			throw new RuntimeException("Could not create plugin user");
+		}
 	}
 
-	public void deletePluginUser(String username, String domain)throws Exception{
+	public void deletePluginUser(String username, String domain) throws Exception {
 		HashMap<String, String> user = getAdminUser();
 
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
 
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 
@@ -275,7 +286,7 @@ public class DomibusRestClient {
 		JSONArray pusers = new JSONObject(sanitizeResponse(getResponse)).getJSONArray("entries");
 		JSONArray toDelete = new JSONArray();
 		for (int i = 0; i < pusers.length(); i++) {
-			if(pusers.getJSONObject(i).getString("username").equalsIgnoreCase(username)){
+			if (pusers.getJSONObject(i).getString("username").equalsIgnoreCase(username)) {
 				JSONObject tmpUser = pusers.getJSONObject(i);
 				tmpUser.put("status", "REMOVED");
 				toDelete.put(tmpUser);
@@ -283,10 +294,12 @@ public class DomibusRestClient {
 		}
 
 		ClientResponse response = requestPUT(resource.path(RestServicePaths.PLUGIN_USERS), toDelete.toString(), cookies);
-		if(response.getStatus() != 204){ throw new RuntimeException("Could not delete plugin user");}
+		if (response.getStatus() != 204) {
+			throw new RuntimeException("Could not delete plugin user");
+		}
 	}
 
-	public void updateUser(String username, HashMap<String, String> toUpdate){
+	public void updateUser(String username, HashMap<String, String> toUpdate) {
 		HashMap<String, String> adminUser = getAdminUser();
 		JSONObject user = null;
 
@@ -294,12 +307,14 @@ public class DomibusRestClient {
 			JSONArray array = getUsers();
 			for (int i = 0; i < array.length(); i++) {
 				JSONObject tmpUser = array.getJSONObject(i);
-				if(tmpUser.getString("userName").equalsIgnoreCase(username)){
+				if (tmpUser.getString("userName").equalsIgnoreCase(username)) {
 					user = tmpUser;
 				}
 			}
 
-			if(null == user) {return;}
+			if (null == user) {
+				return;
+			}
 
 			for (Map.Entry<String, String> entry : toUpdate.entrySet()) {
 				user.put(entry.getKey(), entry.getValue());
@@ -308,19 +323,23 @@ public class DomibusRestClient {
 			user.put("status", "UPDATED");
 
 			List<NewCookie> cookies = login(adminUser.get("username"), adminUser.get("pass"));
-			ClientResponse response = requestPUT(resource.path(RestServicePaths.USERS), "["+user.toString()+"]", cookies);
-			if(response.getStatus() != 200){ throw new RuntimeException("Could not UPDATE user");}
+			ClientResponse response = requestPUT(resource.path(RestServicePaths.USERS), "[" + user.toString() + "]", cookies);
+			if (response.getStatus() != 200) {
+				throw new RuntimeException("Could not UPDATE user");
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public List<String> getDomainNames(){
+	public List<String> getDomainNames() {
 		HashMap<String, String> adminUser = getAdminUser();
 		List<NewCookie> cookies = login(adminUser.get("username"), adminUser.get("pass"));
 
 		ClientResponse response = requestGET(resource.path(RestServicePaths.DOMAINS), null, cookies);
-		if(response.getStatus() != 200){return null;}
+		if (response.getStatus() != 200) {
+			return null;
+		}
 		String rawStringResponse = response.getEntity(String.class);
 
 		List<String> toReturn = null;
@@ -336,7 +355,7 @@ public class DomibusRestClient {
 		return toReturn;
 	}
 
-	public void switchDomain(List<NewCookie> cookies, String domainName){
+	public void switchDomain(List<NewCookie> cookies, String domainName) {
 
 		WebResource.Builder builder = resource.path(RestServicePaths.SESSION_DOMAIN).getRequestBuilder();
 		String xrfTokenValue = "";
@@ -361,14 +380,14 @@ public class DomibusRestClient {
 
 	}
 
-	public void createMessageFilter(String actionName, String domain){
+	public void createMessageFilter(String actionName, String domain) {
 		HashMap<String, String> user = getAdminUser();
 		String payloadTemplate = "{\"entityId\":0,\"index\":0,\"backendName\":\"backendWebservice\",\"routingCriterias\":[{\"entityId\":0,\"name\":\"action\",\"expression\":\"%s\"}],\"persisted\":false,\"from\":null,\"to\":null,\"action\":{\"entityId\":0,\"name\":\"action\",\"expression\":\"%s\"},\"service\":null,\"$$index\":2}";
 		String payload = String.format(payloadTemplate, actionName, actionName);
 
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
 
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 
@@ -383,14 +402,16 @@ public class DomibusRestClient {
 
 
 		ClientResponse response = requestPUT(resource.path(RestServicePaths.MESSAGE_FILTERS), currentMSGF.toString(), cookies);
-		if(response.getStatus() != 200){ throw new RuntimeException("Could not message filter");}
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Could not message filter");
+		}
 	}
 
-	public void deleteMessageFilter(String actionName, String domain){
+	public void deleteMessageFilter(String actionName, String domain) {
 		HashMap<String, String> user = getAdminUser();
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
 
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 
@@ -403,7 +424,7 @@ public class DomibusRestClient {
 
 			for (int i = 0; i < currentMSGF.length(); i++) {
 				JSONObject filter = currentMSGF.getJSONObject(i);
-				if(!filter.toString().contains(actionName)){
+				if (!filter.toString().contains(actionName)) {
 					deletedL.put(filter);
 				}
 			}
@@ -413,14 +434,16 @@ public class DomibusRestClient {
 
 
 		ClientResponse response = requestPUT(resource.path(RestServicePaths.MESSAGE_FILTERS), deletedL.toString(), cookies);
-		if(response.getStatus() != 200){ throw new RuntimeException("Could not message filter");}
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Could not message filter");
+		}
 	}
 
 
 	public void uploadPMode(String pmodeFilePath, String domain) {
 		HashMap<String, String> user = getAdminUser();
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 		HashMap<String, String> fields = new HashMap<>();
@@ -429,10 +452,10 @@ public class DomibusRestClient {
 
 	}
 
-	public boolean isPmodeUploaded(String domain) throws Exception{
+	public boolean isPmodeUploaded(String domain) throws Exception {
 		HashMap<String, String> user = getAdminUser();
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));
-		if(null!=domain && !domain.isEmpty()){
+		if (null != domain && !domain.isEmpty()) {
 			switchDomain(cookies, domain);
 		}
 
@@ -441,18 +464,6 @@ public class DomibusRestClient {
 
 		return entries.length() > 0;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

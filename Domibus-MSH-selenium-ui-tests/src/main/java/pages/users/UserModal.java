@@ -13,34 +13,36 @@ import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
 
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class UserModal extends EditModal {
 	public UserModal(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 		wait.forElementToBeVisible(okBtn);
 	}
-	
+
 	@FindBy(id = "username_id")
 	WebElement usernameInput;
-	
+
 	@FindBy(id = "email_id")
-	WebElement emaiInput;
-	
+	WebElement emailInput;
+
 	@FindBy(id = "password_id")
 	WebElement passwordInput;
-	
+
 	@FindBy(id = "confirmation_id")
 	WebElement confirmationInput;
-	
-//	@FindBy(id = "editbuttonok_id")
-//	WebElement okBtn;
+
 
 	@FindBy(css = "md-card > div:nth-child(4) > md2-select")
 	WebElement domainSelectContainer;
 
-//	@FindBy(id = "editbuttoncancel_id")
-//	WebElement cancelBtn;
-	
 	@FindBy(css = "md2-select[placeholder=\"Role\"]")
 	WebElement rolesSelectContainer;
 
@@ -52,7 +54,7 @@ public class UserModal extends EditModal {
 	private WebElement usernameErrMess;
 	@FindBy(css = "edituser-form > div > form > md-card > div:nth-child(2) > md-input-container > div > div.mat-input-flex > div > div")
 	private WebElement emailErrMess;
-//	@FindBy(css = "edituser-form > div > form > md-card > div:nth-child(3) > div")
+	//	@FindBy(css = "edituser-form > div > form > md-card > div:nth-child(3) > div")
 //	private WebElement roleErrMess;
 	@FindBy(css = "edituser-form > div > form > md-card > div:nth-child(5) > md-input-container > div > div.mat-input-flex > div > div")
 	private WebElement passErrMess;
@@ -60,13 +62,12 @@ public class UserModal extends EditModal {
 	private WebElement confirmationErrMess;
 
 
-
 	public DInput getUserNameInput() {
 		return new DInput(driver, usernameInput);
 	}
 
 	public DInput getEmailInput() {
-		return new DInput(driver, emaiInput);
+		return new DInput(driver, emailInput);
 	}
 
 	public DInput getPasswordInput() {
@@ -89,7 +90,7 @@ public class UserModal extends EditModal {
 		return new Checkbox(driver, activeChk);
 	}
 
-	public void fillData(String user, String email, String role, String password, String confirmation) throws Exception{
+	public void fillData(String user, String email, String role, String password, String confirmation) throws Exception {
 		getUserNameInput().fill(user);
 		getEmailInput().fill(email);
 		getRoleSelect().selectOptionByText(role);
@@ -99,13 +100,13 @@ public class UserModal extends EditModal {
 
 	public boolean isLoaded() {
 		return (getUserNameInput().isPresent()
-		&& getPasswordInput().isPresent()
-		&& getRoleSelect().isDisplayed()
-		&& getPasswordInput().isPresent()
-		&& getConfirmationInput().isPresent());
+				&& getPasswordInput().isPresent()
+				&& getRoleSelect().isDisplayed()
+				&& getPasswordInput().isPresent()
+				&& getConfirmationInput().isPresent());
 	}
 
-	public boolean isActive() throws Exception{
+	public boolean isActive() throws Exception {
 		return getActiveChk().isChecked();
 	}
 

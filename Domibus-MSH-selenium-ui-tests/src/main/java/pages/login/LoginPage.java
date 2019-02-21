@@ -12,14 +12,22 @@ import utils.TestDataProvider;
 
 import java.util.HashMap;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class LoginPage extends DomibusPage {
 
 	public LoginPage(WebDriver driver) {
 		super(driver);
-		
+
 		log.info(".... init");
-		
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 	@FindBy(id = "username_id")
@@ -31,68 +39,68 @@ public class LoginPage extends DomibusPage {
 	@FindBy(id = "loginbutton_id")
 	private WebElement loginBtn;
 
-	public boolean isLoaded(){
-		
+	public boolean isLoaded() {
+
 		log.info("check if is loaded");
 		wait.forElementToBeVisible(username);
-		if(!username.isEnabled()){
-			log.error("Could not find username input!");
+		if (!username.isEnabled()) {
+			log.error("Could not find username input");
 			return false;
 		}
-		if(!password.isEnabled()){
-			log.error("Could not find password input!");
+		if (!password.isEnabled()) {
+			log.error("Could not find password input");
 			return false;
 		}
-		if(!loginBtn.isDisplayed()){
-			log.error("Could not find login button!");
+		if (!loginBtn.isDisplayed()) {
+			log.error("Could not find login button");
 			return false;
 		}
-		log.info("Login page controls loaded!");
+		log.info("Login page controls loaded");
 		return true;
 	}
 
-	public <T extends DomibusPage> T login(String user, String pass, Class<T> expect){
-		log.info("Login started!!");
+	public <T extends DomibusPage> T login(String user, String pass, Class<T> expect) {
+		log.info("Login started");
 		username.clear();
 		username.sendKeys(user);
 		password.clear();
 		password.sendKeys(pass);
 		loginBtn.click();
 		wait.forElementToBeVisible(helpLnk);
-		log.info("Login action done!");
+		log.info("Login action done");
 
 		return PageFactory.initElements(driver, expect);
 	}
-	
-	public void login(String user, String pass){
-		log.info("Login started!!");
+
+	public void login(String user, String pass) {
+		log.info("Login started");
 		username.clear();
 		username.sendKeys(user);
 		password.clear();
 		password.sendKeys(pass);
 		loginBtn.click();
 		wait.forElementToBeVisible(helpLnk);
-		log.info("Login action done!");
+		log.info("Login action done");
 	}
 
-	public void login(String userRole) throws Exception{
+	public void login(String userRole) throws Exception {
 		HashMap<String, String> user = new TestDataProvider().getUser(userRole);
-		log.info("Login started!!");
+		log.info("Login started");
 		new DInput(driver, username).fill(user.get("username"));
 		new DInput(driver, password).fill(user.get("pass"));
 		loginBtn.click();
 		wait.forElementToBeVisible(helpLnk);
-		log.info("Login action done!");
+		log.info("Login action done");
 	}
 
-	public void login(HashMap<String, String> user) throws Exception{
+	public void login(HashMap<String, String> user) throws Exception {
 
-		log.info("Login started!!");
+		log.info("Login started");
 		new DInput(driver, username).fill(user.get("username"));
 		new DInput(driver, password).fill(user.get("pass"));
 		loginBtn.click();
 		wait.forElementToBeVisible(helpLnk);
-		log.info("Login action done!");
+		log.info("Login action done");
 	}
 
 

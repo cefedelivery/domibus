@@ -11,11 +11,19 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class PluginUsersFilterArea extends DComponent {
 
 	public PluginUsersFilterArea(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 	@FindBy(css = "#authType_id")
@@ -34,21 +42,31 @@ public class PluginUsersFilterArea extends DComponent {
 	@FindBy(css = "#searchbutton_id")
 	private WebElement searchButton;
 
-	public boolean isLoaded() throws Exception{
+	public boolean isLoaded() throws Exception {
 
-		if(!getSearchButton().isEnabled()){return false;}
-		if(!getAuthTypeSelect().isDisplayed()){return false;}
-		if(!getUserRoleSelect().isDisplayed()){return false;}
-		if(!getOriginalUserInput().isEnabled()){return false;}
-		if(!getUsernameInput().isPresent()){return false;}
+		if (!getSearchButton().isEnabled()) {
+			return false;
+		}
+		if (!getAuthTypeSelect().isDisplayed()) {
+			return false;
+		}
+		if (!getUserRoleSelect().isDisplayed()) {
+			return false;
+		}
+		if (!getOriginalUserInput().isEnabled()) {
+			return false;
+		}
+		if (!getUsernameInput().isPresent()) {
+			return false;
+		}
 		return true;
 	}
 
-	public void search(String authType, String role, String origUser, String username) throws Exception{
-		if(null != authType) getAuthTypeSelect().selectOptionByText(authType);
-		if(null != role) getUserRoleSelect().selectOptionByText(role);
-		if(null != origUser) getOriginalUserInput().fill(origUser);
-		if(null != username) getUsernameInput().fill(username);
+	public void search(String authType, String role, String origUser, String username) throws Exception {
+		if (null != authType) getAuthTypeSelect().selectOptionByText(authType);
+		if (null != role) getUserRoleSelect().selectOptionByText(role);
+		if (null != origUser) getOriginalUserInput().fill(origUser);
+		if (null != username) getUsernameInput().fill(username);
 		getSearchButton().click();
 	}
 

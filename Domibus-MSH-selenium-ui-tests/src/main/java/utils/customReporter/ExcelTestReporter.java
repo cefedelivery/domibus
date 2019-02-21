@@ -16,6 +16,14 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class ExcelTestReporter implements ITestListener {
 
 	private static final String[] headers = {"Type", "Test Suite Name", "Test Case ID", "Test Case Name", "Can be run on Bamboo", "TC is disabled", "Test Result", "Last Execution Started", "Execution time", "JIRA tickets", "Impact", "Comment"};
@@ -27,9 +35,8 @@ public class ExcelTestReporter implements ITestListener {
 	@Override
 	/*Creates the report file, the sheet and writes the headers of the table with style as well*/
 	public void onStart(ITestContext iTestContext) {
-		
-		
-		
+
+
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
 		String dateStr = format.format(iTestContext.getStartDate());
 		filename = PROPERTIES.REPORTS_FOLDER + "TestRunReport" + dateStr + ".xlsx";
@@ -46,12 +53,12 @@ public class ExcelTestReporter implements ITestListener {
 			cell.setCellValue(headers[i]);
 		}
 
-		try{
+		try {
 			FileOutputStream os = new FileOutputStream(filename);
 			workbook.write(os);
 			workbook.close();
 			os.close();
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -65,7 +72,7 @@ public class ExcelTestReporter implements ITestListener {
 	@Override
 	public void onTestStart(ITestResult iTestResult) {
 		System.out.println("---------------------------------------------------");
-		System.out.println(iTestResult.getName());
+		System.out.println(iTestResult.getTestClass().getName() + " - " + iTestResult.getName());
 		System.out.println("---------------------------------------------------");
 	}
 
@@ -106,27 +113,26 @@ public class ExcelTestReporter implements ITestListener {
 
 
 	/* depending on the type of cell returns the desired style. The supported type are "Header", "Fail", "Pass" */
-	private XSSFCellStyle composeCellStyle(XSSFWorkbook workbook, String type){
+	private XSSFCellStyle composeCellStyle(XSSFWorkbook workbook, String type) {
 		XSSFCellStyle style = workbook.createCellStyle();
 		XSSFFont font = workbook.createFont();
 		font.setBold(true);
 
-		if(type.equalsIgnoreCase("Pass")){
+		if (type.equalsIgnoreCase("Pass")) {
 			style.setFillBackgroundColor(IndexedColors.BRIGHT_GREEN.getIndex());
 			style.setFillForegroundColor(IndexedColors.BRIGHT_GREEN.getIndex());
 
-		}else if (type.equalsIgnoreCase("Fail")){
+		} else if (type.equalsIgnoreCase("Fail")) {
 			style.setFillBackgroundColor(IndexedColors.RED.getIndex());
 			style.setFillForegroundColor(IndexedColors.RED.getIndex());
 			style.setFont(font);
 
-		}else if (type.equalsIgnoreCase("Skipped")){
+		} else if (type.equalsIgnoreCase("Skipped")) {
 			style.setFillBackgroundColor(IndexedColors.WHITE.getIndex());
 			style.setFillForegroundColor(IndexedColors.WHITE.getIndex());
 			style.setFont(font);
 
-		}
-		else if (type.equalsIgnoreCase("Header")){
+		} else if (type.equalsIgnoreCase("Header")) {
 			style.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
 			style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
 			style.setFont(font);
@@ -141,34 +147,38 @@ public class ExcelTestReporter implements ITestListener {
 
 		String qualifiedName = iTestResult.getMethod().getQualifiedName();
 		String testType = "";
-		if(qualifiedName.contains(".ui.")){testType = "UI";}
-		if(qualifiedName.contains(".rest.")){testType = "REST";}
-		
+		if (qualifiedName.contains(".ui.")) {
+			testType = "UI";
+		}
+		if (qualifiedName.contains(".rest.")) {
+			testType = "REST";
+		}
+
 		File myFile = new File(filename);
 		FileInputStream inputStream = new FileInputStream(myFile);
 		XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
 
 		Sheet reportSheet = workbook.getSheetAt(0);
-		int rowNum = reportSheet.getLastRowNum()+1;
-		Row curentRow = reportSheet.createRow(rowNum);
+		int rowNum = reportSheet.getLastRowNum() + 1;
+		Row currentRow = reportSheet.createRow(rowNum);
 
-		curentRow.createCell(0).setCellValue(testType);
-//		curentRow.createCell(0).setCellValue("UI");
-		curentRow.createCell(1).setCellValue(iTestResult.getTestContext().getSuite().getName());
-		curentRow.createCell(2).setCellValue(iTestResult.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).description());
-		curentRow.createCell(3).setCellValue(iTestResult.getName());
-		curentRow.createCell(4).setCellValue("Yes");
-		curentRow.createCell(5).setCellValue(!iTestResult.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).enabled());
-		Cell cell = curentRow.createCell(6);
+		currentRow.createCell(0).setCellValue(testType);
+//		currentRow.createCell(0).setCellValue("UI");
+		currentRow.createCell(1).setCellValue(iTestResult.getTestContext().getSuite().getName());
+		currentRow.createCell(2).setCellValue(iTestResult.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).description());
+		currentRow.createCell(3).setCellValue(iTestResult.getName());
+		currentRow.createCell(4).setCellValue("Yes");
+		currentRow.createCell(5).setCellValue(!iTestResult.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).enabled());
+		Cell cell = currentRow.createCell(6);
 		cell.setCellValue(result);
 		cell.setCellStyle(composeCellStyle(workbook, result));
-		curentRow.createCell(7).setCellValue(sdf.format(new Date(iTestResult.getStartMillis())));
-		curentRow.createCell(8).setCellValue((iTestResult.getEndMillis()-iTestResult.getStartMillis())/1000);
-		curentRow.createCell(9).setCellValue("");
-		curentRow.createCell(10).setCellValue("");
+		currentRow.createCell(7).setCellValue(sdf.format(new Date(iTestResult.getStartMillis())));
+		currentRow.createCell(8).setCellValue((iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000);
+		currentRow.createCell(9).setCellValue("");
+		currentRow.createCell(10).setCellValue("");
 
-		if(iTestResult.getThrowable() != null){
-			curentRow.createCell(11).setCellValue(iTestResult.getThrowable().getMessage());
+		if (iTestResult.getThrowable() != null) {
+			currentRow.createCell(11).setCellValue(iTestResult.getThrowable().getMessage());
 		}
 
 
@@ -179,11 +189,6 @@ public class ExcelTestReporter implements ITestListener {
 		inputStream.close();
 
 	}
-
-
-
-
-
 
 
 }

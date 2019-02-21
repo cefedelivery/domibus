@@ -1,5 +1,13 @@
 package ddsl.enums;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class DRoles {
 
 	public static final String SUPER = "ROLE_AP_ADMIN";

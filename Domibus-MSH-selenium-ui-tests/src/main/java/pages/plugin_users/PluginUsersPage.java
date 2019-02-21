@@ -10,10 +10,18 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class PluginUsersPage extends DomibusPage {
 	public PluginUsersPage(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 	public PluginUsersFilterArea filters = new PluginUsersFilterArea(driver);
@@ -60,30 +68,44 @@ public class PluginUsersPage extends DomibusPage {
 		return new DButton(driver, deleteBtn);
 	}
 
-	public DGrid grid(){
+	public DGrid grid() {
 		return new DGrid(driver, userGridContainer);
 	}
 
-	public void newUser(String user, String role,String password, String confirmation)throws Exception{
+	public void newUser(String user, String role, String password, String confirmation) throws Exception {
 		getNewBtn().click();
 
 		PluginUserModal popup = new PluginUserModal(driver);
-		popup.fillData(user,role,password,confirmation);
+		popup.fillData(user, role, password, confirmation);
 		popup.clickOK();
 	}
 
 
-	public boolean isLoaded()throws Exception{
+	public boolean isLoaded() throws Exception {
 
-		if(!getCancelBtn().isPresent()){return false;}
-		if(!getSaveBtn().isPresent()){return false;}
+		if (!getCancelBtn().isPresent()) {
+			return false;
+		}
+		if (!getSaveBtn().isPresent()) {
+			return false;
+		}
 
-		if(!getNewBtn().isEnabled()){return false;}
-		if(!getEditBtn().isPresent()){return false;}
-		if(!getDeleteBtn().isPresent()){return false;}
+		if (!getNewBtn().isEnabled()) {
+			return false;
+		}
+		if (!getEditBtn().isPresent()) {
+			return false;
+		}
+		if (!getDeleteBtn().isPresent()) {
+			return false;
+		}
 
-		if(!userGridContainer.isDisplayed()){return false;}
-		if(!filters.isLoaded()){return false;}
+		if (!userGridContainer.isDisplayed()) {
+			return false;
+		}
+		if (!filters.isLoaded()) {
+			return false;
+		}
 
 		return true;
 	}

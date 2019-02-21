@@ -9,11 +9,19 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class DomibusPage extends DComponent {
 
 	public DomibusPage(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 //	@FindBy(css = "#routerHolder h1")
@@ -27,48 +35,49 @@ public class DomibusPage extends DComponent {
 	protected WebElement helpLnk;
 
 
-
-	public AlertArea getAlertArea(){
+	public AlertArea getAlertArea() {
 		return new AlertArea(driver);
 	}
-	public SideNavigation getSidebar(){ return new SideNavigation(driver);}
 
-	public SandwichMenu getSandwichMenu(){ return new SandwichMenu(driver);}
+	public SideNavigation getSidebar() {
+		return new SideNavigation(driver);
+	}
 
-	public void refreshPage(){
+	public SandwichMenu getSandwichMenu() {
+		return new SandwichMenu(driver);
+	}
+
+	public void refreshPage() {
 		driver.navigate().refresh();
 	}
 
-	public String getTitle() throws Exception{
+	public String getTitle() throws Exception {
 		DObject pgTitleObj = new DObject(driver, pageTitle);
 		String rawTitle = pgTitleObj.getText();
 
-		if(rawTitle.contains(":")){
+		if (rawTitle.contains(":")) {
 //			removing listed domain from title
 			return rawTitle.split(":")[1].trim();
 		}
 		return rawTitle;
 	}
 
-	public String getDomainFromTitle() throws Exception{
+	public String getDomainFromTitle() throws Exception {
 		DObject pgTitleObj = new DObject(driver, pageTitle);
 		String rawTitle = pgTitleObj.getText();
 
-		if(rawTitle.contains(":")){
+		if (rawTitle.contains(":")) {
 //			removing listed title
 			return rawTitle.split(":")[0].trim();
 		}
 		return null;
 	}
 
-	public DomainSelector getDomainSelector()throws Exception{
+	public DomainSelector getDomainSelector() throws Exception {
 		By domainSelectSelector = By.cssSelector("#sandwichMenuHolder > domain-selector > md-select");
 		WebElement element = driver.findElement(domainSelectSelector);
 		return new DomainSelector(driver, element);
 	}
-
-
-
 
 
 }

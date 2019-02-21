@@ -1,5 +1,13 @@
 package utils;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class PROPERTIES {
 
 	public static final String UI_BASE_URL = System.getProperty("UI_BASE_URL");
@@ -12,9 +20,5 @@ public class PROPERTIES {
 	public static final String DATA_FILE = System.getProperty("test_data.file");
 	public static final String REPORTS_FOLDER = System.getProperty("reports.folder");
 	public static final boolean IS_MULTI_DOMAIN = Boolean.valueOf(System.getProperty("isMultiDomain"));
-
-
-	public static final String adminUser = "";
-	public static final String adminPass = "";
 
 }

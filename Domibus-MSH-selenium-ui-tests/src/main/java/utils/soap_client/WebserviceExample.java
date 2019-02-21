@@ -1,13 +1,16 @@
 package utils.soap_client;
 
-//import eu.domibus.example.ws.logging.MessageLoggingHandler;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
 
 
 public class WebserviceExample {
 //    private static final Log LOG = LogFactory.getLog(WebserviceExample.class);
-
+//
 //    private String wsdl;
 //    private static final String DEFAULT_WEBSERVICE_LOCATION = "http://localhost:8080/domibus/services/backend?wsdl";
 //

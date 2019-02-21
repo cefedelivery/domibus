@@ -6,21 +6,28 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+ * @version 4.1
+ */
+
+
 public class DWait {
 
-	private WebDriver driver;
-	protected WebDriverWait webDriverWait;
+	public WebDriverWait webDriverWait;
 
 
 	public DWait(WebDriver driver) {
-		this.driver = driver;
-		this.webDriverWait = new WebDriverWait(this.driver, PROPERTIES.TIMEOUT);
+		this.webDriverWait = new WebDriverWait(driver, PROPERTIES.TIMEOUT);
 	}
 
 	public void forXMillis(Integer millis) {
 		try {
 			Thread.sleep(millis);
-		} catch (InterruptedException e) { e.printStackTrace(); }
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public WebElement forElementToBeClickable(WebElement element) {
@@ -34,7 +41,7 @@ public class DWait {
 	public void forElementToBeEnabled(WebElement element) {
 		int maxTimeout = PROPERTIES.TIMEOUT * 1000;
 		int waitedSoFar = 0;
-		while ((null != element.getAttribute("disabled")) && (waitedSoFar < maxTimeout)){
+		while ((null != element.getAttribute("disabled")) && (waitedSoFar < maxTimeout)) {
 			waitedSoFar += 300;
 			forXMillis(300);
 		}
@@ -47,7 +54,8 @@ public class DWait {
 	public void forElementToBeGone(WebElement element) {
 		try {
 			webDriverWait.until(ExpectedConditions.not(ExpectedConditions.visibilityOf(element)));
-		} catch (Exception e) {	}
+		} catch (Exception e) {
+		}
 	}
 
 }

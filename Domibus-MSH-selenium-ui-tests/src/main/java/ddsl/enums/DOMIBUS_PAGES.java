@@ -1,5 +1,10 @@
 package ddsl.enums;
 
+/**
+ * @author Catalin Comanici
+ * @version 4.1
+ */
+
 public enum DOMIBUS_PAGES {
 
 	MESSAGES,
@@ -15,7 +20,6 @@ public enum DOMIBUS_PAGES {
 	AUDIT,
 	ALERTS,
 	TEST_SERVICE
-
 
 
 }

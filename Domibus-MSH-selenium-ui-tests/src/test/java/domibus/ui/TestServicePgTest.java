@@ -10,6 +10,14 @@ import pages.login.LoginPage;
 import java.util.HashMap;
 import java.util.List;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class TestServicePgTest extends BaseTest {
 
 	protected void login(HashMap<String, String> user) throws Exception {
@@ -19,14 +27,14 @@ public class TestServicePgTest extends BaseTest {
 	}
 
 	@Test(description = "TS-1", groups = {"multiTenancy", "singleTenancy"})
-	public void openWindow() throws Exception{
+	public void openWindow() throws Exception {
 		SoftAssert soft = new SoftAssert();
 		login(data.getAdminUser());
 		TestServicePage page = new TestServicePage(driver);
 
 		soft.assertTrue(page.isLoaded(), "Page shows all desired elements");
 
-		if(!rest.isPmodeUploaded(null)){
+		if (!rest.isPmodeUploaded(null)) {
 			soft.assertTrue(page.invalidConfigurationState(), "Page shows invalid configuration state");
 		}
 
@@ -38,7 +46,7 @@ public class TestServicePgTest extends BaseTest {
 	}
 
 	@Test(description = "TS-2", groups = {"multiTenancy", "singleTenancy"})
-	public void availableParties() throws Exception{
+	public void availableParties() throws Exception {
 		SoftAssert soft = new SoftAssert();
 		rest.uploadPMode("pmode-blue.xml", null);
 
@@ -55,7 +63,7 @@ public class TestServicePgTest extends BaseTest {
 	}
 
 	@Test(description = "TS-3", groups = {"multiTenancy", "singleTenancy"})
-	public void testBlueParty() throws Exception{
+	public void testBlueParty() throws Exception {
 		SoftAssert soft = new SoftAssert();
 		rest.uploadPMode("pmode-blue.xml", null);
 
@@ -75,13 +83,12 @@ public class TestServicePgTest extends BaseTest {
 		page.wait.forXMillis(500);
 
 		soft.assertTrue(page.getToParty().getText().equalsIgnoreCase("domibus-blue"), "Correct party is listed");
-		soft.assertTrue(!page.getToAccessPoint().getText().isEmpty(), "To acces point contains data");
+		soft.assertTrue(!page.getToAccessPoint().getText().isEmpty(), "To access point contains data");
 		soft.assertTrue(!page.getTimeSent().getText().isEmpty(), "Time sent contains data");
 		soft.assertTrue(!page.getToMessage().getText().isEmpty(), "To Message id contains data");
 
 		soft.assertAll();
 	}
-
 
 
 }

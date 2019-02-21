@@ -14,13 +14,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Select extends DComponent{
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
+public class Select extends DComponent {
 
 
 	public Select(WebDriver driver, WebElement container) {
 		super(driver);
 		log.info("initialize select");
-		PageFactory.initElements( new AjaxElementLocatorFactory(container, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(container, PROPERTIES.TIMEOUT), this);
 
 		this.selectContainer = container;
 		extractOptionIDs();
@@ -36,27 +44,27 @@ public class Select extends DComponent{
 	@FindBy(css = "span.md2-select-value")
 	protected WebElement selectedOptionValue;
 
-	private void expand(){
-		try{
+	private void expand() {
+		try {
 			new DButton(driver, expandBtn).click();
-		}catch (Exception e){}
+		} catch (Exception e) {
+		}
 	}
 
-	private void extractOptionIDs(){
+	private void extractOptionIDs() {
 		wait.forElementToBeVisible(selectContainer);
 		wait.forAttributeNotEmpty(selectContainer, "aria-owns");
-		String[] idsAttrib = selectContainer.getAttribute("aria-owns").trim().split(" ");
-		optionIDs.addAll(Arrays.asList(idsAttrib));
+		String[] idsAttributes = selectContainer.getAttribute("aria-owns").trim().split(" ");
+		optionIDs.addAll(Arrays.asList(idsAttributes));
 		log.info("option ids identified");
 	}
 
-	public boolean isDisplayed(){
+	public boolean isDisplayed() {
 		return (expandBtn.isDisplayed());
 	}
 
 
-
-	protected List<WebElement> getOptionElements(){
+	protected List<WebElement> getOptionElements() {
 
 		log.info("searching options for select");
 		expand();
@@ -75,17 +83,19 @@ public class Select extends DComponent{
 		List<WebElement> options = getOptionElements();
 
 		int index = texts.indexOf(text);
-		if(index == -1){return false;}
+		if (index == -1) {
+			return false;
+		}
 		options.get(index).click();
 		return true;
 	}
 
-	public boolean selectOptionByIndex(int index) throws Exception{
+	public boolean selectOptionByIndex(int index) throws Exception {
 
 		log.info("selecting option by index");
 		List<WebElement> options = getOptionElements();
 
-		if(index>=options.size()){
+		if (index >= options.size()) {
 			return false;
 		}
 
@@ -97,7 +107,7 @@ public class Select extends DComponent{
 		return new DObject(driver, selectedOptionValue).getText();
 	}
 
-	public List<String> getOptionsTexts() throws Exception{
+	public List<String> getOptionsTexts() throws Exception {
 		List<WebElement> options = getOptionElements();
 		List<String> texts = new ArrayList<>();
 		for (WebElement option : options) {

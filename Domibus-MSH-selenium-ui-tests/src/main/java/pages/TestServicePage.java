@@ -12,10 +12,18 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class TestServicePage extends DomibusPage {
 	public TestServicePage(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 	@FindBy(id = "receiverPartyId_id")
@@ -26,7 +34,7 @@ public class TestServicePage extends DomibusPage {
 
 	@FindBy(id = "testbutton_id")
 	WebElement testBtn;
-//------------------------------------------------
+	//------------------------------------------------
 	@FindBy(id = "toPartyId_id")
 	WebElement toParty;
 
@@ -39,7 +47,7 @@ public class TestServicePage extends DomibusPage {
 	@FindBy(id = "toMessageId_id")
 	WebElement toMessage;
 
-//------------------------------------------------
+	//------------------------------------------------
 	@FindBy(id = "fromPartyId_id")
 	WebElement fromParty;
 
@@ -97,13 +105,13 @@ public class TestServicePage extends DomibusPage {
 		return new DInput(driver, fromMessage);
 	}
 
-	public boolean invalidConfigurationState()throws Exception{
+	public boolean invalidConfigurationState() throws Exception {
 		return (getAlertArea().isError()
 				&& getAlertArea().getAlertMessage().equalsIgnoreCase(DMessages.TESTSERVICE_NOTCONFIGURED)
 				&& !getTestBtn().isEnabled()
 				&& !getUpdateBtn().isEnabled()
 				&& getPartySelector().getOptionsTexts().size() == 1
-				);
+		);
 	}
 
 
@@ -119,6 +127,6 @@ public class TestServicePage extends DomibusPage {
 				&& getFromAccessPoint().isPresent()
 				&& getTimeReceived().isPresent()
 				&& getFromMessage().isPresent()
-				);
+		);
 	}
 }

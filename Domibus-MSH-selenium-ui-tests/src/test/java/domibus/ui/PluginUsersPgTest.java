@@ -17,6 +17,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class PluginUsersPgTest extends BaseTest {
 
 	protected PluginUsersPage login(HashMap<String, String> user) throws Exception {
@@ -27,7 +35,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-1", groups = {"multiTenancy", "singleTenancy"})
-	public void openWindow() throws Exception{
+	public void openWindow() throws Exception {
 		SoftAssert soft = new SoftAssert();
 //		login with Admin and go to plugin users page
 
@@ -39,7 +47,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-2", groups = {"multiTenancy", "singleTenancy"})
-	public void doubleclickRow() throws Exception{
+	public void doubleclickRow() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -66,7 +74,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-3", groups = {"multiTenancy", "singleTenancy"})
-	public void newUserCancel() throws Exception{
+	public void newUserCancel() throws Exception {
 
 		String username = Generator.randomAlphaNumeric(9);
 
@@ -74,7 +82,7 @@ public class PluginUsersPgTest extends BaseTest {
 // 		login and go to users page
 		PluginUsersPage page = login(data.getAdminUser());
 
-		soft.assertTrue(page.isLoaded(), "Page is loaded!!");
+		soft.assertTrue(page.isLoaded(), "Page is loaded");
 
 		soft.assertTrue(!page.getCancelBtn().isEnabled(), "Cancel button is disabled on page load");
 
@@ -95,7 +103,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-4", groups = {"multiTenancy", "singleTenancy"})
-	public void newUserSave() throws Exception{
+	public void newUserSave() throws Exception {
 
 		String username = Generator.randomAlphaNumeric(9);
 
@@ -103,7 +111,7 @@ public class PluginUsersPgTest extends BaseTest {
 // 		login and go to users page
 		PluginUsersPage page = login(data.getAdminUser());
 
-		soft.assertTrue(page.isLoaded(), "Page is loaded!!");
+		soft.assertTrue(page.isLoaded(), "Page is loaded");
 
 		soft.assertTrue(!page.getCancelBtn().isEnabled(), "Cancel button is disabled on page load");
 
@@ -132,7 +140,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-5", groups = {"multiTenancy", "singleTenancy"})
-	public void editAndCancel() throws Exception{
+	public void editAndCancel() throws Exception {
 		String toAdd = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
@@ -154,7 +162,7 @@ public class PluginUsersPgTest extends BaseTest {
 		pum.getOriginalUserInput().fill(toAdd);
 		pum.clickOK();
 
-		soft.assertTrue(grid.scrollTo("Original User", toAdd)>-1, "Edited value is visible in the grid");
+		soft.assertTrue(grid.scrollTo("Original User", toAdd) > -1, "Edited value is visible in the grid");
 
 		page.getCancelBtn().click();
 		new Dialog(driver).confirm();
@@ -167,7 +175,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-6", groups = {"multiTenancy", "singleTenancy"})
-	public void editAndSave() throws Exception{
+	public void editAndSave() throws Exception {
 		String toAdd = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
@@ -190,7 +198,7 @@ public class PluginUsersPgTest extends BaseTest {
 		pum.getOriginalUserInput().fill(toAdd);
 		pum.clickOK();
 
-		soft.assertTrue(grid.scrollTo("Original User", toAdd)>-1, "Edited value is visible in the grid");
+		soft.assertTrue(grid.scrollTo("Original User", toAdd) > -1, "Edited value is visible in the grid");
 
 		page.getSaveBtn().click();
 //		there should be confirmation as in all the other pages :(
@@ -204,7 +212,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-7", groups = {"multiTenancy", "singleTenancy"})
-	public void deleteAndCancel() throws Exception{
+	public void deleteAndCancel() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -229,7 +237,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-8", groups = {"multiTenancy", "singleTenancy"})
-	public void deleteAndSave() throws Exception{
+	public void deleteAndSave() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -252,7 +260,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-9", groups = {"multiTenancy", "singleTenancy"})
-	public void editUsername() throws Exception{
+	public void editUsername() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -264,7 +272,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 		PluginUserModal pum = new PluginUserModal(driver);
 
-		soft.assertTrue(!pum.getUserNameInput().isEnabled(), "Username is disabled!");
+		soft.assertTrue(!pum.getUserNameInput().isEnabled(), "Username is disabled");
 
 		rest.deletePluginUser(username, null);
 		soft.assertAll();
@@ -272,7 +280,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-10", groups = {"multiTenancy", "singleTenancy"})
-	public void editPassErrMess() throws Exception{
+	public void editPassErrMess() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -284,7 +292,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 		PluginUserModal pum = new PluginUserModal(driver);
 
-		soft.assertTrue(!pum.getUserNameInput().isEnabled(), "Username is disabled!");
+		soft.assertTrue(!pum.getUserNameInput().isEnabled(), "Username is disabled");
 		pum.getPasswordInput().fill("tst");
 
 		String errMess = pum.getPassErrMess().getText();
@@ -296,14 +304,13 @@ public class PluginUsersPgTest extends BaseTest {
 		soft.assertEquals(errMess, DMessages.PASS_NO_MATCH_MESSAGE, "Password and confirmation should match");
 
 
-
 		rest.deletePluginUser(username, null);
 		soft.assertAll();
 
 	}
 
 	@Test(description = "PU-11", groups = {"multiTenancy", "singleTenancy"})
-	public void createPluginUserFieldValidations() throws Exception{
+	public void createPluginUserFieldValidations() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 
 		SoftAssert soft = new SoftAssert();
@@ -359,7 +366,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-12", groups = {"multiTenancy", "singleTenancy"})
-	public void editRole() throws Exception{
+	public void editRole() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -404,13 +411,13 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-13", groups = {"multiTenancy"})
-	public void domainVisibility() throws Exception{
+	public void domainVisibility() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 
 		List<String> domains = rest.getDomainNames();
 		String domain1 = "";
 		for (String domain : domains) {
-			if(!domain.equalsIgnoreCase("Default")){
+			if (!domain.equalsIgnoreCase("Default")) {
 				domain1 = domain;
 				break;
 			}
@@ -433,7 +440,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-14", groups = {"multiTenancy", "singleTenancy"})
-	public void duplicatePluginUsersSameDomain() throws Exception{
+	public void duplicatePluginUsersSameDomain() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -445,7 +452,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
-				String.format(DMessages.DUPLICATE_PLUGINUSER_, username ),
+				String.format(DMessages.DUPLICATE_PLUGINUSER_, username),
 				"Error message is shown");
 
 		rest.deletePluginUser(username, null);
@@ -453,12 +460,12 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-15", groups = {"multiTenancy"})
-	public void duplicatePluginUsersDifferentDomain() throws Exception{
+	public void duplicatePluginUsersDifferentDomain() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		List<String> domains = rest.getDomainNames();
 		String domain1 = "";
 		for (String domain : domains) {
-			if(!domain.equalsIgnoreCase("Default")){
+			if (!domain.equalsIgnoreCase("Default")) {
 				domain1 = domain;
 				break;
 			}
@@ -473,7 +480,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
-				String.format(DMessages.DUPLICATE_PLUGINUSER_, username ),
+				String.format(DMessages.DUPLICATE_PLUGINUSER_, username),
 				"Error message is shown");
 
 		rest.deletePluginUser(username, domain1);
@@ -481,12 +488,12 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-16", groups = {"multiTenancy"})
-	public void sameUsernameAsUserOnDifferentDomain() throws Exception{
+	public void sameUsernameAsUserOnDifferentDomain() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		List<String> domains = rest.getDomainNames();
 		String domain1 = "";
 		for (String domain : domains) {
-			if(!domain.equalsIgnoreCase("Default")){
+			if (!domain.equalsIgnoreCase("Default")) {
 				domain1 = domain;
 				break;
 			}
@@ -501,7 +508,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
-				String.format(DMessages.DUPLICATE_PLUGINUSER_, username ),
+				String.format(DMessages.DUPLICATE_PLUGINUSER_, username),
 				"Error message is shown");
 
 		rest.deleteUser(username, domain1);
@@ -509,7 +516,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-17", groups = {"multiTenancy", "singleTenancy"})
-	public void sameUsernameAsUserOnSameDomain() throws Exception{
+	public void sameUsernameAsUserOnSameDomain() throws Exception {
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -521,7 +528,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
-				String.format(DMessages.DUPLICATE_PLUGINUSER_, username ),
+				String.format(DMessages.DUPLICATE_PLUGINUSER_, username),
 				"Error message is shown");
 
 		rest.deleteUser(username, null);
@@ -529,7 +536,7 @@ public class PluginUsersPgTest extends BaseTest {
 	}
 
 	@Test(description = "PU-18", groups = {"multiTenancy", "singleTenancy"})
-	public void filterPluginUserList() throws Exception{
+	public void filterPluginUserList() throws Exception {
 		List<String> usernames = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			String username = Generator.randomAlphaNumeric(10);
@@ -542,8 +549,8 @@ public class PluginUsersPgTest extends BaseTest {
 		PluginUsersPage page = login(data.getAdminUser());
 
 		page.getFilters().search(null, null, null, usernames.get(0));
-		soft.assertEquals(page.grid().getRowInfo(0).get("User Name"),usernames.get(0), "Search by username return corect result");
-		soft.assertEquals(page.grid().getRowsNo(), 1, "Search by username returnonly one result");
+		soft.assertEquals(page.grid().getRowInfo(0).get("User Name"), usernames.get(0), "Search by username return correct result");
+		soft.assertEquals(page.grid().getRowsNo(), 1, "Search by username return only one result");
 
 		page.getFilters().getUsernameInput().clear();
 		page.getFilters().search(null, DRoles.USER, null, null);

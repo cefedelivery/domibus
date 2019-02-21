@@ -11,10 +11,18 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class UsersPage extends DomibusPage {
 	public UsersPage(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 	@FindBy(id = "userTable")
@@ -63,40 +71,39 @@ public class UsersPage extends DomibusPage {
 		return new DButton(driver, deleteBtn);
 	}
 
-	public boolean isLoaded() throws Exception{
+	public boolean isLoaded() throws Exception {
 		return (getCancelBtn().isPresent()
 				&& getSaveBtn().isPresent()
 				&& getNewBtn().isEnabled()
 				&& getEditBtn().isPresent()
 				&& getDeleteBtn().isPresent()
-				&& grid().isPresent()		);
+				&& grid().isPresent());
 	}
 
-	public void saveAndConfirm() throws Exception{
+	public void saveAndConfirm() throws Exception {
 		getSaveBtn().click();
 		new Dialog(driver).confirm();
 	}
-	public void cancelAndConfirm() throws Exception{
+
+	public void cancelAndConfirm() throws Exception {
 		getCancelBtn().click();
 		new Dialog(driver).confirm();
 	}
 
-	public void newUser(String user, String email, String role,String password, String confirmation) throws Exception{
+	public void newUser(String user, String email, String role, String password, String confirmation) throws Exception {
 		getNewBtn().click();
 		UserModal modal = new UserModal(driver);
 		modal.fillData(user, email, role, password, confirmation);
 		modal.getOkBtn().click();
 	}
 
-	public void editUser(String user, String email, String role,String password, String confirmation) throws Exception{
+	public void editUser(String user, String email, String role, String password, String confirmation) throws Exception {
 		getEditBtn().click();
 
 		UserModal modal = new UserModal(driver);
 		modal.fillData("", email, role, password, confirmation);
 		modal.getOkBtn().click();
 	}
-
-
 
 
 }

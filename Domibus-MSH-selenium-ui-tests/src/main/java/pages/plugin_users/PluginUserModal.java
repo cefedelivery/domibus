@@ -12,6 +12,14 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class PluginUserModal extends EditModal {
 	public PluginUserModal(WebDriver driver) {
 		super(driver);
@@ -55,7 +63,7 @@ public class PluginUserModal extends EditModal {
 	private WebElement roleErrMess;
 
 
-	public void fillData(String user, String role, String password, String confirmation) throws Exception{
+	public void fillData(String user, String role, String password, String confirmation) throws Exception {
 		getUserNameInput().fill(user);
 		getPasswordInput().fill(password);
 		getConfirmationInput().fill(confirmation);
@@ -112,7 +120,6 @@ public class PluginUserModal extends EditModal {
 	public DObject getRoleErrMess() {
 		return new DObject(driver, roleErrMess);
 	}
-
 
 
 }

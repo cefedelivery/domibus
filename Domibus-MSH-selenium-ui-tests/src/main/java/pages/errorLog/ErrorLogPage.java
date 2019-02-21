@@ -13,10 +13,18 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import utils.PROPERTIES;
 
+
+/**
+ * @author Catalin Comanici
+
+ * @version 4.1
+ */
+
+
 public class ErrorLogPage extends DomibusPage {
 	public ErrorLogPage(WebDriver driver) {
 		super(driver);
-		PageFactory.initElements( new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(driver, PROPERTIES.TIMEOUT), this);
 	}
 
 
@@ -71,7 +79,6 @@ public class ErrorLogPage extends DomibusPage {
 	}
 
 
-
 	public void basicSearch(String signalMessID, String messageID, String fromDate, String toDate) throws Exception {
 		log.info("submit basic search");
 
@@ -89,9 +96,9 @@ public class ErrorLogPage extends DomibusPage {
 	}
 
 
-	public boolean isLoaded() throws Exception{
+	public boolean isLoaded() throws Exception {
 		return (searchButton.isEnabled()
-		&& getMessageIDInput().isEnabled()
-		&& getSignalMessIDInput().isEnabled());
+				&& getMessageIDInput().isEnabled()
+				&& getSignalMessIDInput().isEnabled());
 	}
 }

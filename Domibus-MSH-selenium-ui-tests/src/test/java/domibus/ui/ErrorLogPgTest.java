@@ -13,22 +13,29 @@ import pages.login.LoginPage;
 
 import java.util.HashMap;
 
-public class ErrorLogPgTest extends BaseTest{
+
+/**
+ * @author Catalin Comanici
+ * @version 4.1
+ */
+
+
+public class ErrorLogPgTest extends BaseTest {
 
 
 	@BeforeMethod(alwaysRun = true)
-	private void login() throws Exception{
+	private void login() throws Exception {
 		new LoginPage(driver)
 				.login(data.getAdminUser());
 		new DomibusPage(driver).getSidebar().getPageLnk(DOMIBUS_PAGES.ERROR_LOG).click();
 	}
-	
+
 
 	@Test(description = "ERRLOG-1")
 	public void openErrorLogPage() throws Exception {
 		SoftAssert soft = new SoftAssert();
 		ErrorLogPage errorLogPage = new ErrorLogPage(driver);
-		
+
 		soft.assertTrue(errorLogPage.isLoaded(), "Expected elements appear in the page");
 		soft.assertAll();
 	}
@@ -43,8 +50,8 @@ public class ErrorLogPgTest extends BaseTest{
 
 		DGrid grid = errorLogPage.getGrid();
 
-		if(grid.getRowsNo() < 3){
-			throw new SkipException("Not enough rows to test filtering!!");
+		if (grid.getRowsNo() < 3) {
+			throw new SkipException("Not enough rows to test filtering");
 		}
 
 		HashMap<String, String> row = grid.getRowInfo(0);
@@ -69,9 +76,13 @@ public class ErrorLogPgTest extends BaseTest{
 		Pagination pgCtrl = page.getGrid().getPagination();
 
 		int noOfErrors = pgCtrl.getTotalItems();
-		if(noOfErrors<11){throw new SkipException("Cannot test pagination because with so little errors");}
+		if (noOfErrors < 11) {
+			throw new SkipException("Cannot test pagination because with so little errors");
+		}
 
-		if(!pgCtrl.isPaginationPresent() && pgCtrl.getExpectedNoOfPages() >1 ){soft.fail("Pagination controls are not present although expected number of pages is bigger than 1");}
+		if (!pgCtrl.isPaginationPresent() && pgCtrl.getExpectedNoOfPages() > 1) {
+			soft.fail("Pagination controls are not present although expected number of pages is bigger than 1");
+		}
 
 		soft.assertEquals(pgCtrl.getPageSizeSelect().getSelectedValue(), "10", "Default page size is 10");
 
@@ -95,7 +106,6 @@ public class ErrorLogPgTest extends BaseTest{
 		page.getGrid().sortBy("Error Code");
 		soft.assertTrue(pgCtrl.getActivePage() == 1, "After sorting the active page is 1");
 		pgCtrl.goToPage(2);
-//		soft.assertTrue(page.getGrid().isSortedBy("Error Code"), "Sorting is kept after the user changes active page");
 
 		pgCtrl.getPageSizeSelect().selectOptionByText("25");
 		pgCtrl.skipToLastPage();

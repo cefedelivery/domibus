@@ -1,5 +1,12 @@
 package ddsl.enums;
 
+
+/**
+ * @author Catalin Comanici
+ * @version 4.1
+ */
+
+
 public class DMessages {
 
 
@@ -25,7 +32,7 @@ public class DMessages {
 			"modifications were not saved yet.\n" +
 			"Click on \"Abandon\" to abandon your changes.\n" +
 			"Click \"Keep\" to stay on the current screen and keep your changes without\n" +
-			"saving them now"+
+			"saving them now" +
 			"Click \"Save\" to save your changes and move to the selected screen.";
 	public static final String MSG_9 = "The selection criteria you provided are too restrictive, no result matches\n" +
 			"these criteria. Please enter less selective criteria to obtain some results";
@@ -40,16 +47,11 @@ public class DMessages {
 	public static final String MSG_13 = "You are about to delete User: ${User}.\n" +
 			"Click on \"Delete\" to confirm the deletion.\n" +
 			"Click on \"Keep\" to keep the user.\n";
-	public static final String MSG_14 = "You are about to create an SMP Domain: ${SMP_BDMSL_ID}. Action will\n" +
-			"register new user SMP user to SML for domain ${ BDMSL _DOMAIN}.\n" +
+	public static final String MSG_14 = "" +
 			"Domain will be saved to SMP. Action is not recoverable.\n" +
 			"Click on \"Register\" to confirm the registration and saving.\n" +
 			"Click on \"Cancel\" to cancel the registration.";
-	public static final String MSG_15 = "You are about to delete an SMP Domain: ${SMP_DOMAIN_ID}. Action\n" +
-			"will unregister SMP domain user ${SMP_SML_ID}. from SML for domain\n" +
-			"${ BDMSL _DOMAIN}. Action is not recoverable.\n" +
-			"Click on \"Delete\" to confirm the deleting and unregistration of domain.\n" +
-			"Click on \"Keep\" to keep the domain.";
+	public static final String MSG_15 = "";
 	public static final String MSG_16 = "You are about to delete an X509 private key: ${Key }. Action is not recoverable.\n" +
 			"Click on \"Delete\" to confirm the deleting the key.\n" +
 			"Click on \"Keep\" to keep the key.";
@@ -58,9 +60,9 @@ public class DMessages {
 			"Click on \"Keep\" to keep the domain.";
 	public static final String MSG_18 = "The operation 'update' completed successfully.";
 
-	public static final String USER_OWN_DELETE_ERR = "Delete validation error Could not delete logged user!";
+	public static final String USER_OWN_DELETE_ERR = "Delete validation error Could not delete logged user";
 
-	public static final String MSG_19 = "Domain ${BDMSL_DOMAIN} is already registered with id ${DOMAIN_ID}";
+	public static final String MSG_19 = "";
 	public static final String MSG_20 = "All changes were aborted and data restored into the present window";
 	public static final String MSG_21 = "Unable to login. SMP is not running.";
 
@@ -73,7 +75,7 @@ public class DMessages {
 
 	public static final String ROLE_NOTEMPTY = "You need to choose at least one role for this user";
 
-	public static final String USERNAME_VALIDATION_MESSAGE = "Username can only contain alphanumeric characters (letters A-Z, numbers 0-9) and must have from 4 to 32 characters!";
+	public static final String USERNAME_VALIDATION_MESSAGE = "Username can only contain alphanumeric characters (letters A-Z, numbers 0-9) and must have from 4 to 32 characters";
 
 	public static final String PASS_POLICY_MESSAGE = "Password should follow all of these rules:\n" +
 			"- Minimum length: 8 characters\n" +
@@ -90,8 +92,6 @@ public class DMessages {
 	public static final String DUPLICATE_PLUGINUSER_ = "Error saving plugin users. [DOM_001]:Cannot add user %s because this name already exists.";
 
 	public static final String TESTSERVICE_NOTCONFIGURED = "The test service is not properly configured.";
-
-
 
 
 }
