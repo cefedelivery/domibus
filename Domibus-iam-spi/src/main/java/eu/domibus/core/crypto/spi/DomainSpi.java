@@ -9,14 +9,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *
  * Just a mapper class for core Domain class.
  */
-public class Domain {
+public class DomainSpi {
 
     protected String code;
     protected String name;
 
-    public Domain(){}
+    public DomainSpi(){}
 
-    public Domain(String code, String name) {
+    public DomainSpi(String code, String name) {
         this.code = code;
         this.name = name;
     }
@@ -27,7 +27,7 @@ public class Domain {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        Domain domain = (Domain) o;
+        DomainSpi domain = (DomainSpi) o;
 
         return new EqualsBuilder()
                 .append(code, domain.code)

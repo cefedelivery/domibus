@@ -8,13 +8,13 @@ import java.security.cert.X509Certificate;
  *
  * Just a mapper class for core CertificateEntry class.
  */
-public class CertificateEntry {
+public class CertificateEntrySpi {
 
     private String alias;
 
     private X509Certificate certificate;
 
-    public CertificateEntry(String alias, X509Certificate certificate) {
+    public CertificateEntrySpi(String alias, X509Certificate certificate) {
         this.alias = alias;
         this.certificate = certificate;
     }

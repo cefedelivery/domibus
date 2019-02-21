@@ -4,6 +4,8 @@ import eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
  */
 
 @Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi{
 
     private static final Logger LOG = LoggerFactory.getLogger(DomibusDssCryptoProvider.class);

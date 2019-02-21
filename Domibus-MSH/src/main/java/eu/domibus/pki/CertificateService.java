@@ -2,7 +2,6 @@ package eu.domibus.pki;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.TrustStoreEntry;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
 
 import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;

@@ -27,7 +27,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
     @Qualifier(DEFAULT_IAM_SPI)
     private DomainCryptoServiceSpi defaultDomainCryptoService;
 
-    private Domain domain;
+    private DomainSpi domain;
 
     @Override
     public X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException {
@@ -100,7 +100,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
     }
 
     @Override
-    public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
+    public boolean isCertificateChainValid(String alias) throws DomibusCertificateSpiException{
         return defaultDomainCryptoService.isCertificateChainValid(alias);
     }
 
@@ -110,7 +110,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
     }
 
     @Override
-    public void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
+    public void addCertificate(List<CertificateEntrySpi> certificates, boolean overwrite) {
         defaultDomainCryptoService.addCertificate(certificates,overwrite);
     }
 
@@ -130,11 +130,11 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
     }
 
     @Override
-    public void setDomain(Domain domain) {
+    public void setDomain(DomainSpi domain) {
         this.domain=domain;
     }
 
-    protected Domain getDomain() {
+    protected DomainSpi getDomain() {
         return domain;
     }
 

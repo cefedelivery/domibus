@@ -7,18 +7,19 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.core.converter.DomainCoreConverter;
-import eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi;
-import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
+import eu.domibus.core.crypto.spi.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.pki.DomibusCertificateException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ import java.util.Properties;
  * @since 4.0
  */
 @Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @Qualifier(AbstractCryptoServiceSpi.DEFAULT_IAM_SPI)
 public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainCryptoServiceSpi {
 
@@ -85,14 +87,14 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
     }
 
     @Override
-    public synchronized void refreshTrustStore() throws CryptoException {
+    public synchronized void refreshTrustStore()  {
         final KeyStore trustStore = loadTrustStore();
         setTrustStore(trustStore);
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
-    public synchronized void replaceTrustStore(byte[] store, String password){
+    public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoSpiException{
         LOG.debug("Replacing the existing trust store file [{}] with the provided one", getTrustStoreLocation());
 
         ByteArrayOutputStream oldTrustStoreBytes = new ByteArrayOutputStream();
@@ -100,7 +102,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
             truststore.store(oldTrustStoreBytes, getTrustStorePassword().toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException exc) {
             closeOutputStream(oldTrustStoreBytes);
-            throw new CryptoException("Could not replace truststore", exc);
+            throw new CryptoSpiException("Could not replace truststore", exc);
         }
         try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
             certificateService.validateLoadOperation(newTrustStoreBytes, password, getTrustStoreType());
@@ -114,9 +116,9 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
                 truststore.load(oldTrustStoreBytes.toInputStream(), getTrustStorePassword().toCharArray());
                 signalTrustStoreUpdate();
             } catch (CertificateException | NoSuchAlgorithmException | IOException exc) {
-                throw new CryptoException("Could not replace truststore and old truststore was not reverted properly. Please correct the error before continuing.", exc);
+                throw new CryptoSpiException("Could not replace truststore and old truststore was not reverted properly. Please correct the error before continuing.", exc);
             }
-            throw new CryptoException(e.getMessage(), e);
+            throw new CryptoSpiException(e.getMessage(), e);
         } finally {
             closeOutputStream(oldTrustStoreBytes);
         }
@@ -156,7 +158,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
 
     @Override
     @Transactional(noRollbackFor = DomibusCertificateException.class)
-    public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
+    public boolean isCertificateChainValid(String alias) throws DomibusCertificateSpiException {
         LOG.debug("Checking certificate validation for [{}]", alias);
         KeyStore trustStore = getTrustStore();
         return certificateService.isCertificateChainValid(trustStore, alias);
@@ -170,7 +172,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
     }
 
     @Override
-    public synchronized void addCertificate(List<eu.domibus.core.crypto.spi.CertificateEntry> certificates, boolean overwrite) {
+    public synchronized void addCertificate(List<CertificateEntrySpi> certificates, boolean overwrite) {
         certificates.forEach(certEntry ->
                 doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite));
         persistTrustStore();
@@ -300,7 +302,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
     }
 
     @Override
-    public void setDomain(eu.domibus.core.crypto.spi.Domain domain) {
+    public void setDomain(DomainSpi domain) {
         this.domain=domainCoreConverter.convert(domain,Domain.class);
     }
 

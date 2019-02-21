@@ -31,7 +31,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
+import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +167,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
         LOG.trace("Initiating pull requests:");
-        if(pullProcesses.isEmpty()){
+        if (pullProcesses.isEmpty()) {
             LOG.trace("No pull process configured !");
         }
 
@@ -183,7 +183,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
                     for (Party initiatorParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
-                        if(mpc != null && !mpc.equals(mpcQualifiedName)) {
+                        if (mpc != null && !mpc.equals(mpcQualifiedName)) {
                             continue;
                         }
                         //@thom remove the pullcontext from here.
@@ -196,9 +196,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                                 legConfiguration.getService().getName(),
                                 legConfiguration.getAction().getName(),
                                 legConfiguration.getName());
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(messageExchangeConfiguration.toString());
-                        }
+                        LOG.debug("messageExchangeConfiguration:[{}]", messageExchangeConfiguration);
 
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
@@ -245,7 +243,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
         Set<Identifier> identifiers = initiator.getIdentifiers();
-        if (identifiers.size() == 0) {
+        if (identifiers.isEmpty()) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
             return null;
         }
@@ -309,14 +307,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING)) {
+        if (domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING)) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = multiDomainCertificateProvider.isCertificateChainValid(domainProvider.getCurrentDomain(), receiverName);
                 if (!certificateChainValid) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
-                LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
+                LOG.info("Receiver certificate exists and is valid [{}}]", receiverName);
             } catch (DomibusCertificateException e) {
                 throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, e);
             }
@@ -330,7 +328,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING)) {
+        if (domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING)) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 X509Certificate certificate = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), senderName);
@@ -340,7 +338,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 if (!certificateService.isCertificateValid(certificate)) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
-                LOG.info("Sender certificate exists and is valid [" + senderName + "]");
+                LOG.info("Sender certificate exists and is valid [{}]", senderName);
             } catch (DomibusCertificateException | KeyStoreException ex) {
                 // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
                 // my opinion is that since the option is enabled, we should validate no matter what => this is an error
