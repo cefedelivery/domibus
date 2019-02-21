@@ -47,7 +47,7 @@
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-iam-api</artifactId>
+            <artifactId>domibus-iam-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
