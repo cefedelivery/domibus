@@ -10,17 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>domibus-authentication-dss-extension</artifactId>
-
-    <properties>
-        <dss.version>5.4</dss.version>
-    </properties>
-
     <name>Domibus authentication dss extension</name>
 
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-iam-api</artifactId>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -45,11 +41,9 @@
             <scope>provided</scope>
         </dependency>
         <!-- DSS libraries -->
-
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-document</artifactId>
-            <version>${dss.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
@@ -64,7 +58,6 @@
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-tsl-validation</artifactId>
-            <version>${dss.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
@@ -80,7 +73,6 @@
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-service</artifactId>
-            <version>${dss.version}</version>
         </dependency>
     </dependencies>
 
