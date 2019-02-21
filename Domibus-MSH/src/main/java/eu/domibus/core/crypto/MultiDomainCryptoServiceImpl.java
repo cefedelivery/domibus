@@ -1,15 +1,15 @@
 package eu.domibus.core.crypto;
 
+import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
+import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
-import eu.domibus.api.crypto.CryptoException;
-import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
+import eu.domibus.pki.DomibusCertificateException;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
         return domainCertificateProvider.getX509Certificates(cryptoType);
     }
 
-    protected DomainCryptoService getDomainCertificateProvider(Domain domain)  {
+    protected DomainCryptoService getDomainCertificateProvider(Domain domain) {
         LOG.debug("Get domain CertificateProvider for domain [{}]", domain);
         if (domainCertificateProviderMap.get(domain) == null) {
             synchronized (domainCertificateProviderMap) {
@@ -99,7 +99,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
 
     @Override
     public void verifyTrust(Domain domain, PublicKey publicKey) throws WSSecurityException {
-        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain) ;
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.verifyTrust(publicKey);
     }
 
@@ -167,7 +167,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
-    public X509Certificate getCertificateFromTruststore(Domain domain, String alias) throws KeyStoreException{
+    public X509Certificate getCertificateFromTruststore(Domain domain, String alias) throws KeyStoreException {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromTrustStore(alias);
     }

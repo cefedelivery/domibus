@@ -12,7 +12,7 @@ import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
+import eu.domibus.pki.DomibusCertificateException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;

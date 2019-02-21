@@ -6,10 +6,10 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
-import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
+import eu.domibus.core.crypto.spi.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.core.crypto.spi.DomibusCertificateException;
+import eu.domibus.pki.DomibusCertificateException;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
 
-    protected static final String IAM_IDENTIFIER = "domibus.iam.extension.identifier";
+    protected static final String IAM_IDENTIFIER = "domibus.extension.iam.authorization.identifier";
 
     public DomainCryptoServiceImpl() {
     }
@@ -73,7 +73,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
         }
 
         iamProvider = providerList.get(0);
-        iamProvider.setDomain(new eu.domibus.core.crypto.spi.Domain(domain.getCode(), domain.getName()));
+        iamProvider.setDomain(new DomainSpi(domain.getCode(), domain.getName()));
         iamProvider.init();
 
         LOG.info("Active IAM provider identifier:[{}] for domain:[{}]", iamProvider.getIdentifier(), domain.getName());
@@ -141,7 +141,12 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @Override
     public void replaceTrustStore(byte[] store, String password) throws CryptoException {
-        iamProvider.replaceTrustStore(store, password);
+        try {
+            iamProvider.replaceTrustStore(store, password);
+        } catch (CryptoSpiException e) {
+            LOG.error("Error calling replace truststore on authentication spi:[{}] for domain:[{}]", iamProvider.getIdentifier(), this.domain);
+            throw new CryptoException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -157,17 +162,24 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        return iamProvider.isCertificateChainValid(alias);
+        try {
+            return iamProvider.isCertificateChainValid(alias);
+        } catch (DomibusCertificateSpiException e) {
+            LOG.error("Error validating certificate chain for alias:[{}] and provider:[{}]",
+                    alias,
+                    iamProvider.getIdentifier());
+            throw new DomibusCertificateException(e.getMessage(), e);
+        }
     }
 
     @Override
-    public  boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
+    public boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
         return iamProvider.addCertificate(certificate, alias, overwrite);
     }
 
     @Override
     public void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
-        iamProvider.addCertificate(domainCoreConverter.convert(certificates, eu.domibus.core.crypto.spi.CertificateEntry.class), overwrite);
+        iamProvider.addCertificate(domainCoreConverter.convert(certificates, CertificateEntrySpi.class), overwrite);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package eu.domibus.core.crypto.spi;
+package eu.domibus.pki;
 
 /**
  * Created by Cosmin Baciu on 06-Jul-16.

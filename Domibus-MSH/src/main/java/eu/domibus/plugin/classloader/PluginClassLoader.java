@@ -5,7 +5,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Cosmin Baciu on 6/15/2016.
@@ -37,11 +35,14 @@ public class PluginClassLoader extends URLClassLoader {
     protected static URL[] discoverPlugins(Set<File> directories) throws MalformedURLException {
 
         final List<URI> jarUris = directories.stream().
-                map(directory -> directory.listFiles((dir, name) -> name.endsWith(".jar"))).
+                map(directory -> {
+                    LOG.debug("Extracting plugin and extension jar files from directory:[{}]",directory);
+                    return directory.listFiles((dir, name) -> name.endsWith(".jar"));
+                }).
                 filter(Objects::nonNull).
                 map(Lists::newArrayList).
                 flatMap(ArrayList::stream).
-                map(pluginJarFile -> pluginJarFile.toURI()).
+                map(File::toURI).
                 collect(Collectors.toList());
 
         final URL[] urls = new URL[jarUris.size()];

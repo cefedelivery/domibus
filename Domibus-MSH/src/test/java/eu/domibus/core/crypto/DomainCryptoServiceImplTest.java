@@ -2,7 +2,7 @@ package eu.domibus.core.crypto;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.crypto.spi.Domain;
+import eu.domibus.core.crypto.spi.DomainSpi;
 import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class DomainCryptoServiceImplTest {
         domainCryptoService.setDomainCryptoServiceSpiList(Lists.newArrayList(defaultSpi,dssSpi));
         when(domibusPropertyProvider.getDomainProperty(domainCryptoService.IAM_IDENTIFIER)).thenReturn(dss);
         domainCryptoService.init();
-        verify(dssSpi,times(1)).setDomain(new Domain("DEF","DEFAULT"));
+        verify(dssSpi,times(1)).setDomain(new DomainSpi("DEF","DEFAULT"));
         verify(dssSpi,times(1)).init();
     }
 

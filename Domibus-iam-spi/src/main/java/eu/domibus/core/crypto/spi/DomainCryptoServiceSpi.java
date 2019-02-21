@@ -42,7 +42,7 @@ public interface DomainCryptoServiceSpi {
 
     void refreshTrustStore();
 
-    void replaceTrustStore(byte[] store, String password);
+    void replaceTrustStore(byte[] store, String password) throws CryptoSpiException;
 
     KeyStore getKeyStore();
 
@@ -50,11 +50,11 @@ public interface DomainCryptoServiceSpi {
 
     X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException;
 
-    boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
+    boolean isCertificateChainValid(String alias) throws DomibusCertificateSpiException;
 
     boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite);
 
-    void addCertificate(List<CertificateEntry> certificates, boolean overwrite);
+    void addCertificate(List<CertificateEntrySpi> certificates, boolean overwrite);
 
     X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException;
 
@@ -64,7 +64,7 @@ public interface DomainCryptoServiceSpi {
 
     String getIdentifier();
 
-    void setDomain(Domain domain);
+    void setDomain(DomainSpi domain);
 
     void init();
 }

@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
  */
 
 @Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi{
 
     private static final Logger LOG = LoggerFactory.getLogger(DomibusDssCryptoProvider.class);
