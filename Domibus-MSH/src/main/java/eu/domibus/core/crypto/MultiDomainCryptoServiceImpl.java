@@ -1,15 +1,16 @@
 package eu.domibus.core.crypto;
 
+import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
+import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
-import eu.domibus.api.crypto.CryptoException;
-import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.security.auth.callback.CallbackHandler;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -53,7 +48,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
         return domainCertificateProvider.getX509Certificates(cryptoType);
     }
 
-    protected DomainCryptoService getDomainCertificateProvider(Domain domain)  {
+    protected DomainCryptoService getDomainCertificateProvider(Domain domain) {
         LOG.debug("Get domain CertificateProvider for domain [{}]", domain);
         if (domainCertificateProviderMap.get(domain) == null) {
             synchronized (domainCertificateProviderMap) {
@@ -99,7 +94,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
 
     @Override
     public void verifyTrust(Domain domain, PublicKey publicKey) throws WSSecurityException {
-        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain) ;
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.verifyTrust(publicKey);
     }
 
@@ -122,10 +117,28 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
-    public void replaceTrustStore(Domain domain, byte[] store, String password) throws CryptoException {
+    public void replaceTrustStore(Domain domain, String storeFileName, byte[] store, String password) throws CryptoException {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+
+        validateTruststoreType(domainCertificateProvider.getTrustStoreType(), storeFileName);
+
         domainCertificateProvider.replaceTrustStore(store, password);
         domibusCacheService.clearCache("certValidationByAlias");
+    }
+
+    protected void validateTruststoreType(String storeType, String storeFileName) {
+        String fileType = FilenameUtils.getExtension(storeFileName).toLowerCase();
+        switch (storeType.toLowerCase()) {
+            case "pkcs12":
+                if (Arrays.asList("p12", "pfx").contains(fileType)) {
+                    return;
+                }
+            case "jks":
+                if (Arrays.asList("jks").contains(fileType)) {
+                    return;
+                }
+        }
+        throw new InvalidParameterException("Store file type (" + fileType + ") should match the configured truststore type (" + storeType + ").");
     }
 
     @Override
@@ -167,7 +180,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
-    public X509Certificate getCertificateFromTruststore(Domain domain, String alias) throws KeyStoreException{
+    public X509Certificate getCertificateFromTruststore(Domain domain, String alias) throws KeyStoreException {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromTrustStore(alias);
     }
@@ -183,4 +196,5 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.removeCertificate(aliases);
     }
+
 }
