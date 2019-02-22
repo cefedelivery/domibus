@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -31,12 +33,19 @@ public class FSMessageTransformerTest {
 
     private static final String SERVICE_NOPROCESS = "bdx:noprocess";
     private static final String CONTENT_ID = "cid:message";
+    private static final String CONTENT_ID_MYPAYLOAD = "cid:mypayload";
     private static final String ACTION_TC1LEG1 = "TC1Leg1";
     private static final String SERVICE_TYPE_TC1 = "tc1";
+    private static final String CONVERSATIONID_CONV1 = "conv1";
     private static final String MIME_TYPE = "MimeType";
     private static final String APPLICATION_XML = "application/xml";
+    private static final String TEXT_XML = "text/xml";
     private static final String AGREEMENT_REF_A1 = "A1";
     private static final String EMPTY_STR = "";
+    private static final String MYPROP = "MyProp";
+    private static final String MYPROP_TYPE = "propType";
+    private static final String MYPROP_VALUE = "SomeValue";
+    private static final String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
     @Before
     public void setUp() throws Exception {
@@ -118,19 +127,70 @@ public class FSMessageTransformerTest {
 
     @Test
     public void testTransformToSubmission_NormalFlow() throws Exception {
-        String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-        UserMessage metadata = FSTestHelper.getUserMessage(this.getClass(), "testTransformToSubmissionNormalFlow_metadata.xml");
-        
-        ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
-        dataSource.setName("content.xml");
-        DataHandler dataHandler = new DataHandler(dataSource);
-        final Map<String, FSPayload> fsPayloads = new HashMap<>();
-        fsPayloads.put("cid:message", new FSPayload(null, dataSource.getName(), dataHandler));
-        FSMessage fsMessage = new FSMessage(fsPayloads, metadata);
-
+        FSMessage fsMessage = buildMessage("testTransformToSubmissionNormalFlow_metadata.xml");
         // Transform FSMessage to Submission
         FSMessageTransformer transformer = new FSMessageTransformer();
         Submission submission = transformer.transformToSubmission(fsMessage);
+
+        assertTransformValues(submission);
+        assertDefaultValuesForPayloadInfo(submission);
+    }
+
+    @Test
+    public void testTransformToSubmission_NormalFlow_WithPayloadInfo() throws Exception {
+        FSMessage fsMessage = buildMessage("testTransformToSubmissionNormalFlow_WithPayloadInfo_metadata.xml");
+        // Transform FSMessage to Submission
+        FSMessageTransformer transformer = new FSMessageTransformer();
+        Submission submission = transformer.transformToSubmission(fsMessage);
+
+        assertTransformPayloadInfo(submission);
+
+    }
+
+    @Test
+    public void testTransformToFromToSubmission_NormalFlow() throws Exception {
+        FSMessage fsMessage = buildMessage("testTransformToSubmissionNormalFlow_WithPayloadInfo_metadata.xml");
+        // Transform FSMessage to Submission
+        FSMessageTransformer transformer = new FSMessageTransformer();
+        // perform the transformation to - from and back to subbmission
+        Submission submission0 = transformer.transformToSubmission(fsMessage);
+        FSMessage fsMessage1 = transformer.transformFromSubmission(submission0, null);
+        Submission submission = transformer.transformToSubmission(fsMessage1);
+
+        assertTransformValues(submission);
+        assertTransformPayloadInfo(submission);
+    }
+
+    protected void assertDefaultValuesForPayloadInfo(Submission submission) throws IOException {
+        Assert.assertEquals(1, submission.getPayloads().size());
+        Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
+        Submission.TypedProperty payloadProperty = submissionPayload.getPayloadProperties().iterator().next();
+        Assert.assertEquals(MIME_TYPE, payloadProperty.getKey());
+        Assert.assertEquals(APPLICATION_XML, payloadProperty.getValue());
+
+        DataHandler payloadDatahandler = submissionPayload.getPayloadDatahandler();
+        Assert.assertEquals(APPLICATION_XML, payloadDatahandler.getContentType());
+        Assert.assertEquals(payloadContent, IOUtils.toString(payloadDatahandler.getInputStream()));
+    }
+
+    protected void assertTransformPayloadInfo(Submission submission) {
+        Assert.assertEquals(1, submission.getPayloads().size());
+        Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
+        Assert.assertEquals(CONTENT_ID_MYPAYLOAD, submissionPayload.getContentId());
+
+        Assert.assertEquals(3, submissionPayload.getPayloadProperties().size());
+        for (Submission.TypedProperty payloadProperty : submissionPayload.getPayloadProperties()) {
+            if (MIME_TYPE.equals(payloadProperty.getKey())) {
+                Assert.assertEquals(TEXT_XML, payloadProperty.getValue());
+            }
+            if (MYPROP.equals(payloadProperty.getKey())) {
+                Assert.assertEquals(MYPROP_TYPE, payloadProperty.getType());
+                Assert.assertEquals(MYPROP_VALUE, payloadProperty.getValue());
+            }
+        }
+    }
+
+    protected void assertTransformValues(Submission submission) throws IOException {
 
         Assert.assertNotNull(submission);
         Assert.assertEquals(1, submission.getFromParties().size());
@@ -150,6 +210,7 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(SERVICE_NOPROCESS, submission.getService());
         Assert.assertEquals(SERVICE_TYPE_TC1, submission.getServiceType());
         Assert.assertEquals(ACTION_TC1LEG1, submission.getAction());
+        Assert.assertEquals(CONVERSATIONID_CONV1, submission.getConversationId());
 
         Assert.assertEquals(2, submission.getMessageProperties().size());
         for (Submission.TypedProperty typedProperty : submission.getMessageProperties()) {
@@ -163,13 +224,23 @@ public class FSMessageTransformerTest {
 
         Assert.assertEquals(1, submission.getPayloads().size());
         Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
-        Submission.TypedProperty payloadProperty = submissionPayload.getPayloadProperties().iterator().next();
-        Assert.assertEquals(MIME_TYPE, payloadProperty.getKey());
-        Assert.assertEquals(APPLICATION_XML, payloadProperty.getValue());
 
         DataHandler payloadDatahandler = submissionPayload.getPayloadDatahandler();
         Assert.assertEquals(APPLICATION_XML, payloadDatahandler.getContentType());
         Assert.assertEquals(payloadContent, IOUtils.toString(payloadDatahandler.getInputStream()));
+
     }
 
+    private FSMessage buildMessage(String filename) throws JAXBException {
+        UserMessage metadata = FSTestHelper.getUserMessage(this.getClass(), filename);
+
+        ByteArrayDataSource dataSource = new ByteArrayDataSource(payloadContent.getBytes(), APPLICATION_XML);
+        dataSource.setName("content.xml");
+        DataHandler dataHandler = new DataHandler(dataSource);
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(null, dataSource.getName(), dataHandler));
+        FSMessage fsMessage = new FSMessage(fsPayloads, metadata);
+
+        return fsMessage;
+    }
 }

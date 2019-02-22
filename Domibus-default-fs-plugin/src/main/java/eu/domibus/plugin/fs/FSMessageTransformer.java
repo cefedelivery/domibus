@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.activation.DataHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +27,9 @@ public class FSMessageTransformer
 
     private static final String PAYLOAD_PROPERTY_MIME_TYPE = "MimeType";
 
-    /** we used this attribute name and not FileName to avoid name collision with Domibus core class SubmissionAS4Transformer */
+    /**
+     * we used this attribute name and not FileName to avoid name collision with Domibus core class SubmissionAS4Transformer
+     */
     private static final String PAYLOAD_PROPERTY_FILE_NAME = "PayloadName";
 
     private final ObjectFactory objectFactory = new ObjectFactory();
@@ -36,7 +39,6 @@ public class FSMessageTransformer
      *
      * @param submission the message to be transformed
      * @param messageOut output target
-     *
      * @return result of the transformation as {@link FSMessage}
      */
     @Override
@@ -45,6 +47,7 @@ public class FSMessageTransformer
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
+        metadata.setPayloadInfo(getPayloadInfoFromSubmission(submission));
         Map<String, FSPayload> dataHandlers = getPayloadsFromSubmission(submission);
         return new FSMessage(dataHandlers, metadata);
     }
@@ -65,28 +68,107 @@ public class FSMessageTransformer
         setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
         setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());
         try {
-            setPayloadToSubmission(submission, messageIn.getPayloads());
+            setPayloadToSubmission(submission, messageIn.getPayloads(), metadata);
         } catch (FSPayloadException ex) {
             throw new FSPluginException("Could not set payload to Submission", ex);
         }
         return submission;
     }
 
-    private void setPayloadToSubmission(Submission submission, final Map<String, FSPayload> dataHandlers) {
+    private void setPayloadToSubmission(Submission submission, final Map<String, FSPayload> dataHandlers, UserMessage metadata) {
         for (Map.Entry<String, FSPayload> entry : dataHandlers.entrySet()) {
-            final String contentId = entry.getKey();
+            String contentId = entry.getKey();
             final FSPayload fsPayload = entry.getValue();
             DataHandler dataHandler = fsPayload.getDataHandler();
             final String fileName = fsPayload.getFileName();
-            final String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
+            String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
+
+            /* PartInfo defined in the metadata file take precedence to the plugin properties */
+            String metadataContentId = extractContentIdFromMetadata(metadata);
+            if (metadataContentId != null) {
+                contentId = metadataContentId;
+            }
+            String metadataMimeType = extractMimeTypeFromMetadata(metadata);
+            if (metadataMimeType != null) {
+                mimeType = metadataMimeType;
+            }
             if (StringUtils.isEmpty(mimeType)) {
                 throw new FSPayloadException("Could not detect mime type for " + dataHandler.getName());
             }
-            ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(2);
+            ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>();
             payloadProperties.add(new Submission.TypedProperty(PAYLOAD_PROPERTY_MIME_TYPE, mimeType));
             payloadProperties.add(new Submission.TypedProperty(PAYLOAD_PROPERTY_FILE_NAME, fileName));
+            List<Property> additionalPropertyList = extractAdditionalPropertyListFromMetadata(metadata);
+            if (additionalPropertyList != null) {
+                for (Property property : additionalPropertyList) {
+                    payloadProperties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
+                }
+            }
             submission.addPayload(contentId, dataHandler, payloadProperties);
         }
+    }
+
+
+    protected PartInfo extractPartInfoFromMetadata(UserMessage metadata) {
+        if (metadata.getPayloadInfo() == null ||
+                metadata.getPayloadInfo().getPartInfo() == null) {
+            return null;
+        }
+
+        /* FS plugin sends one payload at a time */
+        return metadata.getPayloadInfo().getPartInfo();
+    }
+
+    protected String extractContentIdFromMetadata(UserMessage metadata) {
+        PartInfo partInfo = extractPartInfoFromMetadata(metadata);
+        if (partInfo != null) {
+            return partInfo.getHref();
+        }
+
+        return null;
+    }
+
+    protected PartProperties extractPartPropertiesFromMetadata(UserMessage metadata) {
+        PartInfo partInfo = extractPartInfoFromMetadata(metadata);
+        if (partInfo != null) {
+            return partInfo.getPartProperties();
+        }
+
+        return null;
+    }
+
+    protected String extractMimeTypeFromMetadata(UserMessage metadata) {
+        PartProperties partProperties = extractPartPropertiesFromMetadata(metadata);
+        if (partProperties == null) {
+            return null;
+        }
+
+        for (Property property : partProperties.getProperty()) {
+            if (PAYLOAD_PROPERTY_MIME_TYPE.equals(property.getName())) {
+                return property.getValue();
+            }
+        }
+        return null;
+    }
+
+    /*
+    * Additional PartProperties are accepted for each payload.
+    * This method extracts all properties that are not MimeType and FileName.
+    */
+    protected List<Property> extractAdditionalPropertyListFromMetadata(UserMessage metadata) {
+        PartProperties partProperties = extractPartPropertiesFromMetadata(metadata);
+        if (partProperties == null) {
+            return null;
+        }
+        List<Property> propertyList = new ArrayList<>();
+
+        for (Property property : partProperties.getProperty()) {
+            if (!PAYLOAD_PROPERTY_MIME_TYPE.equals(property.getName()) &&
+                    !PAYLOAD_PROPERTY_FILE_NAME.equals(property.getName())) {
+                propertyList.add(property);
+            }
+        }
+        return propertyList;
     }
 
     private Map<String, FSPayload> getPayloadsFromSubmission(Submission submission) {
@@ -101,7 +183,7 @@ public class FSMessageTransformer
 
             //file name
             final String fileName = extractPayloadProperty(payload, PAYLOAD_PROPERTY_FILE_NAME);
-            
+
             FSPayload fsPayload = new FSPayload(mimeType, fileName, payload.getPayloadDatahandler());
             result.put(payload.getContentId(), fsPayload);
         }
@@ -124,7 +206,7 @@ public class FSMessageTransformer
             String name = messageProperty.getName();
             String value = messageProperty.getValue();
             String type = messageProperty.getType();
-            
+
             if (type != null) {
                 submission.addMessageProperty(name, value, type);
             } else {
@@ -133,10 +215,35 @@ public class FSMessageTransformer
         }
     }
 
+    private PayloadInfo getPayloadInfoFromSubmission(Submission submission) {
+        final PayloadInfo payloadInfo = new PayloadInfo();
+
+        if (submission.getPayloads() == null || submission.getPayloads().size() != 1) {
+            throw new FSPluginException("FS plugin can only handle one payload per message");
+        }
+
+        final Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
+        final PartInfo partInfo = new PartInfo();
+        partInfo.setHref(submissionPayload.getContentId());
+        final PartProperties partProperties = new PartProperties();
+        for (final Submission.TypedProperty payloadProperty : submissionPayload.getPayloadProperties()) {
+            final Property property = new Property();
+            property.setName(payloadProperty.getKey());
+            property.setValue(payloadProperty.getValue());
+            property.setType(payloadProperty.getType());
+            partProperties.getProperty().add(property);
+        }
+
+        partInfo.setPartProperties(partProperties);
+        payloadInfo.setPartInfo(partInfo);
+
+        return payloadInfo;
+    }
+
     private MessageProperties getMessagePropertiesFromSubmission(Submission submission) {
         MessageProperties messageProperties = objectFactory.createMessageProperties();
 
-        for (Submission.TypedProperty typedProperty: submission.getMessageProperties()) {
+        for (Submission.TypedProperty typedProperty : submission.getMessageProperties()) {
             Property messageProperty = objectFactory.createProperty();
             messageProperty.setType(typedProperty.getType());
             messageProperty.setName(typedProperty.getKey());
@@ -149,7 +256,7 @@ public class FSMessageTransformer
     private void setCollaborationInfoToSubmission(Submission submission, CollaborationInfo collaborationInfo) {
         AgreementRef agreementRef = collaborationInfo.getAgreementRef();
         Service service = collaborationInfo.getService();
-        
+
         if (agreementRef != null) {
             submission.setAgreementRef(agreementRef.getValue());
             submission.setAgreementRefType(agreementRef.getType());
@@ -157,6 +264,7 @@ public class FSMessageTransformer
         submission.setService(service.getValue());
         submission.setServiceType(service.getType());
         submission.setAction(collaborationInfo.getAction());
+        submission.setConversationId(collaborationInfo.getConversationId());
     }
 
     private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
@@ -172,6 +280,7 @@ public class FSMessageTransformer
         collaborationInfo.setAgreementRef(agreementRef);
         collaborationInfo.setService(service);
         collaborationInfo.setAction(submission.getAction());
+        collaborationInfo.setConversationId(submission.getConversationId());
 
         return collaborationInfo;
     }
@@ -179,7 +288,7 @@ public class FSMessageTransformer
     private void setPartyInfoToSubmission(Submission submission, PartyInfo partyInfo) {
         From from = partyInfo.getFrom();
         To to = partyInfo.getTo();
-        
+
         submission.addFromParty(from.getPartyId().getValue(), from.getPartyId().getType());
         submission.setFromRole(from.getRole());
         if (to != null) {
