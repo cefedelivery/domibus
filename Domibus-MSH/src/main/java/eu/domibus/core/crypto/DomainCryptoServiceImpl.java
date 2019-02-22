@@ -141,12 +141,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @Override
     public void replaceTrustStore(byte[] store, String password) throws CryptoException {
-        try {
-            iamProvider.replaceTrustStore(store, password);
-        } catch (CryptoSpiException e) {
-            LOG.error("Error calling replace truststore on authentication spi:[{}] for domain:[{}]", iamProvider.getIdentifier(), this.domain);
-            throw new CryptoException(e.getMessage(), e);
-        }
+        iamProvider.replaceTrustStore(store, password);
     }
 
     @Override
@@ -162,14 +157,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        try {
-            return iamProvider.isCertificateChainValid(alias);
-        } catch (DomibusCertificateSpiException e) {
-            LOG.error("Error validating certificate chain for alias:[{}] and provider:[{}]",
-                    alias,
-                    iamProvider.getIdentifier());
-            throw new DomibusCertificateException(e.getMessage(), e);
-        }
+        return iamProvider.isCertificateChainValid(alias);
     }
 
     @Override
