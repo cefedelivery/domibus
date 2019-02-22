@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
 /**
  * @author Thomas Dussart
  * @since 4.1
- *
+ * <p>
  * Future DSS IAM provider implementation.
  */
 
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi{
+public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomibusDssCryptoProvider.class);
 
