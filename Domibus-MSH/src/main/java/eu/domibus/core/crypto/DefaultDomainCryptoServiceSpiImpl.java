@@ -87,14 +87,14 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
     }
 
     @Override
-    public synchronized void refreshTrustStore()  {
+    public synchronized void refreshTrustStore() {
         final KeyStore trustStore = loadTrustStore();
         setTrustStore(trustStore);
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
-    public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoSpiException{
+    public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoSpiException {
         LOG.debug("Replacing the existing trust store file [{}] with the provided one", getTrustStoreLocation());
 
         ByteArrayOutputStream oldTrustStoreBytes = new ByteArrayOutputStream();
@@ -303,7 +303,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
 
     @Override
     public void setDomain(DomainSpi domain) {
-        this.domain=domainCoreConverter.convert(domain,Domain.class);
+        this.domain = domainCoreConverter.convert(domain, Domain.class);
     }
 
     private synchronized boolean doRemoveCertificate(String alias) {

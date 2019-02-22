@@ -5,7 +5,6 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.core.crypto.spi.CryptoSpiException;
 import eu.domibus.core.crypto.spi.DomibusCertificateSpiException;
 import eu.domibus.ext.delegate.services.interceptor.ServiceInterceptor;
-import eu.domibus.ext.exceptions.DomainExtException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
