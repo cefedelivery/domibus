@@ -414,7 +414,7 @@ public class UserMessageHandlerServiceTest {
             result = messageId;
 
         }};
-        userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, "");
+        userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, null, "");
 
         new Verifications() {{
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
@@ -500,7 +500,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, "");
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, null, "");
         } catch (Exception e) {
             Assert.assertTrue("Expecting Ebms3 exception", e instanceof EbMS3Exception);
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ((EbMS3Exception) e).getErrorCode());
@@ -542,7 +542,7 @@ public class UserMessageHandlerServiceTest {
             result = "TestMessageId123";
         }};
         try {
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, "");
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, null, "");
             Assert.fail("Exception for compression failure expected!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0303, e.getErrorCode());
