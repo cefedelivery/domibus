@@ -134,24 +134,19 @@ public class EbMS3MessageBuilder {
                 msgInfo.setTimestamp(new Date());
                 if (signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
                     msgInfo.setRefToMessageId(signalMessage.getError().iterator().next().getRefToMessageInError());
+                } else if (signalMessage.getMessageInfo() != null &&
+                        StringUtils.isNotBlank(signalMessage.getMessageInfo().getRefToMessageId())) {
+                    msgInfo.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
                 }
-                else {
-                    if(signalMessage.getMessageInfo() != null &&
-                            !StringUtils.isBlank(signalMessage.getMessageInfo().getRefToMessageId())) {
-                        msgInfo.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
-                    }
-                }
-
                 signalMessage.setMessageInfo(msgInfo);
             }
             messaging.setSignalMessage(signalMessage);
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
-
             message.saveChanges();
-
         } catch (final JAXBException | SOAPException ex) {
             throw new SendMessageException(ex);
         }
+
         return message;
     }
 

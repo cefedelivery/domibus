@@ -4,7 +4,6 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -105,7 +104,7 @@ public class UserMessageDefaultServiceTest {
 
 
     @Test
-    public void testGetFinalRecipient(@Injectable  final UserMessage userMessage) throws Exception {
+    public void testGetFinalRecipient(@Injectable final UserMessage userMessage) throws Exception {
         final String messageId = "1";
 
         new Expectations() {{
@@ -122,7 +121,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testGetFinalRecipientWhenNoMessageIsFound(@Injectable  final UserMessage userMessage) throws Exception {
+    public void testGetFinalRecipientWhenNoMessageIsFound(@Injectable final UserMessage userMessage) throws Exception {
         final String messageId = "1";
 
         new Expectations() {{
@@ -135,7 +134,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testFailedMessages(@Injectable  final UserMessage userMessage) throws Exception {
+    public void testFailedMessages(@Injectable final UserMessage userMessage) throws Exception {
         final String finalRecipient = "C4";
 
         userMessageDefaultService.getFailedMessages(finalRecipient);
@@ -146,7 +145,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testGetFailedMessageElapsedTime(@Injectable  final UserMessageLog userMessageLog) throws Exception {
+    public void testGetFailedMessageElapsedTime(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
         final Date failedDate = new Date();
 
@@ -165,7 +164,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test(expected = UserMessageException.class)
-    public void testGetFailedMessageElapsedTimeWhenFailedDateIsNull(@Injectable  final UserMessageLog userMessageLog) throws Exception {
+    public void testGetFailedMessageElapsedTimeWhenFailedDateIsNull(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
 
         new CurrentTimeMillisMock();
@@ -182,7 +181,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test(expected = UserMessageException.class)
-    public void testRestoreMessageWhenMessageIsDeleted(@Injectable  final UserMessageLog userMessageLog) throws Exception {
+    public void testRestoreMessageWhenMessageIsDeleted(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
@@ -363,7 +362,7 @@ public class UserMessageDefaultServiceTest {
         userMessageDefaultService.scheduleSendingPullReceipt(messageId, pModeKey);
 
         new Verifications() {{
-            jmsManager.sendMessageToQueue((JmsMessage)any, sendPullReceiptQueue);
+            jmsManager.sendMessageToQueue((JmsMessage) any, sendPullReceiptQueue);
         }};
 
     }

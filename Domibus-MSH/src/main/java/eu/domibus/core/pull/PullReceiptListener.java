@@ -1,5 +1,7 @@
 package eu.domibus.core.pull;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.dao.SignalMessageDao;
@@ -79,19 +81,27 @@ public class PullReceiptListener implements MessageListener {
             final Policy policy = policyService.getPolicy(legConfiguration);
             List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(refToMessageId);
 
-            if (!CollectionUtils.isEmpty(signalMessages)) {
-                for (SignalMessage signalMessage : signalMessages) {
-                    if (signalMessage.getReceipt() != null && signalMessage.getReceipt().getAny().size() == 1) {
-                        SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, legConfiguration);
-                        pullReceiptSender.sendReceipt(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey, refToMessageId,domainCode);
-                        break;
-                    }
+            if (CollectionUtils.isEmpty(signalMessages)) {
+                LOG.warn("Could not send pull receipt for message [{}]. No signal messages found.", refToMessageId);
+                return;
+            }
 
+            for (SignalMessage signalMessage : signalMessages) {
+                if (signalMessage.getReceipt() != null) { // we have a receipt (it can also be a signal pull request for which we do nothing)
+                    if (signalMessage.getReceipt().getAny().size() == 1) {
+                        SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, legConfiguration);
+                        pullReceiptSender.sendReceipt(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey, refToMessageId, domainCode);
+                    } else {
+                        LOG.warn("Could not send pull receipt for message [{}]. Invalid receipt(<any>) content size in SignalMessage.", refToMessageId);
+                        return;
+                    }
                 }
             }
         } catch (final JMSException | EbMS3Exception e) {
             LOG.error("Error processing JMS message", e);
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Error processing JMS message", e.getCause());
         }
-        LOG.debug("[PullReceiptListener] ~~~ The end of onMessage ~~~");
+
+        LOG.trace("[PullReceiptListener] ~~~ The end of onMessage ~~~");
     }
 }

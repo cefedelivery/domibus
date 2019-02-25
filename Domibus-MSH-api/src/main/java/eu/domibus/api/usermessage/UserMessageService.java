@@ -37,13 +37,17 @@ public interface UserMessageService {
 
     void scheduleSending(String messageId, int retryCount);
 
-    /*
-    * Schedule the sending of the asynchronous Pull Receipt
+    /**
+     * Schedule the sending of the asynchronous Pull Receipt
+     *
+     * @param messageId MessageId of the UserMessage (for which the pull receipt was generated)
+     * @param pmodeKey  the pmode key of the UserMessage
      */
     void scheduleSendingPullReceipt(String messageId, String pmodeKey);
 
     /**
      * Gets a User Message based on the {@code messageId}
+     *
      * @param messageId User Message Identifier
      * @return User Message {@link UserMessage}
      */

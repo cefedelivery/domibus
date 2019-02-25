@@ -2,6 +2,7 @@ package eu.domibus.core.pull;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Receipt;
@@ -11,7 +12,6 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.PolicyService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-
 import org.apache.neethi.Policy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +19,6 @@ import org.junit.runner.RunWith;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.xml.soap.SOAPMessage;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,42 +51,43 @@ public class PullReceiptListenerTest {
     private SignalMessageDao signalMessageDao;
 
     @Test
-    public void onMessageTest(@Mocked Message message) throws JMSException {
-
+    public void onMessageTest(@Mocked Message message) throws JMSException, EbMS3Exception {
 
 
         new Expectations() {{
-                message.getStringProperty(MessageConstants.DOMAIN);
-                result = "mydomain";
+            message.getStringProperty(MessageConstants.DOMAIN);
+            result = "mydomain";
 
-                signalMessageDao.findSignalMessagesByRefMessageId(anyString);
-                result = createSignalMessages();
-        }};
-
-        pullReceiptListener.onMessage(message);
-
-        new Verifications(){{
-            pullReceiptSender.sendReceipt((SOAPMessage) any, anyString, (Policy)any,
-                    (LegConfiguration)any, anyString, anyString, anyString);times=1;
-        }};
-    }
-
-    @Test
-    public void onMessageTestNoReceipt(@Mocked Message message) throws JMSException {
-
-        new Expectations() {{
-                message.getStringProperty(MessageConstants.DOMAIN);
-                result = "mydomain";
-
-                signalMessageDao.findSignalMessagesByRefMessageId(anyString);
-                result = null;
+            signalMessageDao.findSignalMessagesByRefMessageId(anyString);
+            result = createSignalMessages();
         }};
 
         pullReceiptListener.onMessage(message);
 
         new Verifications() {{
             pullReceiptSender.sendReceipt((SOAPMessage) any, anyString, (Policy) any,
-                    (LegConfiguration) any, anyString, anyString, anyString);times = 0;
+                    (LegConfiguration) any, anyString, anyString, anyString);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void onMessageTestNoReceipt(@Mocked Message message) throws JMSException, EbMS3Exception {
+
+        new Expectations() {{
+            message.getStringProperty(MessageConstants.DOMAIN);
+            result = "mydomain";
+
+            signalMessageDao.findSignalMessagesByRefMessageId(anyString);
+            result = null;
+        }};
+
+        pullReceiptListener.onMessage(message);
+
+        new Verifications() {{
+            pullReceiptSender.sendReceipt((SOAPMessage) any, anyString, (Policy) any,
+                    (LegConfiguration) any, anyString, anyString, anyString);
+            times = 0;
         }};
     }
 

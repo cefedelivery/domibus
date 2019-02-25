@@ -26,6 +26,7 @@ import javax.jms.Queue;
 public class MessageListenerContainerConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageListenerContainerConfiguration.class);
+    private static final String DOMIBUS_PULL_RECEIPT_QUEUE_CONCURRENCY = "domibus.pull.receipt.queue.concurrency";
 
     @Autowired
     @Qualifier("sendMessageQueue")
@@ -71,7 +72,7 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setDestination(sendMessageQueue);
         messageListenerContainer.setMessageListener(messageSenderService);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain,"domibus.dispatcher.concurency"));
+        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, "domibus.dispatcher.concurency"));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 
@@ -79,6 +80,7 @@ public class MessageListenerContainerConfiguration {
 
         return messageListenerContainer;
     }
+
     @Bean(name = "pullReceiptContainer")
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public DefaultMessageListenerContainer createPullReceiptListener(Domain domain) {
@@ -91,7 +93,7 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setDestination(sendPullReceiptQueue);
         messageListenerContainer.setMessageListener(pullReceiptListener);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain,"domibus.pull.receipt.queue.concurrency"));
+        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_PULL_RECEIPT_QUEUE_CONCURRENCY));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 
