@@ -1,3 +1,5 @@
+Domibus 4.0.2-FS-SNAPSHOT
+    - allow PayloadInfo as input in the message metadata
 Domibus 4.0.2
 - Improved the logging in the Default JMS Plugin
 - Allow sending an XML payload in the Soap body
