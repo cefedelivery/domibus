@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Interceptor responsible for changing the content it for the source message
+ *
+ * @author Cosmin Baciu
+ * @since 4.1
+ */
 public class DomibusAttachmentOutInterceptor extends AttachmentOutInterceptor {
 
     protected static final Map<String, List<String>> headers = new HashMap<>();

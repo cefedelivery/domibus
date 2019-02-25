@@ -4,6 +4,7 @@ import eu.domibus.common.AutoCloseFileDataSource;
 import eu.domibus.core.message.fragment.MessageFragmentEntity;
 import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.receiver.MSHSourceMessageWebservice;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
@@ -29,7 +30,7 @@ public class UserMessageDefaultFactory implements UserMessageFactory {
     public UserMessage createUserMessageFragment(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, Long fragmentNumber, String fragmentFile) {
         UserMessage result = new UserMessage();
         result.setSplitAndJoin(true);
-        String messageId = sourceMessage.getMessageInfo().getMessageId() + "_" + fragmentNumber;
+        String messageId = sourceMessage.getMessageInfo().getMessageId() + MSHSourceMessageWebservice.FRAGMENT_FILENAME_SEPARATOR + fragmentNumber;
         result.setCollaborationInfo(createCollaborationInfo(sourceMessage.getCollaborationInfo()));
         result.setMessageInfo(createMessageInfo(sourceMessage.getMessageInfo(), messageId));
         result.setPartyInfo(createPartyInfo(sourceMessage.getPartyInfo()));

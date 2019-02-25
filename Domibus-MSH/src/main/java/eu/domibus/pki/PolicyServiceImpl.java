@@ -28,6 +28,7 @@ import java.io.IOException;
 public class PolicyServiceImpl implements PolicyService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
+    public static final String POLICIES = "policies";
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -56,7 +57,7 @@ public class PolicyServiceImpl implements PolicyService {
 
     @Override
     public Policy getPolicy(LegConfiguration legConfiguration) throws ConfigurationException {
-        return parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+        return parsePolicy(POLICIES + File.separator + legConfiguration.getSecurity().getPolicy());
     }
 
     /**
