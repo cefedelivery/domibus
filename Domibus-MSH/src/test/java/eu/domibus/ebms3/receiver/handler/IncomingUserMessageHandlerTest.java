@@ -61,6 +61,9 @@ public class IncomingUserMessageHandlerTest {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(IncomingUserMessageHandlerTest.class);
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
 
+    @Tested
+    IncomingUserMessageHandler incomingUserMessageHandler;
+
     @Injectable
     BackendNotificationService backendNotificationService;
 
@@ -136,8 +139,6 @@ public class IncomingUserMessageHandlerTest {
     @Injectable
     ReliabilityChecker reliabilityChecker;
 
-    @Tested
-    IncomingUserMessageHandler incomingUserMessageHandler;
 
     @Injectable
     ReliabilityMatcher pullReceiptMatcher;

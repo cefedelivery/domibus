@@ -54,6 +54,17 @@ public class SoapUtil {
         }
     }
 
+    /**
+     * Creates a SOAPMessage based on a CXF MessageImpl instance
+     *
+     * @param messageImpl
+     * @return
+     * @throws SOAPException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws TransformerException
+     */
     public SOAPMessage createUserMessage(MessageImpl messageImpl) throws SOAPException, IOException, ParserConfigurationException, SAXException, TransformerException {
         LOG.debug("Creating SOAPMessage");
         SOAPMessage message = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createMessage();

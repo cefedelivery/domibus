@@ -25,6 +25,8 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
 
 /**
+ * Class responsible for sending SourceMessages on the local endpoint(SplitAndJoin)
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

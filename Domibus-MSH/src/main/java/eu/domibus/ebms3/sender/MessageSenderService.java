@@ -16,6 +16,7 @@ import java.util.Set;
 
 
 /**
+ * Entrypoint for sending AS4 messages to C3. Contains common validation and rescheduling logic
  *
  * @author Cosmin Baciu
  * @since 4.1

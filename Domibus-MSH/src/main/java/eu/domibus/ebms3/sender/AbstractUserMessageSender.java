@@ -28,6 +28,8 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
 
 /**
+ * Common logic for sending AS4 messages to C3
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

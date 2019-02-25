@@ -27,6 +27,8 @@ import javax.jms.Queue;
 public class MessageListenerContainerConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageListenerContainerConfiguration.class);
+    public static final String PROPERTY_LARGE_FILES_CONCURRENCY = "domibus.dispatcher.largeFiles.concurrency";
+    public static final String PROPERTY_SPLIT_AND_JOIN_CONCURRENCY = "domibus.dispatcher.splitAndJoin.concurrency";
 
     @Autowired
     @Qualifier("sendMessageQueue")
@@ -83,6 +85,11 @@ public class MessageListenerContainerConfiguration {
         return messageListenerContainer;
     }
 
+    /**
+     * Creates the large message JMS listener(domain dependent)
+     * @param domain
+     * @return
+     */
     @Bean(name = "sendLargeMessageContainer")
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public DefaultMessageListenerContainer createSendLargeMessageListener(Domain domain) {
@@ -95,7 +102,7 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setDestination(sendLargeMessageQueue);
         messageListenerContainer.setMessageListener(largeMessageSenderListener);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain,"domibus.dispatcher.largeFiles.concurrency"));
+        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, PROPERTY_LARGE_FILES_CONCURRENCY));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 
@@ -104,6 +111,11 @@ public class MessageListenerContainerConfiguration {
         return messageListenerContainer;
     }
 
+    /**
+     * Creates the SplitAndJoin JMS listener(domain dependent)
+     * @param domain
+     * @return
+     */
     @Bean(name = "splitAndJoinContainer")
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public DefaultMessageListenerContainer createSplitAndJoinListener(Domain domain) {
@@ -116,7 +128,7 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setDestination(splitAndJoinQueue);
         messageListenerContainer.setMessageListener(splitAndJoinListener);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain,"domibus.dispatcher.splitAndJoin.concurrency"));
+        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, PROPERTY_SPLIT_AND_JOIN_CONCURRENCY));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 

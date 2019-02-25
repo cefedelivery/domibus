@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import javax.xml.soap.SOAPMessage;
 
 /**
+ * Class responsible for sending AS4 UserMessages to C3
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

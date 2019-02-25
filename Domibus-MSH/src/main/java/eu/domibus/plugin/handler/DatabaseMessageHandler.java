@@ -244,6 +244,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return errorLogDao.getErrorsForMessage(messageId);
     }
 
+    //TODO refactor this method in order to reuse existing code from the method submit
     @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submitMessageFragment(UserMessage userMessage, String backendName) throws MessagingProcessingException {

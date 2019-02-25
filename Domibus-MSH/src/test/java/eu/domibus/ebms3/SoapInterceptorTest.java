@@ -82,14 +82,9 @@ public class SoapInterceptorTest {
         message.getSOAPHeader().addChildElement(next);
 
         message.saveChanges();
-
-//        final String rawXMLMessage = SoapUtil.getRawXMLMessage(message);
-//        System.out.println(rawXMLMessage);
-
         return message;
     }
 
-//    @Test
     public void testCreateSoapEnvelope() throws Exception {
         InputStream rawInputStream = new FileInputStream(new File("c:/DEV/domibus-tomcat-4.0/domibus/files/temp/2133e4d5-2247-4727-a44a-f07ae8abdec0"));
         MessageImpl messageImpl = new MessageImpl();//"org.apache.cxf.binding.soap.SoapVersion" ->
@@ -101,7 +96,6 @@ public class SoapInterceptorTest {
 
     }
 
-//    @Test
     public void testCXF2542() throws Exception {
         InputStream rawInputStream = new FileInputStream(new File("c:/DEV/_work/test-e38f79d9-e3c9-4639-a08a-b8f782c99d44"));
         MessageImpl messageImpl = new MessageImpl();//"org.apache.cxf.binding.soap.SoapVersion" ->
@@ -118,40 +112,6 @@ public class SoapInterceptorTest {
             Files.copy(attachment.getDataHandler().getDataSource().getInputStream(), Paths.get("c:/DEV/_work/mytest"));
 
         }
-    }
-
-    protected void testSoapHeader( MessageImpl messageImpl) throws XMLStreamException, SOAPException {
-        final SoapMessage soapMessage = new SoapMessage(messageImpl);
-        final Soap12 soapVersion = Soap12.getInstance();
-        soapMessage.setVersion(soapVersion);
-
-        InputStream is = messageImpl.getContent(InputStream.class);
-
-        messageImpl.getAttachments();
-
-        XMLStreamReader xreader = StaxUtils.createXMLStreamReader(is, "UTF-8");
-        xreader = StaxUtils.configureReader(xreader, messageImpl);
-        messageImpl.setContent(XMLStreamReader.class, xreader);
-
-        XMLStreamReader filteredReader = new PartialXMLStreamReader(xreader, soapVersion.getBody());
-        HeadersProcessor processor = new HeadersProcessor(soapVersion);
-        Document doc =  processor.process(filteredReader);
-
-        messageImpl.setContent(Node.class, doc);
-
-
-        SOAPMessage finalSoapMessage =  MessageFactory.newInstance().createMessage();
-        messageImpl.setContent(SOAPMessage.class, finalSoapMessage);
-
-        SOAPPart part = finalSoapMessage.getSOAPPart();
-        messageImpl.setContent(Node.class, part);
-        messageImpl.put(W3CDOMStreamWriter.class, new SAAJStreamWriter(part));
-//        message.put(BODY_FILLED_IN, Boolean.FALSE);
-        System.out.println(finalSoapMessage.getSOAPHeader());
-
-//        final String rawXMLMessage = SoapUtil.getRawXMLMessage(finalSoapMessage);
-//        System.out.println(rawXMLMessage);
-
     }
 
     @Before

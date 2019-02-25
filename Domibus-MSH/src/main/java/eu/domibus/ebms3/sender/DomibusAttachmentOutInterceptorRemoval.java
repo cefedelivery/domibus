@@ -26,7 +26,7 @@ public class DomibusAttachmentOutInterceptorRemoval extends AbstractSoapIntercep
         Iterator<Interceptor<? extends Message>> it = message.getInterceptorChain().iterator();
         while (it.hasNext()) {
             Interceptor interceptor = it.next();
-            if ( interceptor.getClass().getName().equals(AttachmentOutInterceptor.class.getName())) {
+            if (interceptor.getClass().getName().equals(AttachmentOutInterceptor.class.getName())) {
                 message.getInterceptorChain().remove(interceptor);
                 return;
             }

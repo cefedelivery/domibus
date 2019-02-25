@@ -101,7 +101,7 @@ public class SplitAndJoinListener implements MessageListener {
                     String pmodeKey = userMessageExchangeContext.getPmodeKey();
                     request.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
                 } catch (EbMS3Exception | SOAPException e) {
-                    //TODO return a signal error to C2 and notify the backend
+                    //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
                     LOG.error("Error getting the pmodeKey");
                     return;
                 }

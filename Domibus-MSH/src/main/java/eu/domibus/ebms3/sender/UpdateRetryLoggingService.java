@@ -28,6 +28,7 @@ import java.util.Date;
 
 /**
  * @author Cosmin Baciu
+ * @since 4.1
  */
 @Service
 public class UpdateRetryLoggingService {

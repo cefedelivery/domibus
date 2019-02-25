@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Factory for creating UserMessage instances
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */
@@ -19,6 +21,8 @@ import java.util.List;
 public class UserMessageDefaultFactory implements UserMessageFactory {
 
     private static final List<String> ALLOWED_PROPERTIES = Arrays.asList(new String[]{"originalSender", "finalRecipient", "trackingIdentifier"});
+    public static final String CID_FRAGMENT = "cid:fragment";
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
 
     @Override
@@ -61,13 +65,13 @@ public class UserMessageDefaultFactory implements UserMessageFactory {
         final PartInfo partInfo = new PartInfo();
         partInfo.setInBody(false);
         partInfo.setPayloadDatahandler(new DataHandler(new AutoCloseFileDataSource(fragmentFile)));
-        partInfo.setHref("cid:fragment" + fragmentNumber);
+        partInfo.setHref(CID_FRAGMENT + fragmentNumber);
         partInfo.setFileName(fragmentFile);
         partInfo.setLength(new File(fragmentFile).length());
         final PartProperties partProperties = new PartProperties();
         final Property property = new Property();
         property.setName(Property.MIME_TYPE);
-        property.setValue("application/octet-stream");
+        property.setValue(APPLICATION_OCTET_STREAM);
         partProperties.getProperties().add(property);
 
         partInfo.setPartProperties(partProperties);

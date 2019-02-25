@@ -38,25 +38,27 @@ public class MessageUtil {
     protected JAXBContext jaxbContextMessageFragment;
 
 
+    @SuppressWarnings("unchecked")
     public Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
         LOG.debug("Unmarshalling the Messaging instance from the request");
         final Node messagingXml = (Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
-        @SuppressWarnings("unchecked") final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
+        final JAXBElement<Messaging> root = (JAXBElement<Messaging>) unmarshaller.unmarshal(messagingXml);
         return root.getValue();
     }
 
+    @SuppressWarnings("unchecked")
     public MessageFragmentType getMessageFragment(final SOAPMessage request) {
         try {
             LOG.debug("Unmarshalling the MessageFragmentType instance from the request");
-            final Iterator messageFragment = request.getSOAPHeader().getChildElements(eu.domibus.ebms3.common.model.mf.ObjectFactory._MessageFragment_QNAME);
-            if (!messageFragment.hasNext()) {
+            final Iterator iterator = request.getSOAPHeader().getChildElements(eu.domibus.ebms3.common.model.mf.ObjectFactory._MessageFragment_QNAME);
+            if (!iterator.hasNext()) {
                 return null;
             }
 
-            final Node messagingXml = (Node) messageFragment.next();
+            final Node messagingXml = (Node) iterator.next();
             final Unmarshaller unmarshaller = jaxbContextMessageFragment.createUnmarshaller(); //Those are not thread-safe, therefore a new one is created each call
-            @SuppressWarnings("unchecked") final JAXBElement<MessageFragmentType> root = (JAXBElement<MessageFragmentType>) unmarshaller.unmarshal(messagingXml);
+            final JAXBElement<MessageFragmentType> root = (JAXBElement<MessageFragmentType>) unmarshaller.unmarshal(messagingXml);
             return root.getValue();
         } catch (SOAPException | JAXBException e) {
             throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Not possible to get the MessageFragmentType", e);
