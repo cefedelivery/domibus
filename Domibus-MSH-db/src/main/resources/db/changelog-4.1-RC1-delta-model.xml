@@ -70,6 +70,83 @@
         <addUniqueConstraint columnNames="FK_COMMAND, PROPERTY_NAME" constraintName="UNI_COMMAND_PROP_NAME"
                              tableName="TB_COMMAND_PROPERTY"/>
     </changeSet>
+    <changeSet id="EDELIVERY-4088" author="Cosmin Baciu">
+        <createTable tableName="TB_SPLITTING" remarks="Stores the configuration of the SplitAndJoin parameters configured in the PMode ">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)" remarks="Splitting configuration name"/>
+            <column name="FRAGMENT_SIZE" type="INT" remarks="The fragment size"/>
+            <column name="COMPRESSION" type="BOOLEAN" remarks="True if compression will be used"/>
+            <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)" remarks="Compression algorithm to use for compressing the SourceMessage"/>
+            <column name="JOIN_INTERVAL" type="INT" remarks="The join interval"/>
+            <column name="FK_BUSINESSPROCESS" type="INT" remarks="Foreign key to the business process"/>
+        </createTable>
+
+        <addColumn tableName="TB_LEG">
+            <column name="FK_SPLITTING" type="INT"/>
+        </addColumn>
+        <createIndex indexName="FK_LEG_SPLT" tableName="TB_LEG">
+            <column name="FK_SPLITTING"/>
+        </createIndex>
+        <createIndex indexName="FK_SPLT_BP" tableName="TB_SPLITTING">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="FK_SPLITTING" baseTableName="TB_LEG"
+                                 constraintName="UK_LEG_SPLT" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_SPLITTING"/>
+
+
+        <createTable tableName="TB_MESSAGE_HEADER" remarks="Stores the message header details for SplitAndJoin">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BOUNDARY" type="VARCHAR(255)" remarks="The multipart boundary value"/>
+            <column name="START" type="VARCHAR(255)" remarks="The multipart start value"/>
+        </createTable>
+
+        <createTable tableName="TB_MESSAGE_GROUP" remarks="Stores information about the message group for SplitAndJoin">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(255)" remarks="The group id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SOURCE_MESSAGE_ID" type="VARCHAR(255)" remarks="The SourceMessage id"/>
+            <column name="MESSAGE_SIZE" type="BIGINT" remarks="The message size before compression"/>
+            <column name="FRAGMENT_COUNT" type="INT" remarks="The message fragment count"/>
+            <column name="RECEIVED_FRAGMENTS" type="INT" remarks="Stores how many fragments have been received"/>
+            <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)" remarks="Compression algorithm used for the SourceMessage"/>
+            <column name="COMPRESSED_MESSAGE_SIZE" type="BIGINT" remarks="The size of the message after compression"/>
+            <column name="SOAP_ACTION" type="VARCHAR(255)" remarks="The Soap action value"/>
+            <column name="FK_MESSAGE_HEADER_ID" type="INT" remarks="Foreign key to the TB_MESSAGE_HEADER"/>
+            <column name="REJECTED" type="BOOLEAN" remarks="True if the message group has been rejected"/>
+        </createTable>
+        <createIndex indexName="FK_MG_MH" tableName="TB_MESSAGE_GROUP">
+            <column name="FK_MESSAGE_HEADER_ID"/>
+        </createIndex>
+
+        <addColumn tableName="TB_USER_MESSAGE">
+            <column name="FK_MESSAGE_FRAGMENT_ID" type="INT"/>
+            <column name="SPLIT_AND_JOIN" type="BOOLEAN"/>
+        </addColumn>
+        <createIndex indexName="FK_UM_MF" tableName="TB_USER_MESSAGE">
+            <column name="FK_MESSAGE_FRAGMENT_ID"/>
+        </createIndex>
+
+        <createTable tableName="TB_MESSAGE_FRAGMENT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(255)"/>
+            <column name="FRAGMENT_NUMBER" type="INT"/>
+        </createTable>
+        <createIndex indexName="IDX_MF_GRP_ID" tableName="TB_MESSAGE_FRAGMENT">
+            <column name="GROUP_ID"/>
+        </createIndex>
+    </changeSet>
+
 
     <changeSet author="nperpion" id="EDELIVERY-3979">
 

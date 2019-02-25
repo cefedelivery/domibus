@@ -119,7 +119,7 @@ public class RetrieveMessageIT extends AbstractBackendWSIT {
         userMessage.getMessageInfo().setMessageId(sanitazedMessageId);
         eu.domibus.ebms3.common.model.Messaging messaging = new eu.domibus.ebms3.common.model.Messaging();
         messaging.setUserMessage(userMessage);
-        messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+        messagingService.storeMessage(messaging, MSHRole.RECEIVING, null);
 
         UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageStatus(eu.domibus.common.MessageStatus.RECEIVED);

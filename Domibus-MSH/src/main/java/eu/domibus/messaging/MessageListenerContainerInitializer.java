@@ -12,12 +12,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ion Perpegel
+ * @author Cosmin Baciu
  * @since 4.0
  */
 @Service
@@ -37,7 +36,9 @@ public class MessageListenerContainerInitializer {
     public void init() {
         final List<Domain> domains = domainService.getDomains();
         for (Domain domain : domains) {
-            createMessageListenerContainer(domain);
+            createSendMessageListenerContainer(domain);
+            createSendLargeMessageListenerContainer(domain);
+            createSplitAndJoinListenerContainer(domain);
             createPullReceiptListenerContainer(domain);
         }
     }
@@ -46,22 +47,28 @@ public class MessageListenerContainerInitializer {
     public void destroy() throws InterruptedException {
         LOG.info("Shutting down MessageListenerContainer instances");
 
-        for (MessageListenerContainer instance: instances) {
+        for (MessageListenerContainer instance : instances) {
             try {
                 ((AbstractJmsListeningContainer) instance).shutdown();
-            }catch(Exception e) {
+            } catch (Exception e) {
                 LOG.error("Error while shutting down MessageListenerContainer", e);
             }
         }
     }
 
-    public void createMessageListenerContainer(Domain domain) {
-        MessageListenerContainer instance = messageListenerContainerFactory.createMessageListenerContainer(domain);
+    public void createSendMessageListenerContainer(Domain domain) {
+        MessageListenerContainer instance = messageListenerContainerFactory.createSendMessageListenerContainer(domain);
         instance.start();
         instances.add(instance);
         LOG.info("MessageListenerContainer initialized for domain [{}]", domain);
     }
 
+    public void createSendLargeMessageListenerContainer(Domain domain) {
+        MessageListenerContainer instance = messageListenerContainerFactory.createSendLargeMessageListenerContainer(domain);
+        instance.start();
+        instances.add(instance);
+        LOG.info("LargeMessageListenerContainer initialized for domain [{}]", domain);
+    }
     public void createPullReceiptListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createPullReceiptListenerContainer(domain);
         instance.start();
@@ -70,4 +77,11 @@ public class MessageListenerContainerInitializer {
     }
 
 
+
+    public void createSplitAndJoinListenerContainer(Domain domain) {
+        MessageListenerContainer instance = messageListenerContainerFactory.createSplitAndJoinListenerContainer(domain);
+        instance.start();
+        instances.add(instance);
+        LOG.info("SplitAndJoinListenerContainer initialized for domain [{}]", domain);
+    }
 }

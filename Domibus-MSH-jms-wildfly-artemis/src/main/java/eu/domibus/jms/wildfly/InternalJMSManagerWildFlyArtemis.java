@@ -357,7 +357,6 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
         InternalJmsMessage result = new InternalJmsMessage();
 
         result.setType(mapMessage.getJMSType());
-        mapMessage.getJMSTimestamp();
         Long jmsTimestamp = mapMessage.getJMSTimestamp();
         if (jmsTimestamp != null) {
             result.setTimestamp(new Date(jmsTimestamp));
@@ -365,10 +364,10 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
         result.setId(mapMessage.getJMSMessageID());
 
         Map<String, Object> properties = new HashMap<>();
-        Enumeration<String> mapNames = mapMessage.getMapNames();
-        while (mapNames.hasMoreElements()) {
-            String mapKey = mapNames.nextElement();
-            properties.put(mapKey, mapMessage.getObject(mapKey));
+        Enumeration<String> propertyNames = mapMessage.getPropertyNames();
+        while (propertyNames.hasMoreElements()) {
+            String mapKey = propertyNames.nextElement();
+            properties.put(mapKey, mapMessage.getObjectProperty(mapKey));
         }
         result.setProperties(properties);
         return result;

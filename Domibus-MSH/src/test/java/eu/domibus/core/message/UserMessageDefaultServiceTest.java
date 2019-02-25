@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -53,6 +54,12 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private Queue sendMessageQueue;
+
+    @Injectable
+    private Queue sendLargeMessageQueue;
+
+    @Injectable
+    private Queue splitAndJoinQueue;
 
     @Injectable
     private Queue sendPullReceiptQueue;

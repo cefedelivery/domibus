@@ -8,7 +8,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.Bus;
-import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ import java.io.IOException;
 public class PolicyServiceImpl implements PolicyService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
-    private static final String POLICIES_FOLDER = "policies";
+    public static final String POLICIES = "policies";
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -65,7 +64,7 @@ public class PolicyServiceImpl implements PolicyService {
      */
     @Override
     public Policy getPolicy(LegConfiguration legConfiguration) throws ConfigurationException {
-        return parsePolicy(POLICIES_FOLDER + File.separator + legConfiguration.getSecurity().getPolicy());
+        return parsePolicy(POLICIES + File.separator + legConfiguration.getSecurity().getPolicy());
     }
 
     /**

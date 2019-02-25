@@ -132,7 +132,7 @@ public class PullRequestHandlerImplTest {
             legConfiguration.getReliability().isNonRepudiation();
             result = true;
 
-            pullRequestMatcher.matchReliableCallBack(withAny(legConfiguration));
+            pullRequestMatcher.matchReliableCallBack(withAny(legConfiguration.getReliability()));
             result = true;
 
             pullContext.filterLegOnMpc();
@@ -170,9 +170,9 @@ public class PullRequestHandlerImplTest {
         pullRequestHandler.notifyNoMessage(pullContext);
         new Verifications() {{
 
-            SignalMessage signal;
-            messageBuilder.buildSOAPMessage(signal = withCapture(), withAny(legConfiguration));
-            Assert.assertEquals(1, signal.getError().size());
+            EbMS3Exception exception;
+            messageBuilder.getSoapMessage(exception = withCapture());
+            Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0006, exception.getErrorCode());
         }};
     }
 
@@ -281,6 +281,4 @@ public class PullRequestHandlerImplTest {
             times = 0;
         }};
     }
-
-
 }

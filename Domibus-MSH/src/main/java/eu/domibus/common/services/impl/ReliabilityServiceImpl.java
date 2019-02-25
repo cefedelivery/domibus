@@ -3,7 +3,6 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
@@ -24,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
+ * @author Cosmin Baciu
  * @since 3.3
  */
 
@@ -99,7 +99,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
                 break;
             case ABORT:
-                updateRetryLoggingService.messageFailedInANewTransaction(userMessageLog);
+                updateRetryLoggingService.messageFailedInANewTransaction(userMessage, userMessageLog);
                 break;
         }
     }

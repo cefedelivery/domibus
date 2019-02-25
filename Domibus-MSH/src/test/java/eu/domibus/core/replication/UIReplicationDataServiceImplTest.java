@@ -1,5 +1,6 @@
 package eu.domibus.core.replication;
 
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;

@@ -28,6 +28,9 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    @Autowired
+    protected SoapUtil soapUtil;
+
     public SaveRawPulledMessageInterceptor() {
         super(Phase.WRITE_ENDING);
         addAfter(SoapOutInterceptor.SoapOutEndingInterceptor.class.getName());
@@ -42,7 +45,7 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
         }
         try {
             SOAPMessage soapContent = message.getContent(SOAPMessage.class);
-            messageExchangeService.saveRawXml(SoapUtil.getRawXMLMessage(soapContent),messageId.toString());
+            messageExchangeService.saveRawXml(soapUtil.getRawXMLMessage(soapContent),messageId.toString());
         } catch (TransformerException e) {
             throw new WebServiceException(new IllegalArgumentException(e));
         }

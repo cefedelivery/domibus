@@ -4,13 +4,14 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -25,6 +26,7 @@ import java.util.List;
         "servicesXml",
         "actionsXml",
         "as4Xml",
+        "splittingConfigurationsXml",
         "legConfigurationsXml",
         "processes"
 })
@@ -65,6 +67,11 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @XmlElement(required = true, name = "securities")
     @Transient
     protected Securities securitiesXml; //NOSONAR
+
+    @XmlElement(name = "splittingConfigurations")
+    @Transient
+    protected SplittingConfigurations splittingConfigurationsXml; //NOSONAR
+
     @XmlElement(required = true, name = "legConfigurations")
     @Transient
     protected LegConfigurations legConfigurationsXml; //NOSONAR
@@ -135,6 +142,12 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
     private Set<Reliability> as4Reliability;
+
+    @XmlTransient
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_BUSINESSPROCESS")
+    private Set<Splitting> splittings;
+
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
@@ -291,6 +304,11 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.securities = new HashSet<>();
         this.securities.addAll(this.securitiesXml.getSecurity());
 
+        if (splittingConfigurationsXml != null) {
+            this.splittings = new HashSet<>();
+            this.splittings.addAll(this.splittingConfigurationsXml.getSplitting());
+        }
+
         for (final LegConfiguration legConfiguration : this.legConfigurationsXml.getLegConfiguration()) {
             legConfiguration.init(configuration);
         }
@@ -348,12 +366,12 @@ public class BusinessProcesses extends AbstractBaseEntity {
 
     public void setAgreements(final Set<Agreement> agreements) {
         this.agreements = agreements;
-    } 
+    }
 
     public Parties getPartiesXml() {
         return this.partiesXml;
     }
-    
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -369,6 +387,8 @@ public class BusinessProcesses extends AbstractBaseEntity {
         if (as4Reliability != null ? !as4Reliability.equals(that.as4Reliability) : that.as4Reliability != null)
             return false;
         if (errorHandlings != null ? !errorHandlings.equals(that.errorHandlings) : that.errorHandlings != null)
+            return false;
+        if (splittings != null ? !splittings.equals(that.splittings) : that.splittings != null)
             return false;
         if (legConfigurations != null ? !legConfigurations.equals(that.legConfigurations) : that.legConfigurations != null)
             return false;
@@ -408,6 +428,7 @@ public class BusinessProcesses extends AbstractBaseEntity {
         result = 31 * result + (actions != null ? actions.hashCode() : 0);
         result = 31 * result + (as4ConfigReceptionAwareness != null ? as4ConfigReceptionAwareness.hashCode() : 0);
         result = 31 * result + (as4Reliability != null ? as4Reliability.hashCode() : 0);
+        result = 31 * result + (splittings != null ? splittings.hashCode() : 0);
         result = 31 * result + (legConfigurations != null ? legConfigurations.hashCode() : 0);
         result = 31 * result + (securities != null ? securities.hashCode() : 0);
         return result;
@@ -429,6 +450,13 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.actions = actions;
     }
 
+    public Set<Splitting> getSplittings() {
+        return splittings;
+    }
+
+    public void setSplittings(Set<Splitting> splittings) {
+        this.splittings = splittings;
+    }
 
     public Set<LegConfiguration> getLegConfigurations() {
         return this.legConfigurations;

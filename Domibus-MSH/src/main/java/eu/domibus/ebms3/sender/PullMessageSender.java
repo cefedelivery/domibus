@@ -14,10 +14,10 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.pull.PullReceiptSender;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -53,6 +53,9 @@ import java.util.concurrent.Executor;
 public class PullMessageSender {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullMessageSender.class);
+
+    @Autowired
+    protected MessageUtil messageUtil;
 
     @Autowired
     private MSHDispatcher mshDispatcher;
@@ -110,30 +113,31 @@ public class PullMessageSender {
         String messageId = null;
         try {
             final String mpc = map.getStringProperty(PullContext.MPC);
-            final String pMode = map.getStringProperty(PullContext.PMODE_KEY);
+            final String pModeKey = map.getStringProperty(PullContext.PMODE_KEY);
             notifyBusinessOnError = Boolean.valueOf(map.getStringProperty(PullContext.NOTIFY_BUSINNES_ON_ERROR));
             SignalMessage signalMessage = new SignalMessage();
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
             LOG.debug("Sending pull request with mpc:[{}]", mpc);
-            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
-            final Party receiverParty = pModeProvider.getReceiverParty(pMode);
+            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
             final Policy policy = getPolicy(legConfiguration);
             LOG.trace("Build soap message");
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
             LOG.trace("Send soap message");
-            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
-            messaging = MessageUtil.getMessage(response, jaxbContext);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
+            messaging = messageUtil.getMessage(response);
             if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
                 LOG.trace("No message for sent pull request with mpc:[{}]", mpc);
                 logError(signalMessage);
                 return;
             }
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-            UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
+
             LOG.trace("handle message");
-            userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            Boolean testMessage = userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
+            userMessageHandlerService.handleNewUserMessage(legConfiguration, pModeKey, response, messaging, testMessage);
             final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
             final String sendMessageId = messageId;
@@ -159,7 +163,7 @@ public class PullMessageSender {
 
     private Policy getPolicy(LegConfiguration legConfiguration) throws EbMS3Exception {
         try {
-            return policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            return policyService.getPolicy(legConfiguration);
         } catch (final ConfigurationException e) {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
             ex.setMshRole(MSHRole.SENDING);

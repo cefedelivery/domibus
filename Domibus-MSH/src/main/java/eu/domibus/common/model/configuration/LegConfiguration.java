@@ -4,10 +4,7 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -109,6 +106,15 @@ public class LegConfiguration extends AbstractBaseEntity {
     @Column(name = "COMPRESS_PAYLOADS")
     private boolean compressPayloads;
 
+    @XmlAttribute(name = "splitting")
+    @Transient
+    protected String splittingXml;
+
+    @XmlTransient
+    @ManyToOne
+    @JoinColumn(name = "FK_SPLITTING")
+    private Splitting splitting;
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -207,6 +213,10 @@ public class LegConfiguration extends AbstractBaseEntity {
         this.compressPayloads = compressPayloads;
     }
 
+    public Splitting getSplitting() {
+        return splitting;
+    }
+
     public void init(final Configuration configuration) {
         for (final Reliability rel : configuration.getBusinessProcesses().getAs4Reliability()) {
             if (rel.getName().equalsIgnoreCase(this.reliabilityXml)) {
@@ -233,6 +243,15 @@ public class LegConfiguration extends AbstractBaseEntity {
                 this.security = sec;
                 break;
             }
+        }
+
+        final Set<Splitting> splittings = configuration.getBusinessProcesses().getSplittings();
+        if (splittings != null) {
+            this.splitting = splittings
+                    .stream()
+                    .filter(currentSplitting -> currentSplitting.getName().equalsIgnoreCase(this.splittingXml))
+                    .findFirst()
+                    .orElse(null);
         }
 
         for (final Action a : configuration.getBusinessProcesses().getActions()) {

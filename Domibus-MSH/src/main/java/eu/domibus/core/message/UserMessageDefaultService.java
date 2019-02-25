@@ -61,6 +61,14 @@ public class UserMessageDefaultService implements UserMessageService {
     private Queue sendMessageQueue;
 
     @Autowired
+    @Qualifier("sendLargeMessageQueue")
+    private Queue sendLargeMessageQueue;
+
+    @Autowired
+    @Qualifier("splitAndJoinQueue")
+    private Queue splitAndJoinQueue;
+
+    @Autowired
     @Qualifier("sendPullReceiptQueue")
     private Queue sendPullReceiptQueue;
 
@@ -206,17 +214,50 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void scheduleSending(String messageId, int retryCount) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(retryCount), sendMessageQueue);
+        scheduleSending(messageId, new DispatchMessageCreator(messageId).createMessage(retryCount));
     }
 
     @Override
     public void scheduleSending(String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
+        scheduleSending(messageId, new DispatchMessageCreator(messageId).createMessage());
     }
 
     @Override
     public void scheduleSending(String messageId, Long delay) {
-        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
+        scheduleSending(messageId, new DelayedDispatchMessageCreator(messageId, delay).createMessage());
+    }
+
+    protected void scheduleSending(String messageId, JmsMessage jmsMessage) {
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+
+        if (userMessage.isSplitAndJoin()) {
+            LOG.debug("Sending message to sendLargeMessageQueue");
+            jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
+        } else {
+            LOG.debug("Sending message to sendMessageQueue");
+            jmsManager.sendMessageToQueue(jmsMessage, sendMessageQueue);
+        }
+    }
+
+    @Override
+    public void scheduleSourceMessageRejoin(String groupId) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)
+                .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
+    public void scheduleSourceMessageReceipt(String messageId, String pmodeKey) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)
+                .property(UserMessageService.MSG_SOURCE_MESSAGE_ID, messageId)
+                .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
     }
 
     @Override
@@ -226,13 +267,14 @@ public class UserMessageDefaultService implements UserMessageService {
                 .property(PULL_RECEIPT_REF_TO_MESSAGE_ID, messageId)
                 .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
                 .build();
+        LOG.debug("Sending message to sendPullReceiptQueue");
         jmsManager.sendMessageToQueue(jmsMessage, sendPullReceiptQueue);
     }
 
     @Override
     public eu.domibus.api.usermessage.domain.UserMessage getMessage(String messageId) {
         final UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messageId);
-        if(userMessageByMessageId == null) {
+        if (userMessageByMessageId == null) {
             return null;
         }
         return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.usermessage.domain.UserMessage.class);

@@ -112,7 +112,7 @@ public class ReceiveDeliverMessageJMSIT extends AbstractBackendJMSIT {
         userMessage.getMessageInfo().setMessageId(messageId);
         eu.domibus.ebms3.common.model.Messaging messaging = new eu.domibus.ebms3.common.model.Messaging();
         messaging.setUserMessage(userMessage);
-        messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+        messagingService.storeMessage(messaging, MSHRole.RECEIVING, null);
 
         UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageStatus(eu.domibus.common.MessageStatus.RECEIVED);

@@ -1,10 +1,10 @@
 package eu.domibus.core.replication;
 
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.dao.InMemoryDataBaseConfig;
-import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Assert;

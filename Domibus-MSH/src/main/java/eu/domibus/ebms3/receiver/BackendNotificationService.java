@@ -55,6 +55,7 @@ import java.util.Map;
 
 /**
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 @Service("backendNotificationService")
 public class BackendNotificationService {
@@ -142,14 +143,24 @@ public class BackendNotificationService {
             properties.put(MessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
         }
         properties.put(MessageConstants.ERROR_DETAIL, errorResult.getErrorDetail());
-        notifyOfIncoming(userMessage, NotificationType.MESSAGE_RECEIVED_FAILURE, properties);
+        NotificationType notificationType = NotificationType.MESSAGE_RECEIVED_FAILURE;
+        if(userMessage.isUserMessageFragment()) {
+            notificationType = NotificationType.MESSAGE_FRAGMENT_RECEIVED_FAILURE;
+        }
+
+        notifyOfIncoming(userMessage, notificationType, properties);
     }
 
     public void notifyMessageReceived(final BackendFilter matchingBackendFilter, final UserMessage userMessage) {
         if (isPluginNotificationDisabled()) {
             return;
         }
-        notifyOfIncoming(matchingBackendFilter, userMessage, NotificationType.MESSAGE_RECEIVED, new HashMap<String, Object>());
+        NotificationType notificationType = NotificationType.MESSAGE_RECEIVED;
+        if(userMessage.isUserMessageFragment()) {
+            notificationType = NotificationType.MESSAGE_FRAGMENT_RECEIVED;
+        }
+
+        notifyOfIncoming(matchingBackendFilter, userMessage, notificationType, new HashMap<String, Object>());
     }
 
     public BackendFilter getMatchingBackendFilter(final UserMessage userMessage) {
@@ -285,12 +296,18 @@ public class BackendNotificationService {
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
-    public void notifyOfSendFailure(final String messageId) {
+    public void notifyOfSendFailure(UserMessage userMessage) {
         if (isPluginNotificationDisabled()) {
             return;
         }
+        final String messageId = userMessage.getMessageInfo().getMessageId();
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
-        notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
+        NotificationType notificationType = NotificationType.MESSAGE_SEND_FAILURE;
+        if(userMessage.isUserMessageFragment()) {
+            notificationType = NotificationType.MESSAGE_FRAGMENT_SEND_FAILURE;
+        }
+
+        notify(messageId, backendName, notificationType);
         userMessageLogDao.setAsNotified(messageId);
 
         uiReplicationSignalService.messageNotificationStatusChange(messageId, NotificationStatus.NOTIFIED);
