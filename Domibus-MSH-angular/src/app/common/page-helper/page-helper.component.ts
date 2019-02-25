@@ -21,7 +21,7 @@ export class PageHelperComponent implements OnInit {
   async ngOnInit() {
     const domibusInfo = await this.domibusInfoService.getDomibusInfo();
 
-    let MAIN_HELP_PAGE = 'https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+'
+    let MAIN_HELP_PAGE = 'https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v'
       + domibusInfo.versionNumber + '+Admin+Console+Help';
     let VERSION_SPECIFIC_PAGE = '#Domibusv4.0AdminConsoleHelp-';
 
