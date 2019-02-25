@@ -6,7 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * @author Thomas Dussart
  * @since 4.1
- *
+ * <p>
  * Just a mapper class for core Domain class.
  */
 public class DomainSpi {
@@ -14,7 +14,8 @@ public class DomainSpi {
     protected String code;
     protected String name;
 
-    public DomainSpi(){}
+    public DomainSpi() {
+    }
 
     public DomainSpi(String code, String name) {
         this.code = code;

@@ -6,7 +6,9 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
-import eu.domibus.core.crypto.spi.*;
+import eu.domibus.core.crypto.spi.CertificateEntrySpi;
+import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
+import eu.domibus.core.crypto.spi.DomainSpi;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
@@ -16,7 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.security.auth.callback.CallbackHandler;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
@@ -141,12 +146,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @Override
     public void replaceTrustStore(byte[] store, String password) throws CryptoException {
-        try {
-            iamProvider.replaceTrustStore(store, password);
-        } catch (CryptoSpiException e) {
-            LOG.error("Error calling replace truststore on authentication spi:[{}] for domain:[{}]", iamProvider.getIdentifier(), this.domain);
-            throw new CryptoException(e.getMessage(), e);
-        }
+        iamProvider.replaceTrustStore(store, password);
     }
 
     @Override
@@ -162,14 +162,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @Override
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        try {
-            return iamProvider.isCertificateChainValid(alias);
-        } catch (DomibusCertificateSpiException e) {
-            LOG.error("Error validating certificate chain for alias:[{}] and provider:[{}]",
-                    alias,
-                    iamProvider.getIdentifier());
-            throw new DomibusCertificateException(e.getMessage(), e);
-        }
+        return iamProvider.isCertificateChainValid(alias);
     }
 
     @Override

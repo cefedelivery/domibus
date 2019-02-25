@@ -5,7 +5,7 @@ import java.security.cert.X509Certificate;
 /**
  * @author Thomas Dussart
  * @since 4.1
- *
+ * <p>
  * Just a mapper class for core CertificateEntry class.
  */
 public class CertificateEntrySpi {

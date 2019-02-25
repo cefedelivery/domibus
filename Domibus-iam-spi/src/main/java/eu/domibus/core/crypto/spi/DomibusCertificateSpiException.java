@@ -4,7 +4,7 @@ package eu.domibus.core.crypto.spi;
  * @author Thomas Dussart
  * @since 4.1
  */
-public class DomibusCertificateSpiException extends RuntimeException{
+public class DomibusCertificateSpiException extends RuntimeException {
 
     public DomibusCertificateSpiException() {
     }

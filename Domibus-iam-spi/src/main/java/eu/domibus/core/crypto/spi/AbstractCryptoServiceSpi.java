@@ -19,9 +19,9 @@ import java.util.regex.Pattern;
  * @author Thomas Dussart
  * @since 4.1
  */
-public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi{
+public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi {
 
-    public static final String DEFAULT_IAM_SPI="DEFAULT_IAM_SPI";
+    public static final String DEFAULT_IAM_SPI = "DEFAULT_IAM_SPI";
 
     @Autowired
     @Qualifier(DEFAULT_IAM_SPI)
@@ -41,17 +41,17 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public PrivateKey getPrivateKey(X509Certificate certificate, CallbackHandler callbackHandler) throws WSSecurityException {
-        return defaultDomainCryptoService.getPrivateKey(certificate,callbackHandler);
+        return defaultDomainCryptoService.getPrivateKey(certificate, callbackHandler);
     }
 
     @Override
     public PrivateKey getPrivateKey(PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException {
-        return defaultDomainCryptoService.getPrivateKey(publicKey,callbackHandler);
+        return defaultDomainCryptoService.getPrivateKey(publicKey, callbackHandler);
     }
 
     @Override
     public PrivateKey getPrivateKey(String identifier, String password) throws WSSecurityException {
-        return defaultDomainCryptoService.getPrivateKey(identifier,password);
+        return defaultDomainCryptoService.getPrivateKey(identifier, password);
     }
 
     @Override
@@ -61,7 +61,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void verifyTrust(X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException {
-        defaultDomainCryptoService.verifyTrust(certs,enableRevocation,subjectCertConstraints,issuerCertConstraints);
+        defaultDomainCryptoService.verifyTrust(certs, enableRevocation, subjectCertConstraints, issuerCertConstraints);
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void replaceTrustStore(byte[] store, String password) {
-        defaultDomainCryptoService.replaceTrustStore(store,password);
+        defaultDomainCryptoService.replaceTrustStore(store, password);
     }
 
     @Override
@@ -100,18 +100,18 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
     }
 
     @Override
-    public boolean isCertificateChainValid(String alias) throws DomibusCertificateSpiException{
+    public boolean isCertificateChainValid(String alias) throws DomibusCertificateSpiException {
         return defaultDomainCryptoService.isCertificateChainValid(alias);
     }
 
     @Override
     public boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
-        return defaultDomainCryptoService.addCertificate(certificate,alias,overwrite);
+        return defaultDomainCryptoService.addCertificate(certificate, alias, overwrite);
     }
 
     @Override
     public void addCertificate(List<CertificateEntrySpi> certificates, boolean overwrite) {
-        defaultDomainCryptoService.addCertificate(certificates,overwrite);
+        defaultDomainCryptoService.addCertificate(certificates, overwrite);
     }
 
     @Override
@@ -131,7 +131,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void setDomain(DomainSpi domain) {
-        this.domain=domain;
+        this.domain = domain;
     }
 
     protected DomainSpi getDomain() {
