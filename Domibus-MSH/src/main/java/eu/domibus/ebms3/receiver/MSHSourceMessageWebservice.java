@@ -117,7 +117,10 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         if (compression) {
             final File compressSourceMessage = compressSourceMessage(sourceMessageFileName);
             LOG.debug("Deleting file [{}]", sourceMessageFile);
-            sourceMessageFile.delete();
+            final boolean sourceDeleteSuccessful = sourceMessageFile.delete();
+            if(!sourceDeleteSuccessful) {
+                LOG.warn("Could not delete uncompressed source file [{}]", sourceMessageFile);
+            }
 
             LOG.debug("Using [{}] as source message file ", compressSourceMessage);
             sourceMessageFile = compressSourceMessage;
@@ -148,7 +151,10 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         }
         messageGroupEntity.setFragmentCount(Long.valueOf(fragmentFiles.size()));
         LOG.debug("Deleting source file [{}]", sourceMessageFile);
-        sourceMessageFile.delete();
+        final boolean deleteSuccessful = sourceMessageFile.delete();
+        if(!deleteSuccessful) {
+            LOG.warn("Could not delete source file [{}]", sourceMessageFile);
+        }
         LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
 
         final ContentType contentType = ContentType.parse(contentTypeString);
