@@ -24,22 +24,22 @@ import javax.xml.ws.Endpoint;
 public class LocalEndpointConfiguration {
 
     @Autowired
-    Bus bus;
+    protected Bus bus;
 
     @Autowired
-    MSHSourceMessageWebservice mshWebserviceSerializer;
+    protected MSHSourceMessageWebservice mshWebserviceSerializer;
 
     @Autowired
-    DomibusPropertyProvider domibusPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    DomainContextProvider domainContextProvider;
+    protected DomainContextProvider domainContextProvider;
 
     @Autowired
-    SplitAndJoinService splitAndJoinService;
+    protected SplitAndJoinService splitAndJoinService;
 
     @Autowired
-    MessageUtil messageUtil;
+    protected MessageUtil messageUtil;
 
     @Bean(name = "localMSH")
     public Endpoint createMSHEndpoint() {
