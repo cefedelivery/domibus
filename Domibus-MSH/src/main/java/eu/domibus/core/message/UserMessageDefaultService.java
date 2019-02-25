@@ -3,6 +3,7 @@ package eu.domibus.core.message;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
@@ -14,7 +15,6 @@ import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -25,6 +25,7 @@ import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -59,6 +60,14 @@ public class UserMessageDefaultService implements UserMessageService {
     private Queue sendMessageQueue;
 
     @Autowired
+    @Qualifier("sendLargeMessageQueue")
+    private Queue sendLargeMessageQueue;
+
+    @Autowired
+    @Qualifier("splitAndJoinQueue")
+    private Queue splitAndJoinQueue;
+
+    @Autowired
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
@@ -72,9 +81,6 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private SignalMessageDao signalMessageDao;
-
-    @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -200,23 +206,56 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void scheduleSending(String messageId, int retryCount) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(retryCount), sendMessageQueue);
+        scheduleSending(messageId, new DispatchMessageCreator(messageId).createMessage(retryCount));
     }
 
     @Override
     public void scheduleSending(String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
+        scheduleSending(messageId, new DispatchMessageCreator(messageId).createMessage());
     }
 
     @Override
     public void scheduleSending(String messageId, Long delay) {
-        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
+        scheduleSending(messageId, new DelayedDispatchMessageCreator(messageId, delay).createMessage());
+    }
+
+    protected void scheduleSending(String messageId, JmsMessage jmsMessage) {
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+
+        if (userMessage.isSplitAndJoin()) {
+            LOG.debug("Sending message to sendLargeMessageQueue");
+            jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
+        } else {
+            LOG.debug("Sending message to sendMessageQueue");
+            jmsManager.sendMessageToQueue(jmsMessage, sendMessageQueue);
+        }
+    }
+
+    @Override
+    public void scheduleSourceMessageRejoin(String groupId) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)
+                .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
+    public void scheduleSourceMessageReceipt(String messageId, String pmodeKey) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)
+                .property(UserMessageService.MSG_SOURCE_MESSAGE_ID, messageId)
+                .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
     }
 
     @Override
     public eu.domibus.api.usermessage.domain.UserMessage getMessage(String messageId) {
         final UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messageId);
-        if(userMessageByMessageId == null) {
+        if (userMessageByMessageId == null) {
             return null;
         }
         return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.usermessage.domain.UserMessage.class);

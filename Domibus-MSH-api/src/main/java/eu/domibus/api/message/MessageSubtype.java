@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.model;
+package eu.domibus.api.message;
 
 /**
  * Representation of the supported Message Subtypes

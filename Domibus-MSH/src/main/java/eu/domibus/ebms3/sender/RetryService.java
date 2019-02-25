@@ -106,7 +106,7 @@ public class RetryService {
             return false;
         }
         if(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
-            updateRetryLoggingService.messageFailed(userMessageLog);
+            updateRetryLoggingService.messageFailed(userMessage, userMessageLog);
             return true;
         }
         return false;

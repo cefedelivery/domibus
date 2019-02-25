@@ -3,11 +3,11 @@ package eu.domibus.pki;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.Bus;
-import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,7 @@ import java.io.IOException;
 public class PolicyServiceImpl implements PolicyService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
+    public static final String POLICIES = "policies";
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -52,6 +53,11 @@ public class PolicyServiceImpl implements PolicyService {
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new ConfigurationException(e);
         }
+    }
+
+    @Override
+    public Policy getPolicy(LegConfiguration legConfiguration) throws ConfigurationException {
+        return parsePolicy(POLICIES + File.separator + legConfiguration.getSecurity().getPolicy());
     }
 
     /**
