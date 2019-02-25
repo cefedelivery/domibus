@@ -1,0 +1,13 @@
+{
+  "loginUsers" : {
+    "ROLE_ADMIN" : {
+      "username" : "admin",
+      "pass" : "123456"
+    },
+    "ROLE_USER" : {
+      "username" : "user",
+      "pass" : "123456"
+    }
+  },
+  "passwordForTestUsers": "QW!@qw12"
+}
