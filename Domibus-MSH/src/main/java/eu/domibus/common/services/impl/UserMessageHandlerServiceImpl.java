@@ -194,11 +194,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         final Party sender = pModeProvider.getSenderParty(pmodeKey);
 
         //check endpoint
-        if (receiver.getEndpoint().trim().equalsIgnoreCase(sender.getEndpoint().trim())) {
-            return true;
-        }
-
-        return false;
+        return StringUtils.trimToEmpty(receiver.getEndpoint()).equalsIgnoreCase(StringUtils.trimToEmpty(sender.getEndpoint()));
     }
 
     /**
@@ -286,12 +282,17 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         LOG.debug("Compression for message with id: {} applied: {}", userMessage.getMessageInfo().getMessageId(), compressed);
-        try {
-            payloadProfileValidator.validate(messaging, pmodeKey);
-            propertyProfileValidator.validate(messaging, pmodeKey);
-        } catch (EbMS3Exception e) {
-            e.setMshRole(MSHRole.RECEIVING);
-            throw e;
+
+
+        //skip payload and property profile validations for message fragments
+        if (messageFragmentType == null) {
+            try {
+                payloadProfileValidator.validate(messaging, pmodeKey);
+                propertyProfileValidator.validate(messaging, pmodeKey);
+            } catch (EbMS3Exception e) {
+                e.setMshRole(MSHRole.RECEIVING);
+                throw e;
+            }
         }
 
         try {

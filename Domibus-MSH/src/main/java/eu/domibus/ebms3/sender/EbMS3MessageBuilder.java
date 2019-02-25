@@ -46,6 +46,11 @@ import java.util.Locale;
 public class EbMS3MessageBuilder {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(EbMS3MessageBuilder.class);
+
+    public static final String ID_PREFIX_MESSAGING = "_1";
+    public static final String ID_PREFIX_SOAP_BODY = "_2";
+    public static final String ID_PREFIX_MESSAGE_FRAGMENT = "_3";
+
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
     @Qualifier("messageFactory")
@@ -125,7 +130,7 @@ public class EbMS3MessageBuilder {
             message.getSOAPBody().setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
 
             String messageIDDigest = DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId());
-            message.getSOAPBody().addAttribute(NonRepudiationConstants.ID_QNAME, "_2" + messageIDDigest);
+            message.getSOAPBody().addAttribute(NonRepudiationConstants.ID_QNAME, ID_PREFIX_SOAP_BODY + messageIDDigest);
             if (userMessage.getMessageInfo() != null && userMessage.getMessageInfo().getTimestamp() == null) {
                 userMessage.getMessageInfo().setTimestamp(new Date());
             }
@@ -133,13 +138,13 @@ public class EbMS3MessageBuilder {
             for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
                 this.attachPayload(partInfo, message);
             }
-            if(messageGroupEntity != null) {
+            if (messageGroupEntity != null) {
                 final MessageFragmentType messageFragment = createMessageFragment(userMessage, messageGroupEntity);
                 jaxbContextMessageFragment.createMarshaller().marshal(messageFragment, message.getSOAPHeader());
 
                 final SOAPElement messageFragmentElement = (SOAPElement) message.getSOAPHeader().getChildElements(eu.domibus.ebms3.common.model.mf.ObjectFactory._MessageFragment_QNAME).next();
                 messageFragmentElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
-                messageFragmentElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_3" + messageIDDigest);
+                messageFragmentElement.addAttribute(NonRepudiationConstants.ID_QNAME, ID_PREFIX_MESSAGE_FRAGMENT + messageIDDigest);
 
                 messaging.setUserMessage(userMessageFactory.cloneUserMessageFragment(userMessage));
             } else {
@@ -150,7 +155,7 @@ public class EbMS3MessageBuilder {
 
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
             messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
-            messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + messageIDDigest);
+            messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, ID_PREFIX_MESSAGING + messageIDDigest);
 
 
             message.saveChanges();

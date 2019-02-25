@@ -14,6 +14,8 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
 /**
+ * Handles the incoming AS4 UserMessages
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

@@ -251,11 +251,7 @@ public class UserMessage extends AbstractBaseEntity {
     }
 
     public boolean isUserMessageFragment() {
-        return isSplitAndJoin() && (messageFragment != null);
-    }
-
-    public boolean isSourceUserMessage() {
-        return isSplitAndJoin() && (messageFragment == null);
+        return isSplitAndJoin() && messageFragment != null;
     }
 
     @Override

@@ -7,6 +7,8 @@ import javax.persistence.*;
 import java.math.BigInteger;
 
 /**
+ * Entity class for storing message fragment group details. For more details about relations to other entities please check the SplitAndJoin specs.
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

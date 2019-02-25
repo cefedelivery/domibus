@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
+ * Entity class for storing message fragments
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

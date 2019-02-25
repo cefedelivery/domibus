@@ -12,10 +12,12 @@ import java.util.Map;
 
 
 /**
+ * Auto-generated JAXB class based on the SplitAndJoin XSD
+ *
  * <p>Java class for MessageFragmentType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="MessageFragmentType"&gt;
  *   &lt;complexContent&gt;
@@ -40,24 +42,23 @@ import java.util.Map;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * 
  */
+
 /**
  * @author Cosmin Baciu
  * @since 4.1
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MessageFragmentType", namespace = "http://docs.oasis-open.org/ebxml-msg/ns/v3.0/mf/2010/04/", propOrder = {
-    "groupId",
-    "messageSize",
-    "fragmentCount",
-    "fragmentNum",
-    "messageHeader",
-    "action",
-    "compressionAlgorithm",
-    "compressedMessageSize",
-    "any"
+        "groupId",
+        "messageSize",
+        "fragmentCount",
+        "fragmentNum",
+        "messageHeader",
+        "action",
+        "compressionAlgorithm",
+        "compressedMessageSize",
+        "any"
 })
 @XmlRootElement(name = "MessageFragment")
 public class MessageFragmentType {
@@ -103,11 +104,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the groupId property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getGroupId() {
         return groupId;
@@ -115,11 +116,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the groupId property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setGroupId(String value) {
         this.groupId = value;
@@ -127,11 +128,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the messageSize property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public BigInteger getMessageSize() {
         return messageSize;
@@ -139,11 +140,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the messageSize property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setMessageSize(BigInteger value) {
         this.messageSize = value;
@@ -151,11 +152,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the fragmentCount property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getFragmentCount() {
         return fragmentCount;
@@ -163,11 +164,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the fragmentCount property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setFragmentCount(Long value) {
         this.fragmentCount = value;
@@ -175,11 +176,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the fragmentNum property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getFragmentNum() {
         return fragmentNum;
@@ -187,11 +188,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the fragmentNum property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setFragmentNum(Long value) {
         this.fragmentNum = value;
@@ -199,11 +200,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the messageHeader property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link MessageHeaderType }
-     *     
+     *
      */
     public MessageHeaderType getMessageHeader() {
         return messageHeader;
@@ -211,11 +212,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the messageHeader property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link MessageHeaderType }
-     *     
+     *
      */
     public void setMessageHeader(MessageHeaderType value) {
         this.messageHeader = value;
@@ -223,11 +224,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the action property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAction() {
         return action;
@@ -235,11 +236,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the action property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAction(String value) {
         this.action = value;
@@ -247,11 +248,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the compressionAlgorithm property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCompressionAlgorithm() {
         return compressionAlgorithm;
@@ -259,11 +260,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the compressionAlgorithm property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCompressionAlgorithm(String value) {
         this.compressionAlgorithm = value;
@@ -271,11 +272,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the compressedMessageSize property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public BigInteger getCompressedMessageSize() {
         return compressedMessageSize;
@@ -283,11 +284,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the compressedMessageSize property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setCompressedMessageSize(BigInteger value) {
         this.compressedMessageSize = value;
@@ -295,26 +296,26 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the any property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the any property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAny().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Object }
      * {@link Element }
-     * 
-     * 
+     *
+     *
      */
     public List<Object> getAny() {
         if (any == null) {
@@ -325,11 +326,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the href property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getHref() {
         return href;
@@ -337,11 +338,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the href property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setHref(String value) {
         this.href = value;
@@ -351,11 +352,11 @@ public class MessageFragmentType {
      *  if SOAP 1.2 is being used, this attribute is required, other
      *                     attributes in the S12atts group are allowed and attributes in the S11atts group
      *                     are prohibited.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public boolean isMustUnderstand() {
         if (mustUnderstand == null) {
@@ -367,11 +368,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the mustUnderstand property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMustUnderstand(Boolean value) {
         this.mustUnderstand = value;
@@ -379,11 +380,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the encodingStyle property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEncodingStyle() {
         return encodingStyle;
@@ -391,11 +392,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the encodingStyle property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEncodingStyle(String value) {
         this.encodingStyle = value;
@@ -403,11 +404,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the relay property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public boolean isRelay() {
         if (relay == null) {
@@ -419,11 +420,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the relay property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRelay(Boolean value) {
         this.relay = value;
@@ -431,11 +432,11 @@ public class MessageFragmentType {
 
     /**
      * Gets the value of the role property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRole() {
         return role;
@@ -443,11 +444,11 @@ public class MessageFragmentType {
 
     /**
      * Sets the value of the role property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRole(String value) {
         this.role = value;
@@ -455,15 +456,15 @@ public class MessageFragmentType {
 
     /**
      * Gets a map that contains attributes that aren't bound to any typed property on this class.
-     * 
+     *
      * <p>
      * the map is keyed by the name of the attribute and 
      * the value is the string value of the attribute.
-     * 
+     *
      * the map returned by this method is live, and you can add new attribute
      * by updating the map directly. Because of this design, there's no setter.
-     * 
-     * 
+     *
+     *
      * @return
      *     always non-null
      */

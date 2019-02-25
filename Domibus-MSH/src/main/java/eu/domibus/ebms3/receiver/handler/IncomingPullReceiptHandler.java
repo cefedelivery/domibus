@@ -16,7 +16,10 @@ import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.MessageState;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.MessagingLock;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -36,6 +39,8 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
 
 /**
+ * Handles the incoming AS4 pull receipt
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

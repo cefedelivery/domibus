@@ -5,6 +5,8 @@ import eu.domibus.ebms3.common.model.Messaging;
 import javax.xml.soap.SOAPMessage;
 
 /**
+ * Defines the contract for message handlers responsible for handling incoming AS4 messages
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

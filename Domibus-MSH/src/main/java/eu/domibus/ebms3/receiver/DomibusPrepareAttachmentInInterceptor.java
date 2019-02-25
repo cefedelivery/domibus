@@ -10,6 +10,8 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.Phase;
 
 /**
+ * Interceptor used to configure other Domibus custom interceptors while the AS4 messages are handled
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

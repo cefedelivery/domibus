@@ -12,6 +12,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.util.SoapUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.attachment.AttachmentDeserializer;
 import org.apache.cxf.message.Message;
@@ -55,15 +56,6 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public boolean useSplitAndJoin(LegConfiguration legConfiguration, long payloadSize) {
-        final boolean mayUseSplitAndJoin = mayUseSplitAndJoin(legConfiguration);
-        if (mayUseSplitAndJoin && payloadSize > legConfiguration.getSplitting().getFragmentSize()) {
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -156,11 +148,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     protected void decompressGzip(File input, File output) throws IOException {
         try (GZIPInputStream in = new GZIPInputStream(new FileInputStream(input))) {
             try (FileOutputStream out = new FileOutputStream(output)) {
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
-                }
+                IOUtils.copy(in, out, 1024);
             }
         }
     }

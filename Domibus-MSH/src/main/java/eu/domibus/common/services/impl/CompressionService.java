@@ -40,8 +40,17 @@ public class CompressionService {
     @Autowired
     protected SplitAndJoinService splitAndJoinService;
 
+    /**
+     * This method is responsible for compression of payloads in a ebMS3 AS4 conformant way in case of {@link eu.domibus.common.MSHRole#SENDING}
+     *
+     * @param messageId           the sending {@link UserMessage} with all payloads
+     * @param partInfo            the sending {@link UserMessage} with all payloads
+     * @param legConfigForMessage legconfiguration for this message
+     * @return {@code true} if compression was applied properly and {@code false} if compression was not enabled in the corresponding pmode
+     * @throws EbMS3Exception if an problem occurs during the compression or the mimetype was missing
+     */
     public boolean handleCompression(String messageId, PartInfo partInfo, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
-        if(partInfo == null) {
+        if (partInfo == null) {
             return false;
         }
 
@@ -57,12 +66,12 @@ public class CompressionService {
         }
 
         final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfigForMessage);
-        if(mayUseSplitAndJoin) {
+        if (mayUseSplitAndJoin) {
             LOG.debug("SplitAndJoin compression is only applied for the multipart message");
             return false;
         }
 
-        if(partInfo.getPartProperties() == null) {
+        if (partInfo.getPartProperties() == null) {
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE_MISSING_MIME_TYPE, partInfo.getHref(), messageId);
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:" + partInfo.getHref(), messageId, null);
             ex.setMshRole(MSHRole.SENDING);
@@ -93,7 +102,8 @@ public class CompressionService {
         compressionProperty.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
         compressionProperty.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);
         partInfo.getPartProperties().getProperties().add(compressionProperty);
-        DataHandler gZipDataHandler = new DataHandler(new CompressedDataSource(partInfo.getPayloadDatahandler().getDataSource()));
+        final CompressedDataSource compressedDataSource = new CompressedDataSource(partInfo.getPayloadDatahandler().getDataSource());
+        DataHandler gZipDataHandler = new DataHandler(compressedDataSource);
         partInfo.setPayloadDatahandler(gZipDataHandler);
         CompressionService.LOG.debug("Payload with cid: " + partInfo.getHref() + " and mime type: " + mimeType + " will be compressed");
 
@@ -103,7 +113,7 @@ public class CompressionService {
     /**
      * This method handles decompression of payloads for messages in case of {@link eu.domibus.common.MSHRole#RECEIVING}
      *
-     * @param ebmsMessage the receving {@link UserMessage} with all payloads
+     * @param ebmsMessage         the receving {@link UserMessage} with all payloads
      * @param legConfigForMessage processing information for the message
      * @return {@code true} if everything was decompressed without problems, {@code false} in case of disabled compression via pmode
      * @throws EbMS3Exception if an problem occurs during the de compression or the mimetype of a compressed payload was missing
@@ -124,7 +134,7 @@ public class CompressionService {
             String mimeType = null;
             boolean payloadCompressed = false;
 
-            if(partInfo.getPartProperties() != null) {
+            if (partInfo.getPartProperties() != null) {
                 for (final Property property : partInfo.getPartProperties().getProperties()) {
                     if (Property.MIME_TYPE.equalsIgnoreCase(property.getName())) {
                         mimeType = property.getValue();

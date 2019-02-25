@@ -132,7 +132,7 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
                                        final ReplyPattern replyPattern,
                                        final Boolean nonRepudiation,
                                        final Boolean duplicate,
-                                       final boolean selfSendingFlag) throws EbMS3Exception {
+                                       final Boolean selfSendingFlag) throws EbMS3Exception {
         SOAPMessage responseMessage = null;
         UserMessage userMessage = messaging.getUserMessage();
 
@@ -142,7 +142,7 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
-                final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
+
 
                 String messageId;
                 String timestamp;
@@ -160,6 +160,7 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
                     requestMessage = request.getSOAPPart().getContent();
                 }
 
+                final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
                 transformer.setParameter("messageid", messageId);
                 transformer.setParameter("timestamp", timestamp);
                 transformer.setParameter("nonRepudiation", Boolean.toString(nonRepudiation));
@@ -177,8 +178,6 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, nonRepudiation);
             } catch (TransformerConfigurationException | SOAPException | IOException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
-                // this cannot happen
-                assert false;
                 throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error generating receipt", e);
             } catch (final TransformerException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
@@ -203,7 +202,7 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
 
             if (selfSendingFlag) {
                 /*we add a defined suffix in order to assure DB integrity - messageId unicity
-                basically we are generating another messageId for Signal Message on receievr side
+                basically we are generating another messageId for Signal Message on receiver side
                 */
                 signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
                 signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);

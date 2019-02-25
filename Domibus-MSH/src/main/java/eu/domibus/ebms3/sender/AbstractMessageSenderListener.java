@@ -13,11 +13,10 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 /**
- *
  * @author Cosmin Baciu
  * @since 4.1
  */
-public class AbstractMessageSenderListener implements MessageListener {
+public abstract class AbstractMessageSenderListener implements MessageListener {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractMessageSenderListener.class);
 
@@ -30,6 +29,7 @@ public class AbstractMessageSenderListener implements MessageListener {
     @Autowired
     protected UserMessageService userMessageService;
 
+    @Override
     public void onMessage(final Message message) {
         Long delay = 0L;
         String messageId = null;
@@ -43,15 +43,16 @@ public class AbstractMessageSenderListener implements MessageListener {
             domainCode = message.getStringProperty(MessageConstants.DOMAIN);
             delay = message.getLongProperty(MessageConstants.DELAY);
         } catch (final NumberFormatException nfe) {
+            LOG.trace("Error getting message properties", nfe);
             //This is ok, no delay has been set
         } catch (final JMSException e) {
             LOG.error("Error processing JMS message", e);
         }
-        if(StringUtils.isBlank(messageId)) {
+        if (StringUtils.isBlank(messageId)) {
             LOG.error("Message ID is empty: could not send message");
             return;
         }
-        if(StringUtils.isBlank(domainCode)) {
+        if (StringUtils.isBlank(domainCode)) {
             LOG.error("Domain is empty: could not send message");
             return;
         }

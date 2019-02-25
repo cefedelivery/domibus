@@ -11,11 +11,12 @@ import java.util.Map;
 public class DomibusAttachmentOutInterceptor extends AttachmentOutInterceptor {
 
     protected static final Map<String, List<String>> headers = new HashMap<>();
+    public static final String CONTENT_ID_SOURCE_MESSAGE = "split.root.message@cxf.apache.org";
 
 
     public DomibusAttachmentOutInterceptor() {
         final ArrayList<String> headers = new ArrayList<>();
-        headers.add("split.root.message@cxf.apache.org");
+        headers.add(CONTENT_ID_SOURCE_MESSAGE);
         DomibusAttachmentOutInterceptor.headers.put("Content-ID", headers);
     }
 

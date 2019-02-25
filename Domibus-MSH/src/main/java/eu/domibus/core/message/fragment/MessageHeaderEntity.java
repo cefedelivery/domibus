@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
+ * Entity class for storing the message header details as specified in the SplitAndJoin specs.
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

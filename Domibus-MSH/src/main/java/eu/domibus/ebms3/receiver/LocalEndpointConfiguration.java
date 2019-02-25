@@ -51,15 +51,11 @@ public class LocalEndpointConfiguration {
         dfm.registerDestinationFactory("http://cxf.apache.org/bindings/xformat", localTransport);
         dfm.registerDestinationFactory("http://cxf.apache.org/transports/local", localTransport);
 
-
         ConduitInitiatorManager extension = bus.getExtension(ConduitInitiatorManager.class);
         extension.registerConduitInitiator("http://cxf.apache.org/transports/local", localTransport);
         extension.registerConduitInitiator("http://schemas.xmlsoap.org/wsdl/soap/http", localTransport);
         extension.registerConduitInitiator("http://schemas.xmlsoap.org/soap/http", localTransport);
         extension.registerConduitInitiator("http://cxf.apache.org/bindings/xformat", localTransport);
-
-
-
 
         EndpointImpl endpoint = new EndpointImpl(bus, mshWebserviceSerializer);
         endpoint.setTransportId(LocalTransportFactory.TRANSPORT_ID);

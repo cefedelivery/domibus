@@ -49,6 +49,9 @@ import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 
 
+/**
+ * Local endpoint used to generate the multi mimepart message for SplitAndJoin
+ */
 @WebServiceProvider(portName = "local-msh-dispatch", serviceName = "local-msh-dispatch-service")
 @ServiceMode(Service.Mode.MESSAGE)
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
@@ -58,6 +61,9 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
     public static final String SOURCE_MESSAGE_FILE = "sourceMessageFile";
     private static final Long MB_IN_BYTES = 1048576L;
+    public static final String BOUNDARY = "boundary";
+    public static final String START = "start";
+    public static final String FRAGMENT_FILENAME_SEPARATOR = "_";
 
     @Autowired
     protected MessageFactory messageFactory;
@@ -119,7 +125,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             messageGroupEntity.setCompressionAlgorithm("application/gzip");
         }
 
-        messageGroupEntity.setSoapAction("");
+        messageGroupEntity.setSoapAction(StringUtils.EMPTY);
         messageGroupEntity.setSourceMessageId(userMessage.getMessageInfo().getMessageId());
 
         MessageExchangeConfiguration userMessageExchangeConfiguration = null;
@@ -147,8 +153,8 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
         final ContentType contentType = ContentType.parse(contentTypeString);
         MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
-        messageHeaderEntity.setBoundary(contentType.getParameter("boundary"));
-        final String start = contentType.getParameter("start");
+        messageHeaderEntity.setBoundary(contentType.getParameter(BOUNDARY));
+        final String start = contentType.getParameter(START);
         messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"", ""}));
         messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
         messageGroupDao.create(messageGroupEntity);
@@ -165,10 +171,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         }
 
         try {
-//            SOAPFactory soapFac = SOAPFactory.newInstance();
             SOAPMessage responseMessage = messageFactory.createMessage();
-//            QName sayHi = new QName("http://apache.org/hello_world_rpclit", "sayHiWAttach");
-//            responseMessage.getSOAPBody().addChildElement(soapFac.createElement(sayHi));
             responseMessage.saveChanges();
 
             LOG.debug("Finished processing source message file");
@@ -215,7 +218,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             return messaging.getUserMessage();
 
         } catch (Exception e) {
-            //TODO notify the backend that an error occured
+            //TODO notify the backend that an error occured EDELIVERY-4089
             LOG.error("Error parsing the source file [{}]", sourceMessageFileName);
             throw new WebServiceException(e);
         }
@@ -309,7 +312,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
     protected String getFragmentFileName(File outputDirectory, String sourceFileName, long fragmentNumber) {
-        return outputDirectory.getAbsolutePath() + File.separator + sourceFileName + "_" + fragmentNumber;
+        return outputDirectory.getAbsolutePath() + File.separator + sourceFileName + FRAGMENT_FILENAME_SEPARATOR + fragmentNumber;
     }
 
     protected void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {

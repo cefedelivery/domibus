@@ -130,6 +130,7 @@
                         <redeliveryPolicyEntries>
                             <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.largeMessage.queue" maximumRedeliveries="0"/>
+                            <redeliveryPolicy queue="domibus.internal.splitAndJoin.queue" maximumRedeliveries="3"/>
                             <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.alert.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.ui.replication.queue" maximumRedeliveries="1" redeliveryDelay="10000"/>

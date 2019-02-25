@@ -14,6 +14,8 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
 /**
+ * Handles the incoming source message for SplitAndJoin mechanism
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

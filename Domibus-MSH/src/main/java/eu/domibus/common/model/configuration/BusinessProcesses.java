@@ -4,10 +4,10 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -68,11 +68,11 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @Transient
     protected Securities securitiesXml; //NOSONAR
 
-    @XmlElement(required = true, name = "splittingConfigurations")
+    @XmlElement(name = "splittingConfigurations")
     @Transient
     protected SplittingConfigurations splittingConfigurationsXml; //NOSONAR
 
-    @XmlElement(name = "legConfigurations")
+    @XmlElement(required = true, name = "legConfigurations")
     @Transient
     protected LegConfigurations legConfigurationsXml; //NOSONAR
 
@@ -304,7 +304,7 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.securities = new HashSet<>();
         this.securities.addAll(this.securitiesXml.getSecurity());
 
-        if(splittingConfigurationsXml != null) {
+        if (splittingConfigurationsXml != null) {
             this.splittings = new HashSet<>();
             this.splittings.addAll(this.splittingConfigurationsXml.getSplitting());
         }
@@ -366,12 +366,12 @@ public class BusinessProcesses extends AbstractBaseEntity {
 
     public void setAgreements(final Set<Agreement> agreements) {
         this.agreements = agreements;
-    } 
+    }
 
     public Parties getPartiesXml() {
         return this.partiesXml;
     }
-    
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

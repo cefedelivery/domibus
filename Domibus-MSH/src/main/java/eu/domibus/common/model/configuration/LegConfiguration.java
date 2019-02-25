@@ -246,7 +246,7 @@ public class LegConfiguration extends AbstractBaseEntity {
         }
 
         final Set<Splitting> splittings = configuration.getBusinessProcesses().getSplittings();
-        if(splittings != null) {
+        if (splittings != null) {
             this.splitting = splittings
                     .stream()
                     .filter(currentSplitting -> currentSplitting.getName().equalsIgnoreCase(this.splittingXml))

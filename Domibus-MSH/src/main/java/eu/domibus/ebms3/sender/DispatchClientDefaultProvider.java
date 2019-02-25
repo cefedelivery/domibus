@@ -5,7 +5,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.proxy.DomibusProxy;
 import eu.domibus.proxy.DomibusProxyService;
-import eu.domibus.proxy.DomibusProxyServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
@@ -86,7 +85,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         if (endpoint.startsWith("https://")) {
             final TLSClientParameters params = tlsReader.getTlsClientParameters(domain);
-            if(params != null) {
+            if (params != null) {
                 httpConduit.setTlsClientParameters(params);
             }
         }
@@ -94,8 +93,6 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         configureProxy(httpClientPolicy, httpConduit);
         return dispatch;
     }
-
-
 
 
     @Override
@@ -111,7 +108,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             public void onMessage(Message message) {
                 message.getExchange().getOutMessage().put(ClientImpl.SYNC_TIMEOUT, 0);
                 message.getExchange().put(ClientImpl.FINISHED, Boolean.TRUE);
-                LOG.info("----------------------on message");
+                LOG.debug("on message");
             }
         });
 
@@ -131,7 +128,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
         ConnectionType connectionType = ConnectionType.CLOSE;
-        if(keepAlive) {
+        if (keepAlive) {
             connectionType = ConnectionType.KEEP_ALIVE;
         }
         httpClientPolicy.setConnection(connectionType);
@@ -146,9 +143,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
-        if(!domibusProxyService.useProxy()) {
+        if (!domibusProxyService.useProxy()) {
             LOG.debug("Usage of proxy not required");
-            return ;
+            return;
         }
 
         DomibusProxy domibusProxy = domibusProxyService.getDomibusProxy();

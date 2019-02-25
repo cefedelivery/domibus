@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import javax.xml.soap.SOAPMessage;
 
 /**
+ * Handles the incoming AS4 pull request
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

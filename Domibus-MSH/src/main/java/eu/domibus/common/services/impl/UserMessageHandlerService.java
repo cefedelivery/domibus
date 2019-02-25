@@ -22,8 +22,38 @@ public interface UserMessageHandlerService {
      */
     String SELF_SENDING_SUFFIX = "_1";
 
+    /**
+     * Handles incoming UserMessages
+     *
+     * @param legConfiguration
+     * @param pmodeKey
+     * @param request
+     * @param messaging
+     * @param testMessage
+     * @return
+     * @throws EbMS3Exception
+     * @throws TransformerException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws SOAPException
+     */
     SOAPMessage handleNewUserMessage(LegConfiguration legConfiguration, String pmodeKey, SOAPMessage request, Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException;
 
+    /**
+     * Handles incoming source messages for SplitAndJoin
+     *
+     * @param legConfiguration
+     * @param pmodeKey
+     * @param request
+     * @param messaging
+     * @param testMessage
+     * @return
+     * @throws EbMS3Exception
+     * @throws TransformerException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws SOAPException
+     */
     SOAPMessage handleNewSourceUserMessage(LegConfiguration legConfiguration, String pmodeKey, SOAPMessage request, Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException;
 
     Boolean checkTestMessage(UserMessage message);

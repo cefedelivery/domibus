@@ -30,6 +30,8 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 
 /**
+ * Handles the incoming AS4 receipts
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
+ * Auto-generate JAXB class used for splitting configuration in the PMode configuration management. This classes has been modified to serve also an entity class.
+ *
  * <p>Java class for anonymous complex type.
  *
  * <p>The following schema fragment specifies the expected content contained within this class.

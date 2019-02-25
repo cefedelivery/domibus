@@ -23,6 +23,8 @@ import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 
 /**
+ * Common behaviour for handling incoming AS4 messages
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

@@ -6,8 +6,10 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * Auto-generated JAXB class based on the SplitAndJoin XSD
+ *
  * <p>Java class for TypeType.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -18,8 +20,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
- * 
  */
+
 /**
  * @author Cosmin Baciu
  * @since 4.1
@@ -32,14 +34,14 @@ public enum TypeType {
     /**
      * XOP Package as defined in
      *                         http://www.w3.org/TR/2005/REC-xop10-20050125/ 
-     * 
+     *
      */
     @XmlEnumValue("application/xop+xml")
     APPLICATION_XOP_XML("application/xop+xml"),
 
     /**
      * SOAP with attachments 
-     * 
+     *
      */
     @XmlEnumValue("text/xml")
     TEXT_XML("text/xml");
@@ -54,7 +56,7 @@ public enum TypeType {
     }
 
     public static TypeType fromValue(String v) {
-        for (TypeType c: TypeType.values()) {
+        for (TypeType c : TypeType.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

@@ -6,8 +6,10 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * Auto-generated JAXB class based on the SplitAndJoin XSD
+ *
  * <p>Java class for HTTPCompressionAlgorithmType.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -20,8 +22,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
- * 
  */
+
 /**
  * @author Cosmin Baciu
  * @since 4.1
@@ -49,7 +51,7 @@ public enum HTTPCompressionAlgorithmType {
     }
 
     public static HTTPCompressionAlgorithmType fromValue(String v) {
-        for (HTTPCompressionAlgorithmType c: HTTPCompressionAlgorithmType.values()) {
+        for (HTTPCompressionAlgorithmType c : HTTPCompressionAlgorithmType.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

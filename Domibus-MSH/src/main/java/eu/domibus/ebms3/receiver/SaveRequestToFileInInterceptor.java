@@ -27,6 +27,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * CXF interceptor responsible for saving on the file system the multi-part mime for the source message
+ *
+ * @author Cosmin Baciu
+ * @since 4.1
+ */
 public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SaveRequestToFileInInterceptor.class);
 
@@ -58,10 +64,10 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
             throw new Fault(new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not store Source Message: the property [" + Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION + "] is not defined"));
         }
 
-        InputStream in = message.getContent(InputStream.class);
         String fileName = splitAndJoinService.generateSourceFileName(temporaryDirectoryLocation);
 
-        try (FileOutputStream cos = new FileOutputStream(new File(fileName))) {
+        try (FileOutputStream cos = new FileOutputStream(new File(fileName));
+             InputStream in = message.getContent(InputStream.class)) {
             LOG.debug("Start copying message [{}] to file [{}]", messageId, fileName);
             IOUtils.copy(in, cos);
             in.close();
