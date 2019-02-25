@@ -49,9 +49,9 @@ public class PullReceiptSender {
         } catch (EbMS3Exception e) {
             LOG.error("Error dispatching the pull receipt for message:[{}]", messsageId, e);
             throw e;
+        } finally {
+            LOG.trace("[sendReceipt] ~~~ finnaly the end ~~~");
         }
-
-        LOG.trace("[sendReceipt] ~~~ the end ~~~");
     }
 
     private void handleDispatchReceiptResult(SOAPMessage acknowledgementResult) throws EbMS3Exception {
