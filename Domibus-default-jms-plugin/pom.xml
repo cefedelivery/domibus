@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>4.1-RC1-SNAPSHOT</version>
+        <version>4.0.2-FS-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-default-jms-plugin</artifactId>
@@ -29,11 +29,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
