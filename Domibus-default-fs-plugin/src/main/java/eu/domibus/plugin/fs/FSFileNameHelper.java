@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * Helper to create and recognize derived file names
- * 
+ *
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 public class FSFileNameHelper {
@@ -23,13 +23,14 @@ public class FSFileNameHelper {
     private static final Pattern PROCESSED_FILE_PATTERN = Pattern.compile(
             NAME_SEPARATOR + UUID_PATTERN + "@.", Pattern.CASE_INSENSITIVE);
     private static final List<String> STATE_SUFFIXES;
+    private static final String LOCK_SUFFIX = ".lock";
 
     static {
         List<String> tempStateSuffixes = new LinkedList<>();
         for (MessageStatus status : MessageStatus.values()) {
             tempStateSuffixes.add(EXTENSION_SEPARATOR + status.name());
         }
-        
+
         STATE_SUFFIXES = Collections.unmodifiableList(tempStateSuffixes);
     }
 
@@ -47,7 +48,7 @@ public class FSFileNameHelper {
     public static boolean isAnyState(final String fileName) {
         return StringUtils.endsWithAny(fileName, STATE_SUFFIXES.toArray(new String[0]));
     }
-    
+
     /**
      * Checks if a given file name has been derived from any message Id.
      * In practice checks if the filename contains an underscore followed by a
@@ -58,7 +59,7 @@ public class FSFileNameHelper {
     public static boolean isProcessed(final String fileName) {
         return PROCESSED_FILE_PATTERN.matcher(fileName).find();
     }
-    
+
     /**
      * Checks if a given file name has been derived from a given message Id.
      * In practice checks if the filename contains an underscore followed by the
@@ -70,7 +71,17 @@ public class FSFileNameHelper {
     public static boolean isMessageRelated(String fileName, String messageId) {
         return fileName.contains(NAME_SEPARATOR + messageId);
     }
-    
+
+    /**
+     * Checks if a given file is a lock file, used to lock access to a message
+     * file.
+     * @param fileName the file name to test
+     * @return true, if the file name matches the lock pattern.
+     */
+    public static boolean isLockFile(final String fileName) {
+        return StringUtils.endsWith(fileName, LOCK_SUFFIX);
+    }
+
     /**
      * Derives a new file name from the given file name and a message Id.
      * In practice, for a given file name {@code filename.ext} and message Id
@@ -81,17 +92,17 @@ public class FSFileNameHelper {
      */
     public static String deriveFileName(final String fileName, final String messageId) {
         int extensionIdx = StringUtils.lastIndexOf(fileName, EXTENSION_SEPARATOR);
-        
+
         if (extensionIdx != -1) {
             String fileNamePrefix = StringUtils.substring(fileName, 0, extensionIdx);
             String fileNameSuffix = StringUtils.substring(fileName, extensionIdx + 1);
-            
+
             return fileNamePrefix + NAME_SEPARATOR + messageId + EXTENSION_SEPARATOR + fileNameSuffix;
         } else {
             return fileName + NAME_SEPARATOR + messageId;
         }
     }
-    
+
     /**
      * Derives a new file name from the given file name and a {@link eu.domibus.common.MessageStatus}.
      * In practice, for a given file name {@code filename.ext} and message status
@@ -108,6 +119,20 @@ public class FSFileNameHelper {
         String result = fileName;
         if (isAnyState(fileName)) {
             result = StringUtils.substringBeforeLast(fileName, EXTENSION_SEPARATOR);
+        }
+        return result;
+    }
+
+    /**
+     * Derives the related file name from the lock file name.
+     *
+     * @param fileName the lock file name
+     * @return the base file name
+     */
+    public static String stripLockSuffix(final String fileName) {
+        String result = fileName;
+        if (isLockFile(fileName)) {
+            result = StringUtils.substringBeforeLast(fileName, LOCK_SUFFIX);
         }
         return result;
     }
