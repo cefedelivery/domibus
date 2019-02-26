@@ -6,7 +6,7 @@
 
     <groupId>eu.domibus</groupId>
     <artifactId>domibus</artifactId>
-    <version>4.0.2-FS-SNAPSHOT</version>
+    <version>4.1-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Domibus MSH</name>
     <modules>
@@ -23,10 +23,10 @@
         <module>Domibus-MSH-test</module>
     </modules>
     <properties>
-        <cxf.version>3.2.4</cxf.version>
+        <cxf.version>3.2.6</cxf.version>
         <spring.version>4.3.17.RELEASE</spring.version>
         <spring.security.version>4.2.6.RELEASE</spring.security.version>
-        <activemq.version>5.15.2</activemq.version>
+        <activemq.version>5.15.6</activemq.version>
         <aspectj.version>1.8.13</aspectj.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
@@ -42,7 +42,7 @@
         <bouncycastle.version>1.58</bouncycastle.version>
         <quartz.version>2.3.0</quartz.version>
         <dozer.version>5.5.1</dozer.version>
-        <jackson.version>2.9.5</jackson.version>
+        <jackson.version>2.9.7</jackson.version>
         <commons-test.version>4.2</commons-test.version>
 
         <!-- Sonar properties -->
@@ -61,7 +61,7 @@
             **/api/usermessage/domain/**
         </sonar.exclusions>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
-        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>
+        <sonar.host.url>http://localhost:9000/sonar/</sonar.host.url>
         <sonar.ws.timeout>300</sonar.ws.timeout>
         <jacoco.maven.plugin.version>0.7.7.201606060606</jacoco.maven.plugin.version>
         <!--   Enable the proxy when running sonar from within the EC network -->
@@ -158,7 +158,7 @@
             </dependency>
             <!-- End Jackson-->
 
-            <!-- SL4J + Logback -->
+            <!-- SLF4J + Logback -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
@@ -184,7 +184,7 @@
                 <artifactId>logback-elasticsearch-appender</artifactId>
                 <version>${logback.elasticsearch.appender.version}</version>
             </dependency>
-            <!-- End SL4J + Logback -->
+            <!-- End SLF4J + Logback -->
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -408,6 +408,16 @@
                 <artifactId>cxf-rt-transports-http</artifactId>
                 <version>${cxf.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-transports-local</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-ws-policy</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
             <!-- End CXF -->
 
             <dependency>
@@ -544,9 +554,9 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.5.0.1254</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -716,7 +726,17 @@
             <modules>
                 <module>Domibus-MSH-taskexecutor-weblogic</module>
                 <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
                 <module>Domibus-MSH-weblogic</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>weblogic-ecas</id>
+            <modules>
+                <module>Domibus-MSH-taskexecutor-weblogic</module>
+                <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-common</module>
+                <module>Domibus-MSH-weblogic-ecas</module>
             </modules>
         </profile>
         <profile>
@@ -787,7 +807,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>3.2.1</version>
+                        <version>3.3.2</version>
                         <inherited>false</inherited>
                         <configuration>
                             <skipProvidedScope>true</skipProvidedScope>

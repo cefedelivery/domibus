@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>4.0.2-FS-SNAPSHOT</version>
+        <version>4.1-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-soapui-tests</artifactId>
     <packaging>jar</packaging>
@@ -66,16 +66,9 @@
                         <projectProperties>
                             <value>${localUrl}</value>
                             <value>${remoteUrl}</value>
-                            <value>${driverBlue}</value>
-                            <value>${driverRed}</value>
-                            <value>${jdbcUrlBlue}</value>
-                            <value>${jdbcUrlRed}</value>
-                            <value>${databaseBlue}</value>
-                            <value>${databaseRed}</value>
-                            <value>${blueDbUser}</value>
-                            <value>${blueDbPassword}</value>
-                            <value>${redDbUser}</value>
-                            <value>${redDbPassword}</value>
+							<value>${allDomainsProperties}</value>
+							<value>multitenancyModeC2=0</value>
+							<value>multitenancyModeC3=0</value>
                             <value>updateReport=false</value>
                             <value>thirdGateway=false</value>
                             <value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>
