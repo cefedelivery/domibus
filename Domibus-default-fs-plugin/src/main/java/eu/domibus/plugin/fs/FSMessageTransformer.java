@@ -1,5 +1,7 @@
 package eu.domibus.plugin.fs;
 
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
 import eu.domibus.plugin.fs.exception.FSPayloadException;
@@ -8,6 +10,7 @@ import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.activation.DataHandler;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.Map;
 @Component
 public class FSMessageTransformer
         implements MessageRetrievalTransformer<FSMessage>, MessageSubmissionTransformer<FSMessage> {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageTransformer.class);
 
     private static final String PAYLOAD_PROPERTY_MIME_TYPE = "MimeType";
 
@@ -75,7 +79,7 @@ public class FSMessageTransformer
         return submission;
     }
 
-    private void setPayloadToSubmission(Submission submission, final Map<String, FSPayload> dataHandlers, UserMessage metadata) {
+    protected void setPayloadToSubmission(Submission submission, final Map<String, FSPayload> dataHandlers, UserMessage metadata) {
         for (Map.Entry<String, FSPayload> entry : dataHandlers.entrySet()) {
             String contentId = entry.getKey();
             final FSPayload fsPayload = entry.getValue();
@@ -85,11 +89,13 @@ public class FSMessageTransformer
 
             /* PartInfo defined in the metadata file take precedence to the plugin properties */
             String metadataContentId = extractContentIdFromMetadata(metadata);
-            if (metadataContentId != null) {
+            if (StringUtils.isNotBlank(metadataContentId)) {
+                LOG.debug("Setting contentId from metadata file: [{}]", metadataContentId);
                 contentId = metadataContentId;
             }
             String metadataMimeType = extractMimeTypeFromMetadata(metadata);
-            if (metadataMimeType != null) {
+            if (StringUtils.isNotBlank(metadataMimeType)) {
+                LOG.debug("Setting mimeType from metadata file: [{}]", metadataMimeType);
                 mimeType = metadataMimeType;
             }
             if (StringUtils.isEmpty(mimeType)) {
@@ -101,6 +107,8 @@ public class FSMessageTransformer
             List<Property> additionalPropertyList = extractAdditionalPropertyListFromMetadata(metadata);
             if (additionalPropertyList != null) {
                 for (Property property : additionalPropertyList) {
+                    LOG.debug("Adding property name:[{}] type:[{}] value:[{}] to payload [{}]", property.getName(),
+                            property.getType(), property.getValue(), contentId);
                     payloadProperties.add(new Submission.TypedProperty(property.getName(), property.getValue(), property.getType()));
                 }
             }
@@ -110,13 +118,19 @@ public class FSMessageTransformer
 
 
     protected PartInfo extractPartInfoFromMetadata(UserMessage metadata) {
-        if (metadata.getPayloadInfo() == null ||
-                metadata.getPayloadInfo().getPartInfo() == null) {
+        if (metadata.getPayloadInfo() == null) {
+            return null;
+        }
+        if (CollectionUtils.isEmpty(metadata.getPayloadInfo().getPartInfo())) {
             return null;
         }
 
+        if(metadata.getPayloadInfo().getPartInfo().size() > 1) {
+            throw new FSPluginException("FS plugin can only handle one payload per message. Multiple PartInfo found.");
+        }
+
         /* FS plugin sends one payload at a time */
-        return metadata.getPayloadInfo().getPartInfo();
+        return metadata.getPayloadInfo().getPartInfo().get(0);
     }
 
     protected String extractContentIdFromMetadata(UserMessage metadata) {
@@ -171,7 +185,7 @@ public class FSMessageTransformer
         return propertyList;
     }
 
-    private Map<String, FSPayload> getPayloadsFromSubmission(Submission submission) {
+    protected Map<String, FSPayload> getPayloadsFromSubmission(Submission submission) {
         Map<String, FSPayload> result = new HashMap<>(submission.getPayloads().size());
         for (final Submission.Payload payload : submission.getPayloads()) {
 
@@ -190,7 +204,7 @@ public class FSMessageTransformer
         return result;
     }
 
-    private String extractPayloadProperty(Submission.Payload payload, String propertyName) {
+    protected String extractPayloadProperty(Submission.Payload payload, String propertyName) {
         String propertyValue = null;
         for (Submission.TypedProperty payloadProperty : payload.getPayloadProperties()) {
             if (payloadProperty.getKey().equals(propertyName)) {
@@ -201,7 +215,7 @@ public class FSMessageTransformer
         return propertyValue;
     }
 
-    private void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {
+    protected void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {
         for (Property messageProperty : messageProperties.getProperty()) {
             String name = messageProperty.getName();
             String value = messageProperty.getValue();
@@ -215,7 +229,7 @@ public class FSMessageTransformer
         }
     }
 
-    private PayloadInfo getPayloadInfoFromSubmission(Submission submission) {
+    protected PayloadInfo getPayloadInfoFromSubmission(Submission submission) {
         final PayloadInfo payloadInfo = new PayloadInfo();
 
         if (submission.getPayloads() == null || submission.getPayloads().size() != 1) {
@@ -231,16 +245,18 @@ public class FSMessageTransformer
             property.setName(payloadProperty.getKey());
             property.setValue(payloadProperty.getValue());
             property.setType(payloadProperty.getType());
+            LOG.debug("Adding property name:[{}] type:[{}] value:[{}] to payload [{}]", property.getName(),
+                    property.getType(), property.getValue(), submissionPayload.getContentId());
             partProperties.getProperty().add(property);
         }
 
         partInfo.setPartProperties(partProperties);
-        payloadInfo.setPartInfo(partInfo);
+        payloadInfo.getPartInfo().add(partInfo);
 
         return payloadInfo;
     }
 
-    private MessageProperties getMessagePropertiesFromSubmission(Submission submission) {
+    protected MessageProperties getMessagePropertiesFromSubmission(Submission submission) {
         MessageProperties messageProperties = objectFactory.createMessageProperties();
 
         for (Submission.TypedProperty typedProperty : submission.getMessageProperties()) {
@@ -253,7 +269,7 @@ public class FSMessageTransformer
         return messageProperties;
     }
 
-    private void setCollaborationInfoToSubmission(Submission submission, CollaborationInfo collaborationInfo) {
+    protected void setCollaborationInfoToSubmission(Submission submission, CollaborationInfo collaborationInfo) {
         AgreementRef agreementRef = collaborationInfo.getAgreementRef();
         Service service = collaborationInfo.getService();
 
@@ -267,7 +283,7 @@ public class FSMessageTransformer
         submission.setConversationId(collaborationInfo.getConversationId());
     }
 
-    private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
+    protected CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
         AgreementRef agreementRef = objectFactory.createAgreementRef();
         agreementRef.setType(submission.getAgreementRefType());
         agreementRef.setValue(submission.getAgreementRef());
@@ -285,7 +301,7 @@ public class FSMessageTransformer
         return collaborationInfo;
     }
 
-    private void setPartyInfoToSubmission(Submission submission, PartyInfo partyInfo) {
+    protected void setPartyInfoToSubmission(Submission submission, PartyInfo partyInfo) {
         From from = partyInfo.getFrom();
         To to = partyInfo.getTo();
 
@@ -297,7 +313,7 @@ public class FSMessageTransformer
         }
     }
 
-    private PartyInfo getPartyInfoFromSubmission(Submission submission) {
+    protected PartyInfo getPartyInfoFromSubmission(Submission submission) {
         // From
         Submission.Party fromParty = submission.getFromParties().iterator().next();
         String fromRole = submission.getFromRole();

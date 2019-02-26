@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.*;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -159,6 +160,14 @@ public class FSMessageTransformerTest {
 
         assertTransformValues(submission);
         assertTransformPayloadInfo(submission);
+    }
+
+    @Test(expected = FSPluginException.class)
+    public void testTransformToSubmission_MultiplePartInfo() throws Exception {
+        FSMessage fsMessage = buildMessage("testTransformToSubmissionNormalFlow_MultiplePartInfo_metadata.xml");
+        FSMessageTransformer transformer = new FSMessageTransformer();
+        // expect exception on multiple PartInfo in PayloadInfo
+        transformer.transformToSubmission(fsMessage);
     }
 
     protected void assertDefaultValuesForPayloadInfo(Submission submission) throws IOException {

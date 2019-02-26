@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UserMessage xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+    <PartyInfo>
+        <From>
+            <PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</PartyId>
+            <Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</Role>
+        </From>
+        <!--Optional:-->
+        <To>
+            <PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</PartyId>
+            <Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</Role>
+        </To>
+    </PartyInfo>
+    <CollaborationInfo>
+        <!--You may enter the following 4 items in any order-->
+        <!--Optional:-->
+        <!-- <AgreementRef type="">A1</AgreementRef> -->
+        <Service type="tc1">bdx:noprocess</Service>
+        <Action>TC1Leg1</Action>
+        <ConversationId>conv1</ConversationId>
+    </CollaborationInfo>
+    <MessageProperties>
+        <!--1 or more repetitio-->
+        <!--originalSender and finalRecipient are mandatory-->
+        <Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</Property>
+        <Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</Property>
+    </MessageProperties>
+    <PayloadInfo>
+        <PartInfo href="cid:mypayload">
+            <PartProperties>
+                <Property name="MimeType">text/xml</Property>
+                <Property name="MyProp" type="propType">SomeValue</Property>
+            </PartProperties>
+        </PartInfo>
+        <PartInfo href="cid:mypayload_second">
+            <PartProperties>
+                <Property name="MimeType">second/xml</Property>
+                <Property name="SecondProp" type="propType">SecondValue</Property>
+            </PartProperties>
+        </PartInfo>
+    </PayloadInfo>
+</UserMessage>

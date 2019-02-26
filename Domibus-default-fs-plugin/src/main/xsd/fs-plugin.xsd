@@ -97,7 +97,7 @@
     <xsd:complexType name="PayloadInfo">
         <xsd:sequence>
             <!-- fs plugin sends one payload at a time -->
-            <xsd:element name="PartInfo" type="tns:PartInfo" maxOccurs="1"/>
+            <xsd:element name="PartInfo" type="tns:PartInfo" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 
