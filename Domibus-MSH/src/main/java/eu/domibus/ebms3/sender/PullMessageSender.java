@@ -142,7 +142,7 @@ public class PullMessageSender {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
             final String sendMessageId = messageId;
             try {
-                userMessageDefaultService.scheduleSendingPullReceipt(sendMessageId, pMode);
+                userMessageDefaultService.scheduleSendingPullReceipt(sendMessageId, pModeKey);
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }
