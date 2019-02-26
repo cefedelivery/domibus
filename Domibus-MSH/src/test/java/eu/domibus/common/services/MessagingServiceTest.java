@@ -6,10 +6,13 @@ import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -64,9 +67,18 @@ public class MessagingServiceTest {
     @Injectable
     private DomainContextProvider domainContextProvider;
 
+    @Injectable
+    LegConfiguration legConfiguration;
+
+    @Injectable
+    SplitAndJoinService splitAndJoinService;
+
+    @Injectable
+    CompressionService compressionService;
+
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
-        messagingService.storeMessage(messaging, MSHRole.SENDING);
+        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration);
 
         new Verifications() {{
             messagingDao.create(messaging);
@@ -95,10 +107,13 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
+    public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException, EbMS3Exception {
         new Expectations() {{
             storageProvider.forDomain((Domain) any);
             result = new Storage(new File(STORAGE_PATH));
+
+            compressionService.handleCompression(anyString, withAny(new PartInfo()), legConfiguration);
+            result = true;
         }};
         PartInfo partInfo = storeValidMessage(true);
         byte[] expectedCompressedData = MessagingUtils.compress(validContentFilePath);
@@ -107,7 +122,12 @@ public class MessagingServiceTest {
     }
 
     @Test
-    public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
+    public void testStoreValidMessageCompressed() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException, EbMS3Exception {
+        new Expectations() {{
+            compressionService.handleCompression(anyString, withAny(new PartInfo()), legConfiguration);
+            result = true;
+        }};
+
         PartInfo partInfo = storeValidMessage(true);
         byte[] expectedCompressedData = MessagingUtils.compress(validContentFilePath);
         Assert.assertEquals(new String(expectedCompressedData), new String(partInfo.getBinaryData()));
@@ -150,7 +170,7 @@ public class MessagingServiceTest {
             partInfo.getPartProperties().getProperties().add(property);
         }
 
-        messagingService.storeMessage(validMessaging, MSHRole.SENDING);
+        messagingService.storeMessage(validMessaging, MSHRole.SENDING, legConfiguration);
         partInfo = getOnePartInfo(validMessaging);
 
         return partInfo;
@@ -163,7 +183,7 @@ public class MessagingServiceTest {
         PartInfo partInfo = getOnePartInfo(messaging);
         partInfo.setPayloadDatahandler(dh);
 
-        messagingService.storeMessage(messaging, MSHRole.SENDING);
+        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration);
         partInfo = getOnePartInfo(messaging);
 
         return partInfo;

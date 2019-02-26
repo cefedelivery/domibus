@@ -17,6 +17,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
 import mockit.*;
@@ -117,7 +118,7 @@ public class RetryServiceTest {
     }
 
     @Test
-    public void failIfExpiredTest() throws EbMS3Exception {
+    public void failIfExpiredTest(@Injectable UserMessage userMessage) throws EbMS3Exception {
         new NonStrictExpectations() {{
             userMessageLogDao.findRetryMessages();
             result = new ArrayList<>(RETRY_MESSAGEIDS);
@@ -146,7 +147,7 @@ public class RetryServiceTest {
             retryService.failIfExpired(messageId);
         }
         new Verifications() {{
-            updateRetryLoggingService.messageFailed(userMessageLog); times = 2; // one outside for and one in for
+            updateRetryLoggingService.messageFailed(userMessage, userMessageLog); times = 2; // one outside for and one in for
         }};
     }
 }

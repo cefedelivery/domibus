@@ -1,6 +1,6 @@
 package eu.domibus.ebms3.common.matcher;
 
-import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Reliability;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 
 /**
@@ -10,9 +10,9 @@ import eu.domibus.ebms3.sender.ReliabilityChecker;
 
 public interface ReliabilityMatcher {
 
-    boolean matchReliableCallBack(final LegConfiguration legConfiguration);
+    boolean matchReliableCallBack(final Reliability reliability);
 
-    boolean matchReliableReceipt(final LegConfiguration legConfiguration);
+    boolean matchReliableReceipt(final Reliability reliability);
 
     ReliabilityChecker.CheckResult fails();
 

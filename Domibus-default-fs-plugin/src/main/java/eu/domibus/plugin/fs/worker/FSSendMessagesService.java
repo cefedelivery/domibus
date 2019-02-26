@@ -19,6 +19,8 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.tika.io.IOExceptionWithCause;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -42,10 +44,10 @@ public class FSSendMessagesService {
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
-
+    
     @Autowired
     private FSFilesManager fsFilesManager;
-
+    
     @Autowired
     private FSProcessFileService fsProcessFileService;
 
@@ -62,11 +64,12 @@ public class FSSendMessagesService {
      * Triggering the send messages means that the message files from the OUT directory
      * will be processed to be sent
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void sendMessages() {
         LOG.debug("Sending file system messages...");
 
         sendMessages(null);
-
+        
         for (String domain : fsPluginProperties.getDomains()) {
             if (fsMultiTenancyService.verifyDomainExists(domain)) {
                 sendMessages(domain);
@@ -100,9 +103,10 @@ public class FSSendMessagesService {
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
 
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            LOG.debug("{}", contentFiles);
+            LOG.trace("{}", contentFiles);
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
+            LOG.debug("Processable files [{}]", processableFiles);
             for (FileObject processableFile : processableFiles) {
                 processFileSafely(processableFile, domain);
             }
@@ -167,7 +171,7 @@ public class FSSendMessagesService {
             } else {
                 LOG.error("The send failed message file [{}] was not found in domain [{}]", processableFile, domain);
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new FSPluginException("Error handling the send failed message file " + processableFile, e);
         }
     }
@@ -205,17 +209,17 @@ public class FSSendMessagesService {
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
         List<FileObject> filteredFiles = new LinkedList<>();
-
+        
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
-
+            
             if (!StringUtils.equals(baseName, METADATA_FILE_NAME)
                     && !FSFileNameHelper.isAnyState(baseName)
                     && !FSFileNameHelper.isProcessed(baseName)) {
                 filteredFiles.add(file);
             }
         }
-
+        
         return filteredFiles;
     }
 

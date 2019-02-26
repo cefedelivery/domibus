@@ -27,7 +27,10 @@ public class NonRepudiationDefaultService implements NonRepudiationService {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
+    protected RawEnvelopeLogDao rawEnvelopeLogDao;
+
+    @Autowired
+    protected SoapUtil soapUtil;
 
     @Override
     public void saveRequest(SOAPMessage request, UserMessage userMessage) {
@@ -36,7 +39,7 @@ public class NonRepudiationDefaultService implements NonRepudiationService {
         }
 
         try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
+            String rawXMLMessage = soapUtil.getRawXMLMessage(request);
             LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
             RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
             if (userMessage != null) {
@@ -57,7 +60,7 @@ public class NonRepudiationDefaultService implements NonRepudiationService {
         }
 
         try {
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(response);
+            String rawXMLMessage = soapUtil.getRawXMLMessage(response);
             LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
             RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
             rawEnvelopeLog.setRawXML(rawXMLMessage);
