@@ -36,7 +36,8 @@ public class ErrorHandlerService {
         headers.set(HttpHeaders.CONNECTION, "close");
 
         if (ex instanceof DomainException) {
-            ex = ExceptionUtils.getRootCause(ex);
+            Throwable rootCause = ExceptionUtils.getRootCause(ex);
+            ex = rootCause == null ? ex : rootCause;
         }
         return new ResponseEntity(new ErrorRO(ex.getMessage()), headers, status);
     }
