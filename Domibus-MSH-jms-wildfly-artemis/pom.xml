@@ -87,7 +87,7 @@
 
         <!-- Test dependencies -->
 
-		<dependency>
+        <dependency>
             <groupId>jboss</groupId>
             <artifactId>jboss-client</artifactId>
             <version>4.0.2</version>

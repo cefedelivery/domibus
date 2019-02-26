@@ -22,7 +22,7 @@
         <ConversationId>conv1</ConversationId>
     </CollaborationInfo>
     <MessageProperties>
-        <!--1 or more repetitio-->
+        <!--1 or more repetitions:-->
         <!--originalSender and finalRecipient are mandatory-->
         <Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</Property>
         <Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</Property>

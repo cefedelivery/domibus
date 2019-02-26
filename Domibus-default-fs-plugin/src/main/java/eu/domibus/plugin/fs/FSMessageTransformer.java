@@ -125,7 +125,7 @@ public class FSMessageTransformer
             return null;
         }
 
-        if(metadata.getPayloadInfo().getPartInfo().size() > 1) {
+        if (metadata.getPayloadInfo().getPartInfo().size() > 1) {
             throw new FSPluginException("FS plugin can only handle one payload per message. Multiple PartInfo found.");
         }
 
@@ -216,7 +216,7 @@ public class FSMessageTransformer
     }
 
     private void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {
-        if(messageProperties == null) {
+        if (messageProperties == null) {
             return;
         }
 
@@ -284,7 +284,7 @@ public class FSMessageTransformer
         submission.setService(service.getValue());
         submission.setServiceType(service.getType());
         submission.setAction(collaborationInfo.getAction());
-        if(collaborationInfo.getConversationId() != null) {
+        if (collaborationInfo.getConversationId() != null) {
             submission.setConversationId(collaborationInfo.getConversationId());
         }
     }

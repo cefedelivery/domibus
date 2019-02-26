@@ -5,7 +5,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -48,7 +47,6 @@ public class CheckReleaseSQLScriptsGenerationIT {
      * @throws IOException
      */
     @Test
-    @Ignore //Ignoring this test for the FS-SNAPSHOT
     public void checkPresenceOfSQLScriptDDLsForRelease() throws IOException {
 
         String domibusArtifactVersion = retrieveDomibusArtifactVersion();
