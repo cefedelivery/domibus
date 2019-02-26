@@ -127,6 +127,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     protected void validateTruststoreType(String storeType, String storeFileName) {
+        assert storeType != null;
         String fileType = FilenameUtils.getExtension(storeFileName).toLowerCase();
         switch (storeType.toLowerCase()) {
             case "pkcs12":
