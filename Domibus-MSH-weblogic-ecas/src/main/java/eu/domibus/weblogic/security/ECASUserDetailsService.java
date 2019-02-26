@@ -105,17 +105,19 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
      * @throws IllegalAccessException
      */
     protected UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
-
+        LOG.debug("createUserDetails - start");
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<AuthRole> userGroupsStr = new LinkedList<>();
         String domainCode = null;
         final String ldapGroupPrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY);
+        LOG.debug("createUserDetails - LDAP group prefix is: {}", ldapGroupPrefix);
 
         Map<String, AuthRole> userRoleMappings = retrieveUserRoleMappings();
         Map<String, String> domainMappings = retrieveDomainMappings();
 
         //extract user role and domain
         for (Principal principal : getPrincipals()) {
+            LOG.debug("createUserDetails - principal name: {} and class: {}", principal.getName(), principal.getClass().getName());
             if (isUserGroupPrincipal(principal)) {
                 LOG.debug("Found a user group principal: {}", principal);
                 final String principalName = principal.getName();
@@ -126,11 +128,14 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                     //search for user roles
                     if (userRoleMappings.get(principalName) != null) {
                         userGroupsStr.add(userRoleMappings.get(principalName));
+                        LOG.debug("createUserDetails - userGroup added: {}", userRoleMappings.get(principalName));
                     } else if (domainMappings.get(principalName) != null) {
                         domainCode = domainMappings.get(principalName);
+                        LOG.debug("createUserDetails - domain added: {}", domainCode);
                     }
                 }
             } else {
+                LOG.debug("createUserDetails - user group is not principal");
                 if (isUserPrincipal(principal) && !username.equals(principal.getName())) {
                     LOG.error("Username {} does not match Principal {}", username, principal.getName());
                     throw new AccessDeniedException(
@@ -139,6 +144,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
             }
         }
         userGroups.add(chooseHighestUserGroup(userGroupsStr));
+        LOG.debug("userDetail userGroups={}", userGroups);
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
         userDetail.setExternalAuthProvider(true);
@@ -146,10 +152,12 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         setDomainFromECASGroup(domainCode, userDetail);
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
 
+        LOG.debug("createUserDetails - end");
         return userDetail;
     }
 
     protected void setDomainFromECASGroup(String domainCode, UserDetail userDetail) {
+        LOG.debug("setDomainFromECASGroup - start");
         if (domibusConfigurationService.isMultiTenantAware()) {
             Domain domain = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
                     .findAny()
@@ -160,9 +168,11 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
             userDetail.setDomain(domain.getCode());
             domainContextProvider.setCurrentDomain(domain.getCode());
         } else {
+            LOG.debug("setDomainFromECASGroup - non multitenancy");
             //non multi tenancy
             userDetail.setDomain(DomainService.DEFAULT_DOMAIN.getCode());
         }
+        LOG.debug("setDomainFromECASGroup - domain is: {}", userDetail.getDomain());
     }
 
     protected GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
@@ -195,10 +205,12 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     }
 
     private boolean isUserPrincipal(Principal principal) throws ClassNotFoundException {
+        LOG.debug("isUserPrincipal class={}", principal.getClass().getName());
         return Class.forName(ECAS_USER).isInstance(principal);
     }
 
     protected boolean isUserGroupPrincipal(Principal principal) throws ClassNotFoundException {
+        LOG.debug("isUserGroupPrincipal class={}", principal.getClass().getName());
         return Class.forName(ECAS_GROUP).isInstance(principal);
     }
 
