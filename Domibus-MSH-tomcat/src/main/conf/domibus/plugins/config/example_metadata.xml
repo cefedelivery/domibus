@@ -19,7 +19,6 @@
         <!-- <ConversationId>C1</ConversationId> -->
         <Service type="tc1">bdx:noprocess</Service>
         <Action>TC1Leg1</Action>
-        <ConversationId>conv1</ConversationId>
     </CollaborationInfo>
     <MessageProperties>
         <!--1 or more repetitions:-->

@@ -17,7 +17,8 @@
         <!-- <AgreementRef type="">A1</AgreementRef> -->
         <Service type="tc1">bdx:noprocess</Service>
         <Action>TC1Leg1</Action>
-        <ConversationId>conv1</ConversationId>
+        <!--Optional:-->
+        <!-- <ConversationId>C1</ConversationId> -->
     </CollaborationInfo>
     <MessageProperties>
         <!--1 or more repetitions:-->
