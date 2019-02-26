@@ -11,6 +11,10 @@ import java.security.InvalidParameterException;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Ion Perpegel
+ * @since 4.1
+ */
 public class MultiDomainCryptoServiceImplTest {
 
     @Tested
