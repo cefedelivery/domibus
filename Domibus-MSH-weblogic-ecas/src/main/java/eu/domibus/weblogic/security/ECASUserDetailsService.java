@@ -145,11 +145,13 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
         //chose highest privilege and assign it to user only if it's not null
         final GrantedAuthority grantedAuthority = chooseHighestUserGroup(userGroupsStr);
-        if (null == grantedAuthority) {
-            throw new AccessDeniedException(
-                    String.format(ERROR_USER_HAS_NO_PRIVILEGES, username));
+//        if (null == grantedAuthority) {
+//            throw new AccessDeniedException(
+//                    String.format(ERROR_USER_HAS_NO_PRIVILEGES, username));
+//        }
+        if (null != grantedAuthority) {
+            userGroups.add(grantedAuthority);
         }
-        userGroups.add(grantedAuthority);
 
 
         LOG.debug("userDetail userGroups={}", userGroups);
