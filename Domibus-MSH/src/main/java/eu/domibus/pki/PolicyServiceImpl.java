@@ -55,6 +55,13 @@ public class PolicyServiceImpl implements PolicyService {
         }
     }
 
+    /**
+     * To retrieve the domibus security policy xml based on the leg configuration and create the Security Policy object.
+     *
+     * @param legConfiguration the leg containing the security policy as configured in the pMode
+     * @return the security policy
+     * @throws ConfigurationException if the policy xml cannot be read or parsed from the file
+     */
     @Override
     public Policy getPolicy(LegConfiguration legConfiguration) throws ConfigurationException {
         return parsePolicy(POLICIES + File.separator + legConfiguration.getSecurity().getPolicy());

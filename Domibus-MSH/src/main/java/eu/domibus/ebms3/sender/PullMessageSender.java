@@ -12,10 +12,11 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullReceiptSender;
-import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -61,6 +63,10 @@ public class PullMessageSender {
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
 
+    @Qualifier("jaxbContextEBMS")
+    @Autowired
+    private JAXBContext jaxbContext;
+
     @Autowired
     private UserMessageHandlerService userMessageHandlerService;
 
@@ -77,7 +83,7 @@ public class PullMessageSender {
     private DomibusInitializationHelper domibusInitializationHelper;
 
     @Autowired
-    private PullReceiptSender pullReceiptSender;
+    private UserMessageDefaultService userMessageDefaultService;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -131,23 +137,12 @@ public class PullMessageSender {
 
             LOG.trace("handle message");
             Boolean testMessage = userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
-            final SOAPMessage acknowledgement = userMessageHandlerService.handleNewUserMessage(legConfiguration, pModeKey, response, messaging, testMessage);
+            userMessageHandlerService.handleNewUserMessage(legConfiguration, pModeKey, response, messaging, testMessage);
             final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
             final String sendMessageId = messageId;
-            //TODO this will be changed in 4.1
-            /**
-             * Here we execute the sending of the receipt in a different thread for two reasons:
-             *  1 - If you have a timeout during the sending of the receipt you do not want a complete rollback as the
-             *      message is received.
-             *  2 - It can happen that between the reception and the sending of the message, the message is ready to pull again
-             *      Then the message is retrieved again before commit. The commit occurs just after we verify if the message
-             *      already exist, then we have a constraint violation of the message. The shorter the saving transaction the better.
-             *
-             * Ideally the message id should be committed to a queue and the sending of the receipt executed in another process.
-             */
             try {
-                executor.execute(() -> pullReceiptSender.sendReceipt(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey, sendMessageId, domainCode));
+                userMessageDefaultService.scheduleSendingPullReceipt(sendMessageId, pModeKey);
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }

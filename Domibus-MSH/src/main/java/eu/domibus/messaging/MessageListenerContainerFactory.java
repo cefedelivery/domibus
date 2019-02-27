@@ -14,4 +14,6 @@ public interface MessageListenerContainerFactory {
     MessageListenerContainer createSendLargeMessageListenerContainer(Domain domain);
 
     MessageListenerContainer createSplitAndJoinListenerContainer(Domain domain);
+
+    MessageListenerContainer createPullReceiptListenerContainer(Domain domain);
 }
