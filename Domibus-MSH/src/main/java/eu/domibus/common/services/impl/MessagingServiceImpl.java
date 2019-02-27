@@ -190,21 +190,27 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     protected long saveOutgoingFileToDisk(File file, PartInfo partInfo, InputStream is, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
-        OutputStream fileOutputStream = new FileOutputStream(file);
-
         boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
         LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
 
-        if (useCompression) {
-            LOG.debug("Using compression for storing the file [{}]", file);
-            fileOutputStream = new GZIPOutputStream(fileOutputStream);
+        OutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            if (useCompression) {
+                LOG.debug("Using compression for storing the file [{}]", file);
+                fileOutputStream = new GZIPOutputStream(fileOutputStream);
+            }
+
+            final long total = IOUtils.copyLarge(is, fileOutputStream);
+            LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
+            return total;
+        } finally {
+            if (fileOutputStream != null) {
+                fileOutputStream.flush();
+                fileOutputStream.close();
+            }
         }
 
-        final long total = IOUtils.copyLarge(is, fileOutputStream);
-        fileOutputStream.flush();
-        IOUtils.closeQuietly(fileOutputStream);
-        LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
-        return total;
     }
 
     protected byte[] compress(byte[] binaryData) throws IOException {
