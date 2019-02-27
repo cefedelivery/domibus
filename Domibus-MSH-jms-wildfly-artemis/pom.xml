@@ -86,8 +86,8 @@
         </dependency>
 
         <!-- Test dependencies -->
-		
-		<dependency>
+
+        <dependency>
             <groupId>jboss</groupId>
             <artifactId>jboss-client</artifactId>
             <version>4.0.2</version>
@@ -126,7 +126,7 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-		
+
         <!-- End Test dependencies -->
     </dependencies>
 </project>

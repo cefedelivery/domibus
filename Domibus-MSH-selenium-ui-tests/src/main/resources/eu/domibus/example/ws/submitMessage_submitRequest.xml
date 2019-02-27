@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:submitRequest xmlns:ns3="http://org.ecodex.backend/1_1/">
+<payload payloadId="cid:payload" contentType="application/xml">
+    <value>VEVTVA==</value>
+</payload>
+</ns3:submitRequest>

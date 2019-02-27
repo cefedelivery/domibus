@@ -10,6 +10,7 @@ Domibus 4.1
 - Added route and component for changing password when default used or about to expire for all users.
 - Renamed property "message.retention.downloaded.max.delete" to "domibus.retentionWorker.message.retention.downloaded.max.delete" and property "message.retention.not_downloaded.max.delete" to "domibus.retentionWorker.message.retention.not_downloaded.max.delete"
 - New property "domibus.msh.retry.messageExpirationDelay" to grant a few seconds for schedulling the retry of the last attempt
+- Allow PayloadInfo with one PartInfo (one payload) as input in the message metadata.xml of the FS plugin
 - Added sendPullReceiptQueue for sending the asynchronous pull receipt
 Domibus 4.0.2
 - Improved the logging in the Default JMS Plugin
