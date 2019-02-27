@@ -4,7 +4,6 @@ package eu.domibus.weblogic.security;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -26,10 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.Subject;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,6 +55,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final String ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR = ";";
     private static final String ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR = "=";
+
+    private static final String ERROR_USER_HAS_NO_PRIVILEGES = "Your username %s has no privileges to use Domibus. Please contact the support team";
 
     @Autowired
     private DomainService domainService;
@@ -143,7 +141,17 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                 }
             }
         }
-        userGroups.add(chooseHighestUserGroup(userGroupsStr));
+
+
+        //chose highest privilege and assign it to user only if it's not null
+        final GrantedAuthority grantedAuthority = chooseHighestUserGroup(userGroupsStr);
+        if (null == grantedAuthority) {
+            throw new AccessDeniedException(
+                    String.format(ERROR_USER_HAS_NO_PRIVILEGES, username));
+        }
+        userGroups.add(grantedAuthority);
+
+
         LOG.debug("userDetail userGroups={}", userGroups);
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
@@ -163,7 +171,9 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                     .findAny()
                     .orElse(null);
             if (null == domain) {
-                throw new DomainException("Could not set current domain: unknown domain (" + domainCode + ")");
+                     throw new AccessDeniedException(
+                            String.format(ERROR_USER_HAS_NO_PRIVILEGES, userDetail.getUsername()));
+
             }
             userDetail.setDomain(domain.getCode());
             domainContextProvider.setCurrentDomain(domain.getCode());
@@ -176,12 +186,15 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     }
 
     protected GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
+        SimpleGrantedAuthority simpleGrantedAuthority = null;
         if (userGroups.contains(AuthRole.ROLE_AP_ADMIN)) {
-            return new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name());
+            simpleGrantedAuthority = new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name());
         } else if (userGroups.contains(AuthRole.ROLE_ADMIN)) {
-            return new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name());
+            simpleGrantedAuthority = new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name());
+        } else if (userGroups.contains(AuthRole.ROLE_USER)) {
+            simpleGrantedAuthority = new SimpleGrantedAuthority(AuthRole.ROLE_USER.name());
         }
-        return new SimpleGrantedAuthority(AuthRole.ROLE_USER.name());
+        return simpleGrantedAuthority;
     }
 
     protected boolean isWeblogicSecurity() {
