@@ -4,7 +4,6 @@ package eu.domibus.weblogic.security;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -26,10 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.Subject;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,6 +55,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final String ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR = ";";
     private static final String ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR = "=";
+
+    private static final String ERROR_USER_HAS_NO_PRIVILEGES = "Your username %s has no privileges to use Domibus. Please contact the support team";
 
     @Autowired
     private DomainService domainService;
@@ -105,17 +103,19 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
      * @throws IllegalAccessException
      */
     protected UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
-
+        LOG.debug("createUserDetails - start");
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<AuthRole> userGroupsStr = new LinkedList<>();
         String domainCode = null;
         final String ldapGroupPrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY);
+        LOG.debug("createUserDetails - LDAP group prefix is: {}", ldapGroupPrefix);
 
         Map<String, AuthRole> userRoleMappings = retrieveUserRoleMappings();
         Map<String, String> domainMappings = retrieveDomainMappings();
 
         //extract user role and domain
         for (Principal principal : getPrincipals()) {
+            LOG.debug("createUserDetails - principal name: {} and class: {}", principal.getName(), principal.getClass().getName());
             if (isUserGroupPrincipal(principal)) {
                 LOG.debug("Found a user group principal: {}", principal);
                 final String principalName = principal.getName();
@@ -126,11 +126,14 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                     //search for user roles
                     if (userRoleMappings.get(principalName) != null) {
                         userGroupsStr.add(userRoleMappings.get(principalName));
+                        LOG.debug("createUserDetails - userGroup added: {}", userRoleMappings.get(principalName));
                     } else if (domainMappings.get(principalName) != null) {
                         domainCode = domainMappings.get(principalName);
+                        LOG.debug("createUserDetails - domain added: {}", domainCode);
                     }
                 }
             } else {
+                LOG.debug("createUserDetails - user group is not principal");
                 if (isUserPrincipal(principal) && !username.equals(principal.getName())) {
                     LOG.error("Username {} does not match Principal {}", username, principal.getName());
                     throw new AccessDeniedException(
@@ -138,7 +141,20 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                 }
             }
         }
-        userGroups.add(chooseHighestUserGroup(userGroupsStr));
+
+
+        //chose highest privilege and assign it to user only if it's not null
+        final GrantedAuthority grantedAuthority = chooseHighestUserGroup(userGroupsStr);
+//        if (null == grantedAuthority) {
+//            throw new AccessDeniedException(
+//                    String.format(ERROR_USER_HAS_NO_PRIVILEGES, username));
+//        }
+        if (null != grantedAuthority) {
+            userGroups.add(grantedAuthority);
+        }
+
+
+        LOG.debug("userDetail userGroups={}", userGroups);
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
         userDetail.setExternalAuthProvider(true);
@@ -146,32 +162,41 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         setDomainFromECASGroup(domainCode, userDetail);
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
 
+        LOG.debug("createUserDetails - end");
         return userDetail;
     }
 
     protected void setDomainFromECASGroup(String domainCode, UserDetail userDetail) {
+        LOG.debug("setDomainFromECASGroup - start");
         if (domibusConfigurationService.isMultiTenantAware()) {
             Domain domain = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
                     .findAny()
                     .orElse(null);
             if (null == domain) {
-                throw new DomainException("Could not set current domain: unknown domain (" + domainCode + ")");
+                     throw new AccessDeniedException(
+                            String.format(ERROR_USER_HAS_NO_PRIVILEGES, userDetail.getUsername()));
+
             }
             userDetail.setDomain(domain.getCode());
             domainContextProvider.setCurrentDomain(domain.getCode());
         } else {
+            LOG.debug("setDomainFromECASGroup - non multitenancy");
             //non multi tenancy
             userDetail.setDomain(DomainService.DEFAULT_DOMAIN.getCode());
         }
+        LOG.debug("setDomainFromECASGroup - domain is: {}", userDetail.getDomain());
     }
 
     protected GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
+        SimpleGrantedAuthority simpleGrantedAuthority = null;
         if (userGroups.contains(AuthRole.ROLE_AP_ADMIN)) {
-            return new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name());
+            simpleGrantedAuthority = new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name());
         } else if (userGroups.contains(AuthRole.ROLE_ADMIN)) {
-            return new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name());
+            simpleGrantedAuthority = new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name());
+        } else if (userGroups.contains(AuthRole.ROLE_USER)) {
+            simpleGrantedAuthority = new SimpleGrantedAuthority(AuthRole.ROLE_USER.name());
         }
-        return new SimpleGrantedAuthority(AuthRole.ROLE_USER.name());
+        return simpleGrantedAuthority;
     }
 
     protected boolean isWeblogicSecurity() {
@@ -195,10 +220,12 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     }
 
     private boolean isUserPrincipal(Principal principal) throws ClassNotFoundException {
+        LOG.debug("isUserPrincipal class={}", principal.getClass().getName());
         return Class.forName(ECAS_USER).isInstance(principal);
     }
 
     protected boolean isUserGroupPrincipal(Principal principal) throws ClassNotFoundException {
+        LOG.debug("isUserGroupPrincipal class={}", principal.getClass().getName());
         return Class.forName(ECAS_GROUP).isInstance(principal);
     }
 

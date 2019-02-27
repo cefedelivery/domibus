@@ -1,0 +1,21 @@
+<client-config xmlns="https://www.cc.cec/cas/schemas/client-config/ecas/1.8"
+               xmlns:cas="https://www.cc.cec/cas/schemas/client-config/cas/2.0">
+
+    <ecasBaseUrl>https://ecasa.cc.cec.eu.int:7002</ecasBaseUrl>
+
+    <groups>
+        <group>*</group>
+    </groups>
+
+    <acceptStrengths>
+        <strength>STRONG</strength>
+        <strength>STRONG_SMS</strength>
+        <strength>CLIENT_CERT</strength>
+    </acceptStrengths>
+
+    <assuranceLevel>LOW</assuranceLevel>
+    <!-- renew is false only for local in order to speedup the development-->
+    <cas:renew>true</cas:renew>
+    <requestingUserDetails>true</requestingUserDetails>
+
+</client-config>
