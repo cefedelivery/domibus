@@ -26,10 +26,16 @@
         <Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</Property>
     </MessageProperties>
     <PayloadInfo>
-        <PartInfo href="cid:message123">
+        <PartInfo href="cid:mypayload">
             <PartProperties>
                 <Property name="MimeType">text/xml</Property>
                 <Property name="MyProp" type="propType">SomeValue</Property>
+            </PartProperties>
+        </PartInfo>
+        <PartInfo href="cid:mypayload_second">
+            <PartProperties>
+                <Property name="MimeType">second/xml</Property>
+                <Property name="SecondProp" type="propType">SecondValue</Property>
             </PartProperties>
         </PartInfo>
     </PayloadInfo>

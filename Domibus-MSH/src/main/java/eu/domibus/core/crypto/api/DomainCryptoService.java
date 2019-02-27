@@ -64,4 +64,5 @@ public interface DomainCryptoService {
 
     void removeCertificate(List<String> aliases);
 
+    String getTrustStoreType();
 }
