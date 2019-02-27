@@ -247,7 +247,7 @@ public class EbMS3MessageBuilder {
         }
         result.setCompressionAlgorithm(messageGroupEntity.getCompressionAlgorithm());
         result.setFragmentCount(messageGroupEntity.getFragmentCount());
-        result.setFragmentNum(Long.valueOf(userMessageFragment.getMessageFragment().getFragmentNumber()));
+        result.setFragmentNum(userMessageFragment.getMessageFragment().getFragmentNumber());
         result.setGroupId(messageGroupEntity.getGroupId());
         result.setMustUnderstand(true);
 
