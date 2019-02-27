@@ -38,4 +38,10 @@ public class MessageListenerContainerFactoryImpl implements MessageListenerConta
         LOG.debug("Creating the SplitAndJoinListenerContainer for domain [{}]", domain);
         return (DefaultMessageListenerContainer) applicationContext.getBean("splitAndJoinContainer", domain);
     }
+    @Override
+    public MessageListenerContainer createPullReceiptListenerContainer(Domain domain) {
+        LOG.debug("Creating the PullReceiptListenerContainer for domain [{}]", domain);
+        return (DefaultMessageListenerContainer)applicationContext.getBean("pullReceiptContainer", domain);
+    }
+
 }

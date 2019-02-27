@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -69,8 +70,7 @@ public class TruststoreResource {
             return ResponseEntity.badRequest().body("Failed to upload the truststore file since it was empty.");
         }
 
-        byte[] bytes = truststore.getBytes();
-        multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), bytes, password);
+        multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), truststore.getOriginalFilename(), truststore.getBytes(), password);
         return ResponseEntity.ok("Truststore file has been successfully replaced.");
     }
 

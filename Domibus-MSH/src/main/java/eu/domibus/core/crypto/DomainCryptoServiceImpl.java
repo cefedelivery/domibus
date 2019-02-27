@@ -273,7 +273,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.password");
     }
 
-    protected String getTrustStoreType() {
+    public String getTrustStoreType() {
         return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.type");
     }
 

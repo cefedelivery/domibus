@@ -7,7 +7,7 @@
             targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
             elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd" />
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
 
     <xsd:annotation>
         <xsd:appinfo>Schema for metadata file of the FS plugin</xsd:appinfo>
@@ -17,7 +17,6 @@
         </xsd:documentation>
     </xsd:annotation>
 
-
     <xsd:element name="UserMessage" type="UserMessage"/>
 
     <xsd:complexType name="UserMessage">
@@ -25,6 +24,7 @@
             <xsd:element name="PartyInfo" type="PartyInfo"/>
             <xsd:element name="CollaborationInfo" type="CollaborationInfo"/>
             <xsd:element name="MessageProperties" type="tns:MessageProperties" minOccurs="0"/>
+            <xsd:element name="PayloadInfo" type="tns:PayloadInfo" minOccurs="0"/>
         </xsd:all>
         <xsd:attribute name="mpc" type="xsd:anyURI" use="optional"/>
     </xsd:complexType>
@@ -84,6 +84,20 @@
         </xsd:simpleContent>
     </xsd:complexType>
 
+    <xsd:complexType name="PayloadInfo">
+        <xsd:sequence>
+            <!-- fs plugin sends one payload at a time -->
+            <xsd:element name="PartInfo" type="tns:PartInfo" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PartInfo">
+        <xsd:all>
+            <xsd:element name="PartProperties" type="tns:PartProperties" minOccurs="0"/>
+        </xsd:all>
+        <xsd:attribute name="href" type="xsd:token"/>
+    </xsd:complexType>
+
     <xsd:complexType name="Property">
         <xsd:simpleContent>
             <xsd:extension base="tns:max255-non-empty-string">
@@ -91,6 +105,12 @@
                 <xsd:attribute name="type" type="tns:max255-non-empty-string" use="optional"/>
             </xsd:extension>
         </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="PartProperties">
+        <xsd:sequence>
+            <xsd:element name="Property" type="tns:Property" maxOccurs="unbounded"/>
+        </xsd:sequence>
     </xsd:complexType>
 
     <xsd:complexType name="MessageProperties">

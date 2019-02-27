@@ -62,7 +62,7 @@ public class ToStringAdapter extends XmlAdapter<Node, List<String>> {
         return this.stringToNode(v.get(0));
     }
 
-    private String nodeToString(final Node node) throws TransformerException {
+    protected String nodeToString(final Node node) throws TransformerException {
         final StringWriter sw = new StringWriter();
         final Transformer t = this.transformerFactory.newTransformer();
         t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -70,12 +70,12 @@ public class ToStringAdapter extends XmlAdapter<Node, List<String>> {
         return sw.toString();
     }
 
-    private Node stringToNode(final String content) {
+    protected Node stringToNode(final String content) {
         try {
             final Document doc = this.documentBuilderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(content)));
 
             if (doc.getChildNodes().getLength() == 1) {
-                return doc.getChildNodes().item(1);
+                return doc.getChildNodes().item(0);
             }
 
         } catch (SAXException | IOException | ParserConfigurationException e) {
