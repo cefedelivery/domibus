@@ -1,0 +1,92 @@
+<saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+                 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                 ID="_a0c4b11e-d6c3-4a58-9da2-4dd61ff27e30" IssueInstant="2019-02-25T15:15:07.894Z"
+                 Version="2.0">
+    <saml2:Issuer Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+    >urn:tiani-spirit:sts
+    </saml2:Issuer>
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod
+                    Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            <ds:SignatureMethod
+                    Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ds:Reference URI="#_a0c4b11e-d6c3-4a58-9da2-4dd61ff27e30">
+                <ds:Transforms>
+                    <ds:Transform
+                            Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#">
+                        <ec:InclusiveNamespaces
+                                xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"
+                                PrefixList="xsd"/>
+                    </ds:Transform>
+                </ds:Transforms>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <ds:DigestValue>jWtrWe2ZrFWJf54PaGvzphyfh/CuIc25oI5vtiHcbOQ=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>
+            ByIEcY1Vn/G9h4O6Nd62nomWWdfGLAoX5M36Opr4f19OXjMTkxoXonIsWl32yknumkntyVkNVZOuXH7IdI3Wa7Gc0w7Evk4sD/zqDzu2mXMXa/OHKjB0IjoeikrrdJgwwTbRlE30C7rIZaZsP5evJqtfilXZEwBetqUIKud3Q5XHAR66KHc541NVsQAYuqiJeRbuPVzGh2oRozqVpFDK5qUEtVaF5P9qspQ5nXpWqP9E7QvSEOP5CFuxSzKeWbsm906UxglFaEvJt8waXV5XqdmBZseC0UvByAnM506E1UPg9+PVMswPfN/ueqMAJIt5M+i69AimZ/hKiX5bjsAPRQ==
+        </ds:SignatureValue>
+        <ds:KeyInfo>
+            <ds:X509Data>
+                <ds:X509Certificate>
+                    MIIFBTCCA+2gAwIBAgIBbzANBgkqhkiG9w0BAQ0FADBMMQswCQYDVQQGEwJGUjETMBEGA1UECgwKSUhFIEV1cm9wZTEWMBQGA1UEAwwNSUhFIEV1cm9wZSBDQTEQMA4GA1UECwwHR2F6ZWxsZTAeFw0xOTAxMTAxMDU4MzNaFw0yOTAxMTAxMDU4MzNaMIGoMQswCQYDVQQGEwJBVDEVMBMGA1UECgwMVGlhbmkgU3Bpcml0MSkwJwYDVQQDDCB0aWFuaS0tLWNpc2NvMTIyLmloZS11cy10ZXN0Lm5ldDEVMBMGA1UEKgwMTWFzc2ltaWxpYW5vMQ0wCwYDVQQEDARNYXNpMTEwLwYJKoZIhvcNAQkBFiJtYXNzaW1pbGlhbm8ubWFzaUB0aWFuaS1zcGlyaXQuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr2QpU4VB0EYCV4alDsqbIjxHF7gBBUS51gGAbkGk7NHPNfVc/vT5E5zLmSLpjOg9agiowYsB+cDuwMfFtL8MpemRGfzZfe5ktxvR/9I5n5x4BmkQdE27+cdEm736AmpCjqUGYIzlmwv7ln6xg9evjMa0SIyF06VbFlJD68Iag5jtJvRywdlA1B/lwIXGlhJwmQBgS5hrURhaD199JGwloBKzzwr4rRbmmXhQU22OjNUTSwbp5aCMk5xLBCeVdKIy+qbEY3IqENqpVM2qbC3tuZTSOoiblyOQLd0WgwBpMFsjpnCoa0vAoVbhIVBzRyqHQogkQlRZY9AwTK5BhIc5BQIDAQABo4IBkzCCAY8wKwYDVR0RBCQwIoIgdGlhbmktLS1jaXNjbzEyMi5paGUtdXMtdGVzdC5uZXQwPwYDVR0fBDgwNjA0oDKgMIYuaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQvcGtpL2NybC8yNjU2L2NhY3JsLmNybDA9BglghkgBhvhCAQQEMBYuaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQvcGtpL2NybC8yNjU2L2NhY3JsLmNybDA9BglghkgBhvhCAQMEMBYuaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQvcGtpL2NybC8yNjU2L2NhY3JsLmNybDAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIE8DARBglghkgBhvhCAQEEBAMCBeAwHQYDVR0OBBYEFENANKSRFgzO2Uj+DY7B/NqUv7gNMB8GA1UdIwQYMBaAFB5Dc7RV/SqtX6HsiiaJlDBtYjmPMDMGA1UdJQQsMCoGCCsGAQUFBwMCBggrBgEFBQcDBAYKKwYBBAGCNxQCAgYIKwYBBQUHAwEwDQYJKoZIhvcNAQENBQADggEBAEu6nQPur4nrVZJpKgDQhmVl+z0P1mI0sQiNOF2QzquWG6xbrYKZa6i6bQALx9BO2GqHKUDlvOHNmFsZgI2A3+UBwCfnGDmbbVDLKva0JfiY32kcn19vAN5Z4OcB6f606ygrK9UDE3rj3DlLLTz31wfdM+jQYGLTBYoTQyCLX52mx6IHwEJiU4KKP7J8b6vdnQS/BTdPykEGBel35jXDXGJzInrmGutXOC3y2CPLs45Z5mP5xOZjwk39A/R3iYeWutm2uNiqx+He1Ij7ianX1gbDDpZq0S+rL0/beiZDDjXaDd5GSlcFUrhvQ1A5N1QMY+ugxVY3yc35jXE4ycZIugQ=
+                </ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </ds:Signature>
+    <saml2:Subject>
+        <saml2:NameID Format="urn:oasis:names:tc:SAML:2.0:unspecified"
+                      SPProvidedID="Allgemeines Krankenhaus der Stadt Wien">KA-Nummer des
+            angef??hrten GDA
+        </saml2:NameID>
+        <saml2:SubjectConfirmation>
+            <saml2:SubjectConfirmationData/>
+        </saml2:SubjectConfirmation>
+    </saml2:Subject>
+    <saml2:Conditions NotBefore="2019-02-25T15:15:07.893Z"
+                      NotOnOrAfter="2019-02-25T15:15:07.893Z"/>
+    <saml2:AuthnStatement AuthnInstant="2019-02-25T15:15:07.893Z">
+        <saml2:SubjectLocality Address="192.168.1.2"/>
+        <saml2:AuthnContext>
+            <saml2:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac.classes:x509</saml2:AuthnContextClassRef>
+        </saml2:AuthnContext>
+    </saml2:AuthnStatement>
+    <saml2:AttributeStatement>
+        <saml2:Attribute FriendlyName="XSPA Subject"
+                         Name="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                         NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                  xsi:type="xsd:string">Dr. Max Mustermann
+            </saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="XSPA Organization ID"
+                         Name="urn:oasis:names:tc:xacml:1.0:subject:organization-id"
+                         NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                  xsi:type="xsd:anyURI">urn:tiani-spirit:sts
+            </saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="XUA++ Role"
+                         Name="urn:oasis:names:tc:xacml:2.0:subject:role"
+                         NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                  xsi:type="xsd:anyType">
+                <Role xmlns="urn:hl7-org:v3" code="224608005"
+                      codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT"
+                      displayName="Medical Doctor"/>
+            </saml2:AttributeValue>
+        </saml2:Attribute>
+        <saml2:Attribute FriendlyName="Multivalued attribute"
+                         Name="urn:tiani-spirit:example:multivalued"
+                         NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+            <saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                  xsi:type="xsd:string">value1
+            </saml2:AttributeValue>
+            <saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                  xsi:type="xsd:string">value2
+            </saml2:AttributeValue>
+        </saml2:Attribute>
+    </saml2:AttributeStatement>
+</saml2:Assertion>

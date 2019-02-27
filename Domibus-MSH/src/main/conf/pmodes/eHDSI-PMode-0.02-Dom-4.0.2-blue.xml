@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmode:configuration 
+		xmlns:pmode="http://domibus.eu/configuration"
+		party="blue_gw">
+	<mpcs>
+		<mpc name="defaultMpc" 
+			 qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" 
+			 enabled="true" 
+			 default="true" 
+			 retention_downloaded="0" 
+			 retention_undownloaded="14400"/>
+	</mpcs>
+	<businessProcesses>
+		<roles>
+			<role name="sender" 
+					value="urn:ihe:iti:2018:Requester"/>
+			<role name="recipient" 
+					value="urn:ihe:iti:2018:Provider"/>
+		</roles>
+		<parties>
+			<partyIdTypes>
+				<partyIdType name="eHSDIParty" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:eHSDI"/>
+			</partyIdTypes>
+			<party name="red_gw" endpoint="http://localhost:8191/domibus/services/msh">
+                <identifier partyId="domibus-red" partyIdType="eHSDIParty"/>
+            </party>
+            <party name="blue_gw" endpoint="http://localhost:8091/domibus/services/msh">
+                <identifier partyId="domibus-blue" partyIdType="eHSDIParty"/>
+            </party>
+		</parties>
+		<meps>
+			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+			<binding name="pushandpush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pushAndPush"/>
+		</meps>		
+		<properties>
+			<property name="originalSender" 
+					key="originalSender" 
+					datatype="string" 
+					required="true"/>
+			<property name="finalRecipient" 
+					key="finalRecipient" 
+					datatype="string" 
+					required="true"/>
+			<property name="CorrelationTimeToLive" 
+					key="CorrelationTimeToLive" 
+					datatype="string" 
+					required="false"/>
+			<propertySet name="edeliveryPropertySet">
+				<propertyRef property="finalRecipient"/>
+				<propertyRef property="originalSender"/>
+				<propertyRef property="CorrelationTimeToLive"/>
+			</propertySet>
+		</properties>		
+		<payloadProfiles>
+			<payload name="bodyPayload" 
+					cid="" 
+					required="true" 
+					mimeType="application/xml" 
+					inBody="true"/>
+			<payload name="xmlAttachment" 
+					cid="cid:xmlAttachment" 
+					required="false" 
+					mimeType="application/xml"/>
+			<payload name="binaryAttacment" 
+					cid="cid:binaryAttacment" 
+					required="false" 
+					mimeType="application/octet-stream"/>
+			<payloadProfile name="eHSDIProfile" maxSize="262144000">
+				<attachment name="bodyPayload"/>
+				<attachment name="xmlAttachment"/>
+				<attachment name="binaryAttacment"/>
+			</payloadProfile>
+		</payloadProfiles>		
+		<securities>
+			<security name="eDeliveryAS4Policy" 
+					policy="eDeliveryAS4Policy.xml" 
+					signatureMethod="RSA_SHA256" />
+		</securities>		
+		<errorHandlings>
+			<errorHandling name="defaultErrorHandling" 
+					errorAsResponse="true" 
+					businessErrorNotifyProducer="true" 
+					businessErrorNotifyConsumer="true" 
+					deliveryFailureNotifyProducer="true"/>
+		</errorHandlings>
+		<agreements>
+			<agreement name="agreement1" value="A1" type="T1"/>
+		</agreements>
+		<services>
+			<service name="CrossGatewayQuery" value="urn:ihe:iti:2007:CrossGatewayQuery" type="eHSDI"/>
+			<service name="CrossGatewayRetrieve" value="urn:ihe:iti:2007:CrossGatewayRetrieve" type="eHSDI"/>
+			<service name="ProvideAndRegisterDocumentSet-b" value="urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b" type="eHSDI"/>
+			<service name="CrossGatewayPatientDiscovery" value="urn:hl7-org:v3:PRPA_IN201305UV02:CrossGatewayPatientDiscovery" type="eHSDI"/>
+			<service name="testService" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"/>			
+		</services>		
+		<actions>
+			<action name="CrossGatewayQuery" value="urn:ihe:iti:2007:CrossGatewayQuery"/>
+			<action name="CrossGatewayRetrieve" value="urn:ihe:iti:2007:CrossGatewayRetrieve"/>
+			<action name="ProvideAndRegisterDocumentSet-b" value="urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b"/>
+			<action name="CrossGatewayPatientDiscovery" value="urn:hl7-org:v3:PRPA_IN201305UV02:CrossGatewayPatientDiscovery"/>
+			<action name="CrossGatewayQueryResponse" value="urn:ihe:iti:2007:CrossGatewayQueryResponse"/>
+			<action name="CrossGatewayRetrieveResponse" value="urn:ihe:iti:2007:CrossGatewayRetrieveResponse"/>
+			<action name="ProvideAndRegisterDocumentSet-bResponse" value="urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-bResponse"/>
+			<action name="CrossGatewayPatientDiscoveryResponse" value="urn:hl7-org:v3:PRPA_IN201305UV02:CrossGatewayPatientDiscoveryResponse"/>
+			<action name="testAction" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test"/>
+		</actions>
+		<as4>
+			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
+			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+		</as4>
+		<legConfigurations>
+			<legConfiguration 
+					name="testServiceCase" 
+					service="testService" 
+					action="testAction" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="CrossGatewayQuery" 
+					service="CrossGatewayQuery" 
+					action="CrossGatewayQuery" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					errorHandling="defaultErrorHandling"
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="CrossGatewayQueryRes" 
+					service="CrossGatewayQuery" 
+					action="CrossGatewayQueryResponse" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="CrossGatewayRetrieve" 
+					service="CrossGatewayRetrieve" 
+					action="CrossGatewayRetrieve" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="CrossGatewayRetrieveRes" 
+					service="CrossGatewayRetrieve" 
+					action="CrossGatewayRetrieveResponse" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="ProvideAndRegisterDocumentSet-b" 
+					service="ProvideAndRegisterDocumentSet-b" 
+					action="ProvideAndRegisterDocumentSet-b" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="ProvideAndRegisterDocumentSet-bRes" 
+					service="ProvideAndRegisterDocumentSet-b" 
+					action="ProvideAndRegisterDocumentSet-bResponse" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="CrossGatewayPatientDiscovery" 
+					service="CrossGatewayPatientDiscovery" 
+					action="CrossGatewayPatientDiscovery" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+			<legConfiguration 
+					name="CrossGatewayPatientDiscoveryRes" 
+					service="CrossGatewayPatientDiscovery" 
+					action="CrossGatewayPatientDiscoveryResponse" 
+					defaultMpc="defaultMpc" 
+					reliability="AS4Reliability" 
+					security="eDeliveryAS4Policy" 
+					receptionAwareness="receptionAwareness"
+					payloadProfile="eHSDIProfile"
+					propertySet="eDeliveryPropertySet"  
+					errorHandling="defaultErrorHandling" 
+					compressPayloads="true"/>
+		</legConfigurations>
+		<process name="eHSDIProcess"  
+				mep="twoway" 
+				binding="pushandpush" 
+				initiatorRole="sender" 
+				responderRole="recipient">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="CrossGatewayQuery"/>
+				<leg name="CrossGatewayQueryRes"/>
+				<leg name="CrossGatewayRetrieve"/>
+				<leg name="CrossGatewayRetrieveRes"/>
+				<leg name="ProvideAndRegisterDocumentSet-b"/>
+				<leg name="ProvideAndRegisterDocumentSet-bRes"/>
+				<leg name="CrossGatewayPatientDiscovery"/>
+				<leg name="CrossGatewayPatientDiscoveryRes"/>
+				<leg name="testServiceCase"/>
+			</legs>
+		</process>
+	</businessProcesses>
+</pmode:configuration>
