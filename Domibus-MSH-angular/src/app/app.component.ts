@@ -57,7 +57,8 @@ export class AppComponent implements OnInit {
   }
 
   isUser (): boolean {
-    return !!this.currentUser;
+    //return !!this.currentUser;
+    return this.securityService.isCurrentUserInRole([SecurityService.ROLE_USER]);
   }
 
   isExtAuthProviderEnabled (): boolean {

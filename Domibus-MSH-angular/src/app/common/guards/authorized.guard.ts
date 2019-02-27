@@ -1,28 +1,34 @@
 ﻿import {Injectable} from "@angular/core";
-import {CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
 import {SecurityService} from "../../security/security.service";
 import {ReplaySubject} from "rxjs";
 
 @Injectable()
 export class AuthorizedGuard implements CanActivate {
 
-  constructor(private securityService: SecurityService) {
+  constructor(private router: Router, private securityService: SecurityService) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    //console.log("AuthorizedGuard");
+
     let allowedRoles = this.getAllowedRoles(route);
     let subject = new ReplaySubject();
-    this.securityService.isAuthorized(allowedRoles).subscribe((isAuthorized:boolean) => {
-      //console.log("AuthorizedGuard canActivate [" + isAuthorized + "]");
-      subject.next(isAuthorized);
-    },(error:any) => {
+    console.log('AuthorizedGuard allowedRoles:' + allowedRoles);
+    this.securityService.isAuthorized(allowedRoles).subscribe((isAuthorized: boolean) => {
+      console.log('AuthorizedGuard isAuthorized:' + isAuthorized);
+      if (isAuthorized) {
+        subject.next(true);
+      } else {
+        this.router.navigate(['/notAuthorized']);
+        subject.next(false);
+      }
+    }, (error: any) => {
       console.log("AuthorizedGuard canActivate error [" + error + "]");
     });
     return subject.asObservable();
   }
 
-  getAllowedRoles(route: ActivatedRouteSnapshot) {
-    return route.data["allowedRoles"] as Array<string>;
+  getAllowedRoles(route: ActivatedRouteSnapshot): Array<string> {
+    return [SecurityService.ROLE_USER];
   }
 }

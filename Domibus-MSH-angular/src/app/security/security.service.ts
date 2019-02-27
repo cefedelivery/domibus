@@ -13,6 +13,7 @@ import {AlertService} from '../common/alert/alert.service';
 export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
   static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
+  static ROLE_USER = 'ROLE_USER';
 
   passwordPolicy: Promise<PasswordPolicyRO>;
   pluginPasswordPolicy: Promise<PasswordPolicyRO>;
@@ -169,6 +170,7 @@ export class SecurityService {
         }
       });
     }
+    //console.log('isCurrentUserInRole hasRole=' + hasRole);
     return hasRole;
   }
 
@@ -176,8 +178,10 @@ export class SecurityService {
     const subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
+      console.log('isAuthorized - isAuthenticated: ' + isAuthenticated + ' roles: ' + roles);
       if (isAuthenticated && roles) {
         const hasRole = this.isCurrentUserInRole(roles);
+        console.log('hasRole: ' + hasRole + '  roles:' + roles);
         subject.next(hasRole);
       }
     });
