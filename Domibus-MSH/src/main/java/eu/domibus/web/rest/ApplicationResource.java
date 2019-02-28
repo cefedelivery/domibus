@@ -12,6 +12,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import eu.domibus.web.rest.ro.PasswordPolicyRO;
+import eu.domibus.web.rest.ro.SupportTeamInfoRO;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,9 @@ public class ApplicationResource {
     String PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.plugin.passwordPolicy.validationMessage";
 
     protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
+
+    static final String SUPPORT_TEAM_NAME_KEY = "domibus.ui.support.team.name";
+    static final String SUPPORT_TEAM_EMAIL_KEY = "domibus.ui.support.team.email";
 
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
@@ -162,6 +166,21 @@ public class ApplicationResource {
         return new PasswordPolicyRO(pattern, validationMessage);
     }
 
+    /**
+     * Returns support team name and email address
+     * Info is used in the notAuthorized page
+     * @return {@code SupportTeamInfoRO} object
+     */
+    @RequestMapping(value = "supportteam", method = RequestMethod.GET)
+    public SupportTeamInfoRO getSupportTeamInfo() {
+        LOG.debug("Getting support team info");
+        SupportTeamInfoRO supportTeamInfoRO = new SupportTeamInfoRO();
+        supportTeamInfoRO.setEmail(getSupportTeamEmail());
+        supportTeamInfoRO.setName(getSupportTeamName());
+
+        return supportTeamInfoRO;
+    }
+
     private String getPasswordPattern() {
         return domibusPropertyProvider.getDomainProperty(PASSWORD_POLICY_PATTERN);
     }
@@ -175,5 +194,13 @@ public class ApplicationResource {
     }
     private String getPluginPasswordValidationMessage() {
         return domibusPropertyProvider.getDomainProperty(PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE);
+    }
+
+    private String getSupportTeamName() {
+        return domibusPropertyProvider.getDomainProperty(SUPPORT_TEAM_NAME_KEY);
+    }
+
+    private String getSupportTeamEmail() {
+        return domibusPropertyProvider.getDomainProperty(SUPPORT_TEAM_EMAIL_KEY);
     }
 }

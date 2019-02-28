@@ -170,7 +170,6 @@ export class SecurityService {
         }
       });
     }
-    //console.log('isCurrentUserInRole hasRole=' + hasRole);
     return hasRole;
   }
 
@@ -178,11 +177,11 @@ export class SecurityService {
     const subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
-      console.log('isAuthorized - isAuthenticated: ' + isAuthenticated + ' roles: ' + roles);
       if (isAuthenticated && roles) {
         const hasRole = this.isCurrentUserInRole(roles);
-        console.log('hasRole: ' + hasRole + '  roles:' + roles);
         subject.next(hasRole);
+      } else {
+        subject.next(false);
       }
     });
     return subject.asObservable();
