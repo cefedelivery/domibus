@@ -118,7 +118,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
             } catch (CertificateException | NoSuchAlgorithmException | IOException exc) {
                 throw new CryptoSpiException("Could not replace truststore and old truststore was not reverted properly. Please correct the error before continuing.", exc);
             }
-            throw new CryptoSpiException(e.getMessage(), e);
+            throw new CryptoSpiException(e);
         } finally {
             closeOutputStream(oldTrustStoreBytes);
         }

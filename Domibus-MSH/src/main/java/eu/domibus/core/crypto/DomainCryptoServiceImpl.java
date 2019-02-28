@@ -175,6 +175,11 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
         iamProvider.addCertificate(domainCoreConverter.convert(certificates, CertificateEntrySpi.class), overwrite);
     }
 
+
+    public String getTrustStoreType() {
+        return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.type");
+    }
+
     @Override
     public boolean removeCertificate(String alias) {
         return iamProvider.removeCertificate(alias);

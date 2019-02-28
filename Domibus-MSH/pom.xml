@@ -21,7 +21,7 @@
         <xstream.version>1.4.10</xstream.version>
         <freemarker.version>2.3.23</freemarker.version>
         <mail.version>1.6.1</mail.version>
-        <peppol.version>1.1.1</peppol.version>
+        <peppol.version>1.0.4</peppol.version>
         <dynamic.discovery.client.version>1.10</dynamic.discovery.client.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -202,6 +202,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-local</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-ws-policy</artifactId>
         </dependency>
 
@@ -260,7 +264,7 @@
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-sbdh</artifactId>
-            <version>1.1.1</version>
+            <version>${peppol.version}</version>
         </dependency>
         <dependency>
             <groupId>no.difi.vefa</groupId>
@@ -477,10 +481,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.1</version>
                 <executions>
@@ -506,4 +506,18 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>javadoc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

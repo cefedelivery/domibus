@@ -23,6 +23,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -38,10 +39,7 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.messaging.PModeMismatchException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -152,6 +150,12 @@ public class DatabaseMessageHandlerTest {
     @Injectable
     private UIReplicationSignalService uiReplicationSignalService;
 
+    @Injectable
+    LegConfiguration legConfiguration;
+
+    @Injectable
+    SplitAndJoinService splitAndJoinService;
+
 
     protected Property createProperty(String name, String value, String type) {
         Property aProperty = new Property();
@@ -214,7 +218,7 @@ public class DatabaseMessageHandlerTest {
     }
 
     @Test
-    public void testSubmitMessageGreen2RedOk(@Injectable final Submission messageData) throws Exception {
+    public void testSubmitMessageGreen2RedOk(@Injectable final Submission messageData, @Injectable PartInfo partInfo) throws Exception {
         new Expectations() {{
 
             authUtils.getOriginalUserFromSecurityContext();
@@ -264,9 +268,6 @@ public class DatabaseMessageHandlerTest {
 
             pModeProvider.getLegConfiguration(pModeKey);
             result = legConfiguration;
-
-            compressionService.handleCompression(userMessage, legConfiguration);
-            result = true;
         }};
 
         final String messageId = dmh.submit(messageData, BACKEND);
@@ -277,9 +278,8 @@ public class DatabaseMessageHandlerTest {
             messageIdGenerator.generateMessageId();
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
-            pModeProvider.getLegConfiguration(anyString);
-            compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            pModeProvider.getLegConfiguration(pModeKey);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, withAny(new LegConfiguration()));
             userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
         }};
@@ -287,7 +287,7 @@ public class DatabaseMessageHandlerTest {
     }
 
     @Test
-    public void testSubmitPullMessageGreen2RedOk(@Injectable final Submission messageData) throws Exception {
+    public void testSubmitPullMessageGreen2RedOk(@Injectable final Submission messageData, @Injectable PartInfo partInfo) throws Exception {
         new Expectations() {{
 
             authUtils.getOriginalUserFromSecurityContext();
@@ -339,9 +339,6 @@ public class DatabaseMessageHandlerTest {
 
             pModeProvider.getLegConfiguration(pModeKey);
             result = legConfiguration;
-
-            compressionService.handleCompression(userMessage, legConfiguration);
-            result = true;
         }};
 
         final String messageId = dmh.submit(messageData, BACKEND);
@@ -354,10 +351,9 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             UserMessage message;
-            compressionService.handleCompression(message = withCapture(), withAny(new LegConfiguration()));
-            assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
-            assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+//            assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
+//            assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, withAny(new LegConfiguration()));
             userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
             times = 0;
@@ -366,7 +362,7 @@ public class DatabaseMessageHandlerTest {
     }
 
     @Test
-    public void testSubmitMessageWithRefIdGreen2RedOk(@Injectable final Submission messageData) throws Exception {
+    public void testSubmitMessageWithRefIdGreen2RedOk(@Injectable final Submission messageData, @Injectable PartInfo partInfo) throws Exception {
         new Expectations() {{
 
             UserMessage userMessage = createUserMessage();
@@ -400,8 +396,6 @@ public class DatabaseMessageHandlerTest {
             result = confParty;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            compressionService.handleCompression(userMessage, legConfiguration);
-            result = true;
         }};
 
         final String messageId = dmh.submit(messageData, BACKEND);
@@ -413,8 +407,7 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
-            compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
         }};
 
@@ -452,7 +445,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -495,7 +488,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -553,7 +546,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -603,73 +596,13 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
     }
 
-
-    @Test
-    public void testSubmitMessageCompressionNOk(@Injectable final Submission messageData) throws Exception {
-        new Expectations() {{
-
-            UserMessage userMessage = createUserMessage();
-            transformer.transformFromSubmission(messageData);
-            result = userMessage;
-
-            messageIdGenerator.generateMessageId();
-            result = MESS_ID;
-
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            result = MessageStatus.NOT_FOUND;
-
-            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
-
-            Party sender = new Party();
-            sender.setName(GREEN);
-            pModeProvider.getSenderParty(pModeKey);
-            result = sender;
-
-            Party receiver = new Party();
-            receiver.setName(RED);
-            pModeProvider.getReceiverParty(pModeKey);
-            result = receiver;
-
-            Party confParty = new Party();
-            confParty.setName(GREEN);
-
-            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            compressionService.handleCompression(userMessage, legConfiguration);
-            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "No mime type found for payload with cid:message", MESS_ID, null);
-        }};
-
-        try {
-            dmh.submit(messageData, BACKEND);
-            Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
-        } catch (MessagingProcessingException mpEx) {
-            LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(ErrorCode.EBMS_0303, mpEx.getEbms3ErrorCode());
-            assert (mpEx.getMessage().contains("No mime type found for payload with cid:"));
-        }
-
-        new Verifications() {{
-            authUtils.getOriginalUserFromSecurityContext();
-            messageIdGenerator.generateMessageId();
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
-            pModeProvider.getLegConfiguration(anyString);
-            compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            errorLogDao.create(withAny(new ErrorLogEntry()));
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLog()));
-            times = 0;
-        }};
-
-    }
 
     @Test
     public void testSubmitMessagePModeNOk(@Injectable final Submission messageData) throws Exception {
@@ -706,7 +639,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -751,7 +684,7 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
             userMessageService.scheduleSending(MESS_ID);
@@ -820,7 +753,7 @@ public class DatabaseMessageHandlerTest {
 
 
     @Test
-    public void testSubmitMessageStoreNOk(@Injectable final Submission messageData) throws Exception {
+    public void testSubmitMessageStoreNOk(@Injectable final Submission messageData, @Injectable PartInfo partInfo) throws Exception {
         new Expectations() {{
 
             authUtils.getOriginalUserFromSecurityContext();
@@ -856,10 +789,8 @@ public class DatabaseMessageHandlerTest {
             result = confParty;
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            compressionService.handleCompression(userMessage, legConfiguration);
-            result = true;
 
-            messagingService.storeMessage(new Messaging(), MSHRole.SENDING);
+            messagingService.storeMessage(new Messaging(), MSHRole.SENDING, legConfiguration);
             result = new CompressionException("Could not store binary data for message due to IO exception", new IOException("test compression"));
         }};
 
@@ -878,8 +809,7 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
-            compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration);
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
@@ -887,7 +817,7 @@ public class DatabaseMessageHandlerTest {
     }
 
 
-    public void testStoreMessageToBePulled(@Injectable final Submission messageData) throws EbMS3Exception {
+    public void testStoreMessageToBePulled(@Injectable final Submission messageData, @Injectable PartInfo partInfo) throws EbMS3Exception {
         new Expectations() {{
 
             authUtils.getOriginalUserFromSecurityContext();
@@ -936,7 +866,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(pModeKey);
             result = legConfiguration;
 
-            compressionService.handleCompression(userMessage, legConfiguration);
+            compressionService.handleCompression(MESS_ID, partInfo, legConfiguration);
             result = true;
 
             messageExchangeService.getMessageStatus(messageExchangeConfiguration);

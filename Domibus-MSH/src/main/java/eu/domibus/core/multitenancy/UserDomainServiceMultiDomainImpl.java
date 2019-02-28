@@ -3,18 +3,19 @@ package eu.domibus.core.multitenancy;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.multitenancy.UserDomain;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.core.multitenancy.dao.UserDomainEntity;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -47,6 +48,8 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
     @Autowired
     protected DomibusCacheService domibusCacheService;
 
+    @Autowired
+    protected DomainCoreConverter domainCoreConverter;
 
     /**
      * Get the domain associated to the provided user from the general schema. <br>
@@ -145,4 +148,15 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
         return domainTaskExecutor.submit(() -> userDomainDao.listAllUserNames());
     }
+
+    @Override
+    public List<UserDomain> getAllUserDomainMappings() {
+        LOG.debug("Get all users from general schema");
+
+        return domainTaskExecutor.submit(() -> {
+            List<UserDomainEntity> userDomains = userDomainDao.listAllUsers();
+            return domainCoreConverter.convert(userDomains, UserDomain.class);
+        });
+    }
+
 }

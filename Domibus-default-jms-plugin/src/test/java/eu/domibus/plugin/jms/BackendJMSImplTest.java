@@ -8,6 +8,7 @@ import eu.domibus.ext.domain.JmsMessageDTO;
 import eu.domibus.ext.services.DomainContextExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.ext.services.JMSExtService;
+import eu.domibus.ext.services.MessageExtService;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.handler.MessagePuller;
@@ -59,6 +60,9 @@ public class BackendJMSImplTest {
 
     @Injectable
     protected DomainContextExtService domainContextService;
+
+    @Injectable
+    private MessageExtService messageExtService;
 
     @Injectable
     String name = "myjmsplugin";

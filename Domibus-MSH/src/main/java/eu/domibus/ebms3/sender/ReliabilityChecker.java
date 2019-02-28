@@ -6,6 +6,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Reliability;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
@@ -69,21 +70,32 @@ public class ReliabilityChecker {
     protected TransformerFactory transformerFactory;
 
     @Transactional(rollbackFor = EbMS3Exception.class)
+    public CheckResult check(final SOAPMessage request, final SOAPMessage response, final Reliability reliability) throws EbMS3Exception {
+        return checkReliability(request, response, reliability, pushMatcher);
+    }
+
+    @Transactional(rollbackFor = EbMS3Exception.class)
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey) throws EbMS3Exception {
         return check(request, response, pmodeKey, pushMatcher);
     }
 
+
     @Transactional(rollbackFor = EbMS3Exception.class)
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey, final ReliabilityMatcher matcher) throws EbMS3Exception {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+        return checkReliability(request, response, legConfiguration.getReliability(), matcher);
+    }
+
+
+    protected CheckResult checkReliability(final SOAPMessage request, final SOAPMessage response, Reliability reliability, final ReliabilityMatcher matcher) throws EbMS3Exception {
         String messageId = null;
 
-        if (matcher.matchReliableCallBack(legConfiguration)) {
+        if (matcher.matchReliableCallBack(reliability)) {
             LOG.debug("Reply pattern is waiting for callback, setting message status to WAITING_FOR_CALLBACK.");
             return CheckResult.WAITING_FOR_CALLBACK;
         }
 
-        if (matcher.matchReliableReceipt(legConfiguration)) {
+        if (matcher.matchReliableReceipt(reliability)) {
             LOG.debug("Checking reliability for outgoing message");
             final Messaging messaging;
 
@@ -105,7 +117,7 @@ public class ReliabilityChecker {
                 final String contentOfReceiptString = signalMessage.getReceipt().getAny().get(0);
 
                 try {
-                    if (!legConfiguration.getReliability().isNonRepudiation()) {
+                    if (!reliability.isNonRepudiation()) {
                         final UserMessage userMessage = this.jaxbContext.createUnmarshaller().unmarshal(new StreamSource(new ByteArrayInputStream(contentOfReceiptString.getBytes())), UserMessage.class).getValue();
 
                         final UserMessage userMessageInRequest = this.jaxbContext.createUnmarshaller().unmarshal((Node) request.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next(), Messaging.class).getValue().getUserMessage();
@@ -190,6 +202,7 @@ public class ReliabilityChecker {
         return matcher.fails();
 
     }
+
 
     protected String soapPartToString(SOAPMessage soapMessage) {
         if(soapMessage == null) {

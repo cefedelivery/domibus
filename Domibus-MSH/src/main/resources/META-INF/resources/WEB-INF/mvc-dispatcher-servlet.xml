@@ -26,6 +26,7 @@
         <mvc:interceptor>
             <mvc:mapping path="/rest/**"/>
             <mvc:exclude-mapping path="/rest/security/user"/>
+            <mvc:exclude-mapping path="/rest/security/username"/>
             <mvc:exclude-mapping path="/rest/security/authentication"/>
             <mvc:exclude-mapping path="/rest/security/user/domain"/>
             <mvc:exclude-mapping path="/rest/security/user/password"/>

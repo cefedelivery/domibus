@@ -57,7 +57,7 @@
                            </changeLogFile>
                            <url>
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-delta.mysql
-                           </url>
+                       </url>
                            <migrationSqlOutputFile>
                                ${project.build.directory}/sql-scripts/mysql5innoDb-4.0.1-to-4.1-RC1-migration.ddl
                            </migrationSqlOutputFile>
