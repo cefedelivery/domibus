@@ -24,13 +24,25 @@ import java.util.List;
 /**
  * @author Thomas Dussart
  * @since 4.0
+ * <p>
+ * Load dss beans.
  */
 @Configuration
-@PropertySource(value = "classpath:authentication-dss-extension.properties")
+@PropertySource(value = "classpath:authentication-dss-extension-default.properties")
 @PropertySource(ignoreResourceNotFound = true, value = "file:${domibus.config.location}/extensions/config/authentication-dss-extension.properties")
 public class DssConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DssConfiguration.class);
+
+    private static final String CUSTOM_TRUSTED_LIST_URL_PROPERTY = "domibus.dss.custom.trusted.list.url[%s]";
+
+    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY = "domibus.dss.custom.trusted.list.keystore.type[%s]";
+
+    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY = "domibus.dss.custom.trusted.list.keystore.path[%s]";
+
+    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY = "domibus.dss.custom.trusted.list.keystore.password[%s]";
+
+    private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.dss.custom.trusted.list.country.code[%s]";
 
     @Value("${domibus.oj.content.keystore.type}")
     private String keystoreType;
@@ -56,15 +68,35 @@ public class DssConfiguration {
     @Value("${domibus.dss.cache.path}")
     private String dssCachePath;
 
-    private static final String CUSTOM_TRUSTED_LIST_URL_PROPERTY = "domibus.dss.custom.trusted.list.url[%s]";
+    @Value("domibus.dss.proxy.https.host")
+    private String httpsHost;
 
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY = "domibus.dss.custom.trusted.list.keystore.type[%s]";
+    @Value("domibus.dss.proxy.https.port")
+    private String httpsPort;
 
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY = "domibus.dss.custom.trusted.list.keystore.path[%s]";
+    @Value("domibus.dss.proxy.https.user")
+    private String httpsUser;
 
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY = "domibus.dss.custom.trusted.list.keystore.password[%s]";
+    @Value("domibus.dss.proxy.https.password")
+    private String httpsPassword;
 
-    private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.dss.custom.trusted.list.country.code[%s]";
+    @Value("domibus.dss.proxy.https.excludedHosts")
+    private String httpsExcludesHosts;
+
+    @Value("domibus.dss.proxy.http.host")
+    private String httpHost;
+
+    @Value("domibus.dss.proxy.http.port")
+    private String httpPort;
+
+    @Value("domibus.dss.proxy.http.user")
+    private String httpUser;
+
+    @Value("domibus.dss.proxy.http.password")
+    private String httpPassword;
+
+    @Value("domibus.dss.proxy.http.excludedHosts")
+    private String httpExcludedHosts;
 
     @Bean
     public TrustedListsCertificateSource trustedListSource() {
@@ -81,9 +113,10 @@ public class DssConfiguration {
     }
 
     @Bean
-    public CertificateVerifier certificateVerifier() {
+    public CertificateVerifier certificateVerifier(DomibusDataLoader dataLoader) {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
         certificateVerifier.setTrustedCertSource(trustedListSource());
+        certificateVerifier.setDataLoader(dataLoader);
         /*certificateVerifier.setCrlSource(cachedCRLSource());
         certificateVerifier.setOcspSource(ocspSource());
         certificateVerifier.setDataLoader(dataLoader());*/
@@ -179,9 +212,26 @@ public class DssConfiguration {
         validationJob.setOjContentKeyStore(ojContentKeyStore);
         validationJob.setCheckLOTLSignature(true);
         validationJob.setCheckTSLSignatures(true);
-        validationJob.initRepository();
         validationJob.setOtherTrustedLists(otherTrustedLists);
+        validationJob.initRepository();
+        checkCacheConfigAndInitialize(validationJob);
         validationJob.refresh();
+
         return validationJob;
+    }
+
+    private void checkCacheConfigAndInitialize(TSLValidationJob validationJob) {
+        final File file = new File(dssCachePath);
+        if (!file.exists()) {
+            LOG.warn("Dss cache directory:[{}] does not exist, trusted lists can not be loaded", dssCachePath);
+            return;
+        }
+        final String[] cacheFiles = file.list();
+        if (cacheFiles == null || cacheFiles.length == 0) {
+            LOG.info("Dss cache directory:[{}] is empty at start up, loading trusted lists.", dssCachePath);
+            validationJob.refresh();
+        } else {
+            LOG.info("Dss cache directory:[{}] contains:[{}] file", dssCachePath, cacheFiles.length);
+        }
     }
 }

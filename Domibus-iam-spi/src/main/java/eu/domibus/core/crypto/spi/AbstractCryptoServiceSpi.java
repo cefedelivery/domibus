@@ -131,6 +131,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void setDomain(DomainSpi domain) {
+        defaultDomainCryptoService.setDomain(domain);
         this.domain = domain;
     }
 
@@ -140,7 +141,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void init() {
-
+        defaultDomainCryptoService.init();
     }
 
 
