@@ -10,6 +10,10 @@ public class CryptoSpiException extends RuntimeException {
         super(message);
     }
 
+    public CryptoSpiException(Throwable cause) {
+        super(cause);
+    }
+
     public CryptoSpiException(String message, Throwable cause) {
         super(message, cause);
     }

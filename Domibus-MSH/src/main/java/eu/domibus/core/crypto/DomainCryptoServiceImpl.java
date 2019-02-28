@@ -173,115 +173,11 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     @Override
     public void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
         iamProvider.addCertificate(domainCoreConverter.convert(certificates, CertificateEntrySpi.class), overwrite);
-    public synchronized void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
-        certificates.forEach(certEntry ->
-                doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite));
-        persistTrustStore();
     }
 
-    private boolean doAddCertificate(X509Certificate certificate, String alias, boolean overwrite) {
-        boolean containsAlias;
-        try {
-            containsAlias = getTrustStore().containsAlias(alias);
-        } catch (final KeyStoreException e) {
-            throw new CryptoException("Error while trying to get the alias from the truststore. This should never happen", e);
-        }
-        if (containsAlias && !overwrite) {
-            return false;
-        }
-        try {
-            if (containsAlias) {
-                getTrustStore().deleteEntry(alias);
-            }
-            getTrustStore().setCertificateEntry(alias, certificate);
-
-            return true;
-        } catch (final KeyStoreException e) {
-            throw new ConfigurationException(e);
-        }
-    }
-
-    protected KeyStore loadTrustStore() {
-        String trustStoreLocation = getTrustStoreLocation();
-        if (trustStoreLocation != null) {
-            trustStoreLocation = trustStoreLocation.trim();
-
-            try (InputStream is = loadInputStream(this.getClass().getClassLoader(), trustStoreLocation)) {
-                String passwd = getTrustStorePassword();
-                if (passwd != null) {
-                    passwd = passwd.trim();
-                    passwd = decryptPassword(passwd, passwordEncryptor);
-                }
-                String type = getTrustStoreType();
-                if (type != null) {
-                    type = type.trim();
-                }
-                final KeyStore trustStore = load(is, passwd, null, type);
-                LOG.debug("The TrustStore {} of type {} has been loaded", trustStoreLocation, type);
-                return trustStore;
-            } catch (WSSecurityException | IOException e) {
-                throw new CryptoException("Error loading truststore", e);
-            }
-        }
-        throw new CryptoException("Could not load truststore, truststore location is empty");
-    }
-
-    protected Properties getKeystoreProperties() {
-        final String keystoreType = domibusPropertyProvider.getProperty(domain, "domibus.security.keystore.type");
-        final String keystorePassword = domibusPropertyProvider.getProperty(domain, "domibus.security.keystore.password");
-        final String privateKeyAlias = domibusPropertyProvider.getProperty(domain, "domibus.security.key.private.alias");
-        final String keystoreLocation = domibusPropertyProvider.getResolvedProperty(domain, "domibus.security.keystore.location");
-
-        Properties result = new Properties();
-        result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_TYPE, keystoreType);
-        final String keyStorePasswordProperty = Merlin.PREFIX + Merlin.KEYSTORE_PASSWORD;
-        result.setProperty(keyStorePasswordProperty, keystorePassword);
-        result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_ALIAS, privateKeyAlias);
-        result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_FILE, keystoreLocation);
-
-        Properties logProperties = new Properties();
-        logProperties.putAll(result);
-        logProperties.remove(keyStorePasswordProperty);
-        LOG.debug("Keystore properties for domain [{}] are [{}]", domain, logProperties);
-
-        return result;
-    }
-
-    protected Properties getTrustStoreProperties() {
-        final String trustStoreType = getTrustStoreType();
-        final String trustStorePassword = getTrustStorePassword();
-        final String trustStoreLocation = getTrustStoreLocation();
-
-        Properties result = new Properties();
-        result.setProperty(Merlin.PREFIX + Merlin.TRUSTSTORE_TYPE, trustStoreType);
-        final String trustStorePasswordProperty = Merlin.PREFIX + Merlin.TRUSTSTORE_PASSWORD;
-        result.setProperty(trustStorePasswordProperty, trustStorePassword);
-        result.setProperty(Merlin.PREFIX + Merlin.LOAD_CA_CERTS, "false");
-        result.setProperty(Merlin.PREFIX + Merlin.TRUSTSTORE_FILE, trustStoreLocation);
-
-        Properties logProperties = new Properties();
-        logProperties.putAll(result);
-        logProperties.remove(trustStorePasswordProperty);
-        LOG.debug("Truststore properties for domain [{}] are [{}]", domain, logProperties);
-
-        return result;
-    }
-
-    protected String getTrustStoreLocation() {
-        return domibusPropertyProvider.getResolvedProperty(domain, "domibus.security.truststore.location");
-    }
-
-    protected String getTrustStorePassword() {
-        return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.password");
-    }
 
     public String getTrustStoreType() {
         return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.type");
-    }
-
-    protected void signalTrustStoreUpdate() {
-        // Sends a signal to all the servers from the cluster in order to trigger the refresh of the trust store
-        signalService.signalTrustStoreUpdate(domain);
     }
 
     @Override
