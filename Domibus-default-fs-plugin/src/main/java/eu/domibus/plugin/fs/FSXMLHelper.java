@@ -22,7 +22,7 @@ public class FSXMLHelper {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSXMLHelper.class);
     
     private static final String XSD_FILES_LOCATION = "xsd";
-    private static final String DEFAULT_SCHEMA = "ebms3.xsd";
+    private static final String DEFAULT_SCHEMA = "fs-plugin.xsd";
     
     private FSXMLHelper() {
         super();

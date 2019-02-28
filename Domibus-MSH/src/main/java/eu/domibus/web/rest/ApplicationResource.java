@@ -70,6 +70,7 @@ public class ApplicationResource {
         LOG.debug("Getting application info");
         final DomibusInfoRO domibusInfoRO = new DomibusInfoRO();
         domibusInfoRO.setVersion(domibusPropertiesService.getDisplayVersion());
+        domibusInfoRO.setVersionNumber(domibusPropertiesService.getVersionNumber());
         return domibusInfoRO;
     }
 

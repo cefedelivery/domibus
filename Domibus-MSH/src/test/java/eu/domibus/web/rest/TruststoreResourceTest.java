@@ -106,7 +106,7 @@ public class TruststoreResourceTest {
             domainProvider.getCurrentDomain();
             result = domain;
 
-            multiDomainCertificateProvider.replaceTrustStore(domain, (byte[]) any, anyString);
+            multiDomainCertificateProvider.replaceTrustStore(domain, anyString, (byte[]) any, anyString);
             result = new CryptoException("Password is incorrect");
         }};
 

@@ -4,6 +4,7 @@ import eu.domibus.common.*;
 import eu.domibus.ext.services.DomainContextExtService;
 import eu.domibus.ext.services.DomainExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
+import eu.domibus.ext.services.MessageExtService;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.MessageLister;
 import eu.domibus.plugin.Submission;
@@ -75,6 +76,9 @@ public class BackendFSImplTest {
     private FSSendMessagesService fsSendMessagesService;
 
     @Injectable
+    private MessageExtService messageExtService;
+
+    @Injectable
     String name = "fsplugin";
 
     @Tested
@@ -85,9 +89,9 @@ public class BackendFSImplTest {
     private FileObject incomingFolder;
 
     private FileObject incomingFolderByRecipient, incomingFolderByMessageId;
-    
+
     private FileObject outgoingFolder;
-    
+
     private FileObject sentFolder;
 
     private FileObject failedFolder;
@@ -111,10 +115,10 @@ public class BackendFSImplTest {
 
         incomingFolderByMessageId = incomingFolderByRecipient.resolveFile(messageId);
         incomingFolderByMessageId.createFolder();
-        
+
         outgoingFolder = rootDir.resolveFile(FSFilesManager.OUTGOING_FOLDER);
         outgoingFolder.createFolder();
-        
+
         sentFolder = rootDir.resolveFile(FSFilesManager.SENT_FOLDER);
         sentFolder.createFolder();
 
@@ -130,7 +134,7 @@ public class BackendFSImplTest {
 
         outgoingFolder.close();
         sentFolder.close();
-        
+
         rootDir.deleteAll();
         rootDir.close();
     }
@@ -273,7 +277,7 @@ public class BackendFSImplTest {
 
         backendFS.deliverMessage(messageId);
     }
-    
+
     @Test(expected = FSPluginException.class)
     public void testDeliverMessage_FSSetUpException(@Injectable final FSMessage fsMessage)
             throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
@@ -294,7 +298,7 @@ public class BackendFSImplTest {
 
         backendFS.deliverMessage(messageId);
     }
-    
+
     @Test(expected = FSPluginException.class)
     public void testDeliverMessage_IOException(@Injectable final FSMessage fsMessage)
             throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
@@ -308,10 +312,10 @@ public class BackendFSImplTest {
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
             result = new FSMessage(fsPayloads, userMessage);
-            
+
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
-            
+
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;
         }};
@@ -322,14 +326,14 @@ public class BackendFSImplTest {
     @Test
     public void testGetMessageSubmissionTransformer() {
         MessageSubmissionTransformer<FSMessage> result = backendFS.getMessageSubmissionTransformer();
-        
+
         Assert.assertEquals(defaultTransformer, result);
     }
 
     @Test
     public void testGetMessageRetrievalTransformer() {
         MessageRetrievalTransformer<FSMessage> result = backendFS.getMessageRetrievalTransformer();
-        
+
         Assert.assertEquals(defaultTransformer, result);
     }
 
@@ -342,22 +346,22 @@ public class BackendFSImplTest {
         event.setChangeTimestamp(new Timestamp(new Date().getTime()));
 
         final FileObject contentFile = outgoingFolder.resolveFile("content_" + messageId + ".xml.READY_TO_SEND");
-        
+
         new Expectations(1, backendFS) {{
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
-            
+
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             result = outgoingFolder;
-            
+
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { contentFile };
         }};
-        
+
         backendFS.messageStatusChanged(event);
 
         contentFile.close();
-        
+
         new VerificationsInOrder(1) {{
             fsFilesManager.renameFile(contentFile, "content_" + messageId + ".xml.SEND_ENQUEUED");
         }};
@@ -470,17 +474,17 @@ public class BackendFSImplTest {
         event.setChangeTimestamp(new Timestamp(new Date().getTime()));
 
         final FileObject contentFile = outgoingFolder.resolveFile("content_" + messageId + ".xml.ACKNOWLEDGED");
-        
+
         new Expectations(1, backendFS) {{
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
-            
+
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             result = outgoingFolder;
-            
+
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { contentFile };
-            
+
             fsPluginProperties.isSentActionDelete(null);
             result = true;
         }};
@@ -488,7 +492,7 @@ public class BackendFSImplTest {
         backendFS.messageStatusChanged(event);
 
         contentFile.close();
-        
+
         new VerificationsInOrder(1) {{
             fsFilesManager.deleteFile(contentFile);
         }};
@@ -503,38 +507,38 @@ public class BackendFSImplTest {
         event.setChangeTimestamp(new Timestamp(new Date().getTime()));
 
         final FileObject contentFile = outgoingFolder.resolveFile("content_" + messageId + ".xml.ACKNOWLEDGED");
-        
+
         new Expectations(1, backendFS) {{
             fsFilesManager.setUpFileSystem(null);
             result = rootDir;
-            
+
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             result = outgoingFolder;
-            
+
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { contentFile };
-            
+
             fsPluginProperties.isSentActionDelete(null);
             result = false;
-            
+
             fsPluginProperties.isSentActionArchive(null);
             result = true;
-            
+
             fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/SENT/");
             result = sentFolder;
-            
+
         }};
-        
+
         backendFS.messageStatusChanged(event);
 
         contentFile.close();
-        
+
         new VerificationsInOrder(1) {{
             fsFilesManager.moveFile(contentFile, with(new Delegate<FileObject>() {
               void delegate(FileObject file) throws IOException {
                      Assert.assertNotNull(file);
                      Assert.assertEquals( location + "/SENT/content_" + messageId + ".xml", file.getName().getURI());
-                 }  
+                 }
             }));
         }};
     }

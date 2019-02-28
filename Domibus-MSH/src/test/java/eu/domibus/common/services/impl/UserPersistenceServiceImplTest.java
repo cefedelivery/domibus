@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.multitenancy.UserDomain;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -122,7 +123,7 @@ public class UserPersistenceServiceImplTest {
         List<eu.domibus.api.user.User> addedUsers = Arrays.asList(addedUser);
 
         new Expectations() {{
-            userDomainService.getAllUserNames();
+            userDomainService.getAllUserDomainMappings();
             result = new ArrayList<>();
             domainConverter.convert(addedUser, User.class);
             result = addedUserUntity;
@@ -138,6 +139,32 @@ public class UserPersistenceServiceImplTest {
             userDomainService.setPreferredDomainForUser(addedUser.getUserName(), addedUser.getDomain());
             times = 0;
         }};
+    }
+
+
+    @Test(expected = UserManagementException.class)
+    public void insertNewUsersShouldFailIfUsernameAlreadyExists() {
+        String testUsername = "testUsername";
+        String testDomain = "testDomain";
+
+        UserDomain existingUser = new UserDomain();
+        existingUser.setUserName(testUsername);
+        existingUser.setDomain(testDomain);
+        List<UserDomain> existingUsers = Arrays.asList(existingUser);
+
+        eu.domibus.api.user.User addedUser = new eu.domibus.api.user.User() {{
+            setUserName(testUsername);
+            setActive(true);
+            setStatus(UserState.NEW.name());
+        }};
+        List<eu.domibus.api.user.User> addedUsers = Arrays.asList(addedUser);
+
+        new Expectations() {{
+            userDomainService.getAllUserDomainMappings();
+            result = existingUsers;
+        }};
+
+        userPersistenceService.insertNewUsers(addedUsers);
     }
 
     @Test

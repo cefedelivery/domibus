@@ -1,6 +1,6 @@
 package eu.domibus.api.security;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;

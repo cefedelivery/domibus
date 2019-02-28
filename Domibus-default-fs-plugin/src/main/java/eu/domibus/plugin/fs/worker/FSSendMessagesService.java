@@ -19,6 +19,8 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.tika.io.IOExceptionWithCause;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -34,7 +36,7 @@ import java.util.List;
 public class FSSendMessagesService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
-    
+
     public static final String METADATA_FILE_NAME = "metadata.xml";
     public static final String DEFAULT_DOMAIN = "default";
     public static final String ERROR_EXTENSION = ".error";
@@ -62,6 +64,7 @@ public class FSSendMessagesService {
      * Triggering the send messages means that the message files from the OUT directory
      * will be processed to be sent
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void sendMessages() {
         LOG.debug("Sending file system messages...");
 
@@ -73,10 +76,8 @@ public class FSSendMessagesService {
             }
         }
     }
-    
-    private void sendMessages(String domain) {
-        FileObject[] contentFiles = null;
 
+    private void sendMessages(String domain) {
         if(domibusConfigurationExtService.isMultiTenantAware()) {
             if(domain == null) {
                 domain = DEFAULT_DOMAIN;
@@ -97,13 +98,15 @@ public class FSSendMessagesService {
             authenticationExtService.basicAuthenticate(authenticationUser, authenticationPassword);
         }
 
+        FileObject[] contentFiles = null;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
-            
+
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            LOG.debug("{}", contentFiles);
+            LOG.trace("{}", contentFiles);
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
+            LOG.debug("Processable files [{}]", processableFiles);
             for (FileObject processableFile : processableFiles) {
                 processFileSafely(processableFile, domain);
             }
@@ -122,7 +125,7 @@ public class FSSendMessagesService {
     private void processFileSafely(FileObject processableFile, String domain) {
         String errorMessage = null;
         try {
-            fsProcessFileService.processFile(processableFile);
+            fsProcessFileService.processFile(processableFile, domain);
         } catch (JAXBException ex) {
             errorMessage = buildErrorMessage("Invalid metadata file: " + ex.toString()).toString();
             LOG.error(errorMessage, ex);
@@ -168,7 +171,7 @@ public class FSSendMessagesService {
             } else {
                 LOG.error("The send failed message file [{}] was not found in domain [{}]", processableFile, domain);
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new FSPluginException("Error handling the send failed message file " + processableFile, e);
         }
     }

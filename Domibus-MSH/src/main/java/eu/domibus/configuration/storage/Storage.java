@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 public class Storage {
 
     public static final String ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
+    public static final String TEMPORARY_ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.temp.storage.location";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(Storage.class);
 

@@ -131,7 +131,7 @@
 
             <hr/>
 
-            <button md-menu-item (click)="changePassword()" id="changePassword_id" *ngIf="!isExtAuthProviderEnabled">
+            <button md-menu-item (click)="changePassword()" id="changePassword_id" *ngIf="!isExtAuthProviderEnabled()">
               <md-icon>edit</md-icon>
               <span>Change Password</span>
             </button>

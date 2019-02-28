@@ -1,0 +1,13 @@
+
+--{boundary}
+Content-Type: application/soap+xml; charset=UTF-8
+Content-Transfer-Encoding: binary
+Content-ID: <split.root.message@cxf.apache.org>
+
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Header></env:Header><env:Body xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="_1"/></env:Envelope>
+--{boundary}
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: binary
+Content-ID: <message>
+
+--{boundary}--

@@ -13,6 +13,7 @@ import eu.domibus.common.model.configuration.RetryStrategy;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -25,6 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.Date;
 
+/**
+ * @author Cosmin Baciu
+ * @since 4.1
+ */
 @Service
 public class UpdateRetryLoggingService {
 
@@ -79,23 +84,24 @@ public class UpdateRetryLoggingService {
         if (hasAttemptsLeft(userMessageLog, legConfiguration) && !userMessageLog.isTestMessage()) {
             updateNextAttemptAndNotify(legConfiguration, messageStatus, userMessageLog);
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
-            messageFailed(userMessageLog);
+            final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            messageFailed(userMessage, userMessageLog);
         }
         uiReplicationSignalService.messageChange(userMessageLog.getMessageId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void messageFailedInANewTransaction(MessageLog userMessageLog) {
-        messageFailed(userMessageLog);
+    public void messageFailedInANewTransaction(UserMessage userMessage, MessageLog userMessageLog) {
+        messageFailed(userMessage, userMessageLog);
         rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
     }
 
-    public void messageFailed(MessageLog userMessageLog) {
+    public void messageFailed(UserMessage userMessage, MessageLog userMessageLog) {
         final String messageId = userMessageLog.getMessageId();
         LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
         if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus()) && !userMessageLog.isTestMessage()) {
             LOG.info("Notifying backend for message failure");
-            backendNotificationService.notifyOfSendFailure(messageId);
+            backendNotificationService.notifyOfSendFailure(userMessage);
         }
         userMessageLogService.setMessageAsSendFailure(messageId);
 

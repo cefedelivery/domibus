@@ -10,6 +10,7 @@ import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.security.auth.callback.CallbackHandler;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -122,10 +117,28 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
-    public void replaceTrustStore(Domain domain, byte[] store, String password) throws CryptoException {
+    public void replaceTrustStore(Domain domain, String storeFileName, byte[] store, String password) throws CryptoException {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+
+        validateTruststoreType(domainCertificateProvider.getTrustStoreType(), storeFileName);
+
         domainCertificateProvider.replaceTrustStore(store, password);
         domibusCacheService.clearCache("certValidationByAlias");
+    }
+
+    protected void validateTruststoreType(String storeType, String storeFileName) {
+        String fileType = FilenameUtils.getExtension(storeFileName).toLowerCase();
+        switch (storeType.toLowerCase()) {
+            case "pkcs12":
+                if (Arrays.asList("p12", "pfx").contains(fileType)) {
+                    return;
+                }
+            case "jks":
+                if (Arrays.asList("jks").contains(fileType)) {
+                    return;
+                }
+        }
+        throw new InvalidParameterException("Store file type (" + fileType + ") should match the configured truststore type (" + storeType + ").");
     }
 
     @Override
@@ -183,4 +196,5 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.removeCertificate(aliases);
     }
+
 }

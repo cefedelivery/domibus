@@ -16,16 +16,16 @@ import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -65,8 +65,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
-    @Autowired
-    private CompressionService compressionService;
 
     @Autowired
     private SubmissionAS4Transformer transformer;
@@ -121,6 +119,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
     @Autowired
     UIReplicationSignalService uiReplicationSignalService;
+
+    @Autowired
+    SplitAndJoinService splitAndJoinService;
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -177,14 +178,14 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             LOG.debug("OriginalUser is [{}]", authOriginalUser);
             /* check the message belongs to the authenticated user */
             boolean found = false;
-            for(String recipient : recipients) {
+            for (String recipient : recipients) {
                 String originalUser = getOriginalUser(userMessage, recipient);
                 if (originalUser != null && originalUser.equalsIgnoreCase(authOriginalUser)) {
                     found = true;
                     break;
                 }
             }
-            if(!found) {
+            if (!found) {
                 LOG.debug("User [{}] is trying to submit/access a message having as final recipients: [{}]", authOriginalUser, recipients);
                 throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
             }
@@ -243,6 +244,82 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return errorLogDao.getErrorsForMessage(messageId);
     }
 
+    //TODO refactor this method in order to reuse existing code from the method submit
+    @Transactional
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
+    public String submitMessageFragment(UserMessage userMessage, String backendName) throws MessagingProcessingException {
+        if (userMessage == null) {
+            LOG.warn("UserMessage is null");
+            throw new MessageNotFoundException("UserMessage is null");
+        }
+
+        // MessageInfo is always initialized in the get method
+        MessageInfo messageInfo = userMessage.getMessageInfo();
+        String messageId = messageInfo.getMessageId();
+
+        if (StringUtils.isEmpty(messageId)) {
+            throw new MessagingProcessingException("Message fragment id is empty");
+        }
+        LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+        LOG.debug("Preparing to submit message fragment");
+
+        try {
+            // handle if the messageId is unique.
+            if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
+                throw new DuplicateMessageException(MESSAGE_WITH_ID_STR + messageId + "] already exists. Message identifiers must be unique");
+            }
+
+            Messaging message = ebMS3Of.createMessaging();
+            message.setUserMessage(userMessage);
+
+            MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
+
+
+            Party to = messageValidations(userMessage, pModeKey, backendName);
+
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+
+            fillMpc(userMessage, legConfiguration, to);
+
+            try {
+                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration);
+            } catch (CompressionException exc) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+            MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
+                    MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
+                    backendName, to.getEndpoint(), userMessage.getCollaborationInfo().getService().getValue(), userMessage.getCollaborationInfo().getAction());
+            if (MessageStatus.READY_TO_PULL != messageStatus) {
+                // Sends message to the proper queue if not a message to be pulled.
+                userMessageService.scheduleSending(messageId);
+            } else {
+                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
+                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
+            }
+
+
+            uiReplicationSignalService.userMessageSubmitted(userMessage.getMessageInfo().getMessageId());
+
+            LOG.info("Message fragment submitted");
+            return userMessage.getMessageInfo().getMessageId();
+
+        } catch (EbMS3Exception ebms3Ex) {
+            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
+            errorLogDao.create(new ErrorLogEntry(ebms3Ex));
+            throw MessagingExceptionFactory.transform(ebms3Ex);
+        } catch (PModeException p) {
+            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]" + p.getMessage());
+            errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
+            throw new PModeMismatchException(p.getMessage(), p);
+        }
+    }
+
 
     @Override
     @Transactional
@@ -263,7 +340,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 
-        if(userMessage == null) {
+        if (userMessage == null) {
             LOG.warn("UserMessage is null");
             throw new MessageNotFoundException("UserMessage is null");
         }
@@ -306,11 +383,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             payloadProfileValidator.validate(message, pModeKey);
             propertyProfileValidator.validate(message, pModeKey);
 
-            boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
-            LOG.debug("Compression for message with id: [{}] applied: [{}]", messageId, compressed);
-
             try {
-                messagingService.storeMessage(message, MSHRole.SENDING);
+                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration);
             } catch (CompressionException exc) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
@@ -324,8 +398,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
-            }
-            else{
+            } else {
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
@@ -378,7 +451,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     }
 
     private int getMaxAttempts(LegConfiguration legConfiguration) {
-        return ( legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount() ) + 1; // counting retries after the first send attempt
+        return (legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount()) + 1; // counting retries after the first send attempt
     }
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {
