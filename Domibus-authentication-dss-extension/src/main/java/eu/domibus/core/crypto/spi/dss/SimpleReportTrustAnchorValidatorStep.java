@@ -38,7 +38,10 @@ public class SimpleReportTrustAnchorValidatorStep implements SimpleReportValidat
         final boolean isThereAtLeastOneChainWitAnchor = simpleCertificateReport.
                 getChain().
                 stream().
-                anyMatch(xmlChainItem -> xmlChainItem.getTrustAnchors() != null && !xmlChainItem.getTrustAnchors().isEmpty());
+                anyMatch(xmlChainItem -> {
+                    return xmlChainItem.getTrustAnchors() != null && !xmlChainItem.getTrustAnchors().isEmpty();
+
+                });
         if (!isThereAtLeastOneChainWitAnchor) return false;
 
         //filter based on trusted CA that would have an indication !PASSED.

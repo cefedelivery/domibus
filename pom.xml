@@ -462,6 +462,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.wss4j</groupId>
+                <artifactId>wss4j-ws-security-stax</artifactId>
+                <version>${wss4j.ws.security.common}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>eu.europa.ec.joinup.sd-dss</groupId>
                 <artifactId>dss-document</artifactId>
                 <version>${dss.version}</version>

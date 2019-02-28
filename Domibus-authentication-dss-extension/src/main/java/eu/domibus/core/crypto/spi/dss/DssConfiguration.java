@@ -215,7 +215,7 @@ public class DssConfiguration {
         validationJob.setOtherTrustedLists(otherTrustedLists);
         validationJob.initRepository();
         checkCacheConfigAndInitialize(validationJob);
-        validationJob.refresh();
+        //validationJob.refresh();
 
         return validationJob;
     }

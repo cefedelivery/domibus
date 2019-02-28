@@ -2,6 +2,7 @@ package eu.domibus.core.crypto.spi.dss;
 
 import com.google.common.collect.Lists;
 import eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi;
+import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
 import eu.europa.esig.dss.jaxb.simplecertificatereport.SimpleCertificateReport;
 import eu.europa.esig.dss.tsl.TLInfo;
 import eu.europa.esig.dss.tsl.service.TSLRepository;
@@ -15,6 +16,7 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -45,19 +47,25 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     @Autowired
     public DomibusDssCryptoProvider(
+            @Qualifier(DEFAULT_IAM_SPI) final DomainCryptoServiceSpi defaultDomainCryptoService,
             final CertificateVerifier certificateVerifier,
             final TSLRepository tslRepository,
             final SimpleReportValidator simpleReportValidator) {
-
+        super(defaultDomainCryptoService);
         this.certificateVerifier = certificateVerifier;
         this.tslRepository = tslRepository;
         this.simpleReportValidator = simpleReportValidator;
+        //WSSec
     }
 
     @Override
     public void verifyTrust(X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException {
         //display some trusted list information.
         logDebugTslInfo();
+        //should receive at least two certificates.
+        if (certs == null || certs.length == 1) {
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "The chain of certificate should contain at least two certificates");
+        }
         final X509Certificate leafCertificate = getX509LeafCertificate(certs);
         //add signing certificate to DSS.
         CertificateSource adjunctCertSource = prepareCertificateSource(certs, leafCertificate);
@@ -68,7 +76,6 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         //Validate.
         validate(certificateValidator);
         LOG.debug("Certificate:[{}] passed DSS trust validation:", leafCertificate.getSubjectDN());
-
     }
 
     private void validate(CertificateValidator certificateValidator) throws WSSecurityException {

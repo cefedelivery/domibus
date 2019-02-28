@@ -23,11 +23,14 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     public static final String DEFAULT_IAM_SPI = "DEFAULT_IAM_SPI";
 
-    @Autowired
-    @Qualifier(DEFAULT_IAM_SPI)
+
     private DomainCryptoServiceSpi defaultDomainCryptoService;
 
     private DomainSpi domain;
+
+    public AbstractCryptoServiceSpi(DomainCryptoServiceSpi defaultDomainCryptoService) {
+        this.defaultDomainCryptoService = defaultDomainCryptoService;
+    }
 
     @Override
     public X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException {
