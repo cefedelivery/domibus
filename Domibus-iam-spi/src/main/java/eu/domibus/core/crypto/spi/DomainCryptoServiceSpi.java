@@ -1,7 +1,5 @@
-package eu.domibus.core.crypto.api;
+package eu.domibus.core.crypto.spi;
 
-import eu.domibus.api.crypto.CryptoException;
-import eu.domibus.pki.DomibusCertificateException;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 
@@ -16,11 +14,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * @author Cosmin Baciu
- * @since 4.0
+ * @author Thomas Dussart
+ * @since 4.1
+ * <p>
+ * Externalized interface thant enable to implement identification and access management extensions.
  */
-public interface DomainCryptoService {
-
+public interface DomainCryptoServiceSpi {
     /* START - Methods required to be implemented by the org.apache.wss4j.common.crypto.CryptoBase */
     X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException;
 
@@ -43,7 +42,7 @@ public interface DomainCryptoService {
 
     void refreshTrustStore();
 
-    void replaceTrustStore(byte[] store, String password) throws CryptoException;
+    void replaceTrustStore(byte[] store, String password) throws CryptoSpiException;
 
     KeyStore getKeyStore();
 
@@ -51,11 +50,11 @@ public interface DomainCryptoService {
 
     X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException;
 
-    boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
+    boolean isCertificateChainValid(String alias) throws DomibusCertificateSpiException;
 
     boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite);
 
-    void addCertificate(List<CertificateEntry> certificates, boolean overwrite);
+    void addCertificate(List<CertificateEntrySpi> certificates, boolean overwrite);
 
     X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException;
 
@@ -63,5 +62,9 @@ public interface DomainCryptoService {
 
     void removeCertificate(List<String> aliases);
 
-    String getTrustStoreType();
+    String getIdentifier();
+
+    void setDomain(DomainSpi domain);
+
+    void init();
 }
