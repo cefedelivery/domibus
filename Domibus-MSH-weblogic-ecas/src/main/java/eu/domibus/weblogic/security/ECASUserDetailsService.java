@@ -59,8 +59,6 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     private static final String ECAS_DOMIBUS_MAPPING_PAIR_SEPARATOR = ";";
     private static final String ECAS_DOMIBUS_MAPPING_VALUE_SEPARATOR = "=";
 
-    private static final String ERROR_USER_HAS_NO_PRIVILEGES = "Your username %s has no privileges to use Domibus. Please contact the support team";
-
     @Autowired
     private DomainService domainService;
 
@@ -170,18 +168,18 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     }
 
     protected Domain getDomainFromECASGroup(String domainCode) {
-        LOG.debug("setDomainFromECASGroup - start");
+        LOG.debug("getDomainFromECASGroup - start");
         Domain domainToSet;
         if (domibusConfigurationService.isMultiTenantAware()) {
             domainToSet = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
                     .findAny()
                     .orElse(null);
         } else {
-            LOG.debug("setDomainFromECASGroup - non multitenancy");
+            LOG.debug("getDomainFromECASGroup - non multitenancy");
             //non multi tenancy
             domainToSet = DomainService.DEFAULT_DOMAIN;
         }
-        LOG.debug("setDomainFromECASGroup - domain is: {}", domainCode);
+        LOG.debug("getDomainFromECASGroup - domain is: {}", domainCode);
 
         return domainToSet;
     }
