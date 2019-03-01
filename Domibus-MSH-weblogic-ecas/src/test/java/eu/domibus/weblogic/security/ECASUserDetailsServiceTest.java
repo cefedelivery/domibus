@@ -174,7 +174,7 @@ public class ECASUserDetailsServiceTest {
     }
 
     @Test
-    public void setDomainFromEcasGroup_Multitenancy(@Mocked final UserDetail userDetail) {
+    public void getDomainFromEcasGroup_Multitenancy(@Mocked final UserDetail userDetail) {
         final String domainCode = "domain1";
         List<Domain> domains = new ArrayList<>();
         Domain domain1 = new Domain("domain1", "Domain1");
@@ -191,17 +191,13 @@ public class ECASUserDetailsServiceTest {
         }};
 
         //tested method
-        ecasUserDetailsService.setDomainFromECASGroup(domainCode, userDetail);
-
-        new Verifications() {{
-            String actualDomain;
-            userDetail.setDomain(actualDomain = withCapture());
-            Assert.assertEquals(domainCode, actualDomain);
-        }};
+        final Domain domain = ecasUserDetailsService.getDomainFromECASGroup(domainCode);
+        Assert.assertNotNull(domain);
+        Assert.assertEquals(domainCode, domain1.getCode());
     }
 
     @Test
-    public void setDomainFromEcasGroup_NonMultitenancy(@Mocked final UserDetail userDetail) {
+    public void getDomainFromEcasGroup_NonMultitenancy(@Mocked final UserDetail userDetail) {
         final String domainCode = DomainService.DEFAULT_DOMAIN.getCode();
 
         new Expectations() {{
@@ -211,12 +207,8 @@ public class ECASUserDetailsServiceTest {
         }};
 
         //tested method
-        ecasUserDetailsService.setDomainFromECASGroup(domainCode, userDetail);
-
-        new Verifications() {{
-            String actualDomain;
-            userDetail.setDomain(actualDomain = withCapture());
-            Assert.assertEquals(domainCode, actualDomain);
-        }};
+        final Domain domain = ecasUserDetailsService.getDomainFromECASGroup(domainCode);
+        Assert.assertNotNull(domain);
+        Assert.assertEquals(domainCode, domain.getCode());
     }
 }

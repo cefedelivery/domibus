@@ -25,7 +25,10 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.Subject;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -145,46 +148,42 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
         //chose highest privilege and assign it to user only if it's not null
         final GrantedAuthority grantedAuthority = chooseHighestUserGroup(userGroupsStr);
-//        if (null == grantedAuthority) {
-//            throw new AccessDeniedException(
-//                    String.format(ERROR_USER_HAS_NO_PRIVILEGES, username));
-//        }
-        if (null != grantedAuthority) {
+
+        Domain domain = getDomainFromECASGroup(domainCode);
+
+        if (null != grantedAuthority && null != domain) {
+            //we set the groups only if LDAP groups are mapping on both privileges and domain code
             userGroups.add(grantedAuthority);
         }
-
 
         LOG.debug("userDetail userGroups={}", userGroups);
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
         userDetail.setExternalAuthProvider(true);
+        userDetail.setDomain(domain.getCode());
+        domainContextProvider.setCurrentDomain(domain.getCode());
 
-        setDomainFromECASGroup(domainCode, userDetail);
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
 
         LOG.debug("createUserDetails - end");
         return userDetail;
     }
 
-    protected void setDomainFromECASGroup(String domainCode, UserDetail userDetail) {
+    protected Domain getDomainFromECASGroup(String domainCode) {
         LOG.debug("setDomainFromECASGroup - start");
+        Domain domainToSet;
         if (domibusConfigurationService.isMultiTenantAware()) {
-            Domain domain = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
+            domainToSet = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
                     .findAny()
                     .orElse(null);
-            if (null == domain) {
-                     throw new AccessDeniedException(
-                            String.format(ERROR_USER_HAS_NO_PRIVILEGES, userDetail.getUsername()));
-
-            }
-            userDetail.setDomain(domain.getCode());
-            domainContextProvider.setCurrentDomain(domain.getCode());
         } else {
             LOG.debug("setDomainFromECASGroup - non multitenancy");
             //non multi tenancy
-            userDetail.setDomain(DomainService.DEFAULT_DOMAIN.getCode());
+            domainToSet = DomainService.DEFAULT_DOMAIN;
         }
-        LOG.debug("setDomainFromECASGroup - domain is: {}", userDetail.getDomain());
+        LOG.debug("setDomainFromECASGroup - domain is: {}", domainCode);
+
+        return domainToSet;
     }
 
     protected GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
