@@ -1,7 +1,6 @@
 package eu.domibus.weblogic.security;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -102,6 +101,9 @@ public class ECASUserDetailsServiceTest {
             domibusPropertyProvider.getProperty(ECASUserDetailsService.ECAS_DOMIBUS_LDAP_GROUP_PREFIX_KEY);
             result = "DIGIT_DOM";
 
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
             ecasUserDetailsService.retrieveUserRoleMappings();
             result = userRoleMappings;
 
@@ -173,42 +175,4 @@ public class ECASUserDetailsServiceTest {
                 ecasUserDetailsService.chooseHighestUserGroup(list1));
     }
 
-    @Test
-    public void getDomainFromEcasGroup_Multitenancy(@Mocked final UserDetail userDetail) {
-        final String domainCode = "domain1";
-        List<Domain> domains = new ArrayList<>();
-        Domain domain1 = new Domain("domain1", "Domain1");
-        Domain domain2 = new Domain("domain2", "Domain2");
-        domains.add(domain1);
-        domains.add(domain2);
-
-        new Expectations() {{
-            domibusConfigurationService.isMultiTenantAware();
-            result = true;
-
-            domainService.getDomains();
-            result = domains;
-        }};
-
-        //tested method
-        final Domain domain = ecasUserDetailsService.getDomainFromECASGroup(domainCode);
-        Assert.assertNotNull(domain);
-        Assert.assertEquals(domainCode, domain1.getCode());
-    }
-
-    @Test
-    public void getDomainFromEcasGroup_NonMultitenancy(@Mocked final UserDetail userDetail) {
-        final String domainCode = DomainService.DEFAULT_DOMAIN.getCode();
-
-        new Expectations() {{
-            domibusConfigurationService.isMultiTenantAware();
-            result = false;
-
-        }};
-
-        //tested method
-        final Domain domain = ecasUserDetailsService.getDomainFromECASGroup(domainCode);
-        Assert.assertNotNull(domain);
-        Assert.assertEquals(domainCode, domain.getCode());
-    }
 }

@@ -201,6 +201,8 @@ public class ApplicationResource {
     }
 
     private String getSupportTeamEmail() {
+        /*TBC - should we validate this email address or not?
+         * */
         return domibusPropertyProvider.getDomainProperty(SUPPORT_TEAM_EMAIL_KEY);
     }
 }

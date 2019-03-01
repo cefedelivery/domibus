@@ -144,17 +144,18 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         }
 
 
-        //chose highest privilege and assign it to user only if it's not null
+        //chose highest privilege among LDAP user groups
         final GrantedAuthority grantedAuthority = chooseHighestUserGroup(userGroupsStr);
 
-        Domain domain = getDomainFromECASGroup(domainCode);
+        Domain domain = domibusConfigurationService.isMultiTenantAware() ?
+                domainService.getDomain(domainCode) : DomainService.DEFAULT_DOMAIN;
 
         if (null != grantedAuthority && null != domain) {
             //we set the groups only if LDAP groups are mapping on both privileges and domain code
             userGroups.add(grantedAuthority);
         }
-
         LOG.debug("userDetail userGroups={}", userGroups);
+
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
         userDetail.setExternalAuthProvider(true);
@@ -165,23 +166,6 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
         LOG.debug("createUserDetails - end");
         return userDetail;
-    }
-
-    protected Domain getDomainFromECASGroup(String domainCode) {
-        LOG.debug("getDomainFromECASGroup - start");
-        Domain domainToSet;
-        if (domibusConfigurationService.isMultiTenantAware()) {
-            domainToSet = domainService.getDomains().stream().filter(d -> domainCode.equalsIgnoreCase(d.getCode()))
-                    .findAny()
-                    .orElse(null);
-        } else {
-            LOG.debug("getDomainFromECASGroup - non multitenancy");
-            //non multi tenancy
-            domainToSet = DomainService.DEFAULT_DOMAIN;
-        }
-        LOG.debug("getDomainFromECASGroup - domain is: {}", domainCode);
-
-        return domainToSet;
     }
 
     protected GrantedAuthority chooseHighestUserGroup(final List<AuthRole> userGroups) {
