@@ -12,6 +12,7 @@ Domibus 4.1
 - New property "domibus.msh.retry.messageExpirationDelay" to grant a few seconds for schedulling the retry of the last attempt
 - Allow PayloadInfo with one PartInfo (one payload) as input in the message metadata.xml of the FS plugin
 - Added sendPullReceiptQueue for sending the asynchronous pull receipt
+- Added domibus.ui.support.team.name and domibus.ui.support.team.email properties for Support Team information on GUI
 Domibus 4.0.2
 - Improved the logging in the Default JMS Plugin
 - Allow sending an XML payload in the Soap body
