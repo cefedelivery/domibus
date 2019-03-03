@@ -155,6 +155,10 @@ export class SecurityService {
     return this.isCurrentUserInRole([SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
   }
 
+  hasCurrentUserPrivilegeUser(): boolean {
+    return this.isCurrentUserInRole([SecurityService.ROLE_USER, SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
+  }
+
   isUserFromExternalAuthProvider(): boolean {
     const user = this.getCurrentUser();
     return user ? user.externalAuthProvider : false;
@@ -177,11 +181,11 @@ export class SecurityService {
     const subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
+      console.log('isAuthorized -> isAuthenticated:' + isAuthenticated);
       if (isAuthenticated && roles) {
         const hasRole = this.isCurrentUserInRole(roles);
+        console.log('isAuthorized - hasRole:' + hasRole);
         subject.next(hasRole);
-      } else {
-        subject.next(false);
       }
     });
     return subject.asObservable();

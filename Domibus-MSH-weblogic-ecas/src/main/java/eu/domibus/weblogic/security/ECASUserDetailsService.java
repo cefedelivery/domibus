@@ -159,9 +159,10 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
         userDetail.setExternalAuthProvider(true);
-        userDetail.setDomain(domain.getCode());
-        domainContextProvider.setCurrentDomain(domain.getCode());
-
+        if (null != domain && null != domain.getCode()) {
+            userDetail.setDomain(domain.getCode());
+            domainContextProvider.setCurrentDomain(domain.getCode());
+        }
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
 
         LOG.debug("createUserDetails - end");

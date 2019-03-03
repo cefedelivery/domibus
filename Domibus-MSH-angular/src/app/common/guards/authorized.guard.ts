@@ -29,6 +29,6 @@ export class AuthorizedGuard implements CanActivate {
   }
 
   getAllowedRoles(route: ActivatedRouteSnapshot): Array<string> {
-    return [SecurityService.ROLE_USER];
+    return [SecurityService.ROLE_USER, SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN];
   }
 }

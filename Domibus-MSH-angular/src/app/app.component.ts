@@ -37,6 +37,9 @@ export class AppComponent implements OnInit {
     this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
     if (this.extAuthProviderEnabled) {
       this.securityService.login_extauthprovider();
+      console.log('going to redirect to /');
+      //just redirect to context path
+      this.router.navigate(['/messagelog']);
     }
 
     this.httpEventService.subscribe((error) => {
@@ -57,8 +60,7 @@ export class AppComponent implements OnInit {
   }
 
   isUser (): boolean {
-    //return !!this.currentUser;
-    return this.securityService.isCurrentUserInRole([SecurityService.ROLE_USER]);
+    return this.securityService.hasCurrentUserPrivilegeUser();
   }
 
   isExtAuthProviderEnabled (): boolean {
