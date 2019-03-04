@@ -79,7 +79,28 @@ public class FSFileNameHelperTest {
         
         Assert.assertFalse(result);
     }
-    
+
+    @Test
+    public void testIsLockFile() {
+        boolean result = FSFileNameHelper.isLockFile("large_invoice.pdf.lock");
+
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testIsLockFile_Fail() {
+        boolean result = FSFileNameHelper.isLockFile("large_invoice.pdf");
+
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testStripLockSuffix() {
+        String result = FSFileNameHelper.stripLockSuffix("large_invoice.pdf.lock");
+
+        Assert.assertEquals("large_invoice.pdf", result);
+    }
+
     @Test
     public void testIsMessageRelated_Fail2() {
         // missing one character in UUID in message ID
