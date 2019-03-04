@@ -30,7 +30,7 @@ const appRoutes: Routes = [
   {
     path: '',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
   },
   {
     path: 'pmode-current',
@@ -100,7 +100,7 @@ const appRoutes: Routes = [
   },
   {path: 'logout', component: LogoutAuthExtProviderComponent},
   {path: 'notAuthorized', component: NotAuthorizedComponent, canActivate: [AuthenticatedGuard]},
-  {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]},
+  {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];
 

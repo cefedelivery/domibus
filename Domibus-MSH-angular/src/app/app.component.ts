@@ -37,7 +37,7 @@ export class AppComponent implements OnInit {
     this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
     if (this.extAuthProviderEnabled) {
       this.securityService.login_extauthprovider();
-      console.log('going to redirect to /');
+      console.log('going to redirect to /messagelog');
       //just redirect to context path
       this.router.navigate(['/messagelog']);
     }
