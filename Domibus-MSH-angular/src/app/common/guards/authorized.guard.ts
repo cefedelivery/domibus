@@ -13,9 +13,7 @@ export class AuthorizedGuard implements CanActivate {
 
     let allowedRoles = this.getAllowedRoles(route);
     let subject = new ReplaySubject();
-    console.log('AuthorizedGuard allowedRoles: ' + allowedRoles + 'route.rule: ' + route.url);
     this.securityService.isAuthorized(allowedRoles).subscribe((isAuthorized: boolean) => {
-      console.log('AuthorizedGuard isAuthorized:' + isAuthorized + 'route.rule: ' + route.url);
       if (isAuthorized) {
         subject.next(true);
       } else {

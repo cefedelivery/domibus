@@ -50,19 +50,28 @@ export class SecurityService {
    * It simulates the login function for an external authentication provider
    * Saves current user to local storage, etc
    */
-  async login_extauthprovider() {
+  login_extauthprovider(): Promise<boolean> {
     console.log('login from auth external provider');
+    return new Promise((resolve, reject) => {
+        const res = this.getCurrentUserAndSaveLocally();
+        resolve(res);
+    });
+  }
 
+  async getCurrentUserAndSaveLocally() {
+    let userSet = false;
     try {
       //get the user from server and write it in local storage
       const user = await this.getCurrentUserFromServer();
       if (user) {
         this.updateCurrentUser(user);
         this.domainService.setAppTitle();
+        userSet = true;
       }
     } catch (ex) {
-      console.log('getCurrentUserFromServer error' + ex);
+      console.log('getCurrentUserAndSaveLocally error' + ex);
     }
+    return  userSet;
   }
 
   logout() {

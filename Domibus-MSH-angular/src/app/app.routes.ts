@@ -30,7 +30,7 @@ const appRoutes: Routes = [
   {
     path: '',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]
   },
   {
     path: 'pmode-current',
