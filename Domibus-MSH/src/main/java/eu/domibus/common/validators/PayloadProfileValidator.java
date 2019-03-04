@@ -102,7 +102,8 @@ public class PayloadProfileValidator {
             Payload profiled = null;
             final String cid = (partInfo.getHref() == null ? "" : partInfo.getHref());
             for (final Payload p : modifiableProfileList) {
-                if (StringUtils.equalsIgnoreCase(p.getCid(), cid)) {
+                String payloadCid = StringUtils.trimToEmpty(p.getCid());
+                if (StringUtils.equalsIgnoreCase(payloadCid, cid)) {
                     profiled = p;
                     break;
                 }

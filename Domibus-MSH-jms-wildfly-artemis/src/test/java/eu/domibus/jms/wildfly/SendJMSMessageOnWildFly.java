@@ -13,7 +13,7 @@ public class SendJMSMessageOnWildFly {
     private static final String USER = "jmssender";
     private static final String PASSWORD = "jmssender";
     private static final String CONNECTION_FACTORY_JNDI = "jms/RemoteConnectionFactory";
-    private static final String QUEUE = "jms/domibus.backend.jms.inQueue";
+    private static final String QUEUE = "jms/queue/DomibusBusinessMessageInQueue";
 
     public static void main(String[] args) throws Exception {
         new SendJMSMessageOnWildFly().run();

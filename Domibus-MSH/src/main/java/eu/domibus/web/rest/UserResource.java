@@ -24,15 +24,17 @@ import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Thomas Dussart
@@ -84,9 +86,8 @@ public class UserResource {
         //We caught it here just to check for UserManagementException and put HttpStatus.CONFLICT;  otherwise we would have delegated to general error handler
         Throwable rootException = ExceptionUtils.getRootCause(ex);
         if (rootException instanceof UserManagementException) {
-            return errorHandlerService.createResponse(rootException, HttpStatus.CONFLICT);
+            return handleUserManagementException((UserManagementException) rootException);
         }
-
         return errorHandlerService.createResponse(ex);
     }
 

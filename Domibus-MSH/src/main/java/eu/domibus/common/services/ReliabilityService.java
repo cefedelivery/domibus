@@ -26,4 +26,14 @@ public interface ReliabilityService {
      */
     void handleReliability(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 
+    /**
+     * This method is used when handleReliability failed
+     *
+     * @param messageId                  the processed message id.
+     * @param reliabilityCheckSuccessful the state of the reliability check.
+     * @param isOk                       sub status when reliability is ok.
+     * @param legConfiguration           the legconfiguration of this message exchange.
+     */
+    void handleReliabilityInNewTransaction(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+
 }

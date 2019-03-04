@@ -3,11 +3,11 @@ package eu.domibus.pki;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.apache.cxf.Bus;
-import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,7 @@ import java.io.IOException;
 public class PolicyServiceImpl implements PolicyService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
+    public static final String POLICIES = "policies";
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -52,6 +53,18 @@ public class PolicyServiceImpl implements PolicyService {
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new ConfigurationException(e);
         }
+    }
+
+    /**
+     * To retrieve the domibus security policy xml based on the leg configuration and create the Security Policy object.
+     *
+     * @param legConfiguration the leg containing the security policy as configured in the pMode
+     * @return the security policy
+     * @throws ConfigurationException if the policy xml cannot be read or parsed from the file
+     */
+    @Override
+    public Policy getPolicy(LegConfiguration legConfiguration) throws ConfigurationException {
+        return parsePolicy(POLICIES + File.separator + legConfiguration.getSecurity().getPolicy());
     }
 
     /**

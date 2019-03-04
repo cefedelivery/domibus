@@ -5,13 +5,16 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.proxy.DomibusProxy;
 import eu.domibus.proxy.DomibusProxyService;
-import eu.domibus.proxy.DomibusProxyServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.endpoint.ClientImpl;
 import org.apache.cxf.jaxws.DispatchImpl;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.transport.MessageObserver;
 import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transport.local.LocalConduit;
 import org.apache.cxf.transports.http.configuration.ConnectionType;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.policy.PolicyConstants;
@@ -40,7 +43,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
+    public static final QName LOCAL_SERVICE_NAME = new QName("http://domibus.eu", "local-msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
+    public static final QName LOCAL_PORT_NAME = new QName("http://domibus.eu", "local-msh-dispatch");
     public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT = "domibus.dispatcher.connectionTimeout";
     public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT = "domibus.dispatcher.receiveTimeout";
     public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING = "domibus.dispatcher.allowChunking";
@@ -80,12 +85,34 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         if (endpoint.startsWith("https://")) {
             final TLSClientParameters params = tlsReader.getTlsClientParameters(domain);
-            if(params != null) {
+            if (params != null) {
                 httpConduit.setTlsClientParameters(params);
             }
         }
 
         configureProxy(httpClientPolicy, httpConduit);
+        return dispatch;
+    }
+
+
+    @Override
+    public Dispatch<SOAPMessage> getLocalClient(String domain, String endpoint) {
+        LOG.debug("Creating the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+        Dispatch<SOAPMessage> dispatch = createLocalWSServiceDispatcher(endpoint);
+
+        final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
+        final LocalConduit httpConduit = (LocalConduit) client.getConduit();
+
+        httpConduit.setMessageObserver(new MessageObserver() {
+            @Override
+            public void onMessage(Message message) {
+                message.getExchange().getOutMessage().put(ClientImpl.SYNC_TIMEOUT, 0);
+                message.getExchange().put(ClientImpl.FINISHED, Boolean.TRUE);
+                LOG.debug("on message");
+            }
+        });
+
+
         return dispatch;
     }
 
@@ -101,7 +128,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
         ConnectionType connectionType = ConnectionType.CLOSE;
-        if(keepAlive) {
+        if (keepAlive) {
             connectionType = ConnectionType.KEEP_ALIVE;
         }
         httpClientPolicy.setConnection(connectionType);
@@ -116,9 +143,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
-        if(!domibusProxyService.useProxy()) {
+        if (!domibusProxyService.useProxy()) {
             LOG.debug("Usage of proxy not required");
-            return ;
+            return;
         }
 
         DomibusProxy domibusProxy = domibusProxyService.getDomibusProxy();
@@ -139,4 +166,13 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             httpConduit.setProxyAuthorization(policy);
         }
     }
+
+    protected Dispatch<SOAPMessage> createLocalWSServiceDispatcher(String endpoint) {
+        final javax.xml.ws.Service service = javax.xml.ws.Service.create(LOCAL_SERVICE_NAME);
+        service.setExecutor(executor);
+        service.addPort(LOCAL_PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
+        final Dispatch<SOAPMessage> dispatch = service.createDispatch(LOCAL_PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        return dispatch;
+    }
+
 }

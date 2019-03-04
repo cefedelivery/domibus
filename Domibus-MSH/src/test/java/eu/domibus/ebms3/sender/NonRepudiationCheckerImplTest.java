@@ -76,12 +76,12 @@ public class NonRepudiationCheckerImplTest {
     }
 
     protected NodeList getNonRepudiationNodeListFromRequest(String path) throws Exception {
-        SOAPMessage request = SoapUtil.createSOAPMessage(IOUtils.toString(new ClassPathResource(path).getInputStream()));
+        SOAPMessage request = new SoapUtil().createSOAPMessage(IOUtils.toString(new ClassPathResource(path).getInputStream()));
         return nonRepudiationChecker.getNonRepudiationNodeList(request.getSOAPHeader().getElementsByTagNameNS(WSConstants.SIG_NS, WSConstants.SIG_INFO_LN).item(0));
     }
 
     protected NodeList getNonRepudiationListFromResponse(String path) throws Exception {
-        SOAPMessage response = SoapUtil.createSOAPMessage(IOUtils.toString(new ClassPathResource(path).getInputStream()));
+        SOAPMessage response = new SoapUtil().createSOAPMessage(IOUtils.toString(new ClassPathResource(path).getInputStream()));
         return nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
     }
 

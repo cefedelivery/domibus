@@ -7,6 +7,7 @@ import eu.domibus.api.jms.JmsMessage;
  */
 public class DelayedDispatchMessageCreator extends DispatchMessageCreator {
 
+    public static final String AMQ_SCHEDULED_DELAY = "AMQ_SCHEDULED_DELAY";
 
     private final long delay;
 
@@ -17,7 +18,7 @@ public class DelayedDispatchMessageCreator extends DispatchMessageCreator {
 
     public JmsMessage createMessage() {
         JmsMessage m = super.createMessage();
-        m.setProperty("AMQ_SCHEDULED_DELAY", delay);
+        m.setProperty(AMQ_SCHEDULED_DELAY, delay);
         return m;
     }
 }

@@ -1,0 +1,29 @@
+<ns:Messaging xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+    <ns:UserMessage>
+        <ns:PartyInfo>
+            <ns:From>
+                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+            </ns:From>
+            <ns:To>
+                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+            </ns:To>
+        </ns:PartyInfo>
+        <ns:CollaborationInfo>
+            <ns:Service type="tc1">bdx:noprocess</ns:Service>
+            <ns:Action>TC1Leg1</ns:Action>
+        </ns:CollaborationInfo>
+        <ns:MessageProperties>
+            <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+            <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+        </ns:MessageProperties>
+        <ns:PayloadInfo>
+            <ns:PartInfo href="cid:payload">
+                <ns:PartProperties>
+                    <ns:Property name="MimeType">text/xml</ns:Property>
+                </ns:PartProperties>
+            </ns:PartInfo>
+        </ns:PayloadInfo>
+    </ns:UserMessage>
+</ns:Messaging>

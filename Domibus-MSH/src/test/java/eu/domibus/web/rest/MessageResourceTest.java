@@ -55,13 +55,20 @@ public class MessageResourceTest {
         userMessage.setMpc("mpc1");
         userMessage.setPartyInfo(new PartyInfo());
         PayloadInfo payloadInfo = new PayloadInfo();
+        byte[] byteA = new byte[]{1,0,1};
+        PartInfo partInfoBody = new PartInfo();
+        partInfoBody.setInBody(true);
+        partInfoBody.setBinaryData(byteA);
+        partInfoBody.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(byteA, "text/xml")));
+        payloadInfo.getPartInfo().add(partInfoBody);
         PartInfo partInfo = new PartInfo();
         partInfo.setHref("href");
-        byte[] byteA = new byte[]{1,0,1};
         partInfo.setBinaryData(byteA);
         partInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(byteA, "text/xml")));
         payloadInfo.getPartInfo().add(partInfo);
+
         userMessage.setPayloadInfo(payloadInfo);
+
         return userMessage;
     }
 
@@ -107,4 +114,13 @@ public class MessageResourceTest {
         Assert.assertEquals("application/zip", responseEntity.getHeaders().get("Content-Type").get(0));
         Assert.assertEquals("attachment; filename=messageId.zip", responseEntity.getHeaders().get("content-disposition").get(0));
     }
+
+
+    @Test
+    public void testPayloadName() {
+        UserMessage message = createUserMessage();
+        Assert.assertEquals("bodyload", messageResource.getPayloadName(message.getPayloadInfo().getPartInfo().get(0)));
+        Assert.assertEquals("href", messageResource.getPayloadName(message.getPayloadInfo().getPartInfo().get(1)));
+    }
+
 }

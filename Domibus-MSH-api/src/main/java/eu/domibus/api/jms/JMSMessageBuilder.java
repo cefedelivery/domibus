@@ -50,7 +50,9 @@ public class JMSMessageBuilder {
     }
 
     public JMSMessageBuilder property(String name, Object value) {
-        jmsMessage.getProperties().put(name, value);
+        if(value != null) {
+            jmsMessage.getProperties().put(name, value);
+        }
         return this;
     }
 

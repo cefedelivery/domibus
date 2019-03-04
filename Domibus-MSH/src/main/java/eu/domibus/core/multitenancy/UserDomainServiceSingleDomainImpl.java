@@ -1,6 +1,7 @@
 package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomain;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
 import eu.domibus.logging.DomibusLogger;
@@ -72,6 +73,10 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
      */
     @Override
     public List<String> getAllUserNames() {
-        return new ArrayList<>();
+        return new ArrayList<>(0);
+    }
+    @Override
+    public List<UserDomain> getAllUserDomainMappings() {
+        return new ArrayList<>(0);
     }
 }

@@ -1,10 +1,12 @@
 package eu.domibus.core.pull;
 
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import eu.domibus.logging.DomibusLogger;
@@ -28,19 +30,22 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullMessageStateServiceImpl.class);
 
     @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
+    protected RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Autowired
-    private UserMessageLogDao userMessageLogDao;
+    protected UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
+    protected UpdateRetryLoggingService updateRetryLoggingService;
 
     @Autowired
-    private BackendNotificationService backendNotificationService;
+    protected BackendNotificationService backendNotificationService;
 
     @Autowired
-    private UIReplicationSignalService uiReplicationSignalService;
+    protected UIReplicationSignalService uiReplicationSignalService;
+
+    @Autowired
+    protected MessagingDao messagingDao;
 
     /**
      * {@inheritDoc}
@@ -61,7 +66,8 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Transactional
     public void sendFailed(final UserMessageLog userMessageLog) {
         LOG.debug("Message:[{}] failed to be pull.", userMessageLog.getMessageId());
-        updateRetryLoggingService.messageFailed(userMessageLog);
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(userMessageLog.getMessageId());
+        updateRetryLoggingService.messageFailed(userMessage, userMessageLog);
     }
 
     /**

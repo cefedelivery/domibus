@@ -43,6 +43,7 @@ public class AuthenticationDefaultService implements AuthenticationService {
 
     @Override
     public Authentication basicAuthenticate(String user, String password) {
+        LOG.debug("Authenticating user using basic authentication", user);
         final String domainForUser = userDomainService.getDomainForUser(user);
         domainContextProvider.setCurrentDomain(domainForUser);
         BasicAuthentication authentication = new BasicAuthentication(user, password);

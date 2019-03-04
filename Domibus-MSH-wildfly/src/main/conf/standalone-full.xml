@@ -447,6 +447,21 @@
                         <redelivery-delay>1000</redelivery-delay>
                         <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
+                    <address-setting match="jms.queue.DomibusSendLargeMessageQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>1000</redelivery-delay>
+                        <max-delivery-attempts>0</max-delivery-attempts>
+                    </address-setting>
+                    <address-setting match="jms.queue.DomibusSplitAndJoinQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>60000</redelivery-delay>
+                        <max-delivery-attempts>3</max-delivery-attempts>
+                    </address-setting>
+                    <address-setting match="jms.queue.DomibusPullReceiptQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>60000</redelivery-delay>
+                        <max-delivery-attempts>3</max-delivery-attempts>
+                    </address-setting>
                     <address-setting match="jms.queue.DomibusPullMessageQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
@@ -605,9 +620,24 @@
                         <entry name="java:/jms/queue/DomibusSendMessageQueue"/>
                         <durable>true</durable>
                     </jms-queue>
+                    <jms-queue name="DomibusSendLargeMessageQueue">
+                        <entry name="java:/jms/domibus.internal.largeMessage.queue"/>
+                        <entry name="java:/jms/queue/DomibusSendLargeMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusSplitAndJoinQueue">
+                        <entry name="java:/jms/domibus.internal.splitAndJoin.queue"/>
+                        <entry name="java:/jms/queue/DomibusSplitAndJoinQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
                     <jms-queue name="DomibusPullMessageQueue">
                         <entry name="java:/jms/domibus.internal.pull.queue"/>
                         <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusPullReceiptQueue">
+                        <entry name="java:/jms/domibus.internal.pull.receipt.queue"/>
+                        <entry name="java:/jms/queue/DomibusPullReceiptQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusAlertMessageQueue">

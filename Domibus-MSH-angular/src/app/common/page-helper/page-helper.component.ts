@@ -1,7 +1,8 @@
-import {Component, OnInit} from "@angular/core";
-import {MdDialog} from "@angular/material";
-import {NavigationStart, Router} from "@angular/router";
-import {isNullOrUndefined} from "util";
+import {Component, OnInit} from '@angular/core';
+import {MdDialog} from '@angular/material';
+import {NavigationStart, Router} from '@angular/router';
+import {isNullOrUndefined} from 'util';
+import {DomibusInfoService} from '../appinfo/domibusinfo.service';
 
 @Component({
   selector: 'page-helper',
@@ -14,27 +15,30 @@ export class PageHelperComponent implements OnInit {
   helpPages: Map<String, String> = new Map<String, String>();
   activateHelp: boolean = false;
 
-  constructor(public dialog: MdDialog, private router: Router) {
+  constructor(public dialog: MdDialog, private router: Router, private domibusInfoService: DomibusInfoService) {
   }
 
-  ngOnInit() {
-    let MAIN_HELP_PAGE = "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v4.0.1+Admin+Console+Help";
-    let VERSION_SPECIFIC_PAGE = "#Domibusv4.0AdminConsoleHelp-";
+  async ngOnInit() {
+    const domibusInfo = await this.domibusInfoService.getDomibusInfo();
 
-    this.helpPages.set("/", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Messages");
-    this.helpPages.set("/login", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Login");
-    this.helpPages.set("/messagefilter", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "MessageFilter");
-    this.helpPages.set("/truststore", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Truststore");
-    this.helpPages.set("/pmode-current", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode-Current");
-    this.helpPages.set("/pmode-archive", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode-Archive");
-    this.helpPages.set("/pmode-party", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode-Parties");
-    this.helpPages.set("/errorlog", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "ErrorLog");
-    this.helpPages.set("/jms", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "JMSMonitoring");
-    this.helpPages.set("/user", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Users");
-    this.helpPages.set("/pluginuser", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PluginUsers");
-    this.helpPages.set("/audit", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Audit");
-    this.helpPages.set("/alerts", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Alerts");
-    this.helpPages.set("/testservice", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "TestService");
+    let MAIN_HELP_PAGE = 'https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v'
+      + domibusInfo.versionNumber + '+Admin+Console+Help';
+    let VERSION_SPECIFIC_PAGE = '#Domibusv4.0AdminConsoleHelp-';
+
+    this.helpPages.set('/', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Messages');
+    this.helpPages.set('/login', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Login');
+    this.helpPages.set('/messagefilter', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'MessageFilter');
+    this.helpPages.set('/truststore', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Truststore');
+    this.helpPages.set('/pmode-current', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PMode-Current');
+    this.helpPages.set('/pmode-archive', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PMode-Archive');
+    this.helpPages.set('/pmode-party', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PMode-Parties');
+    this.helpPages.set('/errorlog', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'ErrorLog');
+    this.helpPages.set('/jms', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'JMSMonitoring');
+    this.helpPages.set('/user', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Users');
+    this.helpPages.set('/pluginuser', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PluginUsers');
+    this.helpPages.set('/audit', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Audit');
+    this.helpPages.set('/alerts', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Alerts');
+    this.helpPages.set('/testservice', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'TestService');
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         let url = event.url.split('?')[0];
@@ -52,7 +56,7 @@ export class PageHelperComponent implements OnInit {
 
 
   openHelpDialog() {
-    window.open(this.pageName, "_blank");
+    window.open(this.pageName, '_blank');
   }
 
 }

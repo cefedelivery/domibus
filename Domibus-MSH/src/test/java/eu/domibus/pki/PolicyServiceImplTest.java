@@ -2,6 +2,8 @@ package eu.domibus.pki;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Security;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import mockit.Expectations;
@@ -67,6 +69,20 @@ public class PolicyServiceImplTest {
 
         try {
             policyService.parsePolicy("NonExistentFileLocation");
+        } catch (Exception e) {
+            Assert.assertTrue("Expecting ConfigurationException", e instanceof ConfigurationException);
+        }
+    }
+
+    @Test
+    public void testGetPolicy() {
+        LegConfiguration legConfiguration = new LegConfiguration();
+        Security securityPolicy = new Security();
+        securityPolicy.setPolicy("NonExistentPolicy");
+        legConfiguration.setSecurity(securityPolicy);
+
+        try {
+            policyService.getPolicy(legConfiguration);
         } catch (Exception e) {
             Assert.assertTrue("Expecting ConfigurationException", e instanceof ConfigurationException);
         }

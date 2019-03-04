@@ -9,7 +9,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
-import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
