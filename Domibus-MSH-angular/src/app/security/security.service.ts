@@ -53,8 +53,8 @@ export class SecurityService {
   login_extauthprovider(): Promise<boolean> {
     console.log('login from auth external provider');
     return new Promise((resolve, reject) => {
-        const res = this.getCurrentUserAndSaveLocally();
-        resolve(res);
+      const res = this.getCurrentUserAndSaveLocally();
+      resolve(res);
     });
   }
 
@@ -71,7 +71,7 @@ export class SecurityService {
     } catch (ex) {
       console.log('getCurrentUserAndSaveLocally error' + ex);
     }
-    return  userSet;
+    return userSet;
   }
 
   logout() {
