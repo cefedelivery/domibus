@@ -258,7 +258,7 @@ public class DomibusRestClient {
 
 	public void createPluginUser(String username, String role, String pass, String domain) {
 		HashMap<String, String> user = getAdminUser();
-		String payloadTemplate = "[{\"status\":\"NEW\",\"username\":\"%s\",\"authenticationType\":\"BASIC\",\"$$index\":0,\"authRoles\":\"%s\",\"passwd\":\"%s\"}]";
+		String payloadTemplate = "[{\"status\":\"NEW\",\"userName\":\"%s\",\"active\":true,\"suspended\":false,\"authenticationType\":\"BASIC\",\"$$index\":0,\"authRoles\":\"%s\",\"password\":\"%s\"}]";
 		String payload = String.format(payloadTemplate, username, role, pass);
 
 		List<NewCookie> cookies = login(user.get("username"), user.get("pass"));

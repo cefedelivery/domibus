@@ -305,51 +305,36 @@ public class MessageFilterPgTest extends BaseTest {
 	}
 
 
-//	@Test(description = "MSGF-11", groups = {"multiTenancy"})
-//	public void filtersNotVisibleOnWrongDomains() throws Exception {
-////		Create a filter to check on Default domain
-//		String actionName = Generator.randomAlphaNumeric(5);
-//		rest.createMessageFilter(actionName, null);
-//
-//
-//		SoftAssert soft = new SoftAssert();
-//
-//		MessageFilterPage page = new MessageFilterPage(driver);
-//		page.refreshPage();
-//
-//		int index = scrollToFilterByAction(actionName);
-//		if(index<0){throw new RuntimeException("Could not find created filter");}
-//
-////		select whatever domain is on second position in the list
-//		page.pageHeader.getDomainSelector().selectOptionByIndex(1);
-//
-//		index = scrollToFilterByAction(actionName);
-//		soft.assertTrue(index<0, "Check if filter is still present in the grid");
-//
-////		select default domain
-//		page.pageHeader.getDomainSelector().selectOptionByText("Default");
-//
-//		index = scrollToFilterByAction(actionName);
-//		soft.assertTrue(!(index<0), "Check if filter is still present in the grid");
-//
-////		Delete the created filter
-//		rest.deleteMessageFilter(actionName, null);
-//
-//		soft.assertAll();
-//	}
-//
-//	private int scrollToFilterByAction(String action){
-//		MessageFilterPage page = new MessageFilterPage(driver);
-//
-//		int index = -1;
-//
-//		ArrayList<MessageFilterRow> filterRows = page.getMessageFilterGrid().filterRows;
-//		for (int i = 0; i < filterRows.size(); i++) {
-//			MessageFilterRow filterRow = filterRows.get(i);
-//			if(filterRow.getAction().equalsIgnoreCase(action)){index = i;}
-//		}
-//		return index;
-//	}
+	@Test(description = "MSGF-11", groups = {"multiTenancy"})
+	public void filtersNotVisibleOnWrongDomains() throws Exception {
+//		Create a filter to check on Default domain
+		String actionName = Generator.randomAlphaNumeric(5);
+		rest.createMessageFilter(actionName, null);
 
+
+		SoftAssert soft = new SoftAssert();
+
+		MessageFilterPage page = new MessageFilterPage(driver);
+		page.refreshPage();
+
+		int index = page.grid().scrollTo("Action", actionName);
+		if(index<0){throw new RuntimeException("Could not find created filter");}
+
+//		select whatever domain is on second position in the list
+		page.getDomainSelector().selectOptionByIndex(1);
+		index = page.grid().scrollTo("Action", actionName);
+		soft.assertTrue(index<0, "Check if filter is still present in the grid (1)");
+
+//		select default domain
+		page.getDomainSelector().selectOptionByText("Default");
+
+		index = page.grid().scrollTo("Action", actionName);
+		soft.assertTrue(!(index<0), "Check if filter is still present in the grid (2)");
+
+//		Delete the created filter
+		rest.deleteMessageFilter(actionName, null);
+
+		soft.assertAll();
+	}
 
 }

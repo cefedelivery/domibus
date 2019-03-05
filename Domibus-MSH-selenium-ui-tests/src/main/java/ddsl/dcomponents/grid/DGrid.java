@@ -19,8 +19,6 @@ import java.util.List;
  * @author Catalin Comanici
  * @version 4.1
  */
-
-
 public class DGrid extends DComponent {
 
 	public DGrid(WebDriver driver, WebElement container) {

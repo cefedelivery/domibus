@@ -74,6 +74,27 @@ public class UsersPgTest extends BaseTest {
 		soft.assertAll();
 	}
 
+	@Test(description = "USR-1.2", groups = {"multiTenancy", "singleTenancy"})
+	public void openModalDeletedUser() throws Exception {
+		SoftAssert soft = new SoftAssert();
+		loginAndGoToUsersPage(data.getAdminUser());
+		String username = Generator.randomAlphaNumeric(10);
+		rest.createUser(username, DRoles.USER, data.getDefaultTestPass(), null);
+		rest.deleteUser(username, null);
+
+		UsersPage page = new UsersPage(driver);
+		page.refreshPage();
+
+//		DoubleClick on the row doesn't work as expected due to the fact that not the whole area is clickable
+//		This is circumvented for the time being by clicking the Edit button
+		page.grid().scrollToAndSelect("Username", username);
+		soft.assertTrue(!page.getEditBtn().isEnabled(), "Edit button is not enabled for deleted users!");
+		soft.assertTrue(!page.getDeleteBtn().isEnabled(), "Delete button is not enabled for deleted users!");
+
+
+		soft.assertAll();
+	}
+
 	@Test(description = "USR-2", groups = {"multiTenancy", "singleTenancy"})
 	public void newUserCancel() throws Exception {
 

@@ -10,7 +10,7 @@ package ddsl.enums;
 public class DMessages {
 
 
-	public static final String MSG_1 = "The username/password combination you provided are not valid. Please try again or contact your administrator.";
+	public static final String MSG_1 = "The username/password combination you provided is not valid. Please try again or contact your administrator.";
 	public static final String MSG_2 = "Too many invalid attempts to log in. Access has been temporarily suspended. Please try again later with the right credentials.";
 	public static final String MSG_2_1 = "The user is suspended. Please try again later or contact your administrator.";
 	public static final String MSG_2_2 = "The user is inactive. Please contact your administrator.";
