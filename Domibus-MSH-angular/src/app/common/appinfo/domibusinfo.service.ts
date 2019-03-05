@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
-import {ReplaySubject} from 'rxjs';
 import {DomibusInfo} from './domibusinfo';
+import {SupportTeamInfo} from "../../security/not-authorized/supportteaminfo";
 
 @Injectable()
 export class DomibusInfoService {
@@ -11,6 +10,7 @@ export class DomibusInfoService {
   private isFourCornerEnabledPromise: Promise<boolean>;
   private isExtAuthProviderEnabledPromise: Promise<boolean>;
   private domibusInfo: Promise<DomibusInfo>;
+  private supportTeamInfo: Promise<SupportTeamInfo>;
 
   constructor(private http: Http) {
   }
@@ -38,5 +38,13 @@ export class DomibusInfoService {
         .map((res: Response) => res.json()).toPromise();
     }
     return this.isExtAuthProviderEnabledPromise;
+  }
+
+  getSupportTeamInfo(): Promise<SupportTeamInfo> {
+    if (!this.supportTeamInfo) {
+      this.supportTeamInfo = this.http.get('rest/application/supportteam')
+        .map((res: Response) => res.json()).toPromise();
+    }
+    return this.supportTeamInfo;
   }
 }

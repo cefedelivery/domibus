@@ -4,6 +4,7 @@ import {AuthenticatedGuard} from './common/guards/authenticated.guard';
 import {ErrorLogComponent} from './errorlog/errorlog.component';
 import {CurrentPModeComponent} from './pmode/current/currentPMode.component';
 import {PModeArchiveComponent} from './pmode/archive/pmodeArchive.component';
+import {AuthorizedGuard} from "./common/guards/authorized.guard";
 import {AuthorizedAdminGuard} from './common/guards/authorized-admin.guard';
 import {MessageFilterComponent} from './messagefilter/messagefilter.component';
 import {MessageLogComponent} from './messagelog/messagelog.component';
@@ -22,12 +23,14 @@ import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
 import {LogoutAuthExtProviderComponent} from "./security/logout/logout.components";
 import {RedirectHomeGuard} from "./common/guards/redirect-home.guard";
+import {NotAuthorizedComponent} from "./security/not-authorized/not-authorized.components";
+
 
 const appRoutes: Routes = [
   {
     path: '',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]
   },
   {
     path: 'pmode-current',
@@ -67,7 +70,7 @@ const appRoutes: Routes = [
   {
     path: 'messagelog',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]
   },
   {
     path: 'user',
@@ -81,7 +84,7 @@ const appRoutes: Routes = [
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
-  {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
+  {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]},
   {path: 'login', component: LoginComponent, canActivate: [AuthExternalProviderGuard, RedirectHomeGuard]},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
@@ -96,6 +99,7 @@ const appRoutes: Routes = [
     }
   },
   {path: 'logout', component: LogoutAuthExtProviderComponent},
+  {path: 'notAuthorized', component: NotAuthorizedComponent, canActivate: [AuthenticatedGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];

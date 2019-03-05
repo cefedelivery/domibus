@@ -10,9 +10,9 @@ import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
+import eu.domibus.web.rest.ro.SupportTeamInfoRO;
 import mockit.Expectations;
 import mockit.Injectable;
-import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Tiago Miguel
+ * @author Tiago Miguel, Catalin Enache
  * @since 3.3
  */
 @RunWith(JMockit.class)
@@ -149,5 +149,25 @@ public class ApplicationResourceTest {
         boolean isFourCornerEnabled = applicationResource.getFourCornerModelEnabled();
 
         Assert.assertEquals(false, isFourCornerEnabled);
+    }
+
+    @Test
+    public void testGetSupportTeamInfo() {
+        final String supportTeamName = "The Avengers";
+        final String supportTeamEmail = "ironman@avengers.com";
+        new Expectations() {{
+            domibusPropertyProvider.getDomainProperty(ApplicationResource.SUPPORT_TEAM_NAME_KEY);
+            result = supportTeamName;
+
+            domibusPropertyProvider.getDomainProperty(ApplicationResource.SUPPORT_TEAM_EMAIL_KEY);
+            result = supportTeamEmail;
+        }};
+
+        //tested method
+        SupportTeamInfoRO supportTeamInfoRO = applicationResource.getSupportTeamInfo();
+
+        Assert.assertNotNull(supportTeamInfoRO);
+        Assert.assertEquals(supportTeamName, supportTeamInfoRO.getName());
+        Assert.assertEquals(supportTeamEmail, supportTeamInfoRO.getEmail());
     }
 }
