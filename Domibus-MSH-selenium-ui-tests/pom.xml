@@ -173,8 +173,8 @@
 								<data.folder>./src/main/resources/</data.folder>
 								<test_data.file>multiTenenacytestData.json</test_data.file>
 								<isMultiDomain>true</isMultiDomain>
-								<LONG_TIMEOUT>20</LONG_TIMEOUT>
-								<SHORT_TIMEOUT>10</SHORT_TIMEOUT>
+								<LONG_TIMEOUT>30</LONG_TIMEOUT>
+								<SHORT_TIMEOUT>15</SHORT_TIMEOUT>
 								<UI_BASE_URL>http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus/</UI_BASE_URL>
 
 							</systemPropertyVariables>
