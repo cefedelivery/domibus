@@ -168,7 +168,7 @@
 							<systemPropertyVariables>
 								<webdriver.ie.driver>.\src\main\resources\IEDriverServer.exe</webdriver.ie.driver>
 								<webdriver.chrome.driver>chromedriver.exe</webdriver.chrome.driver>
-								<webdriver.ghecko.driver>/home/edelivery/drivers/geckodriver</webdriver.ghecko.driver>
+								<webdriver.gecko.driver>/home/edelivery/drivers/geckodriver</webdriver.gecko.driver>
 								<reports.folder>./target/</reports.folder>
 								<data.folder>./src/main/resources/</data.folder>
 								<test_data.file>multiTenenacytestData.json</test_data.file>
