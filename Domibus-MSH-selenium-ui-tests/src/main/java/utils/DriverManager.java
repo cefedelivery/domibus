@@ -15,7 +15,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 public class DriverManager {
 
 	public static WebDriver getDriver() {
-		return new FirefoxDriver();
+		System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE,"true");
+		System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE,"/dev/null");
+		WebDriver driver = new FirefoxDriver();
+		driver.manage().window().maximize();
+		return driver;
 	}
 
 
