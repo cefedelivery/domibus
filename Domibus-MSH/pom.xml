@@ -256,6 +256,7 @@
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
         </dependency>
+        <!-- End Difi libraries -->
 
         <!-- eDelivery SMP profile  -->
         <dependency>
