@@ -11,9 +11,15 @@ import java.util.List;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  * <p>
- * Dss validation produces Simple report element. This class validate simple reports.
+ * Dss validation produces Simple report element.
+ * This class validate simple reports.
+ * It is possible to chain the validation by implementing other SimpleReportValidationStep and define the chain order
+ * with the Order annotation.
+ *
+ * @see eu.domibus.core.crypto.spi.dss.SimpleReportValidationStep
+ * @see eu.domibus.core.crypto.spi.dss.SimpleReportTrustAnchorValidatorStep
  */
 @Component
 public class SimpleReportValidator {

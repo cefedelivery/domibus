@@ -2,6 +2,8 @@ package eu.domibus.core.crypto.spi.dss;
 
 import eu.europa.esig.dss.jaxb.simplecertificatereport.SimpleCertificateReport;
 import eu.europa.esig.dss.jaxb.simplecertificatereport.XmlChainItem;
+import eu.europa.esig.dss.jaxb.simplecertificatereport.XmlTrustAnchor;
+import eu.europa.esig.dss.validation.policy.rules.Indication;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Tested;
@@ -59,4 +61,80 @@ public class SimpleReportTrustAnchorValidatorStepTest {
 
         Assert.assertFalse(simpleReportTrustAnchorValidatorStep.isValid(simpleCertificateReport));
     }
+
+    @Test
+    public void isValidWithAnchorButIndicationIsNull(@Mocked final SimpleCertificateReport simpleCertificateReport,
+                                                     @Mocked final XmlChainItem chainItem,
+                                                     @Mocked final XmlTrustAnchor xmlTrustAnchor) {
+        List<XmlChainItem> chains = new ArrayList<>();
+        chains.add(chainItem);
+
+        List<XmlTrustAnchor> anchors = new ArrayList<>();
+        anchors.add(xmlTrustAnchor);
+
+        new Expectations() {{
+            simpleCertificateReport.getChain();
+            result = chains;
+
+            chainItem.getTrustAnchors();
+            result = anchors;
+
+            chainItem.getIndication();
+            result = null;
+
+        }};
+
+        Assert.assertFalse(simpleReportTrustAnchorValidatorStep.isValid(simpleCertificateReport));
+    }
+
+    @Test
+    public void isValidWithAnchorButIndicationFailed(@Mocked final SimpleCertificateReport simpleCertificateReport,
+                                                     @Mocked final XmlChainItem chainItem,
+                                                     @Mocked final XmlTrustAnchor xmlTrustAnchor) {
+        List<XmlChainItem> chains = new ArrayList<>();
+        chains.add(chainItem);
+
+        List<XmlTrustAnchor> anchors = new ArrayList<>();
+        anchors.add(xmlTrustAnchor);
+
+        new Expectations() {{
+            simpleCertificateReport.getChain();
+            result = chains;
+
+            chainItem.getTrustAnchors();
+            result = anchors;
+
+            chainItem.getIndication();
+            result = Indication.FAILED;
+
+        }};
+
+        Assert.assertFalse(simpleReportTrustAnchorValidatorStep.isValid(simpleCertificateReport));
+    }
+
+    @Test
+    public void isValid(@Mocked final SimpleCertificateReport simpleCertificateReport,
+                        @Mocked final XmlChainItem chainItem,
+                        @Mocked final XmlTrustAnchor xmlTrustAnchor) {
+        List<XmlChainItem> chains = new ArrayList<>();
+        chains.add(chainItem);
+
+        List<XmlTrustAnchor> anchors = new ArrayList<>();
+        anchors.add(xmlTrustAnchor);
+
+        new Expectations() {{
+            simpleCertificateReport.getChain();
+            result = chains;
+
+            chainItem.getTrustAnchors();
+            result = anchors;
+
+            chainItem.getIndication();
+            result = Indication.PASSED;
+
+        }};
+
+        Assert.assertTrue(simpleReportTrustAnchorValidatorStep.isValid(simpleCertificateReport));
+    }
+
 }

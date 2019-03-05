@@ -1,7 +1,7 @@
 package eu.domibus.core.crypto.spi.dss;
 
 import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
-import eu.europa.esig.dss.jaxb.simplecertificatereport.SimpleCertificateReport;
+import eu.europa.esig.dss.jaxb.detailedreport.DetailedReport;
 import eu.europa.esig.dss.tsl.service.TSLRepository;
 import eu.europa.esig.dss.validation.CertificateValidator;
 import eu.europa.esig.dss.validation.CertificateVerifier;
@@ -31,7 +31,7 @@ public class DomibusDssCryptoProviderTest {
     private TSLRepository tslRepository;
 
     @Injectable
-    private SimpleReportValidator simpleReportValidator;
+    private ValidationReport validationReport;
 
     @Injectable
     private DomainCryptoServiceSpi defaultDomainCryptoService;
@@ -42,14 +42,8 @@ public class DomibusDssCryptoProviderTest {
     @org.junit.Test(expected = WSSecurityException.class)
     public void verifyTrustNoChain(@Mocked X509Certificate leafCertificate) throws WSSecurityException {
         final X509Certificate[] x509Certificates = {leafCertificate};
-        try {
-            domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
-            assertTrue(false);
-        } catch (WSSecurityException e) {
-            throw e;
-            //@todo check what is going on here.
-            //assertEquals("The chain of certificate should contain at least two certificates",e.getMessage());
-        }
+        domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
+        assertTrue(false);
     }
 
     @org.junit.Test(expected = WSSecurityException.class)
@@ -63,14 +57,8 @@ public class DomibusDssCryptoProviderTest {
             chainCertificate.getBasicConstraints();
             result = 0;
         }};
-        try {
-            domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
-            assertTrue(false);
-        } catch (WSSecurityException e) {
-            throw e;
-            //@todo check what is going on here.
-            //assertEquals("The chain of certificate should contain at least two certificates",e.getMessage());
-        }
+        domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
+        assertTrue(false);
     }
 
     @org.junit.Test(expected = WSSecurityException.class)
@@ -78,7 +66,7 @@ public class DomibusDssCryptoProviderTest {
                                     @Mocked X509Certificate chainCertificate,
                                     @Mocked CertificateValidator certificateValidator,
                                     @Mocked CertificateReports reports,
-                                    @Mocked SimpleCertificateReport simpleCertificateReport) throws WSSecurityException {
+                                    @Mocked DetailedReport detailedReport) throws WSSecurityException {
         final X509Certificate[] x509Certificates = {noLeafCertificate, chainCertificate};
         org.apache.xml.security.Init.init();
 
@@ -99,18 +87,14 @@ public class DomibusDssCryptoProviderTest {
 
             certificateValidator.validate();
             result = reports;
-            reports.getSimpleReportJaxb();
-            result = simpleCertificateReport;
+            reports.getDetailedReportJaxb();
+            result = detailedReport;
 
         }};
-        try {
             domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
             assertTrue(false);
-        } catch (WSSecurityException e) {
-            throw e;
-        }
         new Verifications() {{
-            simpleReportValidator.isValid(simpleCertificateReport);
+            validationReport.isValid(detailedReport);
             times = 1;
         }};
 
@@ -121,7 +105,7 @@ public class DomibusDssCryptoProviderTest {
                                  @Mocked X509Certificate chainCertificate,
                                  @Mocked CertificateValidator certificateValidator,
                                  @Mocked CertificateReports reports,
-                                 @Mocked SimpleCertificateReport simpleCertificateReport) throws WSSecurityException {
+                                 @Mocked DetailedReport detailedReport) throws WSSecurityException {
         final X509Certificate[] x509Certificates = {noLeafCertificate, chainCertificate};
         org.apache.xml.security.Init.init();
 
@@ -143,18 +127,14 @@ public class DomibusDssCryptoProviderTest {
             certificateValidator.validate();
             result = reports;
 
-            reports.getSimpleReportJaxb();
-            result = simpleCertificateReport;
+            reports.getDetailedReportJaxb();
+            result = detailedReport;
 
-            simpleReportValidator.isValid(simpleCertificateReport);
+            validationReport.isValid(detailedReport);
             result = true;
 
         }};
-        try {
             domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
-        } catch (WSSecurityException e) {
-            assertTrue(false);
-        }
 
     }
 

@@ -11,19 +11,22 @@ import eu.europa.esig.dss.x509.KeyStoreCertificateSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
+import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  * <p>
  * Load dss beans.
  */
@@ -34,15 +37,6 @@ public class DssConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DssConfiguration.class);
 
-    private static final String CUSTOM_TRUSTED_LIST_URL_PROPERTY = "domibus.dss.custom.trusted.list.url[%s]";
-
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY = "domibus.dss.custom.trusted.list.keystore.type[%s]";
-
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY = "domibus.dss.custom.trusted.list.keystore.path[%s]";
-
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY = "domibus.dss.custom.trusted.list.keystore.password[%s]";
-
-    private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.dss.custom.trusted.list.country.code[%s]";
 
     @Value("${domibus.oj.content.keystore.type}")
     private String keystoreType;
@@ -68,35 +62,38 @@ public class DssConfiguration {
     @Value("${domibus.dss.cache.path}")
     private String dssCachePath;
 
-    @Value("domibus.dss.proxy.https.host")
+    @Value("${domibus.dss.proxy.https.host}")
     private String httpsHost;
 
-    @Value("domibus.dss.proxy.https.port")
+    @Value("${domibus.dss.proxy.https.port}")
     private String httpsPort;
 
-    @Value("domibus.dss.proxy.https.user")
+    @Value("${domibus.dss.proxy.https.user}")
     private String httpsUser;
 
-    @Value("domibus.dss.proxy.https.password")
+    @Value("${domibus.dss.proxy.https.password}")
     private String httpsPassword;
 
-    @Value("domibus.dss.proxy.https.excludedHosts")
+    @Value("${domibus.dss.proxy.https.excludedHosts}")
     private String httpsExcludesHosts;
 
-    @Value("domibus.dss.proxy.http.host")
+    @Value("${domibus.dss.proxy.http.host}")
     private String httpHost;
 
-    @Value("domibus.dss.proxy.http.port")
+    @Value("${domibus.dss.proxy.http.port}")
     private String httpPort;
 
-    @Value("domibus.dss.proxy.http.user")
+    @Value("${domibus.dss.proxy.http.user}")
     private String httpUser;
 
-    @Value("domibus.dss.proxy.http.password")
+    @Value("${domibus.dss.proxy.http.password}")
     private String httpPassword;
 
-    @Value("domibus.dss.proxy.http.excludedHosts")
+    @Value("${domibus.dss.proxy.http.excludedHosts}")
     private String httpExcludedHosts;
+
+    @Value("${domibus.dss.refresh.cron}")
+    private String dssRefreshCronExpression;
 
     @Bean
     public TrustedListsCertificateSource trustedListSource() {
@@ -122,7 +119,7 @@ public class DssConfiguration {
         certificateVerifier.setDataLoader(dataLoader());*/
 
         // Default configs
-        certificateVerifier.setExceptionOnMissingRevocationData(true);
+        certificateVerifier.setExceptionOnMissingRevocationData(false);
         certificateVerifier.setCheckRevocationForUntrustedChains(false);
 
         return certificateVerifier;
@@ -145,55 +142,7 @@ public class DssConfiguration {
 
     @Bean
     List<OtherTrustedList> otherTrustedLists(Environment env) {
-        int count = 0;
-        boolean propertyExist;
-        List<OtherTrustedList> customLists = new ArrayList<>();
-        do {
-            final String customListUrlPropertyKey = String.format(CUSTOM_TRUSTED_LIST_URL_PROPERTY, count);
-            propertyExist = env.containsProperty(customListUrlPropertyKey);
-            LOG.debug("Property for key:[{}] exist:[{}]", customListUrlPropertyKey, propertyExist);
-            if (propertyExist) {
-                final String customListKeystorePathPropertyKey = String.format(CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY, count);
-                LOG.trace("customListKeystorePathPropertyKey:[{}]", customListKeystorePathPropertyKey);
-
-                final String customListKeystoreTypePropertyKey = String.format(CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY, count);
-                LOG.trace("customListKeystoreTypePropertyKey:[{}]", customListKeystoreTypePropertyKey);
-
-                final String customListKeystorePasswordPropertyKey = String.format(CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY, count);
-                LOG.trace("customListKeystorePasswordPropertyKey:[{}]", customListKeystorePasswordPropertyKey);
-
-                final String customListCountryCodePropertyKey = String.format(CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY, count);
-                LOG.trace("customListCountryCodePropertyKey:[{}]", customListCountryCodePropertyKey);
-
-                final String customListUrl = env.getProperty(customListUrlPropertyKey);
-                LOG.debug("Custom list:[{}] url:[{}]", count, customListUrl);
-
-                final String customListKeystorePath = env.getProperty(customListKeystorePathPropertyKey);
-                LOG.debug("Custom list:[{}] keystore path:[{}]", count, customListKeystorePath);
-
-                final String customListKeystoreType = env.getProperty(customListKeystoreTypePropertyKey);
-                LOG.debug("Custom list:[{}] keystore type:[{}]", count, customListKeystoreType);
-
-                final String customListCountryCode = env.getProperty(customListCountryCodePropertyKey);
-                LOG.debug("Custom list:[{}] country code:[{}]", count, customListCountryCode);
-
-                final String customListKeystorePassword = env.getProperty(customListKeystorePasswordPropertyKey);
-
-                OtherTrustedList otherTrustedList = new OtherTrustedList();
-                try {
-                    otherTrustedList.setTrustStore(
-                            new KeyStoreCertificateSource(new File(customListKeystorePath), customListKeystoreType, customListKeystorePassword));
-                    otherTrustedList.setUrl(customListUrl);
-                    otherTrustedList.setCountryCode(customListCountryCode);
-                    customLists.add(otherTrustedList);
-                } catch (IOException e) {
-                    LOG.error("Error while loading custom trust list", e);
-                }
-            }
-            count++;
-        } while (propertyExist);
-
-        return customLists;
+        return new OtherTrustedListPropertyMapper(env).map();
     }
 
     @Bean
@@ -214,13 +163,11 @@ public class DssConfiguration {
         validationJob.setCheckTSLSignatures(true);
         validationJob.setOtherTrustedLists(otherTrustedLists);
         validationJob.initRepository();
-        checkCacheConfigAndInitialize(validationJob);
-        //validationJob.refresh();
-
+        validationJob.refresh();
         return validationJob;
     }
 
-    private void checkCacheConfigAndInitialize(TSLValidationJob validationJob) {
+   /* private void checkCacheConfigAndInitialize(TSLValidationJob validationJob) {
         final File file = new File(dssCachePath);
         if (!file.exists()) {
             LOG.warn("Dss cache directory:[{}] does not exist, trusted lists can not be loaded", dssCachePath);
@@ -233,5 +180,31 @@ public class DssConfiguration {
         } else {
             LOG.info("Dss cache directory:[{}] contains:[{}] file", dssCachePath, cacheFiles.length);
         }
+    }*/
+
+    @Bean
+    public JobDetailFactoryBean dssRefreshJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(DssRefreshWorker.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean dssRefreshTrigger() {
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(dssRefreshJob().getObject());
+        obj.setCronExpression(dssRefreshCronExpression);
+        obj.setGroup("GENERAL");
+        LOG.debug("dssRefreshTrigger configured with cronExpression [{}]", dssRefreshCronExpression);
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
+    @Bean
+    public ValidationReport validationReport(Environment env) {
+        final List<ConstraintInternal> constraints = new ConstraintPropertyMapper(env).map();
+        return new ValidationReport(constraints);
     }
 }

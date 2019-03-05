@@ -3,7 +3,7 @@ package eu.domibus.core.crypto.spi.dss;
 import com.google.common.collect.Lists;
 import eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi;
 import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
-import eu.europa.esig.dss.jaxb.simplecertificatereport.SimpleCertificateReport;
+import eu.europa.esig.dss.jaxb.detailedreport.DetailedReport;
 import eu.europa.esig.dss.tsl.TLInfo;
 import eu.europa.esig.dss.tsl.service.TSLRepository;
 import eu.europa.esig.dss.validation.CertificateValidator;
@@ -43,18 +43,18 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     private TSLRepository tslRepository;
 
-    private SimpleReportValidator simpleReportValidator;
+    private ValidationReport validationReport;
 
     @Autowired
     public DomibusDssCryptoProvider(
             @Qualifier(DEFAULT_IAM_SPI) final DomainCryptoServiceSpi defaultDomainCryptoService,
             final CertificateVerifier certificateVerifier,
             final TSLRepository tslRepository,
-            final SimpleReportValidator simpleReportValidator) {
+            final ValidationReport validationReport) {
         super(defaultDomainCryptoService);
         this.certificateVerifier = certificateVerifier;
         this.tslRepository = tslRepository;
-        this.simpleReportValidator = simpleReportValidator;
+        this.validationReport = validationReport;
         //WSSec
     }
 
@@ -80,9 +80,9 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     private void validate(CertificateValidator certificateValidator) throws WSSecurityException {
         CertificateReports reports = certificateValidator.validate();
-        LOG.debug("Simple report:[{}]", reports.getXmlSimpleReport());
-        final SimpleCertificateReport simpleReportJaxb = reports.getSimpleReportJaxb();
-        final boolean valid = simpleReportValidator.isValid(simpleReportJaxb);
+        LOG.debug("Simple report:[{}]", reports.getXmlDetailedReport());
+        final DetailedReport detailedReport = reports.getDetailedReportJaxb();
+        final boolean valid = validationReport.isValid(detailedReport);
         if (!valid) {
             throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "certpath", new Object[]{"No trusted certs found"});
         }

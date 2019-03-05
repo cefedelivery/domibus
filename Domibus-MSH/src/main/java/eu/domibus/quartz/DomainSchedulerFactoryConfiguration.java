@@ -31,6 +31,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,10 +43,11 @@ import java.util.stream.Collectors;
  * @since 4.0
  */
 @Configuration
-@DependsOn("springContextProvider")
+@DependsOn({"springContextProvider", "dssConfiguration"})
 public class DomainSchedulerFactoryConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainSchedulerFactoryConfiguration.class);
+
     private static final String GROUP_GENERAL = "GENERAL";
 
     @Autowired
@@ -278,6 +280,11 @@ public class DomainSchedulerFactoryConfiguration {
                 .filter(trigger -> trigger instanceof CronTriggerImpl &&
                         ((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
                 .collect(Collectors.toList());
+        if (LOG.isDebugEnabled()) {
+            for (Trigger trigger : domibusStandardTriggerList) {
+                LOG.debug("Add trigger:[{}] to general scheduler factory", trigger);
+            }
+        }
         schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
         return schedulerFactoryBean;
     }
