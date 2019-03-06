@@ -371,7 +371,6 @@
                 <artifactId>hibernate-jpamodelgen</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.mchange</groupId>
                 <artifactId>c3p0</artifactId>
@@ -391,7 +390,6 @@
                 <artifactId>jaxb-core</artifactId>
                 <version>${jaxb.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
@@ -521,7 +519,6 @@
                 <artifactId>guava</artifactId>
                 <version>27.0.1-jre</version>
             </dependency>
-
             <dependency>
                 <groupId>org.joda</groupId>
                 <artifactId>joda-convert</artifactId>
@@ -532,7 +529,6 @@
                 <artifactId>jsr305</artifactId>
                 <version>3.0.0</version>
             </dependency>
-
             <dependency>
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>
@@ -574,6 +570,7 @@
                 <version>${dom4j.version}</version>
             </dependency>
 
+            <!-- Apache Tika -->
             <dependency>
                 <groupId>org.apache.tika</groupId>
                 <artifactId>tika-core</artifactId>
