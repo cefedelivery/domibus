@@ -375,17 +375,17 @@
 				<leg name="pushConnectivityTest"/>
 			</legs>
 		</process>	
-		<process name="tc13Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="red_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="blue_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pullTestcase13tc13Action"/>
-			</legs>
-		</process>		
+		<!--<process name="tc13Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
+			<!--<initiatorParties>-->
+				<!--<initiatorParty name="red_gw"/>-->
+			<!--</initiatorParties>-->
+			<!--<responderParties>-->
+				<!--<responderParty name="blue_gw"/>-->
+			<!--</responderParties>-->
+			<!--<legs>-->
+				<!--<leg name="pullTestcase13tc13Action"/>-->
+			<!--</legs>-->
+		<!--</process>		-->
 		<process name="tc14Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="red_gw"/>
@@ -397,50 +397,50 @@
 				<leg name="pullTestcase14tc14Action"/>
 			</legs>
 		</process>
-		<process name="tc15Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="red_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="blue_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pullTestcase15tc15Action"/>
-			</legs>
-		</process>
-		<process name="tc16Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="red_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="blue_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pullTestcase16tc16Action"/>
-			</legs>
-		</process>
-		<process name="tc17Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="red_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="blue_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pullTestcase17tc17Action"/>
-			</legs>
-		</process>
-		<process name="tc18Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="blue_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="blue_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pullTestcase18tc18Action"/>
-			</legs>
-		</process>
+		<!--<process name="tc15Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
+			<!--<initiatorParties>-->
+				<!--<initiatorParty name="red_gw"/>-->
+			<!--</initiatorParties>-->
+			<!--<responderParties>-->
+				<!--<responderParty name="blue_gw"/>-->
+			<!--</responderParties>-->
+			<!--<legs>-->
+				<!--<leg name="pullTestcase15tc15Action"/>-->
+			<!--</legs>-->
+		<!--</process>-->
+		<!--<process name="tc16Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
+			<!--<initiatorParties>-->
+				<!--<initiatorParty name="red_gw"/>-->
+			<!--</initiatorParties>-->
+			<!--<responderParties>-->
+				<!--<responderParty name="blue_gw"/>-->
+			<!--</responderParties>-->
+			<!--<legs>-->
+				<!--<leg name="pullTestcase16tc16Action"/>-->
+			<!--</legs>-->
+		<!--</process>-->
+		<!--<process name="tc17Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
+			<!--<initiatorParties>-->
+				<!--<initiatorParty name="red_gw"/>-->
+			<!--</initiatorParties>-->
+			<!--<responderParties>-->
+				<!--<responderParty name="blue_gw"/>-->
+			<!--</responderParties>-->
+			<!--<legs>-->
+				<!--<leg name="pullTestcase17tc17Action"/>-->
+			<!--</legs>-->
+		<!--</process>-->
+		<!--<process name="tc18Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
+			<!--<initiatorParties>-->
+				<!--<initiatorParty name="blue_gw"/>-->
+			<!--</initiatorParties>-->
+			<!--<responderParties>-->
+				<!--<responderParty name="blue_gw"/>-->
+			<!--</responderParties>-->
+			<!--<legs>-->
+				<!--<leg name="pullTestcase18tc18Action"/>-->
+			<!--</legs>-->
+		<!--</process>-->
 		<process name="tc19Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="blue_gw"/>
@@ -481,18 +481,18 @@
 			<legs>
 				<leg name="pushTestcase21tc21Action"/>
 			</legs>
-		</process>
-		<process name="tc22Process" agreement="agreementDummy" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
-			<initiatorParties>
-				<initiatorParty name="red_gw"/>
-			</initiatorParties>
-			<responderParties>
-				<responderParty name="blue_gw"/>
-			</responderParties>
-			<legs>
-				<leg name="pullTestcase22tc22Action"/>
-			</legs>
-		</process>
+		<!--</process>-->
+		<!--<process name="tc22Process" agreement="agreementDummy" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
+			<!--<initiatorParties>-->
+				<!--<initiatorParty name="red_gw"/>-->
+			<!--</initiatorParties>-->
+			<!--<responderParties>-->
+				<!--<responderParty name="blue_gw"/>-->
+			<!--</responderParties>-->
+			<!--<legs>-->
+				<!--<leg name="pullTestcase22tc22Action"/>-->
+			<!--</legs>-->
+		<!--</process>-->
 		<process name="tc23Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="blue_gw"/>

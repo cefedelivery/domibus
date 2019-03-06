@@ -41,6 +41,12 @@ public class NonRepudiationCheckerImplTest {
         assertEquals(referencesFromSecurityHeader.getLength(), 6);
     }
 
+//    @Test
+//    public void testGetNonRepudiationNodeListFromPullReceipt() throws Exception {
+//        final NodeList referencesFromSecurityHeader = getNonRepudiationListFromResponse("dataset/as4/MSHAS4Receipt.xml");
+//        assertEquals(referencesFromSecurityHeader.getLength(), 6);
+//    }
+
     @Test
     public void testGetNonRepudiationNodeListFromResponse() throws Exception {
         final NodeList referencesFromNonRepudiationInformation = getNonRepudiationListFromResponse("dataset/as4/MSHAS4Response.xml");
