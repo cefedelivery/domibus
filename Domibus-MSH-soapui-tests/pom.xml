@@ -62,6 +62,7 @@
                         <junitReport>true</junitReport>
                         <printReport>true</printReport>
                         <testSuite>WS-Auto-for-Bamboo</testSuite>
+                        <testCase>Dom395-Pull-Get Status-Basic flow-DELETED-DOWNLOADED</testCase>
                         <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
                         <projectProperties>
                             <value>${localUrl}</value>
