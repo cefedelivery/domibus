@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * @author Catalin Comanici
-
  * @version 4.1
  */
 
@@ -63,6 +62,15 @@ public class Pagination extends DComponent {
 
 		try {
 			return !("disabled".equalsIgnoreCase(getNextPageLnk().getAttribute("class")));
+		} catch (Exception e) {
+		}
+		return false;
+	}
+
+	public boolean hasPrevPage() {
+
+		try {
+			return !("disabled".equalsIgnoreCase(getPrevPageLnk().getAttribute("class")));
 		} catch (Exception e) {
 		}
 		return false;
@@ -157,13 +165,17 @@ public class Pagination extends DComponent {
 
 	public void goToNextPage() throws Exception {
 		log.info("going to next page");
-		getNextPageLnk().click();
+		if (hasNextPage()) {
+			getNextPageLnk().click();
+		}
 		PageFactory.initElements(driver, this);
 	}
 
 	public void goToPrevPage() throws Exception {
 		log.info("going to prev page");
-		getPrevPageLnk().click();
+		if (hasPrevPage()) {
+			getPrevPageLnk().click();
+		}
 		PageFactory.initElements(driver, this);
 	}
 
