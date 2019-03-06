@@ -113,7 +113,7 @@ public class ReliabilityChecker {
             //SignalMessage with Receipt expected
             messageId = getMessageId(signalMessage);
             if (signalMessage.getReceipt() != null && signalMessage.getReceipt().getAny().size() == 1) {
-
+                LOG.info("");
                 final String contentOfReceiptString = signalMessage.getReceipt().getAny().get(0);
 
                 try {
@@ -187,6 +187,9 @@ public class ReliabilityChecker {
                     ReliabilityChecker.LOG.error("", e);
                 } catch (final SOAPException e) {
                     ReliabilityChecker.LOG.error("", e);
+                } catch (final Exception e) {
+                    LOG.error("Other exc ~~~~~~~ ", e);
+                    throw e;
                 }
 
             } else {

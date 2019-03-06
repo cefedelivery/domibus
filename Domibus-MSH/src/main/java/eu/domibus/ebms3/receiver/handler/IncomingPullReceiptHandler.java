@@ -105,7 +105,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);
             return messageBuilder.getSoapMessage(ebMS3Exception);
         }
-        LOG.debug("[handlePullRequestReceipt]:Message:[{}] delete lock ", messageId);
+        LOG.debug("[handlePullRequestReceipt]:Message:[{}] get lock ", messageId);
 
         final MessagingLock lock = pullMessageService.getLock(messageId);
         if (lock == null || MessageState.WAITING != lock.getMessageState()) {
@@ -129,6 +129,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
                 throw e;
             }
             reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, pModeKey, pullReceiptMatcher);
+            LOG.info("ReliabilityCheck result is [{}]", reliabilityCheckSuccessful);
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
