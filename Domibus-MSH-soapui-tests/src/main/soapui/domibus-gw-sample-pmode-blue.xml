@@ -481,7 +481,7 @@
 			<legs>
 				<leg name="pushTestcase21tc21Action"/>
 			</legs>
-		<!--</process>-->
+		</process>
 		<!--<process name="tc22Process" agreement="agreementDummy" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">-->
 			<!--<initiatorParties>-->
 				<!--<initiatorParty name="red_gw"/>-->
