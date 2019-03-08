@@ -123,13 +123,16 @@ public class PluginUsersPgTest extends BaseTest {
 		soft.assertTrue(page.getSaveBtn().isEnabled(), "Save button is enabled after new user creation");
 
 		page.getSaveBtn().click();
-//		new Dialog(driver).confirm();
+		new Dialog(driver).confirm();
+		page.wait.forXMillis(300);
 
 		DGrid grid = page.grid();
 		grid.waitForRowsToLoad();
 
 		int index = page.grid().scrollTo("User Name", username);
 		soft.assertTrue(index > -1, "Created user present in grid");
+
+
 
 		soft.assertTrue(!page.getCancelBtn().isEnabled(), "Cancel button is disabled after new user persisted");
 		soft.assertTrue(!page.getSaveBtn().isEnabled(), "Save button is disabled after new user persisted");
@@ -449,6 +452,7 @@ public class PluginUsersPgTest extends BaseTest {
 		PluginUsersPage page = login(data.getAdminUser());
 		page.newUser(username, DRoles.USER, data.getDefaultTestPass(), data.getDefaultTestPass());
 		page.getSaveBtn().click();
+		new Dialog(driver).confirm();
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
@@ -477,6 +481,7 @@ public class PluginUsersPgTest extends BaseTest {
 		PluginUsersPage page = login(data.getAdminUser());
 		page.newUser(username, DRoles.USER, data.getDefaultTestPass(), data.getDefaultTestPass());
 		page.getSaveBtn().click();
+		new Dialog(driver).confirm();
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
@@ -505,6 +510,7 @@ public class PluginUsersPgTest extends BaseTest {
 		PluginUsersPage page = login(data.getAdminUser());
 		page.newUser(username, DRoles.USER, data.getDefaultTestPass(), data.getDefaultTestPass());
 		page.getSaveBtn().click();
+		new Dialog(driver).confirm();
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),
@@ -525,6 +531,7 @@ public class PluginUsersPgTest extends BaseTest {
 		PluginUsersPage page = login(data.getAdminUser());
 		page.newUser(username, DRoles.USER, data.getDefaultTestPass(), data.getDefaultTestPass());
 		page.getSaveBtn().click();
+		new Dialog(driver).confirm();
 
 		soft.assertTrue(page.getAlertArea().isError(), "Error message is shown");
 		soft.assertEquals(page.getAlertArea().getAlertMessage(),

@@ -1,9 +1,9 @@
 {
   "loginUsers" : {
-    "ROLE_AP_ADMIN" : {
-      "username" : "super",
-      "pass" : "Domibus-123"
-    }
+	"ROLE_AP_ADMIN" : {
+	  "username" : "super",
+	  "pass" : "Domibus-123"
+	}
   },
   "passwordForTestUsers": "QW!@qw12"
 }

@@ -488,7 +488,8 @@ public class UsersPgTest extends BaseTest {
 		page.saveAndConfirm();
 
 		soft.assertEquals(page.getAlertArea().isError(), true, "Error message displayed");
-		soft.assertEquals(page.getAlertArea().getAlertMessage(), "Duplicate user name for user: " + username + ".", "Correct message displayed");
+		String expectedError = String.format(DMessages.DUPLICATE_USER_, username, domains.get(1));
+		soft.assertEquals(page.getAlertArea().getAlertMessage(), expectedError, "Correct message is displayed");
 
 		soft.assertAll();
 	}
@@ -511,7 +512,8 @@ public class UsersPgTest extends BaseTest {
 		page.saveAndConfirm();
 
 		soft.assertEquals(page.getAlertArea().isError(), true, "Error message displayed");
-		soft.assertEquals(page.getAlertArea().getAlertMessage(), "Duplicate user name for user: " + username + ".", "Correct message displayed");
+		String expectedMessage = String.format(DMessages.DUPLICATE_USER_, username, "default");
+		soft.assertEquals(page.getAlertArea().getAlertMessage(), expectedMessage, "Correct message displayed");
 
 		soft.assertAll();
 	}
@@ -538,7 +540,9 @@ public class UsersPgTest extends BaseTest {
 		page.saveAndConfirm();
 
 		soft.assertEquals(page.getAlertArea().isError(), true, "Error message displayed");
-		soft.assertEquals(page.getAlertArea().getAlertMessage(), "Duplicate user name for user: " + username + ".", "Correct message displayed");
+
+		String expectedMessage = String.format(DMessages.DUPLICATE_USER_, username, domains.get(1));
+		soft.assertEquals(page.getAlertArea().getAlertMessage(), expectedMessage, "Correct message displayed");
 
 		soft.assertAll();
 	}

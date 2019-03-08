@@ -40,7 +40,6 @@ public class DomibusRestClient {
 	}
 
 	private ClientResponse requestGET(WebResource resource, HashMap<String, String> params, List<NewCookie> cookies) {
-
 		if (params != null) {
 			for (Map.Entry<String, String> param : params.entrySet()) {
 				resource = resource.queryParam(param.getKey(), param.getValue());
@@ -48,11 +47,19 @@ public class DomibusRestClient {
 		}
 
 		WebResource.Builder builder = resource.getRequestBuilder();
+		String xrfTokenValue = "";
 
 		if (cookies != null) {
 			for (NewCookie cookie : cookies) {
-				builder = builder.cookie(cookie);
+				builder = builder.cookie(cookie.toCookie());
+				if (cookie.getName().equalsIgnoreCase("XSRF-TOKEN")) {
+					xrfTokenValue = cookie.getValue();
+				}
 			}
+		}
+
+		if (xrfTokenValue != null) {
+			builder = builder.header("X-XSRF-TOKEN", xrfTokenValue);
 		}
 
 		return builder.get(ClientResponse.class);
@@ -286,7 +293,7 @@ public class DomibusRestClient {
 		JSONArray pusers = new JSONObject(sanitizeResponse(getResponse)).getJSONArray("entries");
 		JSONArray toDelete = new JSONArray();
 		for (int i = 0; i < pusers.length(); i++) {
-			if (pusers.getJSONObject(i).getString("username").equalsIgnoreCase(username)) {
+			if (pusers.getJSONObject(i).getString("userName").equalsIgnoreCase(username)) {
 				JSONObject tmpUser = pusers.getJSONObject(i);
 				tmpUser.put("status", "REMOVED");
 				toDelete.put(tmpUser);
