@@ -267,81 +267,113 @@ public class PartyServiceImpl implements PartyService {
 
         List<eu.domibus.common.model.configuration.Party> newParties = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
 
-        BusinessProcesses bp = configuration.getBusinessProcesses();
-        Parties parties = bp.getPartiesXml();
+        List<eu.domibus.common.model.configuration.Party> removedParties = updateConfigurationParties(newParties, configuration);
+
+        updatePartyIdTypes(newParties, configuration);
+
+        updateProcessConfiguration(partyList, configuration);
+
+        return removedParties;
+    }
+
+    private List<eu.domibus.common.model.configuration.Party> updateConfigurationParties(List<eu.domibus.common.model.configuration.Party> newParties, Configuration configuration) {
+        BusinessProcesses businessProcesses = configuration.getBusinessProcesses();
+        Parties parties = businessProcesses.getPartiesXml();
 
         List<eu.domibus.common.model.configuration.Party> removedParties = parties.getParty().stream()
                 .filter(existingP -> !newParties.stream().anyMatch(newP -> newP.getName().equals(existingP.getName())))
                 .collect(toList());
+        preventGatewayPartyRemoval(removedParties);
 
+        parties.getParty().clear();
+        parties.getParty().addAll(newParties);
+        return removedParties;
+    }
+
+    private void preventGatewayPartyRemoval(List<eu.domibus.common.model.configuration.Party> removedParties) {
         String partyMe = pModeProvider.getGatewayParty().getName();
         if (removedParties.stream().anyMatch(party -> party.getName().equals(partyMe))) {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_003, "Cannot delete the party describing the current system. ");
         }
-        
-        parties.getParty().clear();
-        parties.getParty().addAll(newParties);
+    }
 
-        PartyIdTypes partyIdTypes = bp.getPartiesXml().getPartyIdTypes();
+    private void updatePartyIdTypes(List<eu.domibus.common.model.configuration.Party> newParties, Configuration configuration) {
+        BusinessProcesses businessProcesses = configuration.getBusinessProcesses();
+        Parties parties = businessProcesses.getPartiesXml();
+        PartyIdTypes partyIdTypes = parties.getPartyIdTypes();
+        List<PartyIdType> partyIdType = partyIdTypes.getPartyIdType();
+
         newParties.forEach(party -> {
             party.getIdentifiers().forEach(identifier -> {
-                if (!partyIdTypes.getPartyIdType().contains(identifier.getPartyIdType())) {
-                    partyIdTypes.getPartyIdType().add(identifier.getPartyIdType());
+                if (!partyIdType.contains(identifier.getPartyIdType())) {
+                    partyIdType.add(identifier.getPartyIdType());
                 }
             });
         });
+    }
 
-        List<Process> processes = bp.getProcesses();
+    private void updateProcessConfiguration(List<Party> partyList, Configuration configuration) {
+        BusinessProcesses businessProcesses = configuration.getBusinessProcesses();
+        List<Process> processes = businessProcesses.getProcesses();
+
         processes.forEach(process -> {
-            // sync <initiatorParties> and <responderParties>
-            Set<String> iParties = partyList.stream()
-                    .filter(p -> p.getProcessesWithPartyAsInitiator().stream()
-                            .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
-                    .map(p -> p.getName())
-                    .collect(Collectors.toSet());
-
-            if (process.getInitiatorPartiesXml() == null)
-                process.setInitiatorPartiesXml(new InitiatorParties());
-            List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
-            ip.removeIf(x -> !iParties.contains(x.getName()));
-            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equalsIgnoreCase(x.getName())))
-                    .map(name -> {
-                        InitiatorParty y = new InitiatorParty();
-                        y.setName(name);
-                        return y;
-                    }).collect(Collectors.toSet()));
-            if (ip.isEmpty())
-                process.setInitiatorPartiesXml(null);
-
-
-            Set<String> rParties = partyList.stream()
-                    .filter(p -> p.getProcessesWithPartyAsResponder().stream()
-                            .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
-                    .map(p -> p.getName())
-                    .collect(Collectors.toSet());
-
-            if (process.getResponderPartiesXml() == null)
-                process.setResponderPartiesXml(new ResponderParties());
-            List<ResponderParty> rp = process.getResponderPartiesXml().getResponderParty();
-            rp.removeIf(x -> !rParties.contains(x.getName()));
-            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equalsIgnoreCase(x.getName())))
-                    .map(name -> {
-                        ResponderParty y = new ResponderParty();
-                        y.setName(name);
-                        return y;
-                    }).collect(Collectors.toSet()));
-            if (rp.isEmpty())
-                process.setResponderPartiesXml(null);
+            updateProcessConfigurationInitiatorParties(partyList, process);
+            updateProcessConfigurationResponderParties(partyList, process);
         });
+    }
 
-        return removedParties;
+    private void updateProcessConfigurationResponderParties(List<Party> partyList, Process process) {
+        Set<String> rParties = partyList.stream()
+                .filter(p -> p.getProcessesWithPartyAsResponder().stream()
+                        .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
+                .map(p -> p.getName())
+                .collect(Collectors.toSet());
+
+        if (process.getResponderPartiesXml() == null) {
+            process.setResponderPartiesXml(new ResponderParties());
+        }
+        List<ResponderParty> rp = process.getResponderPartiesXml().getResponderParty();
+        rp.removeIf(x -> !rParties.contains(x.getName()));
+        rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equalsIgnoreCase(x.getName())))
+                .map(name -> {
+                    ResponderParty y = new ResponderParty();
+                    y.setName(name);
+                    return y;
+                }).collect(Collectors.toSet()));
+        if (rp.isEmpty()) {
+            process.setResponderPartiesXml(null);
+        }
+    }
+
+    private void updateProcessConfigurationInitiatorParties(List<Party> partyList, Process process) {
+        Set<String> iParties = partyList.stream()
+                .filter(p -> p.getProcessesWithPartyAsInitiator().stream()
+                        .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
+                .map(p -> p.getName())
+                .collect(Collectors.toSet());
+
+        if (process.getInitiatorPartiesXml() == null) {
+            process.setInitiatorPartiesXml(new InitiatorParties());
+        }
+        List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
+        ip.removeIf(x -> !iParties.contains(x.getName()));
+        ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equalsIgnoreCase(x.getName())))
+                .map(name -> {
+                    InitiatorParty y = new InitiatorParty();
+                    y.setName(name);
+                    return y;
+                }).collect(Collectors.toSet()));
+        if (ip.isEmpty()) {
+            process.setInitiatorPartiesXml(null);
+        }
     }
 
     @Override
     public void updateParties(List<Party> partyList, Map<String, String> certificateList) {
         final PModeArchiveInfo pModeArchiveInfo = pModeProvider.getRawConfigurationList().stream().findFirst().orElse(null);
-        if (pModeArchiveInfo == null)
+        if (pModeArchiveInfo == null) {
             throw new IllegalStateException("Could not update PMode parties: PMode not found!");
+        }
 
         ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(pModeArchiveInfo.getId());
 
