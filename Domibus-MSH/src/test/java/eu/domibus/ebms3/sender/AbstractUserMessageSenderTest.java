@@ -37,6 +37,8 @@ import java.util.UUID;
 @RunWith(JMockit.class)
 public class AbstractUserMessageSenderTest {
 
+
+
     @Tested
     AbstractUserMessageSender abstractUserMessageSender;
 
@@ -79,6 +81,7 @@ public class AbstractUserMessageSenderTest {
     private final String pModeKey = "toto";
     private final String configPolicy = "tototiti";
     private final ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
+    static final String POLICIES = "policies/";
 
 
     @Test
@@ -111,7 +114,7 @@ public class AbstractUserMessageSenderTest {
             legConfiguration.getSecurity().getPolicy();
             result = configPolicy;
 
-            policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            policyService.parsePolicy(POLICIES + legConfiguration.getSecurity().getPolicy());
             result = policy;
 
             pModeProvider.getSenderParty(pModeKey);
@@ -199,7 +202,7 @@ public class AbstractUserMessageSenderTest {
             legConfiguration.getSecurity().getPolicy();
             result = configPolicy;
 
-            policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            policyService.parsePolicy(POLICIES + legConfiguration.getSecurity().getPolicy());
             result = configurationException;
 
         }};
@@ -318,7 +321,7 @@ public class AbstractUserMessageSenderTest {
             legConfiguration.getSecurity().getPolicy();
             result = configPolicy;
 
-            policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            policyService.parsePolicy(POLICIES + legConfiguration.getSecurity().getPolicy());
             result = policy;
 
             pModeProvider.getSenderParty(pModeKey);
@@ -379,6 +382,85 @@ public class AbstractUserMessageSenderTest {
             Assert.assertEquals(attemptError, attemptErrorActual);
             Assert.assertEquals(attemptStatus, attemptStatusActual);
 
+        }};
+    }
+
+    @Test
+    public void testSendMessage_DispatchError_Exception(@Mocked final UserMessage userMessage, @Mocked final LegConfiguration legConfiguration, @Mocked final Policy policy,
+                                                        final @Mocked Party senderParty, final @Mocked Party receiverParty,
+                                                        final @Mocked SOAPMessage soapMessage) throws Exception {
+
+        final ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.SEND_FAIL;
+
+        MessageAttempt attempt = createMessageAttempt();
+        MessageAttemptStatus attemptStatus = MessageAttemptStatus.ERROR;
+        String attemptError = "OutOfMemory occurred while dispatching messages";
+
+        new Expectations(abstractUserMessageSender) {{
+            abstractUserMessageSender.getLog();
+            result = DomibusLoggerFactory.getLogger(AbstractUserMessageSenderTest.class);
+
+            userMessage.getMessageInfo().getMessageId();
+            result = messageId;
+
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            result = pModeKey;
+
+            pModeProvider.getLegConfiguration(pModeKey);
+            result = legConfiguration;
+
+            legConfiguration.getName();
+            result = legConfigurationName;
+
+            legConfiguration.getSecurity().getPolicy();
+            result = configPolicy;
+
+            policyService.parsePolicy(POLICIES + legConfiguration.getSecurity().getPolicy());
+            result = policy;
+
+            pModeProvider.getSenderParty(pModeKey);
+            result = senderParty;
+
+            pModeProvider.getReceiverParty(pModeKey);
+            result = receiverParty;
+
+            receiverParty.getName();
+            result = receiverName;
+
+            senderParty.getName();
+            result = senderName;
+
+            abstractUserMessageSender.createSOAPMessage(userMessage, legConfiguration);
+            result = soapMessage;
+
+            mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
+            result = new OutOfMemoryError("OutOfMemory occurred while dispatching messages");
+
+        }};
+
+        try {
+            //tested method
+            abstractUserMessageSender.sendMessage(userMessage);
+            Assert.fail("exception expected");
+        } catch (Throwable t) {
+            Assert.assertTrue(t instanceof OutOfMemoryError);
+        }
+
+        new FullVerifications(abstractUserMessageSender, reliabilityService) {{
+
+            String messageIdActual;
+            ReliabilityChecker.CheckResult checkResultActual;
+            reliabilityService.handleReliability(messageIdActual = withCapture(), userMessage, checkResultActual = withCapture(), isOk, legConfiguration);
+            Assert.assertEquals(messageId, messageIdActual);
+            Assert.assertEquals(reliabilityCheckSuccessful, checkResultActual);
+
+            MessageAttempt attemptActual;
+            String attemptErrorActual;
+            MessageAttemptStatus attemptStatusActual;
+            abstractUserMessageSender.updateAndCreateAttempt(attemptActual = withCapture(), attemptErrorActual = withCapture(), attemptStatusActual = withCapture());
+            Assert.assertEquals(attempt.getId(), attemptActual.getId());
+            Assert.assertEquals(attemptError, attemptErrorActual);
+            Assert.assertEquals(attemptStatus, attemptStatusActual);
         }};
     }
 
