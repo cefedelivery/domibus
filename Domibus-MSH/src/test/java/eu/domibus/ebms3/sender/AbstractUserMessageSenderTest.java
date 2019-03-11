@@ -38,7 +38,6 @@ import java.util.UUID;
 public class AbstractUserMessageSenderTest {
 
 
-
     @Tested
     AbstractUserMessageSender abstractUserMessageSender;
 
