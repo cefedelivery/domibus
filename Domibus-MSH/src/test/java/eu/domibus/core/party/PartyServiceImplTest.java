@@ -1,29 +1,32 @@
 package eu.domibus.core.party;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import eu.domibus.api.exceptions.DomibusCoreException;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.process.Process;
 import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.BusinessProcesses;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.InitiatorParties;
-import eu.domibus.common.model.configuration.InitiatorParty;
-import eu.domibus.common.model.configuration.Parties;
-import eu.domibus.common.model.configuration.PartyIdType;
-import eu.domibus.common.model.configuration.PartyIdTypes;
-import eu.domibus.common.model.configuration.ResponderParties;
-import eu.domibus.common.model.configuration.ResponderParty;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.pki.CertificateService;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Tested;
+import mockit.Verifications;
+import mockit.VerificationsInOrder;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,9 +35,19 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
-import java.util.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Dussart
@@ -82,6 +95,9 @@ public class PartyServiceImplTest {
     @Injectable
     private PartyIdTypes configurationPartyIdTypes;
 
+    @Injectable
+    private Domain currentDomain;
+
     @Before
     public void setUp() {
         new NonStrictExpectations() {{
@@ -91,6 +107,8 @@ public class PartyServiceImplTest {
             configuration.getBusinessProcesses(); result = configurationBusinessProcesses;
             configurationBusinessProcesses.getPartiesXml(); result = configurationParties;
             configurationParties.getPartyIdTypes(); result = configurationPartyIdTypes;
+
+            domainProvider.getCurrentDomain(); result = currentDomain;
         }};
     }
 
@@ -788,6 +806,217 @@ public class PartyServiceImplTest {
         }};
     }
 
+    @Test
+    public void throwsExceptionIfItCannotRetrieveThePModeRawConfigurationsArchiveWhenUpdatingParties() {
+        // Given
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("Could not update PMode parties: PMode not found!");
+
+        new Expectations() {{
+           pModeProvider.getRawConfigurationList(); result = Lists.newArrayList();
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), Maps.newHashMap());
+    }
+
+    @Test
+    public void throwsExceptionIfItCannotRetrieveThePModeConfigurationWhenUpdatingParties(@Injectable PModeArchiveInfo pModeArchiveInfo,
+             @Injectable ConfigurationRaw rawConfiguration) throws Exception {
+        // Given
+        thrown.expect(IllegalStateException.class);
+
+        new Expectations() {{
+            pModeArchiveInfo.getId(); result = anyInt;
+            rawConfiguration.getXml(); result = any;
+
+            pModeProvider.getRawConfigurationList(); result = Lists.newArrayList(pModeArchiveInfo);
+            pModeProvider.getRawConfiguration(anyInt); result = rawConfiguration;
+            pModeProvider.getPModeConfiguration((byte[])any); result = new XmlProcessingException("");
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), Maps.newHashMap());
+    }
+
+    @Test
+    public void throwsExceptionIfItCannotUpdatePModeConfigurationWhenUpdatingParties(@Injectable PModeArchiveInfo pModeArchiveInfo,
+              @Injectable ConfigurationRaw rawConfiguration) throws Exception {
+        // Given
+        thrown.expect(IllegalStateException.class);
+
+        new Expectations() {{
+            pModeArchiveInfo.getId(); result = anyInt;
+            rawConfiguration.getXml(); result = any;
+
+            pModeProvider.getRawConfigurationList(); result = Lists.newArrayList(pModeArchiveInfo);
+            pModeProvider.getRawConfiguration(anyInt); result = rawConfiguration;
+            pModeProvider.getPModeConfiguration((byte[]) any); result = configuration;
+
+            partyService.replaceParties((List<Party>)any, configuration); result = any;
+            rawConfiguration.getConfigurationDate(); result = new Date();
+            pModeProvider.serializePModeConfiguration(configuration); result = any;
+            pModeProvider.updatePModes((byte[]) any, anyString); result = new XmlProcessingException("");
+
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), Maps.newHashMap());
+    }
+
+    @Test
+    public void removesCertificatesInTheCurrentDomainForRemovedPartiesWhenUpdatingParties(@Injectable PModeArchiveInfo pModeArchiveInfo,
+             @Injectable ConfigurationRaw rawConfiguration,
+             @Injectable eu.domibus.common.model.configuration.Party removedParty) throws Exception {
+        // Given
+        List<eu.domibus.common.model.configuration.Party> removedParties = Lists.newArrayList(removedParty);
+        new Expectations(partyService) {{
+            partyService.replaceParties((List<Party>) any, configuration); result = new PartyServiceImpl.ReplacementResult(configuration, removedParties);
+        }};
+
+        new Expectations() {{
+            pModeArchiveInfo.getId(); result = anyInt;
+            rawConfiguration.getXml(); result = any;
+            removedParty.getName(); result = "removed";
+
+            pModeProvider.getRawConfigurationList(); result = Lists.newArrayList(pModeArchiveInfo);
+            pModeProvider.getRawConfiguration(anyInt); result = rawConfiguration;
+            pModeProvider.getPModeConfiguration((byte[]) any); result = configuration;
+
+            rawConfiguration.getConfigurationDate(); result = new Date();
+            pModeProvider.serializePModeConfiguration(configuration); result = any;
+            pModeProvider.updatePModes((byte[]) any, withPrefix("Updated parties to version of"));
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), Maps.newHashMap());
+
+        // Then
+        new Verifications() {{
+            List<String> aliases;
+            multiDomainCertificateProvider.removeCertificate(currentDomain, aliases = withCapture());
+            Assert.assertEquals("Should have removed the certificate in the current domain for the removed parties",
+                    Lists.newArrayList("removed"), aliases);
+        }};
+    }
+
+    @Test
+    public void ignoresNullPartyCertificatesInTheCurrentDomainWhenUpdatingParties(@Injectable PModeArchiveInfo pModeArchiveInfo,
+              @Injectable ConfigurationRaw rawConfiguration,
+              @Injectable eu.domibus.common.model.configuration.Party removedParty) throws Exception {
+        // Given
+        List<eu.domibus.common.model.configuration.Party> removedParties = Lists.newArrayList(removedParty);
+        Map<String, String> partyToCertificateMap = Maps.newHashMap();
+        partyToCertificateMap.put("party_1", null);
+
+        new Expectations(partyService) {{
+            partyService.replaceParties((List<Party>) any, configuration); result = new PartyServiceImpl.ReplacementResult(configuration, removedParties);
+        }};
+
+        new Expectations() {{
+            pModeArchiveInfo.getId(); result = anyInt;
+            rawConfiguration.getXml(); result = any;
+            removedParty.getName(); result = "removed";
+
+            pModeProvider.getRawConfigurationList(); result = Lists.newArrayList(pModeArchiveInfo);
+            pModeProvider.getRawConfiguration(anyInt); result = rawConfiguration;
+            pModeProvider.getPModeConfiguration((byte[]) any); result = configuration;
+
+            rawConfiguration.getConfigurationDate(); result = new Date();
+            pModeProvider.serializePModeConfiguration(configuration); result = any;
+            pModeProvider.updatePModes((byte[]) any, withPrefix("Updated parties to version of"));
+            multiDomainCertificateProvider.removeCertificate(currentDomain, (List<String>) any);
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), partyToCertificateMap);
+
+        // Then
+        new Verifications() {{
+            List<CertificateEntry> certificates;
+            multiDomainCertificateProvider.addCertificate(currentDomain, certificates = withCapture(), true);
+            Assert.assertTrue("Should have ignore party certificates that are null when updating parties",
+                    certificates.isEmpty());
+        }};
+    }
+
+    @Test
+    public void addsPartyCertificatesInTheCurrentDomainWhenUpdatingParties(@Injectable PModeArchiveInfo pModeArchiveInfo,
+               @Injectable ConfigurationRaw rawConfiguration,
+               @Injectable X509Certificate x509Certificate,
+               @Injectable eu.domibus.common.model.configuration.Party removedParty) throws Exception {
+        // Given
+        List<eu.domibus.common.model.configuration.Party> removedParties = Lists.newArrayList(removedParty);
+        Map<String, String> partyToCertificateMap = Maps.newHashMap();
+        partyToCertificateMap.put("party_1", "certificate_1");
+
+        new Expectations(partyService) {{
+            partyService.replaceParties((List<Party>) any, configuration); result = new PartyServiceImpl.ReplacementResult(configuration, removedParties);
+        }};
+
+        new Expectations() {{
+            pModeArchiveInfo.getId(); result = anyInt;
+            rawConfiguration.getXml(); result = any;
+            removedParty.getName(); result = "removed";
+
+            pModeProvider.getRawConfigurationList(); result = Lists.newArrayList(pModeArchiveInfo);
+            pModeProvider.getRawConfiguration(anyInt); result = rawConfiguration;
+            pModeProvider.getPModeConfiguration((byte[]) any); result = configuration;
+
+            rawConfiguration.getConfigurationDate(); result = new Date();
+            pModeProvider.serializePModeConfiguration(configuration); result = any;
+            pModeProvider.updatePModes((byte[]) any, withPrefix("Updated parties to version of"));
+            multiDomainCertificateProvider.removeCertificate(currentDomain, (List<String>) any);
+            certificateService.loadCertificateFromString("certificate_1"); result = x509Certificate;
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), partyToCertificateMap);
+
+        // Then
+        new Verifications() {{
+            List<CertificateEntry> certificates;
+            multiDomainCertificateProvider.addCertificate(currentDomain, certificates = withCapture(), true);
+            Assert.assertTrue("Should have ignore party certificates that are null when updating parties",
+                    certificates.size() == 1
+                            && "party_1".equals(certificates.get(0).getAlias())
+                            && x509Certificate == certificates.get(0).getCertificate());
+        }};
+    }
 
 
+    @Test
+    public void throwsExceptionIfLoadingPartyCertificatesFailsInTheCurrentDomainWhenUpdatingParties(@Injectable PModeArchiveInfo pModeArchiveInfo,
+               @Injectable ConfigurationRaw rawConfiguration,
+               @Injectable eu.domibus.common.model.configuration.Party removedParty) throws Exception {
+        // Given
+        thrown.expect(IllegalStateException.class);
+
+        List<eu.domibus.common.model.configuration.Party> removedParties = Lists.newArrayList(removedParty);
+        Map<String, String> partyToCertificateMap = Maps.newHashMap();
+        partyToCertificateMap.put("party_1", "certificate_1");
+
+        new Expectations(partyService) {{
+            partyService.replaceParties((List<Party>) any, configuration); result = new PartyServiceImpl.ReplacementResult(configuration, removedParties);
+        }};
+
+        new Expectations() {{
+            pModeArchiveInfo.getId(); result = anyInt;
+            rawConfiguration.getXml(); result = any;
+            removedParty.getName(); result = "removed";
+
+            pModeProvider.getRawConfigurationList(); result = Lists.newArrayList(pModeArchiveInfo);
+            pModeProvider.getRawConfiguration(anyInt); result = rawConfiguration;
+            pModeProvider.getPModeConfiguration((byte[]) any); result = configuration;
+
+            rawConfiguration.getConfigurationDate(); result = new Date();
+            pModeProvider.serializePModeConfiguration(configuration); result = any;
+            pModeProvider.updatePModes((byte[]) any, withPrefix("Updated parties to version of"));
+            multiDomainCertificateProvider.removeCertificate(currentDomain, (List<String>) any);
+            certificateService.loadCertificateFromString("certificate_1"); result = new CertificateException();
+        }};
+
+        // When
+        partyService.updateParties(Lists.newArrayList(), partyToCertificateMap);
+    }
 }
