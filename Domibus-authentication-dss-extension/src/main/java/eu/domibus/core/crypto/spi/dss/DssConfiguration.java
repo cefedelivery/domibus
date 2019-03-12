@@ -30,13 +30,12 @@ import java.util.List;
  * <p>
  * Load dss beans.
  */
-@Configuration
+@Configuration("dssConfiguration")
 @PropertySource(value = "classpath:authentication-dss-extension-default.properties")
 @PropertySource(ignoreResourceNotFound = true, value = "file:${domibus.config.location}/extensions/config/authentication-dss-extension.properties")
 public class DssConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DssConfiguration.class);
-
 
     @Value("${domibus.oj.content.keystore.type}")
     private String keystoreType;
@@ -196,7 +195,6 @@ public class DssConfiguration {
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(dssRefreshJob().getObject());
         obj.setCronExpression(dssRefreshCronExpression);
-        obj.setGroup("GENERAL");
         LOG.debug("dssRefreshTrigger configured with cronExpression [{}]", dssRefreshCronExpression);
         obj.setStartDelay(20000);
         return obj;
