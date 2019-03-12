@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * @since 4.0
  */
 @Configuration
-@DependsOn({"springContextProvider", "dssConfiguration"})
+@DependsOn({"springContextProvider"})
 public class DomainSchedulerFactoryConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainSchedulerFactoryConfiguration.class);

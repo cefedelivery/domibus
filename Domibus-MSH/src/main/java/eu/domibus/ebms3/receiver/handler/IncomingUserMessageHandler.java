@@ -29,9 +29,12 @@ public class IncomingUserMessageHandler extends AbstractIncomingMessageHandler {
     @Autowired
     protected AuthorizationService authorizationService;
 
+
     @Override
     protected SOAPMessage processMessage(LegConfiguration legConfiguration, String pmodeKey, SOAPMessage request, Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
-        authorizationService.authorize(null, messaging.getUserMessage());
+
+
+        authorizationService.authorizeUserMessage(request, messaging);
         LOG.debug("Processing UserMessage");
         return userMessageHandlerService.handleNewUserMessage(legConfiguration, pmodeKey, request, messaging, testMessage);
     }

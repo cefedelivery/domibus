@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi.DEFAULT_IAM_AUTHENTICATION_SPI;
+
 /**
  * @author Cosmin Baciu
  * @since 4.0
@@ -61,6 +63,9 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     @PostConstruct
     public void init() {
         String spiIdentifier = domibusPropertyProvider.getDomainProperty(IAM_AUTHENTICATION_IDENTIFIER);
+        if (spiIdentifier.equals(DEFAULT_IAM_AUTHENTICATION_SPI) && domainCryptoServiceSpiList.size() > 1) {
+            LOG.warn("A custom authentication implementation has been provided but property:[domibus.extension.iam.authentication.identifier] is configured with default value:[{}]", spiIdentifier);
+        }
         final List<DomainCryptoServiceSpi> providerList = domainCryptoServiceSpiList.stream().
                 filter(domainCryptoServiceSpi -> spiIdentifier.equals(domainCryptoServiceSpi.getIdentifier())).
                 collect(Collectors.toList());

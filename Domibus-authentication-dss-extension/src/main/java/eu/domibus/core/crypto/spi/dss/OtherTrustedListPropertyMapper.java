@@ -38,6 +38,7 @@ public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTru
         this.env = env;
     }
 
+
     public List<OtherTrustedList> map() {
         return super.map(
                 CUSTOM_TRUSTED_LIST_URL_PROPERTY,

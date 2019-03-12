@@ -144,7 +144,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             result=X_509_V_3;
         }};
         Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
-        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),binarySecurityTokenReference);
+        X509Certificate xc = (X509Certificate) trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(), binarySecurityTokenReference);
         Assert.assertNotNull(xc);
         Assert.assertNotNull(xc.getIssuerDN());
     }
@@ -158,7 +158,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509PKIPathv1";
         }};
         Document doc = readDocument("dataset/as4/RawXMLMessageWithSpacesAndPkiPath.xml");
-        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),binarySecurityTokenReference);
+        X509Certificate xc = (X509Certificate) trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(), binarySecurityTokenReference);
         Assert.assertNotNull(xc);
         Assert.assertNotNull(xc.getIssuerDN());
     }

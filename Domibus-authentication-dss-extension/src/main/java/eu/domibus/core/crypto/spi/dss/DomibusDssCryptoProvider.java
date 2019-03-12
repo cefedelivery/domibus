@@ -47,7 +47,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     @Autowired
     public DomibusDssCryptoProvider(
-            @Qualifier(DEFAULT_IAM_SPI) final DomainCryptoServiceSpi defaultDomainCryptoService,
+            final DomainCryptoServiceSpi defaultDomainCryptoService,
             final CertificateVerifier certificateVerifier,
             final TSLRepository tslRepository,
             final ValidationReport validationReport) {

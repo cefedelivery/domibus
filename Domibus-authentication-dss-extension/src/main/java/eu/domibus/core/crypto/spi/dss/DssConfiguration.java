@@ -30,7 +30,7 @@ import java.util.List;
  * <p>
  * Load dss beans.
  */
-@Configuration("dssConfiguration")
+@Configuration
 @PropertySource(value = "classpath:authentication-dss-extension-default.properties")
 @PropertySource(ignoreResourceNotFound = true, value = "file:${domibus.config.location}/extensions/config/authentication-dss-extension.properties")
 public class DssConfiguration {

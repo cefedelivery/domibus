@@ -7,6 +7,7 @@ import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -70,6 +71,10 @@ public interface CertificateService {
      * @throws KeyStoreException if the trust store was not initialized
      */
     TrustStoreEntry getPartyCertificateFromTruststore(String alias) throws KeyStoreException;
+
+    String serializeCertificateChain(List<? extends Certificate> certificates);
+
+    List<X509Certificate> deserializeCertificateChain(String chain);
 
     /**
      * Returns a certificate entry converted from a base64 string
