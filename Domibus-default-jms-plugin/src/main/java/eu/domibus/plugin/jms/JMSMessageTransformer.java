@@ -97,6 +97,7 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             messageOut.setStringProperty(PROTOCOL, "AS4");
             messageOut.setStringProperty(AGREEMENT_REF, submission.getAgreementRef());
             messageOut.setStringProperty(REF_TO_MESSAGE_ID, submission.getRefToMessageId());
+            messageOut.setJMSCorrelationID(submission.getRefToMessageId());
 
             // save the first payload (payload_1) for the bodyload (if exists)
             int counter = 1;
