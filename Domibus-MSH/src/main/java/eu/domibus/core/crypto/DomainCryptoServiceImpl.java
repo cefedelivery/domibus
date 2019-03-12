@@ -49,7 +49,7 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
 
-    protected static final String IAM_IDENTIFIER = "domibus.extension.iam.authorization.identifier";
+    protected static final String IAM_AUTHENTICATION_IDENTIFIER = "domibus.extension.iam.authentication.identifier";
 
     public DomainCryptoServiceImpl() {
     }
@@ -60,21 +60,21 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     @PostConstruct
     public void init() {
-        String spiIdentifier = domibusPropertyProvider.getDomainProperty(IAM_IDENTIFIER);
+        String spiIdentifier = domibusPropertyProvider.getDomainProperty(IAM_AUTHENTICATION_IDENTIFIER);
         final List<DomainCryptoServiceSpi> providerList = domainCryptoServiceSpiList.stream().
                 filter(domainCryptoServiceSpi -> spiIdentifier.equals(domainCryptoServiceSpi.getIdentifier())).
                 collect(Collectors.toList());
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("IAM spi:");
-            providerList.stream().forEach(domainCryptoServiceSpi -> LOG.debug(" identifier:[{}] for class:[{}]", domainCryptoServiceSpi.getIdentifier(), domainCryptoServiceSpi.getClass()));
+            LOG.debug("Authentication spi:");
+            providerList.forEach(domainCryptoServiceSpi -> LOG.debug(" identifier:[{}] for class:[{}]", domainCryptoServiceSpi.getIdentifier(), domainCryptoServiceSpi.getClass()));
         }
 
         if (providerList.size() > 1) {
-            throw new IllegalStateException(String.format("More than one IAM service provider for identifier:[%s]", spiIdentifier));
+            throw new IllegalStateException(String.format("More than one authentication service provider for identifier:[%s]", spiIdentifier));
         }
         if (providerList.isEmpty()) {
-            throw new IllegalStateException(String.format("No IAM service provider found for given identifier:[%s]", spiIdentifier));
+            throw new IllegalStateException(String.format("No authentication service provider found for given identifier:[%s]", spiIdentifier));
         }
 
         iamProvider = providerList.get(0);

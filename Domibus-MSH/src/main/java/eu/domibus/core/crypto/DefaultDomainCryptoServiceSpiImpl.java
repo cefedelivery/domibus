@@ -39,7 +39,7 @@ import java.util.Properties;
  */
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-@Qualifier(AbstractCryptoServiceSpi.DEFAULT_IAM_SPI)
+@Qualifier(AbstractCryptoServiceSpi.DEFAULT_IAM_AUTHENTICATION_SPI)
 public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainCryptoServiceSpi {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultDomainCryptoServiceSpiImpl.class);
@@ -298,7 +298,7 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
 
     @Override
     public String getIdentifier() {
-        return AbstractCryptoServiceSpi.DEFAULT_IAM_SPI;
+        return AbstractCryptoServiceSpi.DEFAULT_IAM_AUTHENTICATION_SPI;
     }
 
     @Override
