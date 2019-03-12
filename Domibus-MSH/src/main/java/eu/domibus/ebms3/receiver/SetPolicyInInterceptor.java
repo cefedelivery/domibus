@@ -68,9 +68,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
 
-    @Autowired
-    private BindingHelper bindingHelper;
-
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
     public SetPolicyInInterceptor() {
@@ -139,11 +136,11 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_INCOMING_USE, securityAlgorithm);
 
         } catch (EbMS3Exception e) {
-            bindingHelper.setBindingOperation(message);
+            setBindingOperation(message);
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
         } catch (IOException | JAXBException e) {
-            bindingHelper.setBindingOperation(message);
+            setBindingOperation(message);
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
@@ -151,6 +148,34 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         }
     }
 
+    //this is a hack to avoid a nullpointer in @see WebFaultOutInterceptor.
+    //I suppose the bindingOperation is set after the execution of this interceptor and is empty in case of error.
+
+    private void setBindingOperation(SoapMessage message) {
+        final Exchange exchange = message.getExchange();
+        if (exchange == null) {
+            return;
+        }
+        final Endpoint endpoint = exchange.getEndpoint();
+        if (endpoint == null) {
+            return;
+        }
+        final EndpointInfo endpointInfo = endpoint.getEndpointInfo();
+        if (endpointInfo == null) {
+            return;
+        }
+        final BindingInfo binding = endpointInfo.getBinding();
+        if (binding == null) {
+            return;
+        }
+        final Collection<BindingOperationInfo> operations = binding.getOperations();
+        if (operations == null) {
+            return;
+        }
+        for (BindingOperationInfo operation : operations) {
+            exchange.put(BindingOperationInfo.class, operation);
+        }
+    }
 
 
     public static class CheckEBMSHeaderInterceptor extends AbstractSoapInterceptor {

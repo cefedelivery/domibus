@@ -54,9 +54,6 @@
 
     </bean>
 
-    <bean id="authorizationInterceptor" class="eu.domibus.ebms3.receiver.AuthorizationInterceptor">
-    </bean>
-
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
     <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
         <property name="messageLegConfigurationFactory" ref="serverInMessageLegConfigurationFactory"/>
@@ -106,7 +103,6 @@
             <ref bean="domibusReadyInterceptor"/>
             <ref bean="setDomainInInterceptor"/>
             <ref bean="trustSenderInterceptor"/>
-            <ref bean="authorizationInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>
         </jaxws:inInterceptors>

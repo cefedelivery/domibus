@@ -32,7 +32,7 @@ public class PropertyValueExchangeInterceptor extends AbstractSoapInterceptor {
         final SOAPMessage jaxwsMessage = message.getContent(javax.xml.soap.SOAPMessage.class);
         try {
             jaxwsMessage.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, message.getContextualProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY));
-
+            jaxwsMessage.setProperty(CertificateExchangeType.class.getSimpleName(), message.getContextualProperty(CertificateExchangeType.class.getSimpleName()));
         } catch (final SOAPException e) {
             PropertyValueExchangeInterceptor.LOG.error("", e);
         }

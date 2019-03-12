@@ -107,11 +107,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
+       /* if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
             LOG.debug("No trust verification of sending certificate");
             return;
-        }
-
+        }*/
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
             LOG.info("Message does not contain security info ==> skipping sender trust verification.");
@@ -140,11 +139,11 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             throw new Fault(ebMS3Ex);
         }
 
-        if (!checkCertificateValidity(certificate, senderPartyName, isPullMessage)) {
+      /*  if (!checkCertificateValidity(certificate, senderPartyName, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] certificate is not valid or has been revoked", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
-        }
+        }*/
     }
 
     protected Boolean checkCertificateValidity(X509Certificate certificate, String sender, boolean isPullMessage) {
@@ -249,8 +248,12 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             final TokenReference tokenReference = tokenReferenceExtractor.extractTokenReference(securityHeader);
             X509Certificate cert;
             if (tokenReference == null) {
+                msg.put(CertificateExchangeType.class.getSimpleName(), CertificateExchangeType.KEY_INFO);
+                msg.getExchange().put(CertificateExchangeType.class.getSimpleName(), CertificateExchangeType.KEY_INFO);
                 cert = getCertificateFromKeyInfo(requestData, securityHeader);
             } else {
+                msg.put(CertificateExchangeType.class.getSimpleName(), CertificateExchangeType.BINARY_SECURITY_TOKEN);
+                msg.getExchange().put(CertificateExchangeType.class.getSimpleName(), CertificateExchangeType.BINARY_SECURITY_TOKEN);
                 BinarySecurityTokenReference binarySecurityTokenReference = (BinarySecurityTokenReference) tokenReference;
                 cert = getCertificateFromBinarySecurityToken(securityHeader, binarySecurityTokenReference);
             }
@@ -347,6 +350,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                         LOG.debug("Not an issuer:[{}]", leafSubjet);
                         return subjectMap.get(leafSubjet);
                     }
+                    LOG.error("Message exchange is X_509_PKIPATHV_1 but no leaf certificate has been found");
                     return null;
                 }
             }
