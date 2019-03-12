@@ -21,13 +21,16 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi {
 
-    public static final String DEFAULT_IAM_AUTHENTICATION_SPI = "DEFAULT_IAM_AUTHENTICATION_SPI";
+    public static final String DEFAULT_IAM_SPI = "DEFAULT_IAM_SPI";
 
-    @Autowired
-    @Qualifier(DEFAULT_IAM_AUTHENTICATION_SPI)
+
     private DomainCryptoServiceSpi defaultDomainCryptoService;
 
     private DomainSpi domain;
+
+    public AbstractCryptoServiceSpi(DomainCryptoServiceSpi defaultDomainCryptoService) {
+        this.defaultDomainCryptoService = defaultDomainCryptoService;
+    }
 
     @Override
     public X509Certificate[] getX509Certificates(CryptoType cryptoType) throws WSSecurityException {
@@ -131,6 +134,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void setDomain(DomainSpi domain) {
+        defaultDomainCryptoService.setDomain(domain);
         this.domain = domain;
     }
 
@@ -140,7 +144,7 @@ public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi
 
     @Override
     public void init() {
-
+        defaultDomainCryptoService.init();
     }
 
 
