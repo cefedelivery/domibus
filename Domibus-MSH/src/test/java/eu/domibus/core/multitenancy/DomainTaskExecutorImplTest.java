@@ -32,7 +32,7 @@ public class DomainTaskExecutorImplTest {
 
     @Test
     public void testSubmitRunnable(@Injectable Runnable submitRunnable) {
-        domainTaskExecutor.submitRunnable(submitRunnable, false, DomainTaskExecutorImpl.DEFAULT_WAIT_TIMEOUT);
+        domainTaskExecutor.submitRunnable(submitRunnable, false, DomainTaskExecutorImpl.DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
 
         new Verifications() {{
             taskExecutor.submit(submitRunnable);
@@ -50,7 +50,7 @@ public class DomainTaskExecutorImplTest {
             result = new InterruptedException();
         }};
 
-        domainTaskExecutor.submitRunnable(submitRunnable, false, DomainTaskExecutorImpl.DEFAULT_WAIT_TIMEOUT);
+        domainTaskExecutor.submitRunnable(submitRunnable, false, DomainTaskExecutorImpl.DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
 
         new Verifications() {{
             taskExecutor.submit(submitRunnable);

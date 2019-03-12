@@ -249,8 +249,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Override
     public void payloadSubmitted(PayloadSubmittedEvent event) {
-        //delete lock file
-        fsProcessFileService.renameProcessedFile(event.getMessageId());
+        try {
+            FileObject fileObject = fsFilesManager.getEnsureRootLocation(event.getFileName());
+            fsFilesManager.deleteLockFile(fileObject);
+            fsProcessFileService.renameProcessedFile(fileObject, event.getMessageId());
+        } catch (FileSystemException e) {
+            LOG.error("Error handling payload submitted event", e);
+        }
     }
 
     @Override

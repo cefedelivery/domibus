@@ -57,7 +57,7 @@ public class FSProcessFileService {
                 String messageId = backendFSPlugin.submit(message);
                 LOG.info("Message [{}] submitted: [{}]", messageId, processableFile.getName());
 
-                //add lock file
+                fsFilesManager.createLockFile(processableFile);
 
             } else {
                 LOG.error("Metadata file is missing for " + processableFile.getName().getURI());
@@ -66,7 +66,10 @@ public class FSProcessFileService {
     }
 
     public void renameProcessedFile(FileObject processableFile, String messageId) {
-        String newFileName = FSFileNameHelper.deriveFileName(processableFile.getName().getBaseName(), messageId);
+        final String baseName = processableFile.getName().getBaseName();
+        String newFileName = FSFileNameHelper.deriveFileName(baseName, messageId);
+
+        LOG.debug("Renaming file [{}] to [{}]", baseName, newFileName);
 
         try {
             fsFilesManager.renameFile(processableFile, newFileName);

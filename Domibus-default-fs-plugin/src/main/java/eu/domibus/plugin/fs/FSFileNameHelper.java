@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.common.MessageStatus;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.vfs2.FileObject;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -80,6 +81,10 @@ public class FSFileNameHelper {
      */
     public static boolean isLockFile(final String fileName) {
         return StringUtils.endsWith(fileName, LOCK_SUFFIX);
+    }
+
+    public static String getLockFilename(FileObject file) {
+        return file.getName().getBaseName() + LOCK_SUFFIX;
     }
 
     /**
