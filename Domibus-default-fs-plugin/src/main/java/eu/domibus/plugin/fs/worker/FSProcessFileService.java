@@ -52,6 +52,7 @@ public class FSProcessFileService {
                 String payloadId = fsPluginProperties.getPayloadId(domain);
                 final FSPayload fsPayload = new FSPayload(null, processableFile.getName().getBaseName(), dataHandler);
                 fsPayload.setFileSize(processableFile.getContent().getSize());
+                fsPayload.setFilePath(processableFile.getURL().getPath());
                 fsPayloads.put(payloadId, fsPayload);
                 FSMessage message = new FSMessage(fsPayloads, metadata);
                 String messageId = backendFSPlugin.submit(message);

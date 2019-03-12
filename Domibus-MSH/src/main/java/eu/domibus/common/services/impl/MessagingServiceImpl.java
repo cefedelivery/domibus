@@ -20,6 +20,7 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -71,9 +72,12 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     protected UserMessageService userMessageService;
 
+    @Autowired
+    protected BackendNotificationService backendNotificationService;
+
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration) throws CompressionException {
+    public void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration, String backendName) throws CompressionException {
         if (messaging == null || messaging.getUserMessage() == null) {
             return;
         }
@@ -85,7 +89,7 @@ public class MessagingServiceImpl implements MessagingService {
                     () -> {
                         LOG.debug("Saving the SourceMessage payloads");
                         try {
-                            storePayloads(messaging, mshRole, legConfiguration);
+                            storePayloads(messaging, mshRole, legConfiguration, backendName);
                         } catch (Exception e) {
                             LOG.error("Error saving the SourceMessage payloads", e);
                         }
@@ -98,7 +102,7 @@ public class MessagingServiceImpl implements MessagingService {
                     false,
                     domibusPropertyProvider.getLongDomainProperty(currentDomain, PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
         } else {
-            storePayloads(messaging, mshRole, legConfiguration);
+            storePayloads(messaging, mshRole, legConfiguration, backendName);
         }
         LOG.debug("Saving Messaging");
         setPayloadsContentType(messaging);
@@ -114,7 +118,7 @@ public class MessagingServiceImpl implements MessagingService {
         }
     }
 
-    protected void storePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration) {
+    protected void storePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration, String backendName) {
         LOG.debug("Storing payloads");
         if (messaging.getUserMessage().getPayloadInfo() != null && messaging.getUserMessage().getPayloadInfo().getPartInfo() != null) {
             for (PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
@@ -122,7 +126,7 @@ public class MessagingServiceImpl implements MessagingService {
                     if (MSHRole.RECEIVING.equals(mshRole)) {
                         storeIncomingPayload(partInfo, messaging.getUserMessage().getMessageInfo().getMessageId());
                     } else {
-                        storeOutgoingPayload(partInfo, messaging.getUserMessage(), legConfiguration);
+                        storeOutgoingPayload(partInfo, messaging.getUserMessage(), legConfiguration, backendName);
                     }
                 } catch (IOException | EbMS3Exception exc) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, partInfo.getHref());
@@ -162,7 +166,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
 
-    protected void storeOutgoingPayload(PartInfo partInfo, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
+    protected void storeOutgoingPayload(PartInfo partInfo, UserMessage userMessage, final LegConfiguration legConfiguration, String backendName) throws IOException, EbMS3Exception {
         String messageId = userMessage.getMessageInfo().getMessageId();
 
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
@@ -173,10 +177,11 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if (savePayloadsInDatabase(currentStorage)) {
-            saveOutgoingFileToDatabase(partInfo, userMessage, legConfiguration);
+            saveOutgoingFileToDatabase(partInfo, userMessage, legConfiguration, backendName);
         } else {
-            if (StringUtils.isBlank(partInfo.getFileName())) {
-                saveOutgoingFileToDisk(partInfo, userMessage, legConfiguration, currentStorage);
+            //message fragment files are already saved on the file system
+            if (!userMessage.isUserMessageFragment()) {
+                saveOutgoingFileToDisk(partInfo, userMessage, legConfiguration, currentStorage, backendName);
             }
         }
 
@@ -189,23 +194,28 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
 
-    protected void saveOutgoingFileToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage) throws IOException, EbMS3Exception {
+    protected void saveOutgoingFileToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage, String backendName) throws IOException, EbMS3Exception {
         try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
-            //notify submitted
+            final String originalFileName = partInfo.getFileName();
+
             final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + PAYLOAD_EXTENSION);
             partInfo.setFileName(attachmentStore.getAbsolutePath());
             final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
             partInfo.setLength(fileLength);
-            //notify processed
+
+            backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
         }
     }
 
-    protected void saveOutgoingFileToDatabase(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
+    protected void saveOutgoingFileToDatabase(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, String backendName) throws IOException, EbMS3Exception {
         try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
+            final String originalFileName = partInfo.getFileName();
             byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);
             partInfo.setBinaryData(binaryData);
             partInfo.setLength(binaryData.length);
             partInfo.setFileName(null);
+
+            backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
         }
     }
 

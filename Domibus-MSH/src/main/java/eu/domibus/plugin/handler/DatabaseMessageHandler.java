@@ -283,7 +283,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             fillMpc(userMessage, legConfiguration, to);
 
             try {
-                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration);
+                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration, backendName);
             } catch (CompressionException exc) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
@@ -390,7 +390,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             //3. when payloads complete signal message scheduling
             //4 if payloads save fail => mark the message as fail
             try {
-                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration);
+                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration, backendName);
             } catch (CompressionException exc) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
@@ -401,13 +401,16 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
-            if (MessageStatus.READY_TO_PULL != messageStatus && !splitAndJoin) {
-                // Sends message to the proper queue if not a message to be pulled.
-                userMessageService.scheduleSending(messageId);
-            } else {
-                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
-                LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
-                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
+
+            if(!userMessage.isSourceMessage()) {
+                if (MessageStatus.READY_TO_PULL != messageStatus) {
+                    // Sends message to the proper queue if not a message to be pulled.
+                    userMessageService.scheduleSending(messageId);
+                } else {
+                    final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                    LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
+                    pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
+                }
             }
 
             uiReplicationSignalService.userMessageSubmitted(userMessage.getMessageInfo().getMessageId());

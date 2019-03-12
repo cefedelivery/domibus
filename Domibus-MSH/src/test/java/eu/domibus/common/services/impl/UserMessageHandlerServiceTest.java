@@ -420,7 +420,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration, anyString);
             uiReplicationSignalService.userMessageReceived(messageId);
         }};
     }
@@ -510,7 +510,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration, anyString);
             times = 0;
             userMessageLogDao.create(withAny(userMessageLog));
             times = 0;
@@ -535,7 +535,7 @@ public class UserMessageHandlerServiceTest {
             compressionService.handleDecompression(userMessage, legConfiguration);
             result = true;
 
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration, anyString);
             result = new CompressionException("Could not store binary data for message ", null);
 
             userMessage.getMessageInfo().getMessageId();
@@ -552,7 +552,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration, anyString);
             userMessageLogDao.create(withAny(userMessageLog));
             times = 0;
         }};

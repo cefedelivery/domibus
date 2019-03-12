@@ -296,7 +296,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         }
 
         try {
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration, backendName);
         } catch (CompressionException exc) {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
             ex.setMshRole(MSHRole.RECEIVING);

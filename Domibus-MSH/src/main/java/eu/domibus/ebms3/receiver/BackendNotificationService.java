@@ -4,10 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.NotificationType;
+import eu.domibus.common.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
@@ -18,6 +15,7 @@ import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -25,6 +23,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
+import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.BackendFilterEntity;
@@ -113,6 +112,9 @@ public class BackendNotificationService {
     @Autowired
     private UIReplicationSignalService uiReplicationSignalService;
 
+    @Autowired
+    protected List<BackendConnector> backendConnectors;
+
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -161,6 +163,17 @@ public class BackendNotificationService {
         }
 
         notifyOfIncoming(matchingBackendFilter, userMessage, notificationType, new HashMap<String, Object>());
+    }
+
+    public void notifyPayloadSubmitted(final UserMessage userMessage, String originalFilename, PartInfo partInfo, String backendName) {
+        final BackendConnector backendConnector = getBackendConnector(backendName);
+        PayloadSubmittedEvent payloadSubmittedEvent = new PayloadSubmittedEvent();
+        payloadSubmittedEvent.setCid(partInfo.getHref());
+        payloadSubmittedEvent.setFileName(originalFilename);
+        payloadSubmittedEvent.setMessageId(userMessage.getMessageInfo().getMessageId());
+        payloadSubmittedEvent.setMime(partInfo.getMime());
+        backendConnector.payloadSubmitted(payloadSubmittedEvent);
+
     }
 
     public BackendFilter getMatchingBackendFilter(final UserMessage userMessage) {
@@ -253,6 +266,15 @@ public class BackendNotificationService {
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
             if (notificationListenerService.getBackendName().equalsIgnoreCase(backendName)) {
                 return notificationListenerService;
+            }
+        }
+        return null;
+    }
+
+    protected BackendConnector getBackendConnector(String backendName) {
+        for (final BackendConnector backendConnector : backendConnectors) {
+            if (backendConnector.getName().equalsIgnoreCase(backendName)) {
+                return backendConnector;
             }
         }
         return null;

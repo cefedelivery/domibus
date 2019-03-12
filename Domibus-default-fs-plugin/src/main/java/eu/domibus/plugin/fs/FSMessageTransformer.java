@@ -114,6 +114,7 @@ public class FSMessageTransformer
             }
             final Submission.Payload payload = new Submission.Payload(contentId, dataHandler, payloadProperties, false, null, null);
             payload.setPayloadSize(fsPayload.getFileSize());
+            payload.setFilepath(fsPayload.getFilePath());
             submission.addPayload(payload);
         }
     }

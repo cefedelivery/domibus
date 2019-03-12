@@ -78,7 +78,7 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
-        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration);
+        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration, "backend");
 
         new Verifications() {{
             messagingDao.create(messaging);
@@ -170,7 +170,7 @@ public class MessagingServiceTest {
             partInfo.getPartProperties().getProperties().add(property);
         }
 
-        messagingService.storeMessage(validMessaging, MSHRole.SENDING, legConfiguration);
+        messagingService.storeMessage(validMessaging, MSHRole.SENDING, legConfiguration, "backend");
         partInfo = getOnePartInfo(validMessaging);
 
         return partInfo;
@@ -183,7 +183,7 @@ public class MessagingServiceTest {
         PartInfo partInfo = getOnePartInfo(messaging);
         partInfo.setPayloadDatahandler(dh);
 
-        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration);
+        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration, "backend");
         partInfo = getOnePartInfo(messaging);
 
         return partInfo;
