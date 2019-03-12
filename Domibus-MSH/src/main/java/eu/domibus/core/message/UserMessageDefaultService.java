@@ -219,6 +219,13 @@ public class UserMessageDefaultService implements UserMessageService {
         scheduleSending(messageId, new DelayedDispatchMessageCreator(messageId, delay).createMessage());
     }
 
+    @Override
+    public void scheduleSourceMessageSending(String messageId) {
+        LOG.debug("Sending message to sendLargeMessageQueue");
+        final JmsMessage jmsMessage = new DispatchMessageCreator(messageId).createMessage();
+        jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
+    }
+
     protected void scheduleSending(String messageId, JmsMessage jmsMessage) {
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
 

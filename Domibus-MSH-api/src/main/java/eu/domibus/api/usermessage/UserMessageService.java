@@ -37,6 +37,8 @@ public interface UserMessageService {
 
     void scheduleSending(String messageId);
 
+    void scheduleSourceMessageSending(String messageId);
+
     void scheduleSourceMessageRejoin(String groupId);
 
     void scheduleSourceMessageReceipt(String messageId, String pmodeKey);

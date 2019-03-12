@@ -615,6 +615,8 @@ public class Submission {
         private final DataHandler payloadDatahandler;
         private final Collection<TypedProperty> payloadProperties;
         private final boolean inBody;
+        private long payloadSize;
+        private String filepath;
 
         public Payload(final String contentId, final DataHandler payloadDatahandler, final Collection<TypedProperty> payloadProperties, final boolean inBody, final Description description, String schemaLocation) {
             this.contentId = contentId;
@@ -653,6 +655,22 @@ public class Submission {
 
         public Description getDescription() {
             return this.description;
+        }
+
+        public long getPayloadSize() {
+            return payloadSize;
+        }
+
+        public void setPayloadSize(long payloadSize) {
+            this.payloadSize = payloadSize;
+        }
+
+        public String getFilepath() {
+            return filepath;
+        }
+
+        public void setFilepath(String filepath) {
+            this.filepath = filepath;
         }
 
         @Override

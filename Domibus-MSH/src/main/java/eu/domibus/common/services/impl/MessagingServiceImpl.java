@@ -4,6 +4,9 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
@@ -24,9 +27,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -39,27 +45,77 @@ public class MessagingServiceImpl implements MessagingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
     public static final String PAYLOAD_EXTENSION = ".payload";
     public static final String MIME_TYPE_APPLICATION_UNKNOWN = "application/unknown";
+    private static final String PROPERTY_WAIT_FOR_TASK = "domibus.dispatcher.splitAndJoin.waitForTask";
 
     @Autowired
-    MessagingDao messagingDao;
+    protected MessagingDao messagingDao;
 
     @Autowired
-    StorageProvider storageProvider;
+    protected StorageProvider storageProvider;
 
     @Autowired
-    private DomainContextProvider domainContextProvider;
+    protected DomainContextProvider domainContextProvider;
 
     @Autowired
-    SplitAndJoinService splitAndJoinService;
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected SplitAndJoinService splitAndJoinService;
 
     @Autowired
     private CompressionService compressionService;
 
+    @Autowired
+    protected DomainTaskExecutor domainTaskExecutor;
+
+    @Autowired
+    protected UserMessageService userMessageService;
+
+    @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration) throws CompressionException {
-        if (messaging == null || messaging.getUserMessage() == null)
+        if (messaging == null || messaging.getUserMessage() == null) {
             return;
+        }
 
+        if (messaging.getUserMessage().isSourceMessage()) {
+            LOG.debug("Scheduling the SourceMessage saving");
+            final Domain currentDomain = domainContextProvider.getCurrentDomain();
+            domainTaskExecutor.submit(
+                    () -> {
+                        LOG.debug("Saving the SourceMessage payloads");
+                        try {
+                            storePayloads(messaging, mshRole, legConfiguration);
+                        } catch (Exception e) {
+                            LOG.error("Error saving the SourceMessage payloads", e);
+                        }
+
+                        final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+                        LOG.debug("Scheduling the SourceMessage sending");
+                        userMessageService.scheduleSourceMessageSending(messageId);
+                    },
+                    currentDomain,
+                    false,
+                    domibusPropertyProvider.getLongDomainProperty(currentDomain, PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
+        } else {
+            storePayloads(messaging, mshRole, legConfiguration);
+        }
+        LOG.debug("Saving Messaging");
+        setPayloadsContentType(messaging);
+        messagingDao.create(messaging);
+    }
+
+    protected void setPayloadsContentType(Messaging messaging) {
+        if (messaging.getUserMessage().getPayloadInfo() == null || messaging.getUserMessage().getPayloadInfo().getPartInfo() == null) {
+            return;
+        }
+        for (PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+            setContentType(partInfo);
+        }
+    }
+
+    protected void storePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration) {
+        LOG.debug("Storing payloads");
         if (messaging.getUserMessage().getPayloadInfo() != null && messaging.getUserMessage().getPayloadInfo().getPartInfo() != null) {
             for (PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
                 try {
@@ -74,13 +130,9 @@ public class MessagingServiceImpl implements MessagingService {
                 }
             }
         }
-
-        messagingDao.create(messaging);
     }
 
     protected void storeIncomingPayload(PartInfo partInfo, String messageId) throws IOException {
-        setContentType(partInfo);
-
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
         LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
@@ -121,31 +173,48 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if (savePayloadsInDatabase(currentStorage)) {
-            InputStream is = partInfo.getPayloadDatahandler().getInputStream();
-            byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);
-            partInfo.setBinaryData(binaryData);
-            partInfo.setLength(binaryData.length);
-            partInfo.setFileName(null);
+            saveOutgoingFileToDatabase(partInfo, userMessage, legConfiguration);
         } else {
-            final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
-            userMessage.setSplitAndJoin(mayUseSplitAndJoin);
             if (StringUtils.isBlank(partInfo.getFileName())) {
-
-                InputStream is = partInfo.getPayloadDatahandler().getInputStream();
-                final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + PAYLOAD_EXTENSION);
-                partInfo.setFileName(attachmentStore.getAbsolutePath());
-                final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
-                partInfo.setLength(fileLength);
+                saveOutgoingFileToDisk(partInfo, userMessage, legConfiguration, currentStorage);
             }
         }
-
-        setContentType(partInfo);
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SENDING_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
 
         final boolean hasCompressionProperty = hasCompressionProperty(partInfo);
         if (hasCompressionProperty) {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
+        }
+    }
+
+
+    protected void saveOutgoingFileToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage) throws IOException, EbMS3Exception {
+        try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
+            //notify submitted
+            final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + PAYLOAD_EXTENSION);
+            partInfo.setFileName(attachmentStore.getAbsolutePath());
+            final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
+            partInfo.setLength(fileLength);
+            //notify processed
+        }
+    }
+
+    protected void saveOutgoingFileToDatabase(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
+        try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
+            byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);
+            partInfo.setBinaryData(binaryData);
+            partInfo.setLength(binaryData.length);
+            partInfo.setFileName(null);
+        }
+    }
+
+    protected long saveIncomingFileToDisk(File file, InputStream is) throws IOException {
+        try (OutputStream fileOutputStream = new FileOutputStream(file)) {
+            final long total = IOUtils.copyLarge(is, fileOutputStream);
+            fileOutputStream.flush();
+            LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
+            return total;
         }
     }
 
@@ -160,15 +229,6 @@ public class MessagingServiceImpl implements MessagingService {
         }
         LOG.debug("Setting the payload [{}] content type to [{}]", partInfo.getHref(), contentType);
         partInfo.setMime(contentType);
-    }
-
-    protected long saveIncomingFileToDisk(File file, InputStream is) throws IOException {
-        try (OutputStream fileOutputStream = new FileOutputStream(file)) {
-            final long total = IOUtils.copyLarge(is, fileOutputStream);
-            fileOutputStream.flush();
-            LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
-            return total;
-        }
     }
 
     protected byte[] getOutgoingBinaryData(PartInfo partInfo, InputStream is, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {

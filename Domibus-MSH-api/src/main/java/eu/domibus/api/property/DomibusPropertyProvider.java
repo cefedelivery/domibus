@@ -83,6 +83,8 @@ public interface DomibusPropertyProvider {
 
     Integer getIntegerDomainProperty(Domain domain, String propertyName);
 
+    Long getLongDomainProperty(Domain domain, String propertyName);
+
     /**
      * <p>Reads an optional domain property value and parses it safely as an {@code Integer} before returning it.</p><br />
      *

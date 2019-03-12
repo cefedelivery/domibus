@@ -1,28 +1,23 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
-import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.util.DomibusPropertiesService;
-import eu.domibus.core.message.UserMessageDefaultService;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Property;
 import eu.domibus.common.model.configuration.PropertySet;
-import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.MessageProperties;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
-import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +30,7 @@ import java.util.Set;
  */
 
 @Service
+@Transactional(propagation = Propagation.SUPPORTS)
 public class PropertyProfileValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PropertyProfileValidator.class);
 

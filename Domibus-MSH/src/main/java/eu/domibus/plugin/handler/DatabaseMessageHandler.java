@@ -325,7 +325,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
-
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
@@ -383,6 +382,13 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             payloadProfileValidator.validate(message, pModeKey);
             propertyProfileValidator.validate(message, pModeKey);
 
+            final boolean splitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
+            userMessage.setSplitAndJoin(splitAndJoin);
+
+            //1. store Messaging
+            //2. async save payloads
+            //3. when payloads complete signal message scheduling
+            //4 if payloads save fail => mark the message as fail
             try {
                 messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration);
             } catch (CompressionException exc) {
@@ -395,7 +401,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
-            if (MessageStatus.READY_TO_PULL != messageStatus) {
+            if (MessageStatus.READY_TO_PULL != messageStatus && !splitAndJoin) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             } else {
@@ -403,7 +409,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
-
 
             uiReplicationSignalService.userMessageSubmitted(userMessage.getMessageInfo().getMessageId());
 

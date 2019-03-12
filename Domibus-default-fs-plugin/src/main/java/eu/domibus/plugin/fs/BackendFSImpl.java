@@ -13,6 +13,7 @@ import eu.domibus.plugin.fs.ebms3.Property;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.worker.FSProcessFileService;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
@@ -45,7 +46,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
 
     private static final String FILENAME_SANITIZE_REGEX = "[^\\w.-]";
-    private  static final String FILENAME_SANITIZE_REPLACEMENT = "_";
+    private static final String FILENAME_SANITIZE_REPLACEMENT = "_";
 
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
@@ -61,15 +62,14 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     );
 
 
-
     // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
     @Autowired
     private FSMessageTransformer defaultTransformer;
-    
+
     @Autowired
     private FSFilesManager fsFilesManager;
-    
+
     @Autowired
     private FSPluginProperties fsPluginProperties;
 
@@ -81,6 +81,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Autowired
     private FSSendMessagesService fsSendMessagesService;
+
+    @Autowired
+    protected FSProcessFileService fsProcessFileService;
 
     private final Map<String, Pattern> domainPatternCache = new HashMap<>();
 
@@ -141,7 +144,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
         // get domain info
         String domain;
-        if(multiTenantAware) {
+        if (multiTenantAware) {
             domain = domainContextExtService.getCurrentDomain().getCode();
         } else {
             domain = resolveDomain(fsMessage);
@@ -223,7 +226,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
         return null;
     }
-    
+
     private Pattern getDomainPattern(String domain) {
         if (domainPatternCache.containsKey(domain)) {
             return domainPatternCache.get(domain);
@@ -242,6 +245,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             domainPatternCache.put(domain, domainExpressionPattern);
             return domainExpressionPattern;
         }
+    }
+
+    @Override
+    public void payloadSubmitted(PayloadSubmittedEvent event) {
+        //delete lock file
+        fsProcessFileService.renameProcessedFile(event.getMessageId());
     }
 
     @Override
@@ -269,7 +278,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
             fsSendMessagesService.handleSendFailedMessage(targetFileMessage, domain, getErrorMessage(messageId));
 
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new FSPluginException("Error handling the send failed message file " + messageId, e);
         }
     }
@@ -293,11 +302,11 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private StringBuilder getErrorFileContent(ErrorResult errorResult) {
 
         return fsSendMessagesService.buildErrorMessage(errorResult.getErrorCode() == null ? null : errorResult.getErrorCode().getErrorCodeName(),
-                                                        errorResult.getErrorDetail(),
-                                                        errorResult.getMessageInErrorId(),
-                                                        errorResult.getMshRole() == null ? null : errorResult.getMshRole().toString(),
-                                                        errorResult.getNotified() == null ? null : errorResult.getNotified().toString(),
-                                                        errorResult.getTimestamp() == null ? null : errorResult.getTimestamp().toString());
+                errorResult.getErrorDetail(),
+                errorResult.getMessageInErrorId(),
+                errorResult.getMshRole() == null ? null : errorResult.getMshRole().toString(),
+                errorResult.getNotified() == null ? null : errorResult.getNotified().toString(),
+                errorResult.getTimestamp() == null ? null : errorResult.getTimestamp().toString());
     }
 
     private void handleSentMessage(String domain, String messageId) {
@@ -357,7 +366,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
         // get domain info
         String domain;
-        if(multiTenantAware) {
+        if (multiTenantAware) {
             domain = domainContextExtService.getCurrentDomain().getCode();
         } else {
 
@@ -394,9 +403,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private void renameMessageFile(String domain, String messageId, MessageStatus status) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
-                FileObject targetFile = findMessageFile(outgoingFolder, messageId)) {
-            
+             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+             FileObject targetFile = findMessageFile(outgoingFolder, messageId)) {
+
             if (targetFile != null) {
                 String baseName = targetFile.getName().getBaseName();
                 String newName = FSFileNameHelper.deriveFileName(baseName, status);
@@ -414,9 +423,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     /**
      * extracts finalRecipient from message properties
      *
-     * @see UserMessage
      * @param userMessage Object which contains finalRecipient info
      * @return finalRecipient String
+     * @see UserMessage
      */
     protected String getFinalRecipient(final UserMessage userMessage) {
         String finalRecipient = null;

@@ -10,7 +10,6 @@ import eu.domibus.property.PropertyResolver;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -195,6 +194,12 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     @Override
+    public Long getLongDomainProperty(Domain domain, String propertyName) {
+        String domainValue = getDomainProperty(domain, propertyName);
+        return getLongInternal(propertyName, domainValue);
+    }
+
+    @Override
     public Integer getIntegerOptionalDomainProperty(String propertyName) {
         String optionalDomainValue = getOptionalDomainProperty(propertyName);
         return getIntegerInternal(propertyName, optionalDomainValue);
@@ -212,8 +217,25 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         return getDefaultIntegerValue(propertyName);
     }
 
-    private Integer getDefaultIntegerValue(String propertyName) {
+    protected Long getLongInternal(String propertyName, String customValue) {
+        if(customValue != null) {
+            try {
+                return Long.valueOf(customValue);
+            } catch (final NumberFormatException e) {
+                LOGGER.warn("Could not parse the property [" + propertyName + "] custom value [" + customValue + "] to a Long value", e);
+                return getDefaultLongValue(propertyName);
+            }
+        }
+        return getDefaultLongValue(propertyName);
+    }
+
+    protected Integer getDefaultIntegerValue(String propertyName) {
         Integer defaultValue = MapUtils.getInteger(domibusDefaultProperties, propertyName);
+        return checkDefaultValue(propertyName, defaultValue);
+    }
+
+    protected Long getDefaultLongValue(String propertyName) {
+        Long defaultValue = MapUtils.getLong(domibusDefaultProperties, propertyName);
         return checkDefaultValue(propertyName, defaultValue);
     }
 

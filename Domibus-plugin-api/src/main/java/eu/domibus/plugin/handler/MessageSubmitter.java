@@ -21,5 +21,5 @@ public interface MessageSubmitter {
      * @return the messageId of the submitted message
      * @throws MessagingProcessingException if the message was rejected by the Domibus MSH
      */
-    public String submit(Submission messageData, String submitterName) throws MessagingProcessingException;
+    String submit(Submission messageData, String submitterName) throws MessagingProcessingException;
 }

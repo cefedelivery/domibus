@@ -1,9 +1,6 @@
 package eu.domibus.plugin;
 
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.MessageReceiveFailureEvent;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.MessageStatusChangeEvent;
+import eu.domibus.common.*;
 import eu.domibus.ext.services.MessageExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -119,6 +116,11 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     @Override
     public void messageSendSuccess(String messageId) {
         throw new UnsupportedOperationException("Plugins using " + Mode.PUSH.name() + " must implement this method");
+    }
+
+    @Override
+    public void payloadSubmitted(PayloadSubmittedEvent event) {
+        //this method should be implemented by the plugins needed to be notified about payload submitted events
     }
 
     @Override

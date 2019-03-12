@@ -254,6 +254,10 @@ public class UserMessage extends AbstractBaseEntity {
         return isSplitAndJoin() && messageFragment != null;
     }
 
+    public boolean isSourceMessage() {
+        return isSplitAndJoin() && messageFragment == null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

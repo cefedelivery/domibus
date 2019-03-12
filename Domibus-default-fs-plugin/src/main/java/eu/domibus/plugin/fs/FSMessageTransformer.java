@@ -85,7 +85,10 @@ public class FSMessageTransformer
             ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(2);
             payloadProperties.add(new Submission.TypedProperty(PAYLOAD_PROPERTY_MIME_TYPE, mimeType));
             payloadProperties.add(new Submission.TypedProperty(PAYLOAD_PROPERTY_FILE_NAME, fileName));
-            submission.addPayload(contentId, dataHandler, payloadProperties);
+
+            final Submission.Payload payload = new Submission.Payload(contentId, dataHandler, payloadProperties, false, null, null);
+            payload.setPayloadSize(fsPayload.getFileSize());
+            submission.addPayload(payload);
         }
     }
 

@@ -18,6 +18,7 @@ import java.util.concurrent.*;
 public class DomainTaskExecutorImpl implements DomainTaskExecutor {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainTaskExecutorImpl.class);
+    public static final long DEFAULT_WAIT_TIMEOUT = 5000L;
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -41,25 +42,34 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
     public void submit(Runnable task) {
         LOG.trace("Submitting task");
         final ClearDomainRunnable clearDomainRunnable = new ClearDomainRunnable(domainContextProvider, task);
-        submitRunnable(clearDomainRunnable);
+        submitRunnable(clearDomainRunnable, true, DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
     }
 
     @Override
     public void submit(Runnable task, Domain domain) {
-        LOG.trace("Submitting task for domain [{}]", domain);
-        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, domain, task);
-        submitRunnable(domainRunnable);
+        submit(task, domain, true, DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
     }
 
-    protected void submitRunnable(Runnable task) {
+    @Override
+    public void submit(Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
+        LOG.trace("Submitting task for domain [{}]", domain);
+        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, domain, task);
+        submitRunnable(domainRunnable, waitForTask, timeout, timeUnit);
+    }
+
+    protected void submitRunnable(Runnable task, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
         final Future<?> utrFuture = schedulingTaskExecutor.submit(task);
-        try {
-            utrFuture.get(5000L, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new DomainException("Could not execute task", e);
-        } catch (ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not execute task", e);
+
+        if (waitForTask) {
+            LOG.debug("Waiting for task to complete");
+            try {
+                utrFuture.get(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new DomainException("Could not execute task", e);
+            } catch (ExecutionException | TimeoutException e) {
+                throw new DomainException("Could not execute task", e);
+            }
         }
     }
 }

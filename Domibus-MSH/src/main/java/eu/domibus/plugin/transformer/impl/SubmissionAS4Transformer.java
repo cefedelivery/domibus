@@ -107,6 +107,9 @@ public class SubmissionAS4Transformer {
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
+            partInfo.setLength(payload.getPayloadSize());
+            partInfo.setFileName(payload.getFilepath());
+
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
                 final Property property = new Property();

@@ -1,10 +1,7 @@
 
 package eu.domibus.plugin;
 
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.MessageReceiveFailureEvent;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.MessageStatusChangeEvent;
+import eu.domibus.common.*;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
@@ -112,6 +109,9 @@ public interface BackendConnector<U, T> {
      * @param event event containing details about the message status change event
      */
     void messageStatusChanged(MessageStatusChangeEvent event);
+
+    void payloadSubmitted(PayloadSubmittedEvent event);
+
 
     /**
      * This method gets called when an outgoing message associated with a Mode.PUSH plugin and an associated
