@@ -17,6 +17,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -181,18 +182,19 @@ public class EbMS3MessageBuilder {
                 msgInfo.setTimestamp(new Date());
                 if (signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
                     msgInfo.setRefToMessageId(signalMessage.getError().iterator().next().getRefToMessageInError());
+                } else if (signalMessage.getMessageInfo() != null &&
+                        StringUtils.isNotBlank(signalMessage.getMessageInfo().getRefToMessageId())) {
+                    msgInfo.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
                 }
-
                 signalMessage.setMessageInfo(msgInfo);
             }
             messaging.setSignalMessage(signalMessage);
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
-
             message.saveChanges();
-
         } catch (final JAXBException | SOAPException ex) {
             throw new SendMessageException(ex);
         }
+
         return message;
     }
 

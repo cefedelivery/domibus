@@ -1,0 +1,36 @@
+<eb:Messaging xmlns=""
+              xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+    <eb:UserMessage>
+        <eb:MessageInfo>
+            <eb:Timestamp></eb:Timestamp>
+            <eb:MessageId></eb:MessageId>
+        </eb:MessageInfo>
+        <eb:PartyInfo>
+            <eb:From>
+                <eb:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</eb:PartyId>
+                <eb:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultRole</eb:Role>
+            </eb:From>
+            <eb:To>
+                <eb:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</eb:PartyId>
+                <eb:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultRole</eb:Role>
+            </eb:To>
+        </eb:PartyInfo>
+        <eb:CollaborationInfo>
+            <eb:Service type="tc1">bdx:noprocess</eb:Service>
+            <eb:Action>TC1Leg1</eb:Action>
+            <eb:ConversationId>1</eb:ConversationId>
+        </eb:CollaborationInfo>
+        <eb:MessageProperties>
+            <eb:Property name="originalSender">CourtA</eb:Property>
+            <eb:Property name="finalRecipient">CourtB</eb:Property>
+        </eb:MessageProperties>
+        <eb:PayloadInfo>
+            <eb:PartInfo href="cid:payload">
+                <eb:Description xml:lang="en-US">business document</eb:Description>
+                <eb:PartProperties>
+                    <eb:Property name="MimeType">text/xml</eb:Property>
+                </eb:PartProperties>
+            </eb:PartInfo>
+        </eb:PayloadInfo>
+    </eb:UserMessage>
+</eb:Messaging>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--suppress MavenModelInspection -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>eu.domibus</groupId>
+		<artifactId>domibus</artifactId>
+		<version>4.1-RC1-SNAPSHOT</version>
+	</parent>
+	<artifactId>domibus-selenium-tests</artifactId>
+
+	<name>Domibus MSH Selenium UI Tests</name>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+
+	<dependencies>
+
+		<!--USED ONLY FOR SOAP REQUEST CLASSES-->
+		<dependency>
+			<groupId>eu.domibus</groupId>
+			<artifactId>domibus-ws-stubs</artifactId>
+			<version>4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.bluecatcode.junit</groupId>
+			<artifactId>junit-4.10-extended</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+
+		<!--**************************************-->
+		<!--USED ONLY FOR JMS-->
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>5.7.0</version>
+		</dependency>
+
+		<!--**************************************-->
+		<!--FOR DATA DRIVEN TESTS-->
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>4.0</version>
+		</dependency>
+		<!--**************************************-->
+
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-chrome-driver</artifactId>
+			<version>3.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>3.9.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>7.0.0-beta1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.11</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.19.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-multipart</artifactId>
+			<version>1.19.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20080701</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0-m02</version>
+		</dependency>
+
+	</dependencies>
+
+
+	<profiles>
+		<profile>
+			<id>local_MT</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.22.1</version>
+						<configuration>
+							<failIfNoTests>true</failIfNoTests>
+							<groups>multiTenancy,independent</groups>
+							<systemPropertyVariables>
+								<webdriver.ie.driver>.\src\main\resources\IEDriverServer.exe</webdriver.ie.driver>
+								<webdriver.chrome.driver>chromedriver.exe</webdriver.chrome.driver>
+								<webdriver.ghecko.driver>.\src\main\resources\gheckodriver.exe</webdriver.ghecko.driver>
+								<reports.folder>./target/</reports.folder>
+								<data.folder>.\src\main\resources\</data.folder>
+								<test_data.file>multiTenenacytestData.json</test_data.file>
+								<isMultiDomain>true</isMultiDomain>
+								<LONG_TIMEOUT>20</LONG_TIMEOUT>
+								<SHORT_TIMEOUT>3</SHORT_TIMEOUT>
+								<UI_BASE_URL>http://localhost:8080/domibus/</UI_BASE_URL>
+
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>ubuntu</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.22.1</version>
+						<configuration>
+							<failIfNoTests>true</failIfNoTests>
+							<groups>multiTenancy,independent</groups>
+							<systemPropertyVariables>
+								<webdriver.ie.driver>.\src\main\resources\IEDriverServer.exe</webdriver.ie.driver>
+								<webdriver.chrome.driver>chromedriver.exe</webdriver.chrome.driver>
+								<webdriver.ghecko.driver>.\src\main\resources\gheckodriver.exe</webdriver.ghecko.driver>
+								<reports.folder>./target/</reports.folder>
+								<data.folder>./src/main/resources/</data.folder>
+								<test_data.file>multiTenenacytestData.json</test_data.file>
+								<isMultiDomain>true</isMultiDomain>
+								<LONG_TIMEOUT>20</LONG_TIMEOUT>
+								<SHORT_TIMEOUT>10</SHORT_TIMEOUT>
+								<UI_BASE_URL>http://localhost:8080/domibus/</UI_BASE_URL>
+
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

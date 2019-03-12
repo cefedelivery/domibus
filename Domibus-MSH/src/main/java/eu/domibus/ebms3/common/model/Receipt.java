@@ -63,4 +63,8 @@ public class Receipt extends AbstractBaseEntity {
         }
         return this.any;
     }
+
+    public void setAny(List<String> any) {
+        this.any = any;
+    }
 }

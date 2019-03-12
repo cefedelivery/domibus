@@ -1,13 +1,13 @@
 ﻿import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, Router, RouterStateSnapshot} from "@angular/router";
 import {SecurityService} from "../../security/security.service";
 import {AuthorizedGuard} from "./authorized.guard";
 
 @Injectable()
 export class AuthorizedAdminGuard extends AuthorizedGuard {
 
-  constructor(securityService: SecurityService) {
-    super(securityService);
+  constructor(router: Router, securityService: SecurityService) {
+    super(router, securityService);
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {

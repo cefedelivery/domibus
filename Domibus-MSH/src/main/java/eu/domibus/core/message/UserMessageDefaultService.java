@@ -15,6 +15,7 @@ import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -68,6 +69,10 @@ public class UserMessageDefaultService implements UserMessageService {
     private Queue splitAndJoinQueue;
 
     @Autowired
+    @Qualifier("sendPullReceiptQueue")
+    private Queue sendPullReceiptQueue;
+
+    @Autowired
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
@@ -81,6 +86,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private SignalMessageDao signalMessageDao;
+
+    @Autowired
+    private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -257,6 +265,17 @@ public class UserMessageDefaultService implements UserMessageService {
                 .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
                 .build();
         jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
+    public void scheduleSendingPullReceipt(String messageId, String pmodeKey) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(PULL_RECEIPT_REF_TO_MESSAGE_ID, messageId)
+                .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
+                .build();
+        LOG.debug("Sending message to sendPullReceiptQueue");
+        jmsManager.sendMessageToQueue(jmsMessage, sendPullReceiptQueue);
     }
 
     @Override
