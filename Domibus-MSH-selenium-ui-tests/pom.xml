@@ -170,7 +170,7 @@
 							<groups>multiTenancy,independent</groups>
 							<systemPropertyVariables>
 								<webdriver.ie.driver>.\src\main\resources\IEDriverServer.exe</webdriver.ie.driver>
-								<webdriver.chrome.driver>chromedriver.exe</webdriver.chrome.driver>
+								<webdriver.chrome.driver>/home/edelivery/drivers/chromedriver</webdriver.chrome.driver>
 								<webdriver.gecko.driver>/home/edelivery/drivers/geckodriver</webdriver.gecko.driver>
 								<reports.folder>./target/</reports.folder>
 								<data.folder>./src/main/resources/</data.folder>
