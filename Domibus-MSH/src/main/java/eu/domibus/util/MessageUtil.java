@@ -10,6 +10,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
@@ -25,6 +27,7 @@ import java.util.Iterator;
  * @since 3.3
  */
 @Service
+@Transactional(propagation = Propagation.SUPPORTS)
 public class MessageUtil {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageUtil.class);

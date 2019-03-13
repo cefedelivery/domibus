@@ -23,6 +23,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -78,7 +79,7 @@ public class SoapUtil {
             message.addAttachmentPart(attachmentPart);
         }
 
-        final String soapEnvelopeString = IOUtils.toString(messageImpl.getContent(InputStream.class));
+        final String soapEnvelopeString = IOUtils.toString(messageImpl.getContent(InputStream.class), StandardCharsets.UTF_8);
         final SOAPMessage soapMessage = createSOAPMessage(soapEnvelopeString);
         final SOAPElement next = (SOAPElement) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         message.getSOAPHeader().addChildElement(next);
@@ -115,7 +116,7 @@ public class SoapUtil {
 
         try (StringReader stringReader = new StringReader(rawXml); InputStream targetStream =
                 new ByteArrayInputStream(CharStreams.toString(stringReader)
-                        .getBytes(Charsets.UTF_8.name()))) {
+                        .getBytes(StandardCharsets.UTF_8.name()))) {
             Document document = builder.parse(targetStream);
             DOMSource domSource = new DOMSource(document);
             SOAPPart soapPart = message.getSOAPPart();

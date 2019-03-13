@@ -19,6 +19,8 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.soap.SOAPMessage;
 import java.io.*;
@@ -64,8 +66,11 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         return temporaryDirectoryLocation + "/" + uuid;
     }
 
+    @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public SOAPMessage rejoinSourceMessage(String groupId) {
+        LOG.debug("Rejoining the SourceMessage for group [{}]", groupId);
+
         final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
         if (messageGroupEntity.getFragmentCount() != userMessageFragments.size()) {
@@ -83,12 +88,17 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         }
 
         final File sourceMessageFile = mergeSourceFile(fragmentFilesInOrder, messageGroupEntity);
+        LOG.debug("Rejoined the SourceMessage for group [{}] into file [{}]", groupId, sourceMessageFile);
+
+        LOG.debug("Creating the SOAPMessage from file [{}]", sourceMessageFile);
         try (InputStream rawInputStream = new FileInputStream(sourceMessageFile)) {
             MessageImpl messageImpl = new MessageImpl();
             messageImpl.setContent(InputStream.class, rawInputStream);
             messageImpl.put(Message.CONTENT_TYPE, createContentType(messageGroupEntity.getMessageHeaderEntity().getBoundary(), messageGroupEntity.getMessageHeaderEntity().getStart()));
             new AttachmentDeserializer(messageImpl).initializeAttachments();
-            return soapUtil.createUserMessage(messageImpl);
+            final SOAPMessage soapMessage = soapUtil.createUserMessage(messageImpl);
+            LOG.debug("Created the SOAPMessage from file [{}]", sourceMessageFile);
+            return soapMessage;
         } catch (Exception e) {
             //TODO return a signal error to C2 and notify the backend
             LOG.error("Error parsing the source file [{}]", sourceMessageFile);
@@ -103,6 +113,8 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     }
 
     protected File mergeSourceFile(List<File> fragmentFilesInOrder, MessageGroupEntity messageGroupEntity) {
+
+
         final String temporaryDirectoryLocation = domibusPropertyProvider.getProperty(Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION);
         if (StringUtils.isEmpty(temporaryDirectoryLocation)) {
             throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments: the property [" + Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION + "] is not defined", null);
@@ -115,6 +127,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         }
 
         final File outputFile = new File(outputFileName);
+
+        LOG.debug("Merging files [{}] for group [{}] into file [{}]", fragmentFilesInOrder, messageGroupEntity.getGroupId(), outputFile);
+
         try (OutputStream mergingStream = new BufferedOutputStream(Files.newOutputStream(outputFile.toPath()))) {
             mergeFiles(fragmentFilesInOrder, mergingStream);
         } catch (IOException exp) {
@@ -127,8 +142,13 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         final File decompressedSourceFile = new File(sourceFileName);
         try {
+            LOG.debug("Decompressing SourceMessage file [{}] into file [{}]", outputFile, decompressedSourceFile);
             decompressGzip(outputFile, decompressedSourceFile);
-            outputFile.delete();
+            LOG.debug("Deleting file [{}]", outputFile);
+            final boolean delete = outputFile.delete();
+            if (!delete) {
+                LOG.warn("Could not delete file [{}]", outputFile);
+            }
         } catch (IOException exp) {
             throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments", exp);
         }

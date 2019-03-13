@@ -1,6 +1,10 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
@@ -13,17 +17,17 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.core.message.fragment.MessageFragmentEntity;
-import eu.domibus.core.message.fragment.MessageGroupDao;
-import eu.domibus.core.message.fragment.MessageGroupEntity;
-import eu.domibus.core.message.fragment.MessageHeaderEntity;
+import eu.domibus.core.message.fragment.*;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
 import eu.domibus.ebms3.common.model.mf.MessageHeaderType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -50,6 +54,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Thomas Dussart
@@ -113,6 +118,21 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
     @Autowired
     protected AS4ReceiptService as4ReceiptService;
 
+    @Autowired
+    protected DomainTaskExecutor domainTaskExecutor;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected SplitAndJoinService splitAndJoinService;
+
+    @Autowired
+    protected IncomingSourceMessageHandler incomingSourceMessageHandler;
+
     @Override
     public SOAPMessage handleNewUserMessage(final LegConfiguration legConfiguration, String pmodeKey, final SOAPMessage request, final Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, SOAPException {
         //check if the message is sent to the same Domibus instance
@@ -175,7 +195,33 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
                     if (groupEntity.getReceivedFragments() == groupEntity.getFragmentCount()) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
-                        userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId());
+
+                        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+                        domainTaskExecutor.submit(
+                                () -> {
+                                    LOG.debug("Saving the incoming SourceMessage payloads");
+
+                                    final String groupId = groupEntity.getGroupId();
+                                    final SOAPMessage sourceRequest = splitAndJoinService.rejoinSourceMessage(groupId);
+                                    Messaging sourceMessaging = messageUtil.getMessage(sourceRequest);
+
+                                    MessageExchangeConfiguration userMessageExchangeContext = null;
+                                    try {
+                                        userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(sourceMessaging.getUserMessage(), MSHRole.RECEIVING);
+                                        String sourcePmodeKey = userMessageExchangeContext.getPmodeKey();
+                                        sourceRequest.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, sourcePmodeKey);
+                                    } catch (EbMS3Exception | SOAPException e) {
+                                        //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
+                                        LOG.error("Error getting the pmodeKey");
+                                        return;
+                                    }
+
+                                    incomingSourceMessageHandler.processMessage(sourceRequest, sourceMessaging);
+                                    userMessageService.scheduleSourceMessageReceipt(sourceMessaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
+                                },
+                                currentDomain,
+                                false,
+                                domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
                     }
                 }
             }
@@ -399,6 +445,8 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
     }
 
     protected void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
+        LOG.debug("Start handling payloads");
+
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
@@ -444,6 +492,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                 throw ex;
             }
         }
+        LOG.debug("Finished handling payloads");
     }
 
     protected String getFinalRecipientName(UserMessage userMessage) {

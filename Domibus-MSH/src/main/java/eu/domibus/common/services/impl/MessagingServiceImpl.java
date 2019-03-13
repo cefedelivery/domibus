@@ -46,7 +46,7 @@ public class MessagingServiceImpl implements MessagingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
     public static final String PAYLOAD_EXTENSION = ".payload";
     public static final String MIME_TYPE_APPLICATION_UNKNOWN = "application/unknown";
-    private static final String PROPERTY_WAIT_FOR_TASK = "domibus.dispatcher.splitAndJoin.waitForTask";
+    public static final String PROPERTY_WAIT_FOR_TASK = "domibus.dispatcher.splitAndJoin.waitForTask";
 
     @Autowired
     protected MessagingDao messagingDao;
@@ -83,7 +83,7 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if (messaging.getUserMessage().isSourceMessage()) {
-            LOG.debug("Scheduling the SourceMessage saving");
+            LOG.debug("Scheduling saving the SourceMessage");
             final Domain currentDomain = domainContextProvider.getCurrentDomain();
             domainTaskExecutor.submit(
                     () -> {
