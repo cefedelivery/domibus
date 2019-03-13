@@ -163,12 +163,13 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             // Sets the message log status to DELETED
             userMessageLogService.setMessageAsDeleted(messageId);
             // Sets the log status to deleted also for the signal messages (if present).
-            List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
-            if (!signalMessageIds.isEmpty()) {
-                for (String signalMessageId : signalMessageIds) {
-                    userMessageLogService.setMessageAsDeleted(signalMessageId);
-                }
-            }
+//            List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
+//            if (!signalMessageIds.isEmpty()) {
+//                for (String signalMessageId : signalMessageIds) {
+//                    userMessageLogService.setMessageAsDeleted(signalMessageId);
+//                    LOG.info("SignalMessage [{}] was set as DELETED.", signalMessageId);
+//                }
+//            }
         }
         return transformer.transformFromMessaging(userMessage);
     }
