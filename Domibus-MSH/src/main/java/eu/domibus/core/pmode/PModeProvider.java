@@ -13,8 +13,9 @@ import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.configuration.*;
+import eu.domibus.core.crypto.spi.model.UserMessageMapping;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
@@ -47,10 +48,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+
+import static eu.domibus.core.crypto.spi.model.UserMessageMapping.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -200,8 +200,8 @@ public abstract class PModeProvider {
     }
 
     private String validateDescriptionSize(final String description) {
-        if(StringUtils.isNotEmpty(description) && description.length()>255){
-            return description.substring(0,254);
+        if (StringUtils.isNotEmpty(description) && description.length() > 255) {
+            return description.substring(0, 254);
         }
         return description;
     }
@@ -281,7 +281,7 @@ public abstract class PModeProvider {
             LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeConfiguration.getPmodeKey(), userMessage);
             return messageExchangeConfiguration;
         } catch (EbMS3Exception e) {
-            if(userMessage.getMessageInfo() != null) {
+            if (userMessage.getMessageInfo() != null) {
                 e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
             }
 
@@ -316,6 +316,16 @@ public abstract class PModeProvider {
     protected abstract String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception;
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
+
+    public Map<UserMessageMapping, String> getMessageMapping(UserMessage userMessage) throws EbMS3Exception {
+        Map<UserMessageMapping, String> mappings = new HashMap<>();
+        final String actionValue = userMessage.getCollaborationInfo().getAction();
+        mappings.put(ACTION_NAME, findActionName(actionValue));
+        final eu.domibus.ebms3.common.model.Service service = userMessage.getCollaborationInfo().getService();
+        mappings.put(SERVICE_NAME, findServiceName(service));
+        mappings.put(FROM_PARTY_NAME, findPartyName(userMessage.getPartyInfo().getFrom().getPartyId()));
+        return mappings;
+    }
 
     public abstract Party getGatewayParty();
 

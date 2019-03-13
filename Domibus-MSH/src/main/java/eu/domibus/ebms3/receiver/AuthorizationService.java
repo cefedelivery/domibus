@@ -1,19 +1,14 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.ErrorCode;
-import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.certificate.Certificate;
-import eu.domibus.common.services.SoapService;
-import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
-import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.pki.DomibusCertificateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,26 +18,21 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING;
 import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 @Component
 public class AuthorizationService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthorizationService.class);
 
+    protected static final String IAM_AUTHORIZATION_IDENTIFIER = "domibus.extension.iam.authorization.identifier";
+
     @Autowired
     private List<AuthorizationServiceSpi> authorizationServiceSpis;
-
-    @Autowired
-    private SoapService soapService;
-
-    @Autowired
-    private DomibusPropertiesService domibusPropertiesService;
 
     @Autowired
     private CertificateService certificateService;
@@ -53,7 +43,8 @@ public class AuthorizationService {
     @Autowired
     private DomainCoreConverter domainCoreConverter;
 
-    protected static final String IAM_AUTHORIZATION_IDENTIFIER = "domibus.extension.iam.authorization.identifier";
+    @Autowired
+    private PModeProvider pModeProvider;
 
     AuthorizationServiceSpi getAuthorizationService() {
         final String authorizationServiceIndentifier = domibusPropertyProvider.getDomainProperty(IAM_AUTHORIZATION_IDENTIFIER);
@@ -75,59 +66,51 @@ public class AuthorizationService {
         return authorizationServiceList.get(0);
     }
 
-    public void authorizeUserMessage(SOAPMessage request, Messaging messaging) throws EbMS3Exception {
-        authorize(request, messaging, messaging.getUserMessage().getMessageInfo().getMessageId());
-    }
+    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception {
 
-    private void authorize(SOAPMessage request, Messaging messaging, String messageId) throws EbMS3Exception {
         if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
             LOG.debug("No trust verification of sending certificate");
             return;
         }
+        final CertificateExchangeType certificateExchangeType = getCertificateExchangeType(request);
+        if (CertificateExchangeType.NONE.equals(certificateExchangeType)) {
+            LOG.debug("Message has no security configured, skipping authorization");
+            return;
+        }
 
-        String certificateExchangeTypeValue;
+        final List<X509Certificate> x509Certificates = getCertificates(request);
+        getAuthorizationService().authorize(x509Certificates.toArray(new X509Certificate[]{}),
+                domainCoreConverter.convert(userMessage, eu.domibus.core.crypto.spi.model.UserMessage.class),
+                pModeProvider.getMessageMapping(userMessage));
+    }
+
+    private List<X509Certificate> getCertificates(SOAPMessage request) {
         String certificateChainValue;
         try {
-            certificateExchangeTypeValue = (String) request.getProperty(CertificateExchangeType.getKey());
             certificateChainValue = (String) request.getProperty(CertificateExchangeType.getValue());
+        } catch (SOAPException e) {
+            throw new IllegalStateException(String.
+                    format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
+        }
+        return certificateService.deserializeCertificateChain(certificateChainValue);
+
+    }
+
+    private CertificateExchangeType getCertificateExchangeType(SOAPMessage request) {
+        String certificateExchangeTypeValue;
+        try {
+            certificateExchangeTypeValue = (String) request.getProperty(CertificateExchangeType.getKey());
         } catch (SOAPException e) {
             throw new IllegalStateException(String.
                     format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
         }
 
         try {
-            final CertificateExchangeType certificateExchangeType1 = CertificateExchangeType.valueOf(certificateExchangeTypeValue);
-            if (CertificateExchangeType.NONE.equals(certificateExchangeType1)) {
-                LOG.info("Message does not contain security info ==> skipping sender trust verification.");
-                return;
-            }
+            return CertificateExchangeType.valueOf(certificateExchangeTypeValue);
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(String.format("Invalid certificate exchange type:[%s]", certificateExchangeTypeValue));
         }
-
-        final List<X509Certificate> x509Certificates = certificateService.deserializeCertificateChain(certificateChainValue);
-        if (domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING)) {
-            checkCertificateValidity(x509Certificates, messageId);
-        }
-        getAuthorizationService().authorize(x509Certificates.toArray(new X509Certificate[]{}), domainCoreConverter.convert(messaging.getUserMessage(), eu.domibus.core.crypto.spi.model.UserMessage.class));
     }
 
-    protected void checkCertificateValidity(List<X509Certificate> certificates, String messageId) throws EbMS3Exception {
-        for (X509Certificate certificate : certificates) {
-            try {
-                if (!certificateService.isCertificateValid(certificate)) {
-                    LOG.error("Invalid incoming certificate");
-                    EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, String.format("Certificate with subject [%s] certificate is not valid or has been revoked", certificate.getSubjectDN()), messageId, null);
-                    ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-                    throw ebMS3Ex;
-                }
-            } catch (DomibusCertificateException dce) {
-                LOG.error("Invalid incoming certificate");
-                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, String.format("Invalid incoming certificate:[%s]", certificate.getSubjectDN()), messageId, null);
-                ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-                throw ebMS3Ex;
-            }
-        }
-    }
 
 }

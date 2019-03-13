@@ -76,6 +76,8 @@ public interface CertificateService {
 
     List<X509Certificate> deserializeCertificateChain(String chain);
 
+    Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates);
+
     /**
      * Returns a certificate entry converted from a base64 string
      *

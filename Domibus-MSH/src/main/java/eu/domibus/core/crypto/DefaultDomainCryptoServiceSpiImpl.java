@@ -30,8 +30,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * @author Cosmin Baciu
@@ -294,6 +296,11 @@ public class DefaultDomainCryptoServiceSpiImpl extends Merlin implements DomainC
     public void removeCertificate(List<String> aliases) {
         aliases.forEach(this::doRemoveCertificate);
         persistTrustStore();
+    }
+
+    @Override
+    public void verifyTrust(X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException {
+        super.verifyTrust(certs, enableRevocation, subjectCertConstraints, issuerCertConstraints);
     }
 
     @Override

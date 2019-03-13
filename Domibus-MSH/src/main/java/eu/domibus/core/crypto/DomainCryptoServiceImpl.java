@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi.DEFAULT_IAM_AUTHENTICATION_SPI;
+import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING;
 
 /**
  * @author Cosmin Baciu

@@ -433,6 +433,38 @@ public class CertificateServiceImpl implements CertificateService {
         return certificates;
     }
 
+    @Override
+    public Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Extracting leaf certificate from chain");
+            for (Certificate certificate : certificates) {
+                LOG.trace("Certificate:[{}]" + certificate);
+            }
+        }
+        Set<String> issuerSet = new HashSet<>();
+        Map<String, X509Certificate> subjectMap = new HashMap<>();
+        for (Certificate certificate : certificates) {
+            X509Certificate x509Certificate = (X509Certificate) certificate;
+            final String subjectName = x509Certificate.getSubjectDN().getName();
+            subjectMap.put(subjectName, x509Certificate);
+            final String issuerName = x509Certificate.getIssuerDN().getName();
+            issuerSet.add(issuerName);
+            LOG.debug("Certificate subject:[{}] issuer:[{}]", subjectName, issuerName);
+        }
+
+        final Set<String> allSubject = subjectMap.keySet();
+        //There should always be one more subject more than issuers. Indeed the root CA has the same value as issuer and subject.
+        allSubject.removeAll(issuerSet);
+        //the unique entry in the set is the leaf.
+        if (allSubject.size() == 1) {
+            final String leafSubjet = allSubject.iterator().next();
+            LOG.debug("Not an issuer:[{}]", leafSubjet);
+            return subjectMap.get(leafSubjet);
+        }
+        LOG.error("Certificate exchange type is X_509_PKIPATHV_1 but no leaf certificate has been found");
+        return null;
+    }
+
 
     public TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException {
         X509Certificate cert = loadCertificateFromString(certificateContent);

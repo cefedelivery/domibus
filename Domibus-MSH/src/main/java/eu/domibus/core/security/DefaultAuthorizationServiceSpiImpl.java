@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 /**
  * @author Thomas Dussart
@@ -20,7 +21,7 @@ public class DefaultAuthorizationServiceSpiImpl implements AuthorizationServiceS
     protected static final String DEFAULT_IAM_AUTHORIZATION_IDENTIFIER = "DEFAULT_IAM_AUTHORIZATION_SPI";
 
     @Override
-    public boolean authorize(X509Certificate[] certs, UserMessage userMessage) {
+    public boolean authorize(X509Certificate[] certs, UserMessage userMessage, Map<String, String> messageMapping) {
         LOG.info("Default authorization not implemented.");
         return true;
     }

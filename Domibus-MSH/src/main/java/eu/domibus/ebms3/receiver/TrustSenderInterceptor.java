@@ -64,7 +64,7 @@ import java.util.*;
  */
 public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
-    protected static final String DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING = "domibus.sender.trust.validation.onreceiving";
+    public static final String DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING = "domibus.sender.trust.validation.onreceiving";
 
     protected static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING = "domibus.sender.certificate.validation.onreceiving";
 
@@ -77,6 +77,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     public static final String X_509_PKIPATHV_1 = "X509PKIPathv1";
 
     public static final String ID = "Id";
+
+    protected static final String DOMIBUS_SENDER_CERTIFICATE_SUBJECT_CHECK = "domibus.sender.certificate.subject.check";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -110,7 +112,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
         if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
-            LOG.debug("No trust verification of sending certificate");
+            LOG.warn("No trust verification of sending certificate");
             return;
         }
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
@@ -135,17 +137,17 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
         LOG.info("Validating sender certificate for party [{}]", senderPartyName);
         X509Certificate certificate = getSenderCertificate(message);
-        /*if (!checkSenderPartyTrust(certificate, senderPartyName, messageId, isPullMessage)) {
+        if (!checkSenderPartyTrust(certificate, senderPartyName, messageId, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
-        }*/
+        }
 
-      /*  if (!checkCertificateValidity(certificate, senderPartyName, isPullMessage)) {
+        if (!checkCertificateValidity(certificate, senderPartyName, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] certificate is not valid or has been revoked", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
-        }*/
+        }
     }
 
     protected Boolean checkCertificateValidity(X509Certificate certificate, String sender, boolean isPullMessage) {
@@ -169,7 +171,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId, boolean isPullMessage) {
-        if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
+        if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_SUBJECT_CHECK)) {
             LOG.debug("Sender alias verification is disabled");
             return true;
         }
@@ -264,8 +266,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                 BinarySecurityTokenReference binarySecurityTokenReference = (BinarySecurityTokenReference) tokenReference;
                 final List<? extends Certificate> certificateChain = getCertificateFromBinarySecurityToken(securityHeader, binarySecurityTokenReference);
                 addSerializedCertificateToMessage(msg, certificateChain, CertificateExchangeType.BINARY_SECURITY_TOKEN);
-
-                final Certificate certificate = extractLeafCertificateFromChain(certificateChain);
+                final Certificate certificate = certificateService.extractLeafCertificateFromChain(certificateChain);
                 if (certificate == null) {
                     throw new SoapFault("CertificateException: Could not extract the certificate for validation", version.getSender());
                 }
@@ -344,37 +345,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                 }
             }
         }
-        return null;
-    }
-
-    public Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Signing chain received");
-            for (Certificate certificate : certificates) {
-                LOG.trace(certificate.toString());
-            }
-        }
-        Set<String> issuerSet = new HashSet<>();
-        Map<String, X509Certificate> subjectMap = new HashMap<>();
-        for (Certificate certificate : certificates) {
-            X509Certificate x509Certificate = (X509Certificate) certificate;
-            final String subjectName = x509Certificate.getSubjectDN().getName();
-            subjectMap.put(subjectName, x509Certificate);
-            final String issuerName = x509Certificate.getIssuerDN().getName();
-            issuerSet.add(issuerName);
-            LOG.debug("Certificate subject:[{}] issuer:[{}]", subjectName, issuerName);
-        }
-
-        final Set<String> allSubject = subjectMap.keySet();
-        //There should always be one more subject more than issuers. Indeed the root CA has the same value as issuer and subject.
-        allSubject.removeAll(issuerSet);
-        //the unique entry in the set is the leaf.
-        if (allSubject.size() == 1) {
-            final String leafSubjet = allSubject.iterator().next();
-            LOG.debug("Not an issuer:[{}]", leafSubjet);
-            return subjectMap.get(leafSubjet);
-        }
-        LOG.error("Certificate exchange type is X_509_PKIPATHV_1 but no leaf certificate has been found");
         return null;
     }
 
