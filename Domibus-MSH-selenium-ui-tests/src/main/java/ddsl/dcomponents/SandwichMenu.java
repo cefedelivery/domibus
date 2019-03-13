@@ -17,6 +17,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 
 public class SandwichMenu extends DComponent {
+
+	private final int miniWaitTime = 200;
+
 	public SandwichMenu(WebDriver driver) {
 		super(driver);
 		log.info("sandwich menu init");
@@ -32,18 +35,22 @@ public class SandwichMenu extends DComponent {
 
 
 	public DButton getExpandButton() {
+		wait.forXMillis(miniWaitTime);
 		return new DButton(driver, driver.findElement(expandButton));
 	}
 
 	public DObject getCurrentUserID() {
+		wait.forXMillis(miniWaitTime);
 		return new DObject(driver, driver.findElement(currentUserID));
 	}
 
 	public DLink getLogoutLnk() {
+		wait.forXMillis(miniWaitTime);
 		return new DLink(driver, driver.findElement(logoutLnk));
 	}
 
 	private boolean isMenuExpanded() throws Exception {
+		wait.forXMillis(miniWaitTime);
 		try {
 			wait.webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(menuContainer));
 			return true;
@@ -53,6 +60,7 @@ public class SandwichMenu extends DComponent {
 	}
 
 	private void expandMenu() throws Exception {
+		wait.forXMillis(miniWaitTime);
 		if (isMenuExpanded()) return;
 		getExpandButton().click();
 		try {
@@ -63,11 +71,14 @@ public class SandwichMenu extends DComponent {
 	}
 
 	private void contractMenu() throws Exception {
+		wait.forXMillis(miniWaitTime);
 		if (!isMenuExpanded()) return;
 		clickVoidSpace();
 	}
 
 	public boolean isLoggedIn() throws Exception {
+
+		wait.forXMillis(miniWaitTime);
 		expandMenu();
 
 		boolean toReturn = !getCurrentUserID().getText().equalsIgnoreCase("Not logged in");
@@ -78,6 +89,9 @@ public class SandwichMenu extends DComponent {
 	}
 
 	public void logout() throws Exception {
+
+		wait.forXMillis(miniWaitTime);
+
 		expandMenu();
 		log.info("Logging out...");
 		getLogoutLnk().click();

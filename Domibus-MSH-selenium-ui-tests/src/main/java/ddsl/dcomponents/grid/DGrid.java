@@ -160,6 +160,7 @@ public class DGrid extends DComponent {
 	public void scrollToAndDoubleClick(String columnName, String value) throws Exception {
 		int index = scrollTo(columnName, value);
 		doubleClickRow(index);
+		wait.forXMillis(500);
 	}
 
 

@@ -14,12 +14,16 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class DriverManager {
 
+//	public static WebDriver getDriver() {
+//		System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE,"true");
+//		System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE,"/dev/null");
+//		WebDriver driver = new FirefoxDriver();
+//		driver.manage().window().maximize();
+//		return driver;
+//	}
+
 	public static WebDriver getDriver() {
-		System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE,"true");
-		System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE,"/dev/null");
-		WebDriver driver = new FirefoxDriver();
-		driver.manage().window().maximize();
-		return driver;
+		return new ChromeDriver();
 	}
 
 
