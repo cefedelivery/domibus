@@ -27,10 +27,15 @@ import java.util.List;
 
 public class PluginUsersPgTest extends BaseTest {
 
-	protected PluginUsersPage login(HashMap<String, String> user) throws Exception {
+	protected PluginUsersPage login(HashMap<String, String> user){
+		System.out.println("login started");
 		LoginPage loginPage = new LoginPage(driver);
-		loginPage.login(user);
-		new DomibusPage(driver).getSidebar().getPageLnk(DOMIBUS_PAGES.PLUGIN_USERS).click();
+		try {
+			loginPage.login(user);
+			new DomibusPage(driver).getSidebar().getPageLnk(DOMIBUS_PAGES.PLUGIN_USERS).click();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return new PluginUsersPage(driver);
 	}
 
@@ -216,6 +221,7 @@ public class PluginUsersPgTest extends BaseTest {
 
 	@Test(description = "PU-7", groups = {"multiTenancy", "singleTenancy"})
 	public void deleteAndCancel() throws Exception {
+		System.out.println("method started");
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -364,6 +370,7 @@ public class PluginUsersPgTest extends BaseTest {
 		errMess = pum.getConfirmationErrMess().getText();
 		soft.assertEquals(errMess, DMessages.PASS_NO_MATCH_MESSAGE, "Password and confirmation should match");
 
+		page.clickVoidSpace();
 
 		soft.assertAll();
 	}
