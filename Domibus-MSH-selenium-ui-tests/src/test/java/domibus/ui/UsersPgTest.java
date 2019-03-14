@@ -143,6 +143,7 @@ public class UsersPgTest extends BaseTest {
 		page.newUser(username, "tuser@bnc.com", DRoles.ADMIN, data.getDefaultTestPass(), data.getDefaultTestPass());
 
 		page.grid().waitForRowsToLoad();
+		page.wait.forXMillis(500);
 
 		soft.assertTrue(page.getCancelBtn().isEnabled(), "Cancel button is enabled after new user creation");
 

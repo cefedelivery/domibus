@@ -140,8 +140,8 @@
 								<webdriver.gecko.driver>geckodriver.exe</webdriver.gecko.driver>
 								<reports.folder>./target/</reports.folder>
 								<data.folder>.\src\main\resources\</data.folder>
-								<!--<test_data.file>multiTenenacytestData.json</test_data.file>-->
-								<test_data.file>localmultiTenenacytestData.json</test_data.file>
+								<test_data.file>multiTenenacytestData.json</test_data.file>
+								<!--<test_data.file>localmultiTenenacytestData.json</test_data.file>-->
 								<isMultiDomain>true</isMultiDomain>
 								<LONG_TIMEOUT>20</LONG_TIMEOUT>
 								<SHORT_TIMEOUT>3</SHORT_TIMEOUT>
@@ -169,7 +169,7 @@
 							<failIfNoTests>true</failIfNoTests>
 							<groups>multiTenancy,independent</groups>
 							<systemPropertyVariables>
-								<webdriver.ie.driver>.\src\main\resources\IEDriverServer.exe</webdriver.ie.driver>
+								<webdriver.ie.driver></webdriver.ie.driver>
 								<webdriver.chrome.driver>/home/edelivery/drivers/chromedriver</webdriver.chrome.driver>
 								<webdriver.gecko.driver>/home/edelivery/drivers/geckodriver</webdriver.gecko.driver>
 								<reports.folder>./target/</reports.folder>

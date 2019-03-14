@@ -84,7 +84,7 @@ public class DGrid extends DComponent {
 	}
 
 	public void waitForRowsToLoad() {
-		wait.forElementToBeVisible(gridRows.get(0));
+		wait.forElementToBeVisible(gridHeaders.get(0));
 	}
 
 	public int getIndexOf(Integer columnIndex, String value) throws Exception {

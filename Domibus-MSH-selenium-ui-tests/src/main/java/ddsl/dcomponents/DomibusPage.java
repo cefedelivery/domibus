@@ -49,6 +49,7 @@ public class DomibusPage extends DComponent {
 
 	public void refreshPage() {
 		driver.navigate().refresh();
+		wait.forXMillis(500);
 	}
 
 	public String getTitle() throws Exception {

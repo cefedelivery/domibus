@@ -69,11 +69,12 @@ public class SandwichMenu extends DComponent {
 
 	public boolean isLoggedIn() throws Exception {
 		expandMenu();
-
+		wait.forXMillis(300);
 		boolean toReturn = !getCurrentUserID().getText().equalsIgnoreCase("Not logged in");
 		log.info("User login status is: " + toReturn);
 
 		contractMenu();
+		wait.forXMillis(300);
 		return toReturn;
 	}
 
@@ -82,6 +83,8 @@ public class SandwichMenu extends DComponent {
 		log.info("Logging out...");
 		getLogoutLnk().click();
 		contractMenu();
+		wait.forXMillis(300);
+		wait.webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(expandButton));
 	}
 
 
