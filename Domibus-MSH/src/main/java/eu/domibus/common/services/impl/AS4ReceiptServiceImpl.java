@@ -200,13 +200,13 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
             Messaging messaging = messageUtil.getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
 
-            if (selfSendingFlag) {
-                /*we add a defined suffix in order to assure DB integrity - messageId unicity
-                basically we are generating another messageId for Signal Message on receiver side
-                */
-                signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
-                signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
-            }
+//            if (selfSendingFlag) {
+//                /*we add a defined suffix in order to assure DB integrity - messageId unicity
+//                basically we are generating another messageId for Signal Message on receiver side
+//                */
+//                signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
+//                signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
+//            }
             // Stores the signal message
             signalMessageDao.create(signalMessage);
             // Updating the reference to the signal message
