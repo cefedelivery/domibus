@@ -13,6 +13,7 @@ import {AlertService} from '../common/alert/alert.service';
 export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
   static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
+  static ROLE_USER = 'ROLE_USER';
 
   passwordPolicy: Promise<PasswordPolicyRO>;
   pluginPasswordPolicy: Promise<PasswordPolicyRO>;
@@ -49,19 +50,28 @@ export class SecurityService {
    * It simulates the login function for an external authentication provider
    * Saves current user to local storage, etc
    */
-  async login_extauthprovider() {
+  login_extauthprovider(): Promise<boolean> {
     console.log('login from auth external provider');
+    return new Promise((resolve, reject) => {
+      const res = this.getCurrentUserAndSaveLocally();
+      resolve(res);
+    });
+  }
 
+  async getCurrentUserAndSaveLocally() {
+    let userSet = false;
     try {
       //get the user from server and write it in local storage
       const user = await this.getCurrentUserFromServer();
       if (user) {
         this.updateCurrentUser(user);
         this.domainService.setAppTitle();
+        userSet = true;
       }
     } catch (ex) {
-      console.log('getCurrentUserFromServer error' + ex);
+      console.log('getCurrentUserAndSaveLocally error' + ex);
     }
+    return userSet;
   }
 
   logout() {
@@ -154,6 +164,10 @@ export class SecurityService {
     return this.isCurrentUserInRole([SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
   }
 
+  hasCurrentUserPrivilegeUser(): boolean {
+    return this.isCurrentUserInRole([SecurityService.ROLE_USER, SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
+  }
+
   isUserFromExternalAuthProvider(): boolean {
     const user = this.getCurrentUser();
     return user ? user.externalAuthProvider : false;
@@ -176,8 +190,10 @@ export class SecurityService {
     const subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
+      console.log('isAuthorized -> isAuthenticated:' + isAuthenticated);
       if (isAuthenticated && roles) {
         const hasRole = this.isCurrentUserInRole(roles);
+        console.log('isAuthorized - hasRole:' + hasRole);
         subject.next(hasRole);
       }
     });

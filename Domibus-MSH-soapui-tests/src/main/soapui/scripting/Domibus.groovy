@@ -1291,7 +1291,7 @@ class Domibus{
             } else {
                 debugLog("  addPluginUser  [][]  Users list before the update: " + usersMap, log)
                 debugLog("  addPluginUser  [][]  Prepare user $userPl details to be added.", log)
-                curlParams = "[\n  {\n    \"status\": \"NEW\",\n    \"username\": \"$userPl\",\n    \"authenticationType\": \"BASIC\",\n" + ((originalUser != null && originalUser != "") ? "    \"originalUser\": \"$originalUser\",\n" : "") + "    \"authRoles\": \"$userRole\",\n    \"passwd\": \"$passwordPl\"\n  }\n]";
+                curlParams = "[\n  {\n    \"status\": \"NEW\",\n    \"userName\": \"$userPl\",\n    \"authenticationType\": \"BASIC\",\n" + ((originalUser != null && originalUser != "") ? "    \"originalUser\": \"$originalUser\",\n" : "") + "    \"authRoles\": \"$userRole\",\n    \"password\": \"$passwordPl\",\n    \"active\": \"true\"\n  }\n]";
                 debugLog("  addPluginUser  [][]  Inserting user $userPl in the list.", log)
                 debugLog("  addPluginUser  [][]  curlParams: " + curlParams, log)
                 commandString = "curl " + urlToDomibus(side, log, context) + "/rest/plugin/users -b " + context.expand('${projectDir}') + "\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: " + returnXsfrToken(side, context, log, authenticationUser, authenticationPwd) + "\" -X PUT -d " + formatJsonForCurl(curlParams, log)
@@ -1331,7 +1331,7 @@ class Domibus{
             } else {
                 while (i < usersMap.entries.size()) {
                     assert(usersMap.entries[i] != null),"Error:removePluginUser: Error while parsing the list of plugin users.";
-                    if (usersMap.entries[i].username == userPl) {
+                    if (usersMap.entries[i].userName == userPl) {
                         rolePl = usersMap.entries[i].authRoles;
                         originalUser = usersMap.entries[i].originalUser;
                         entityId = usersMap.entries[i].entityId;
@@ -1341,7 +1341,7 @@ class Domibus{
                 }
                 assert(rolePl != null),"Error:removePluginUser: Error while fetching the role of user \"$userPl\".";
                 assert(entityId != null),"Error:removePluginUser: Error while fetching the \"entityId\" of user \"$userPl\" from the user list.";
-                curlParams = "[\n  {\n    \"entityId\": $entityId,\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n" + ((originalUser != null && originalUser != "") ? "    \"originalUser\": \"$originalUser\",\n" : "") + "    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
+                curlParams = "[\n  {\n    \"entityId\": $entityId,\n    \"userName\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n" + ((originalUser != null && originalUser != "") ? "    \"originalUser\": \"$originalUser\",\n" : "") + "    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
                 debugLog("  removePluginUser  [][]  curlParams: " + curlParams, log)
                 commandString = "curl " + urlToDomibus(side, log, context) + "/rest/plugin/users -b " + context.expand('${projectDir}') + "\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: " + returnXsfrToken(side, context, log, authenticationUser, authenticationPwd) + "\" -X PUT -d " + formatJsonForCurl(curlParams, log)
                 commandResult = runCurlCommand(commandString, log)
@@ -1363,8 +1363,8 @@ class Domibus{
             assert(usersMap.entries != null),"Error:userExists: Error while parsing the list of plugin users.";
             while ( (i < usersMap.entries.size()) && (userFound == false) ) {
                 assert(usersMap.entries[i] != null),"Error:userExists: Error while parsing the list of plugin users.";
-                debugLog("  userExists  [][]  Iteration $i: comparing --$targetedUser--and--" + usersMap.entries[i].username + "--.", log)
-                if (usersMap.entries[i].username == targetedUser) {
+                debugLog("  userExists  [][]  Iteration $i: comparing --$targetedUser--and--" + usersMap.entries[i].userName + "--.", log)
+                if (usersMap.entries[i].userName == targetedUser) {
                     userFound = true;
                 }
                 i++;
