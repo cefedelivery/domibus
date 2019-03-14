@@ -197,7 +197,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
 
                         final Domain currentDomain = domainContextProvider.getCurrentDomain();
-                        domainTaskExecutor.submit(
+                        domainTaskExecutor.submitLongRunningTask(
                                 () -> {
                                     LOG.debug("Saving the incoming SourceMessage payloads");
 

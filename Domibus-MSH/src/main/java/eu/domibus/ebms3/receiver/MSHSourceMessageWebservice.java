@@ -4,15 +4,18 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.MessageGroupDao;
 import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.core.message.fragment.MessageHeaderEntity;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -20,8 +23,6 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
@@ -46,6 +47,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 
@@ -90,97 +92,99 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     protected UserMessageFactory userMessageFactory;
 
     @Autowired
-    private DatabaseMessageHandler databaseMessageHandler;
+    protected SplitAndJoinService splitAndJoinService;
 
     @Autowired
-    private UserMessageLogDao userMessageLogDao;
+    protected DomainTaskExecutor domainTaskExecutor;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @WebMethod
     @WebResult(name = "soapMessageResult")
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SOAPMessage invoke(final SOAPMessage request) {
-        LOG.debug("Processing source message file");
+        LOG.debug("Processing SourceMessage request");
 
         final String domain = LOG.getMDC(MSHDispatcher.HEADER_DOMIBUS_DOMAIN);
         domainContextProvider.setCurrentDomain(domain);
+        final Domain currentDomain = domainContextProvider.getCurrentDomain();
 
         final String contentTypeString = LOG.getMDC(Message.CONTENT_TYPE);
         final boolean compression = Boolean.valueOf(LOG.getMDC(MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION));
         final String sourceMessageFileName = LOG.getMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE);
 
-        UserMessage userMessage = getUserMessage(sourceMessageFileName, contentTypeString);
+        domainTaskExecutor.submitLongRunningTask(
+                () -> {
+                    UserMessage userMessage = getUserMessage(sourceMessageFileName, contentTypeString);
 
-        MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
-        messageGroupEntity.setGroupId(UUID.randomUUID().toString());
-        File sourceMessageFile = new File(sourceMessageFileName);
-        messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
-        if (compression) {
-            final File compressSourceMessage = compressSourceMessage(sourceMessageFileName);
-            LOG.debug("Deleting file [{}]", sourceMessageFile);
-            final boolean sourceDeleteSuccessful = sourceMessageFile.delete();
-            if(!sourceDeleteSuccessful) {
-                LOG.warn("Could not delete uncompressed source file [{}]", sourceMessageFile);
-            }
+                    MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
+                    messageGroupEntity.setGroupId(UUID.randomUUID().toString());
+                    File sourceMessageFile = new File(sourceMessageFileName);
+                    messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
+                    if (compression) {
+                        final File compressSourceMessage = compressSourceMessage(sourceMessageFileName);
+                        LOG.debug("Deleting file [{}]", sourceMessageFile);
+                        final boolean sourceDeleteSuccessful = sourceMessageFile.delete();
+                        if(!sourceDeleteSuccessful) {
+                            LOG.warn("Could not delete uncompressed source file [{}]", sourceMessageFile);
+                        }
 
-            LOG.debug("Using [{}] as source message file ", compressSourceMessage);
-            sourceMessageFile = compressSourceMessage;
-            messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(compressSourceMessage.length()));
-            messageGroupEntity.setCompressionAlgorithm("application/gzip");
-        }
+                        LOG.debug("Using [{}] as source message file ", compressSourceMessage);
+                        sourceMessageFile = compressSourceMessage;
+                        messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(compressSourceMessage.length()));
+                        messageGroupEntity.setCompressionAlgorithm("application/gzip");
+                    }
 
-        messageGroupEntity.setSoapAction(StringUtils.EMPTY);
-        messageGroupEntity.setSourceMessageId(userMessage.getMessageInfo().getMessageId());
+                    messageGroupEntity.setSoapAction(StringUtils.EMPTY);
+                    messageGroupEntity.setSourceMessageId(userMessage.getMessageInfo().getMessageId());
 
-        MessageExchangeConfiguration userMessageExchangeConfiguration = null;
-        LegConfiguration legConfiguration = null;
-        try {
-            userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
-            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-        } catch (EbMS3Exception e) {
-            LOG.error("Could not get LegConfiguration", e);
-            throw new WebServiceException(e);
-        }
+                    MessageExchangeConfiguration userMessageExchangeConfiguration = null;
+                    LegConfiguration legConfiguration = null;
+                    try {
+                        userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+                        String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
+                        legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+                    } catch (EbMS3Exception e) {
+                        LOG.error("Could not get LegConfiguration", e);
+                        throw new WebServiceException(e);
+                    }
 
-        List<String> fragmentFiles = null;
-        try {
-            fragmentFiles = splitSourceMessage(sourceMessageFile, legConfiguration.getSplitting().getFragmentSize());
-        } catch (IOException e) {
-            LOG.error("Could not split source message", e);
-            throw new WebServiceException(e);
-        }
-        messageGroupEntity.setFragmentCount(Long.valueOf(fragmentFiles.size()));
-        LOG.debug("Deleting source file [{}]", sourceMessageFile);
-        final boolean deleteSuccessful = sourceMessageFile.delete();
-        if(!deleteSuccessful) {
-            LOG.warn("Could not delete source file [{}]", sourceMessageFile);
-        }
-        LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
+                    List<String> fragmentFiles = null;
+                    try {
+                        fragmentFiles = splitSourceMessage(sourceMessageFile, legConfiguration.getSplitting().getFragmentSize());
+                    } catch (IOException e) {
+                        LOG.error("Could not split source message", e);
+                        throw new WebServiceException(e);
+                    }
+                    messageGroupEntity.setFragmentCount(Long.valueOf(fragmentFiles.size()));
+                    LOG.debug("Deleting source file [{}]", sourceMessageFile);
+                    final boolean deleteSuccessful = sourceMessageFile.delete();
+                    if(!deleteSuccessful) {
+                        LOG.warn("Could not delete source file [{}]", sourceMessageFile);
+                    }
+                    LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
 
-        final ContentType contentType = ContentType.parse(contentTypeString);
-        MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
-        messageHeaderEntity.setBoundary(contentType.getParameter(BOUNDARY));
-        final String start = contentType.getParameter(START);
-        messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"", ""}));
-        messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
-        messageGroupDao.create(messageGroupEntity);
+                    final ContentType contentType = ContentType.parse(contentTypeString);
+                    MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
+                    messageHeaderEntity.setBoundary(contentType.getParameter(BOUNDARY));
+                    final String start = contentType.getParameter(START);
+                    messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"", ""}));
+                    messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
 
-        String backendName = userMessageLogDao.findBackendForMessageId(userMessage.getMessageInfo().getMessageId());
-        for (int index = 0; index < fragmentFiles.size(); index++) {
-            try {
-                final String fragmentFile = fragmentFiles.get(index);
-                createMessagingForFragment(userMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
-            } catch (MessagingProcessingException e) {
-                LOG.error("Could not create Messaging for fragment [{}]", index);
-                throw new WebServiceException(e);
-            }
-        }
+                    splitAndJoinService.createMessageFragments(userMessage, messageGroupEntity, fragmentFiles);
+
+                    LOG.debug("Finished processing source message file");
+                },
+                currentDomain,
+                false,
+                domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
 
         try {
             SOAPMessage responseMessage = messageFactory.createMessage();
             responseMessage.saveChanges();
 
-            LOG.debug("Finished processing source message file");
+            LOG.debug("Finished processing SourceMessage request");
             return responseMessage;
         } catch (Exception e) {
             throw new WebServiceException(e);
@@ -201,6 +205,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             LOG.error("Could not compress the message content to file " + fileName);
             throw new Fault(e);
         }
+        LOG.debug("Finished compressing the source message file [{}] to [{}]", fileName, compressedFileName);
         return new File(compressedFileName);
     }
 
@@ -225,16 +230,10 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
         } catch (Exception e) {
             //TODO notify the backend that an error occured EDELIVERY-4089
-            LOG.error("Error parsing the source file [{}]", sourceMessageFileName);
+            LOG.error("Error parsing the source file [{}]", sourceMessageFileName, e);
             throw new WebServiceException(e);
         }
     }
-
-    protected void createMessagingForFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, String backendName, String fragmentFile, int index) throws MessagingProcessingException {
-        final UserMessage userMessageFragment = userMessageFactory.createUserMessageFragment(userMessage, messageGroupEntity, Long.valueOf(index), fragmentFile);
-        databaseMessageHandler.submitMessageFragment(userMessageFragment, backendName);
-    }
-
 
     protected List<String> splitSourceMessage(File sourceMessageFile, int fragmentSizeInMB) throws IOException {
         LOG.debug("Source file [{}] will be split into fragments", sourceMessageFile);

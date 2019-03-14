@@ -4,13 +4,20 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Splitting;
 import eu.domibus.configuration.storage.Storage;
+import eu.domibus.configuration.storage.StorageProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.handler.DatabaseMessageHandler;
+import eu.domibus.plugin.transformer.impl.UserMessageFactory;
+import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +30,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.WebServiceException;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -51,6 +59,24 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     @Autowired
     protected SoapUtil soapUtil;
 
+    @Autowired
+    protected PModeProvider pModeProvider;
+
+    @Autowired
+    protected StorageProvider storageProvider;
+
+    @Autowired
+    protected MessageUtil messageUtil;
+
+    @Autowired
+    protected UserMessageFactory userMessageFactory;
+
+    @Autowired
+    private DatabaseMessageHandler databaseMessageHandler;
+
+    @Autowired
+    private UserMessageLogDao userMessageLogDao;
+
     @Override
     public boolean mayUseSplitAndJoin(LegConfiguration legConfiguration) {
         final Splitting splitting = legConfiguration.getSplitting();
@@ -64,6 +90,28 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     public String generateSourceFileName(String temporaryDirectoryLocation) {
         final String uuid = UUID.randomUUID().toString();
         return temporaryDirectoryLocation + "/" + uuid;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
+    @Override
+    public void createMessageFragments(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, List<String> fragmentFiles) {
+        messageGroupDao.create(messageGroupEntity);
+
+        String backendName = userMessageLogDao.findBackendForMessageId(sourceMessage.getMessageInfo().getMessageId());
+        for (int index = 0; index < fragmentFiles.size(); index++) {
+            try {
+                final String fragmentFile = fragmentFiles.get(index);
+                createMessagingForFragment(sourceMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
+            } catch (MessagingProcessingException e) {
+                LOG.error("Could not create Messaging for fragment [{}]", index);
+                throw new WebServiceException(e);
+            }
+        }
+    }
+
+    protected void createMessagingForFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, String backendName, String fragmentFile, int index) throws MessagingProcessingException {
+        final UserMessage userMessageFragment = userMessageFactory.createUserMessageFragment(userMessage, messageGroupEntity, Long.valueOf(index), fragmentFile);
+        databaseMessageHandler.submitMessageFragment(userMessageFragment, backendName);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)

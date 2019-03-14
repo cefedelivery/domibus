@@ -85,7 +85,7 @@ public class MessagingServiceImpl implements MessagingService {
         if (messaging.getUserMessage().isSourceMessage()) {
             LOG.debug("Scheduling saving the SourceMessage");
             final Domain currentDomain = domainContextProvider.getCurrentDomain();
-            domainTaskExecutor.submit(
+            domainTaskExecutor.submitLongRunningTask(
                     () -> {
                         LOG.debug("Saving the SourceMessage payloads");
                         try {

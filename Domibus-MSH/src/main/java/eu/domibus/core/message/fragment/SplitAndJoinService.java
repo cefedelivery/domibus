@@ -1,8 +1,10 @@
 package eu.domibus.core.message.fragment;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.ebms3.common.model.UserMessage;
 
 import javax.xml.soap.SOAPMessage;
+import java.util.List;
 
 /**
  * Class responsible for handling operations related to SplitAndJoin like: rejoin the source message based on message fragments, etc
@@ -35,5 +37,7 @@ public interface SplitAndJoinService {
      * @return
      */
     SOAPMessage rejoinSourceMessage(String groupId);
+
+    void createMessageFragments(UserMessage userMessage, MessageGroupEntity messageGroupEntity, List<String> fragmentFiles);
 
 }

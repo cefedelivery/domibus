@@ -27,6 +27,10 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
     @Autowired
     protected SchedulingTaskExecutor schedulingTaskExecutor;
 
+    @Qualifier("quartzTaskExecutor")
+    @Autowired
+    protected SchedulingTaskExecutor schedulingLongTaskExecutor;
+
     @Override
     public <T extends Object> T submit(Callable<T> task) {
         DomainCallable domainCallable = new DomainCallable(domainContextProvider, task);
@@ -42,23 +46,27 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
     public void submit(Runnable task) {
         LOG.trace("Submitting task");
         final ClearDomainRunnable clearDomainRunnable = new ClearDomainRunnable(domainContextProvider, task);
-        submitRunnable(clearDomainRunnable, true, DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
+        submitRunnable(schedulingTaskExecutor, clearDomainRunnable, true, DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
     }
 
     @Override
     public void submit(Runnable task, Domain domain) {
-        submit(task, domain, true, DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
+        submit(schedulingTaskExecutor, task, domain, true, DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
     }
 
     @Override
-    public void submit(Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
-        LOG.trace("Submitting task for domain [{}]", domain);
-        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, domain, task);
-        submitRunnable(domainRunnable, waitForTask, timeout, timeUnit);
+    public void submitLongRunningTask(Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
+        submit(schedulingLongTaskExecutor, task, domain, waitForTask, timeout, timeUnit);
     }
 
-    protected void submitRunnable(Runnable task, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
-        final Future<?> utrFuture = schedulingTaskExecutor.submit(task);
+    protected void submit(SchedulingTaskExecutor taskExecutor, Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
+        LOG.trace("Submitting task for domain [{}]", domain);
+        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, domain, task);
+        submitRunnable(taskExecutor, domainRunnable, waitForTask, timeout, timeUnit);
+    }
+
+    protected void submitRunnable(SchedulingTaskExecutor taskExecutor, Runnable task, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
+        final Future<?> utrFuture = taskExecutor.submit(task);
 
         if (waitForTask) {
             LOG.debug("Waiting for task to complete");

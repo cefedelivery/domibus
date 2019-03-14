@@ -17,5 +17,5 @@ public interface DomainTaskExecutor {
 
     void submit(Runnable task, Domain domain);
 
-    void submit(Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit);
+    void submitLongRunningTask(Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit);
 }

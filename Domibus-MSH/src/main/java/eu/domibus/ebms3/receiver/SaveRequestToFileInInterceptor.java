@@ -19,6 +19,8 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.http.entity.ContentType;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,6 +51,7 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
 
     protected MessageUtil messageUtil;
 
+    @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public void handleMessage(Message message) throws Fault {
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
