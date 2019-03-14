@@ -4,12 +4,9 @@ package domibus.ui;
 import ddsl.dcomponents.DomibusPage;
 import ddsl.enums.DMessages;
 import ddsl.enums.DRoles;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 import pages.login.LoginPage;
-import rest.DomibusRestClient;
 import utils.Generator;
 
 import java.util.HashMap;
@@ -137,7 +134,7 @@ public class LoginPgTest extends BaseTest {
 
 		HashMap<String, String> toUpdate = new HashMap<>();
 		toUpdate.put("active", "true");
-		new DomibusRestClient().updateUser(username, toUpdate);
+		rest.updateUser(username, toUpdate);
 
 		page.wait.forXMillis(300);
 		page.login(username, data.getDefaultTestPass());

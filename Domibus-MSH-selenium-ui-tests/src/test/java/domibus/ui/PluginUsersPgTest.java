@@ -6,6 +6,7 @@ import ddsl.dcomponents.popups.Dialog;
 import ddsl.enums.DMessages;
 import ddsl.enums.DOMIBUS_PAGES;
 import ddsl.enums.DRoles;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 import pages.login.LoginPage;
@@ -53,6 +54,9 @@ public class PluginUsersPgTest extends BaseTest {
 
 	@Test(description = "PU-2", groups = {"multiTenancy", "singleTenancy"})
 	public void doubleclickRow() throws Exception {
+
+//		throw new SkipException("Test cannot run because of bug in FirefoxDriver https://github.com/mozilla/geckodriver/issues/661");
+
 		String username = Generator.randomAlphaNumeric(10);
 		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), null);
 
@@ -160,7 +164,8 @@ public class PluginUsersPgTest extends BaseTest {
 		DGrid grid = page.grid();
 		int index = grid.scrollTo("User Name", username);
 
-		grid.scrollToAndDoubleClick("User Name", username);
+		grid.scrollToAndSelect("User Name", username);
+		page.getEditBtn().click();
 
 		PluginUserModal pum = new PluginUserModal(driver);
 

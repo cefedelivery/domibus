@@ -11,21 +11,21 @@
 	</mpcs>
 	<businessProcesses>
 		<roles>
-			<role name="defaultInitiatorRole" 
-					value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
-			<role name="defaultResponderRole" 
-					value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+			<role name="defaultInitiatorRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
 		</roles>
 		<parties>
 			<partyIdTypes>
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
 			<party name="red_gw"
-				    endpoint="http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly/services/msh">
+				   endpoint="http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly/services/msh">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
-			<party name="blue_gw" 
-					endpoint="http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus/services/msh">
+			<party name="blue_gw"
+				   endpoint="http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus/services/msh">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
@@ -33,31 +33,32 @@
 			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
 			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
 			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
-			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+			<binding name="pushAndPush"
+					 value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
 		</meps>
 		<properties>
-			<property name="originalSenderProperty" 
-					key="originalSender" 
-					datatype="string" 
-					required="false"/>
-			<property name="finalRecipientProperty" 
-					key="finalRecipient" 
-					datatype="string" 
-					required="false"/>
+			<property name="originalSenderProperty"
+					  key="originalSender"
+					  datatype="string"
+					  required="false"/>
+			<property name="finalRecipientProperty"
+					  key="finalRecipient"
+					  datatype="string"
+					  required="false"/>
 			<propertySet name="eDeliveryPropertySet">
 				<propertyRef property="finalRecipientProperty"/>
 				<propertyRef property="originalSenderProperty"/>
 			</propertySet>
-		</properties>				
+		</properties>
 		<payloadProfiles>
 			<payload name="businessContentPayload"
-					cid="cid:message"
-					required="true"
-					mimeType="text/xml"/>
+					 cid="cid:message"
+					 required="true"
+					 mimeType="text/xml"/>
 			<payload name="businessContentAttachment"
-					cid="cid:attachment" 
-					required="false"
-					mimeType="application/octet-stream"/>
+					 cid="cid:attachment"
+					 required="false"
+					 mimeType="application/octet-stream"/>
 			<payloadProfile name="MessageProfile" maxSize="40894464"> <!-- maxSize is currently ignored -->
 				<attachment name="businessContentPayload"/>
 				<attachment name="businessContentAttachment"/>
@@ -65,15 +66,15 @@
 		</payloadProfiles>
 		<securities>
 			<security name="eDeliveryAS4Policy"
-					policy="eDeliveryAS4Policy.xml"
-					signatureMethod="RSA_SHA256" />	
+					  policy="eDeliveryAS4Policy.xml"
+					  signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>
-			<errorHandling name="demoErrorHandling" 
-					errorAsResponse="true" 
-					businessErrorNotifyProducer="true"
-					businessErrorNotifyConsumer="true"
-					deliveryFailureNotifyProducer="true"/>
+			<errorHandling name="demoErrorHandling"
+						   errorAsResponse="true"
+						   businessErrorNotifyProducer="true"
+						   businessErrorNotifyConsumer="true"
+						   deliveryFailureNotifyProducer="true"/>
 		</errorHandlings>
 		<agreements>
 			<agreement name="agreement1" value="A1" type="T1"/>
@@ -91,17 +92,17 @@
 			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
-			<legConfiguration name="pushTestcase1tc1Action" 
-					service="testService1" 
-					action="tc1Action" 
-					defaultMpc="defaultMpc" 
-					reliability="AS4Reliability" 
-					security="eDeliveryAS4Policy"
-					receptionAwareness="receptionAwareness" 
-					propertySet="eDeliveryPropertySet"
-					payloadProfile="MessageProfile"
-					errorHandling="demoErrorHandling"
-					compressPayloads="true"/>
+			<legConfiguration name="pushTestcase1tc1Action"
+							  service="testService1"
+							  action="tc1Action"
+							  defaultMpc="defaultMpc"
+							  reliability="AS4Reliability"
+							  security="eDeliveryAS4Policy"
+							  receptionAwareness="receptionAwareness"
+							  propertySet="eDeliveryPropertySet"
+							  payloadProfile="MessageProfile"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="true"/>
 			<legConfiguration name="testServiceCase"
 							  service="testService"
 							  action="testAction"
@@ -114,23 +115,23 @@
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
 		</legConfigurations>
-<process name="tc1Process"
-         mep="oneway"
-         binding="push"
-         initiatorRole="defaultInitiatorRole"
-         responderRole="defaultResponderRole">
-	<initiatorParties>
-		<initiatorParty name="blue_gw"/>
-		<initiatorParty name="red_gw"/>
-	</initiatorParties>
-	<responderParties>
-		<responderParty name="blue_gw"/>
-		<responderParty name="red_gw"/>
-	</responderParties>
-	<legs>
-		<leg name="pushTestcase1tc1Action"/>
-		<leg name="testServiceCase"/>
-	</legs>
-</process>
+		<process name="tc1Process"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase1tc1Action"/>
+				<leg name="testServiceCase"/>
+			</legs>
+		</process>
 	</businessProcesses>
 </db:configuration>
