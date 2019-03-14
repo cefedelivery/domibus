@@ -141,12 +141,11 @@
 								<reports.folder>./target/</reports.folder>
 								<data.folder>.\src\main\resources\</data.folder>
 								<test_data.file>multiTenenacytestData.json</test_data.file>
-								<!--<test_data.file>localmultiTenenacytestData.json</test_data.file>-->
 								<isMultiDomain>true</isMultiDomain>
 								<LONG_TIMEOUT>20</LONG_TIMEOUT>
 								<SHORT_TIMEOUT>3</SHORT_TIMEOUT>
-								<!--<UI_BASE_URL>http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus/</UI_BASE_URL>-->
-								<UI_BASE_URL>http://localhost:8080/domibus/</UI_BASE_URL>
+								<UI_BASE_URL>http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus/</UI_BASE_URL>
+								<!--<UI_BASE_URL>http://localhost:8080/domibus/</UI_BASE_URL>-->
 
 							</systemPropertyVariables>
 						</configuration>

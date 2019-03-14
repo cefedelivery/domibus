@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import utils.PROPERTIES;
 import utils.TestDataProvider;
 
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import java.io.File;
@@ -81,7 +82,15 @@ public class DomibusRestClient {
 
 		if (null != cookies) {
 			for (NewCookie cookie : cookies) {
-				builder = builder.cookie(cookie.toCookie());
+//				builder = builder.cookie(cookie.toCookie());
+				builder = builder.cookie(
+						new Cookie(cookie.getName(),
+						cookie.getValue(),
+								"/",
+								""
+						)
+				);
+
 			}
 		}
 
@@ -177,9 +186,10 @@ public class DomibusRestClient {
 	private ClientResponse requestPUT(WebResource resource, String params) {
 
 		WebResource.Builder builder = decorateBuilder(resource);
+
 		return builder
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.type(MediaType.APPLICATION_JSON_TYPE)
+//				.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
 				.put(ClientResponse.class, params);
 	}
 

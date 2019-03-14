@@ -1,6 +1,9 @@
 package utils;
 
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * @author Catalin Comanici
 
@@ -20,5 +23,15 @@ public class PROPERTIES {
 	public static final String DATA_FILE = System.getProperty("test_data.file");
 	public static final String REPORTS_FOLDER = System.getProperty("reports.folder");
 	public static final boolean IS_MULTI_DOMAIN = Boolean.valueOf(System.getProperty("isMultiDomain"));
+
+	public static String DOMAIN;
+
+	static {
+		try {
+			DOMAIN = new URL(UI_BASE_URL).getHost();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
