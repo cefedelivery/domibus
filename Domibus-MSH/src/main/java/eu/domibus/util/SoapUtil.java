@@ -4,7 +4,6 @@ import com.google.common.io.CharStreams;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.message.Attachment;
 import org.apache.cxf.message.MessageImpl;
@@ -75,14 +74,19 @@ public class SoapUtil {
 
         final Collection<Attachment> attachments = messageImpl.getAttachments();
         for (Attachment attachment : attachments) {
+            LOG.debug("Creating attachmentPart [{}]", attachment.getId());
             final AttachmentPart attachmentPart = message.createAttachmentPart(attachment.getDataHandler());
 
             attachmentPart.setContentId(attachment.getId());
             attachmentPart.setContentType(attachment.getDataHandler().getContentType());//to check
             message.addAttachmentPart(attachmentPart);
+            LOG.debug("Finished creating attachmentPart [{}]", attachment.getId());
         }
 
+        LOG.debug("Getting soapEnvelopeString");
         final String soapEnvelopeString = IOUtils.toString(messageImpl.getContent(InputStream.class), StandardCharsets.UTF_8);
+        LOG.debug("Finished getting soapEnvelopeString");
+
         final SOAPMessage soapMessage = createSOAPMessage(soapEnvelopeString);
         final SOAPElement next = (SOAPElement) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         message.getSOAPHeader().addChildElement(next);
@@ -110,6 +114,8 @@ public class SoapUtil {
     }
 
     public SOAPMessage createSOAPMessage(final String rawXml) throws SOAPException, IOException, ParserConfigurationException, SAXException {
+        LOG.debug("Creating SOAPMessage from rawXML [{}]", rawXml);
+
         MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage message = factory.createMessage();
 
@@ -120,7 +126,11 @@ public class SoapUtil {
         try (StringReader stringReader = new StringReader(rawXml); InputStream targetStream =
                 new ByteArrayInputStream(CharStreams.toString(stringReader)
                         .getBytes(StandardCharsets.UTF_8.name()))) {
+
+            LOG.debug("Parsing SOAPMessage document");
             Document document = builder.parse(targetStream);
+            LOG.debug("Finished parsing SOAPMessage document");
+
             DOMSource domSource = new DOMSource(document);
             SOAPPart soapPart = message.getSOAPPart();
             soapPart.setContent(domSource);

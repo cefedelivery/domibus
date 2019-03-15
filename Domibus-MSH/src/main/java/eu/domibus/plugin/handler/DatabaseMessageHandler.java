@@ -385,10 +385,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             final boolean splitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
             userMessage.setSplitAndJoin(splitAndJoin);
 
-            //1. store Messaging
-            //2. async save payloads
-            //3. when payloads complete signal message scheduling
-            //4 if payloads save fail => mark the message as fail
             try {
                 messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration, backendName);
             } catch (CompressionException exc) {
