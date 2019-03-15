@@ -250,7 +250,7 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected long saveIncomingFileToDisk(File file, InputStream is) throws IOException {
         try (OutputStream fileOutputStream = new FileOutputStream(file)) {
-            final long total = IOUtils.copyLarge(is, fileOutputStream);
+            final long total = IOUtils.copy(is, fileOutputStream, 32 * 1024);
             fileOutputStream.flush();
             LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
             return total;
@@ -300,7 +300,7 @@ public class MessagingServiceImpl implements MessagingService {
                 fileOutputStream = new GZIPOutputStream(fileOutputStream);
             }
 
-            final long total = IOUtils.copyLarge(is, fileOutputStream);
+            final long total = IOUtils.copy(is, fileOutputStream, 32 * 1024);
             LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
             return total;
         } finally {
@@ -314,8 +314,7 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected byte[] compress(byte[] binaryData) throws IOException {
         LOG.debug("Compressing binary data");
-        int maxReadBufferSize = 32 * 1024;
-        final byte[] buffer = new byte[maxReadBufferSize];
+        final byte[] buffer = new byte[ 32 * 1024];
         InputStream sourceStream = new ByteArrayInputStream(binaryData);
         ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
         GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);

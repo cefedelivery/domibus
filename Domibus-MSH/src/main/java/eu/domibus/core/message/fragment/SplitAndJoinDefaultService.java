@@ -216,7 +216,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     protected void decompressGzip(File input, File output) throws IOException {
         try (GZIPInputStream in = new GZIPInputStream(new FileInputStream(input))) {
             try (FileOutputStream out = new FileOutputStream(output)) {
-                IOUtils.copy(in, out, 1024);
+                IOUtils.copy(in, out, 32 * 1024);
             }
         }
     }
