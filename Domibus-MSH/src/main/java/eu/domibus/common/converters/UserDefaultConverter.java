@@ -23,7 +23,7 @@ public class UserDefaultConverter implements UserConverter {
         for (UserRole role : roles) {
             authorities.add(role.getName());
         }
-        return new eu.domibus.api.user.User(
+        return new User(
                 userEntity.getUserName(),
                 userEntity.getEmail(),
                 userEntity.isActive(),
