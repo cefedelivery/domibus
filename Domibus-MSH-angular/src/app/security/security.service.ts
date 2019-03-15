@@ -65,7 +65,7 @@ export class SecurityService {
       const user = await this.getCurrentUserFromServer();
       if (user) {
         this.updateCurrentUser(user);
-        this.domainService.setAppTitle();
+        //this.domainService.setAppTitle();
         userSet = true;
       }
     } catch (ex) {
@@ -131,6 +131,7 @@ export class SecurityService {
   }
 
   getCurrentUserFromServer(): Promise<User> {
+    console.log('getCurrentUserFromServer');
     return this.http.get('rest/security/user').
       map((res: Response) => res.json()).toPromise();
   }
@@ -195,6 +196,9 @@ export class SecurityService {
         const hasRole = this.isCurrentUserInRole(roles);
         console.log('isAuthorized - hasRole:' + hasRole);
         subject.next(hasRole);
+      } else {
+        console.log('isAuthorized - not');
+        subject.next(false);
       }
     });
     return subject.asObservable();
