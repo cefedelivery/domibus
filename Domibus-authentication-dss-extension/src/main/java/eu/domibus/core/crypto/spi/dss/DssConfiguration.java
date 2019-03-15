@@ -1,6 +1,9 @@
 package eu.domibus.core.crypto.spi.dss;
 
+import com.mchange.v2.lang.StringUtils;
 import eu.europa.esig.dss.client.http.DataLoader;
+import eu.europa.esig.dss.client.http.proxy.ProxyConfig;
+import eu.europa.esig.dss.client.http.proxy.ProxyProperties;
 import eu.europa.esig.dss.tsl.OtherTrustedList;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.tsl.service.TSLRepository;
@@ -62,34 +65,34 @@ public class DssConfiguration {
     private String dssCachePath;
 
     @Value("${domibus.dss.proxy.https.host}")
-    private String httpsHost;
+    private String httpsProxyHost;
 
     @Value("${domibus.dss.proxy.https.port}")
-    private String httpsPort;
+    private String httpsProxyPort;
 
     @Value("${domibus.dss.proxy.https.user}")
-    private String httpsUser;
+    private String httpsProxyUser;
 
     @Value("${domibus.dss.proxy.https.password}")
-    private String httpsPassword;
+    private String httpsProxyPassword;
 
     @Value("${domibus.dss.proxy.https.excludedHosts}")
-    private String httpsExcludesHosts;
+    private String httpsProxyExcludesHosts;
 
     @Value("${domibus.dss.proxy.http.host}")
-    private String httpHost;
+    private String httpProxyHost;
 
     @Value("${domibus.dss.proxy.http.port}")
-    private String httpPort;
+    private String httpProxyPort;
 
     @Value("${domibus.dss.proxy.http.user}")
-    private String httpUser;
+    private String httpProxyUser;
 
     @Value("${domibus.dss.proxy.http.password}")
-    private String httpPassword;
+    private String httpProxyPassword;
 
     @Value("${domibus.dss.proxy.http.excludedHosts}")
-    private String httpExcludedHosts;
+    private String httpProxyExcludedHosts;
 
     @Value("${domibus.dss.refresh.cron}")
     private String dssRefreshCronExpression;
@@ -135,8 +138,27 @@ public class DssConfiguration {
     @Bean
     public DomibusDataLoader dataLoader() {
         DomibusDataLoader dataLoader = new DomibusDataLoader();
-        dataLoader.setProxyConfig(null);
+        ProxyConfig proxyConfig = new ProxyConfig();
+        dataLoader.setProxyConfig(proxyConfig);
+        if (StringUtils.nonEmptyString(httpsProxyHost)) {
+            ProxyProperties httpsProxyProperties = getProxyProperties(httpsProxyHost, httpsProxyPort, httpsProxyExcludesHosts, httpsProxyUser, httpsProxyPassword);
+            proxyConfig.setHttpsProperties(httpsProxyProperties);
+        }
+        if (StringUtils.nonEmptyString(httpProxyHost)) {
+            ProxyProperties httpProxyProperties = getProxyProperties(httpProxyHost, httpProxyPort, httpProxyExcludedHosts, httpProxyUser, httpProxyPassword);
+            proxyConfig.setHttpProperties(httpProxyProperties);
+        }
         return dataLoader;
+    }
+
+    private ProxyProperties getProxyProperties(String httpsProxyHost, String httpsProxyPort, String httpsProxyExcludesHosts, String httpsProxyUser, String httpsProxyPassword) {
+        ProxyProperties httpsProxyProperties = new ProxyProperties();
+        httpsProxyProperties.setHost(httpsProxyHost);
+        httpsProxyProperties.setPort(Integer.parseInt(httpsProxyPort));
+        httpsProxyProperties.setExcludedHosts(httpsProxyExcludesHosts);
+        httpsProxyProperties.setUser(httpsProxyUser);
+        httpsProxyProperties.setPassword(httpsProxyPassword);
+        return httpsProxyProperties;
     }
 
     @Bean
