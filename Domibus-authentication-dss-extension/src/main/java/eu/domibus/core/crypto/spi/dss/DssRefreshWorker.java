@@ -18,8 +18,9 @@ public class DssRefreshWorker extends QuartzJobBean {
     private TSLValidationJob tslValidationJob;
 
     @Autowired
-    public DssRefreshWorker(TSLValidationJob tslValidationJob) {
-        this.tslValidationJob = tslValidationJob;
+    private DssRefreshWorker dssRefreshWorker;
+
+    public DssRefreshWorker() {
     }
 
     @Override
