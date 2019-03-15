@@ -72,7 +72,8 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
         try (FileOutputStream cos = new FileOutputStream(new File(fileName));
              InputStream in = message.getContent(InputStream.class)) {
             LOG.debug("Start copying message [{}] to file [{}]", messageId, fileName);
-            IOUtils.copy(in, cos);
+            int maxReadBufferSize = 32 * 1024;
+            IOUtils.copy(in, cos, maxReadBufferSize);
             in.close();
             cos.close();
             LOG.debug("Finished copying message [{}] to file [{}]", messageId, fileName);
