@@ -9,6 +9,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
+import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.wss4j.common.crypto.PasswordEncryptor;
@@ -18,6 +19,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,6 +36,7 @@ import java.util.List;
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class DomainCryptoServiceImplNonInitializedTest {
 
     public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";

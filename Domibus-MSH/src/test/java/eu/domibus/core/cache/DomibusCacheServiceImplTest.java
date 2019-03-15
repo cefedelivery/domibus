@@ -7,7 +7,9 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.Verifications;
+import mockit.integration.junit4.JMockit;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -18,6 +20,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class DomibusCacheServiceImplTest {
 
     @Tested

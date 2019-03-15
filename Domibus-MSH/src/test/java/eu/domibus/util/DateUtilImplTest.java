@@ -1,8 +1,10 @@
 package eu.domibus.util;
 
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -14,6 +16,7 @@ import java.util.Date;
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class DateUtilImplTest {
 
     @Tested

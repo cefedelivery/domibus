@@ -12,11 +12,13 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 import javax.activation.DataSource;
 import java.io.InputStream;
@@ -24,6 +26,7 @@ import java.io.InputStream;
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class TestServiceTest {
 
     private static final String MESSAGE_PROPERTY_KEY_FINAL_RECIPIENT = Deencapsulation.getField(TestService.class, "MESSAGE_PROPERTY_KEY_FINAL_RECIPIENT");

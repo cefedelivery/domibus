@@ -10,6 +10,7 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Assert;
@@ -17,6 +18,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,6 +32,7 @@ import static org.apache.wss4j.common.ext.WSSecurityException.ErrorCode.SECURITY
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class DomainCryptoServiceImplTest {
 
     public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";

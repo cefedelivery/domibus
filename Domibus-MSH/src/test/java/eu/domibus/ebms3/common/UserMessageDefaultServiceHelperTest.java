@@ -10,8 +10,10 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.MessageConstants;
 import mockit.Expectations;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,6 +24,7 @@ import static eu.domibus.ebms3.common.UserMessageDefaultServiceHelperTest.Proper
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class UserMessageDefaultServiceHelperTest {
 
     @Tested

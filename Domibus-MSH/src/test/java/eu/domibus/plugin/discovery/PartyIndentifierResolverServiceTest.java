@@ -7,16 +7,19 @@ import eu.domibus.common.model.configuration.Identifier;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 import java.util.Collection;
 
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class PartyIndentifierResolverServiceTest {
 
     @Tested

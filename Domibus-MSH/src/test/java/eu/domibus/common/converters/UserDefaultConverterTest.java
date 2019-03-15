@@ -7,8 +7,10 @@ import eu.domibus.common.model.security.UserRole;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 /**
  * @author Sebastian-Ion TINCU
  */
+@RunWith(JMockit.class)
 public class UserDefaultConverterTest {
 
     @Tested
