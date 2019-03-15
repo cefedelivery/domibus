@@ -123,9 +123,18 @@ public class PayloadProfileValidator {
             }
 
             if (profiled.getMimeType() != null) {
-                if ((!StringUtils.equalsIgnoreCase(profiled.getMimeType(), mime)) ||
-                        (partInfo.isInBody() != profiled.isInBody()))//|| (profiled.getMaxSize() > 0 && profiled.getMaxSize() < partInfo.getBinaryData().length)) {
+                if (partInfo.isInBody() != profiled.isInBody()) {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error: expected: " + profiled + ", got " + partInfo, userMessage.getMessageInfo().getMessageId(), null);
+                }
+
+                if(StringUtils.isBlank(mime) && partInfo.isInBody()) {
+                    LOG.debug("Bodyload message mimeType is null: payload profiling skipped for bodyload");
+                } else  {
+                    if (!StringUtils.equalsIgnoreCase(profiled.getMimeType(), mime)) {
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error: expected: " + profiled + ", got " + partInfo, userMessage.getMessageInfo().getMessageId(), null);
+                    }
+                }
+
             }
 
         } //FIXME: size handling not possible with datahandlers
