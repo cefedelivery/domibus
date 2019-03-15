@@ -214,9 +214,13 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                 }
 
                 if (messageFragmentType != null) {
+                    LOG.debug("Received UserMessage fragment");
+
                     final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
                     groupEntity.incrementReceivedFragments();
                     messageGroupDao.update(groupEntity);
+
+                    LOG.debug("Received fragments [{}] out of expected [{}] for group [{}]", groupEntity.getReceivedFragments(), groupEntity.getFragmentCount(), groupEntity.getGroupId());
 
                     if (groupEntity.getReceivedFragments() == groupEntity.getFragmentCount()) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());

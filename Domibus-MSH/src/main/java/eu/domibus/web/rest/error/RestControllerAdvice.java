@@ -1,6 +1,6 @@
 package eu.domibus.web.rest.error;
 
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainTaskException;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -31,8 +31,8 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
     @Autowired
     private ErrorHandlerService errorHandlerService;
 
-    @ExceptionHandler({DomainException.class})
-    public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
+    @ExceptionHandler({DomainTaskException.class})
+    public ResponseEntity<ErrorRO> handleDomainException(DomainTaskException ex) {
         return handleWrappedException(ex);
     }
 

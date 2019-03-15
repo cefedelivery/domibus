@@ -3,7 +3,7 @@ package eu.domibus.core.multitenancy;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainTaskException;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -38,11 +38,11 @@ public class DomainContextProviderImpl implements DomainContextProvider {
 
         String domainCode = LOG.getMDC(DomibusLogger.MDC_DOMAIN);
         if (StringUtils.isBlank(domainCode)) {
-            throw new DomainException("Could not get current domain");
+            throw new DomainTaskException("Could not get current domain");
         }
         final Domain domain = domainService.getDomain(domainCode);
         if (domain == null) {
-            throw new DomainException("Could not get current domain: domain with code [" + domainCode + "] is not configured");
+            throw new DomainTaskException("Could not get current domain: domain with code [" + domainCode + "] is not configured");
         }
         return domain;
     }
@@ -52,7 +52,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
         Domain result = null;
         try {
             result = getCurrentDomain();
-        } catch (DomainException e) {
+        } catch (DomainTaskException e) {
             LOG.trace("Could not get current domain [{}]", e.getMessage());
         }
         return result;
@@ -62,7 +62,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
     @Override
     public void setCurrentDomain(String domainCode) {
         if (StringUtils.isEmpty(domainCode)) {
-            throw new DomainException("Could not set current domain: domain is empty");
+            throw new DomainTaskException("Could not set current domain: domain is empty");
         }
 
         LOG.putMDC(DomibusLogger.MDC_DOMAIN, domainCode);

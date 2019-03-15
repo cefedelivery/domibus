@@ -38,7 +38,7 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
         try {
             return utrFuture.get(5000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not execute task", e);
+            throw new DomainTaskException("Could not execute task", e);
         }
     }
 
@@ -55,8 +55,8 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
     }
 
     @Override
-    public void submitLongRunningTask(Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
-        submit(schedulingLongTaskExecutor, task, domain, waitForTask, timeout, timeUnit);
+    public void submitLongRunningTask(Runnable task, Domain domain) {
+        submit(schedulingLongTaskExecutor, task, domain, false, null, null);
     }
 
     protected void submit(SchedulingTaskExecutor taskExecutor, Runnable task, Domain domain, boolean waitForTask, Long timeout, TimeUnit timeUnit) {
@@ -74,9 +74,9 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
                 utrFuture.get(timeout, timeUnit);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new DomainException("Could not execute task", e);
+                throw new DomainTaskException("Could not execute task", e);
             } catch (ExecutionException | TimeoutException e) {
-                throw new DomainException("Could not execute task", e);
+                throw new DomainTaskException("Could not execute task", e);
             }
         }
     }

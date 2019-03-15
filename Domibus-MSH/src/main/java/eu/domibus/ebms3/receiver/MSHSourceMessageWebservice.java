@@ -176,9 +176,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
                     LOG.debug("Finished processing source message file");
                 },
-                currentDomain,
-                false,
-                domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
+                currentDomain);
 
         try {
             SOAPMessage responseMessage = messageFactory.createMessage();

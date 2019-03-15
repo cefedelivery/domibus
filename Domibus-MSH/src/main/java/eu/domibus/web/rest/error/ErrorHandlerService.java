@@ -1,6 +1,6 @@
 package eu.domibus.web.rest.error;
 
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainTaskException;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -35,7 +35,7 @@ public class ErrorHandlerService {
         //We need to send the connection header for the tomcat/chrome combination to be able to read the error message
         headers.set(HttpHeaders.CONNECTION, "close");
 
-        if (ex instanceof DomainException) {
+        if (ex instanceof DomainTaskException) {
             Throwable rootCause = ExceptionUtils.getRootCause(ex);
             ex = rootCause == null ? ex : rootCause;
         }

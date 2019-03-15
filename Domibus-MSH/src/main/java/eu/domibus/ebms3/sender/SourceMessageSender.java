@@ -14,7 +14,6 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Service;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class responsible for sending SourceMessages on the local endpoint(SplitAndJoin)
@@ -78,9 +76,7 @@ public class SourceMessageSender implements MessageSender {
                 () -> {
                     doSendMessage(userMessage);
                 },
-                currentDomain,
-                false,
-                domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
+                currentDomain);
 
 
     }

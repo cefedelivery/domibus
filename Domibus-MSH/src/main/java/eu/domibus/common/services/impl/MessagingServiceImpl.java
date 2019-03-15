@@ -98,9 +98,7 @@ public class MessagingServiceImpl implements MessagingService {
                         LOG.debug("Scheduling the SourceMessage sending");
                         userMessageService.scheduleSourceMessageSending(messageId);
                     },
-                    currentDomain,
-                    false,
-                    domibusPropertyProvider.getLongDomainProperty(currentDomain, PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
+                    currentDomain);
         } else {
             storePayloads(messaging, mshRole, legConfiguration, backendName);
         }

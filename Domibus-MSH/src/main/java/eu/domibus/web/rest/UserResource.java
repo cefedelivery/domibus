@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainTaskException;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
@@ -81,8 +81,8 @@ public class UserResource {
         return errorHandlerService.createResponse(ex, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler({DomainException.class})
-    public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
+    @ExceptionHandler({DomainTaskException.class})
+    public ResponseEntity<ErrorRO> handleDomainException(DomainTaskException ex) {
         //We caught it here just to check for UserManagementException and put HttpStatus.CONFLICT;  otherwise we would have delegated to general error handler
         Throwable rootException = ExceptionUtils.getRootCause(ex);
         if (rootException instanceof UserManagementException) {

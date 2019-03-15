@@ -2,7 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainTaskException;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.AuthUtils;
@@ -123,12 +123,12 @@ public class AuthenticationResourceTest {
         Assert.assertEquals(domainRO, result);
     }
 
-    @Test(expected = DomainException.class)
+    @Test(expected = DomainTaskException.class)
     public void testExceptionInSetCurrentDomain(@Mocked final LoggerFactory loggerFactory) {
         // Given
         new Expectations(authenticationResource) {{
             authenticationService.changeDomain("");
-            result = new DomainException("");
+            result = new DomainTaskException("");
         }};
         // When
         authenticationResource.setCurrentDomain("");

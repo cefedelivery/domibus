@@ -1,7 +1,7 @@
 package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainTaskException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -42,7 +42,7 @@ public class DomainTaskExecutorImplTest {
         }};
     }
 
-    @Test(expected = DomainException.class)
+    @Test(expected = DomainTaskException.class)
     public void testSubmitRunnableThreadInterruption(@Injectable Runnable submitRunnable,
                                                      @Injectable Future<?> utrFuture) throws Exception {
         new Expectations() {{
