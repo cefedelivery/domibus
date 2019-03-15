@@ -61,4 +61,6 @@ public interface UserMessageHandlerService {
     Boolean checkTestMessage(final LegConfiguration legConfiguration);
 
     ErrorResult createErrorResult(EbMS3Exception ebm3Exception);
+
+    void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException;
 }

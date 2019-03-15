@@ -247,11 +247,12 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
-    public void scheduleSourceMessageRejoin(String groupId) {
+    public void scheduleSourceMessageRejoin(String groupId, String backendName) {
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()
                 .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)
                 .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .property(UserMessageService.MSG_BACKEND_NAME, backendName)
                 .build();
         jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
     }

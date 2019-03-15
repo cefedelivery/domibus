@@ -15,9 +15,10 @@ public interface UserMessageService {
     String MSG_SOURCE_MESSAGE_RECEIPT = "SourceMessageReceipt";
     String MSG_TYPE = "messageType";
     String MSG_GROUP_ID = "groupId";
+    String MSG_BACKEND_NAME = "backendName";
     String MSG_SOURCE_MESSAGE_ID = "sourceMessageId";
 
-    public static final String PULL_RECEIPT_REF_TO_MESSAGE_ID = "pullReceiptRefToMessageId";
+    String PULL_RECEIPT_REF_TO_MESSAGE_ID = "pullReceiptRefToMessageId";
 
     String getFinalRecipient(final String messageId);
 
@@ -41,7 +42,7 @@ public interface UserMessageService {
 
     void scheduleSourceMessageSending(String messageId);
 
-    void scheduleSourceMessageRejoin(String groupId);
+    void scheduleSourceMessageRejoin(String groupId, String backendName);
 
     void scheduleSourceMessageReceipt(String messageId, String pmodeKey);
 

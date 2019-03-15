@@ -15,4 +15,6 @@ public interface MessagingService {
 
     void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration, String backendName) throws CompressionException;
 
+    void storePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration, String backendName);
+
 }

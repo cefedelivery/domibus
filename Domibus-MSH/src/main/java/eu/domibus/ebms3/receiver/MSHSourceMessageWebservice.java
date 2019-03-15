@@ -276,7 +276,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
         LOG.debug("Splitting SourceMessage [{}] into [{}] fragments, bytesPerSplit [{}], remainingBytes [{}]", sourceMessageFile, fragmentCount, bytesPerSplit, remainingBytes);
 
-        int maxReadBufferSize = 8 * 1024; //8KB
+        int maxReadBufferSize = 32 * 1024; //16KB
         try (RandomAccessFile raf = new RandomAccessFile(sourceMessageFile, "r")) {
             for (int index = 1; index <= fragmentCount; index++) {
                 final String fragmentFileName = getFragmentFileName(storageDirectory, sourceMessageFile.getName(), index);

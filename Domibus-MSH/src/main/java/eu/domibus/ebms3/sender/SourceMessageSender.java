@@ -3,6 +3,10 @@ package eu.domibus.ebms3.sender;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -10,6 +14,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -23,6 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class responsible for sending SourceMessages on the local endpoint(SplitAndJoin)
@@ -54,11 +60,36 @@ public class SourceMessageSender implements MessageSender {
     private MessageExchangeService messageExchangeService;
 
     @Autowired
-    UserMessageLogDao userMessageLogDao;
+    protected UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    protected DomainTaskExecutor domainTaskExecutor;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public void sendMessage(final UserMessage userMessage) {
+        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        domainTaskExecutor.submitLongRunningTask(
+                () -> {
+                    doSendMessage(userMessage);
+                },
+                currentDomain,
+                false,
+                domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
+
+
+    }
+
+    protected void doSendMessage(final UserMessage userMessage) {
         String messageId = userMessage.getMessageInfo().getMessageId();
+        LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+
+        LOG.debug("Sending SourceMessage");
 
         MessageAttempt attempt = new MessageAttempt();
         attempt.setMessageId(messageId);
@@ -89,6 +120,7 @@ public class SourceMessageSender implements MessageSender {
                 return;
             }
 
+
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             mshDispatcher.dispatchLocal(userMessage, soapMessage, legConfiguration);
         } catch (final SOAPFaultException soapFEx) {
@@ -115,6 +147,8 @@ public class SourceMessageSender implements MessageSender {
                 attempt.setStatus(attemptStatus);
                 attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
                 messageAttemptService.create(attempt);
+
+                LOG.debug("Finished sending SourceMessage");
             } catch (Exception ex) {
                 LOG.error("Finally: ", ex);
             }

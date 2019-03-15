@@ -1,7 +1,6 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -21,13 +20,11 @@ import eu.domibus.core.message.fragment.*;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
-import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
 import eu.domibus.ebms3.common.model.mf.MessageHeaderType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
-import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -40,6 +37,8 @@ import org.apache.commons.lang3.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
@@ -54,7 +53,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Thomas Dussart
@@ -150,9 +148,36 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         final boolean selfSendingFlag = checkSelfSending(pmodeKey);
         final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
 
-        handleIncomingMessage(legConfiguration, pmodeKey, request, messaging, selfSendingFlag, messageExists, testMessage);
+        handleIncomingSourceMessage(legConfiguration, pmodeKey, request, messaging, selfSendingFlag, messageExists, testMessage);
 
         return null;
+    }
+
+    protected void handleIncomingSourceMessage(final LegConfiguration legConfiguration, String pmodeKey, final SOAPMessage request, final Messaging messaging, boolean selfSending, boolean messageExists, boolean testMessage) throws IOException, TransformerException, EbMS3Exception, SOAPException {
+        soapUtil.logMessage(request);
+
+        String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+        checkCharset(messaging);
+
+        LOG.debug("Message duplication status:{}", messageExists);
+        if (!messageExists) {
+            if (testMessage) {
+                // ping messages are only stored and not notified to the plugins
+                persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, null);
+            } else {
+                final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+                String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
+
+                persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, backendName);
+
+                try {
+                    backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
+                } catch (SubmissionValidationException e) {
+                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
+                }
+            }
+        }
     }
 
 
@@ -196,32 +221,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                     if (groupEntity.getReceivedFragments() == groupEntity.getFragmentCount()) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
 
-                        final Domain currentDomain = domainContextProvider.getCurrentDomain();
-                        domainTaskExecutor.submitLongRunningTask(
-                                () -> {
-                                    LOG.debug("Saving the incoming SourceMessage payloads");
-
-                                    final String groupId = groupEntity.getGroupId();
-                                    final SOAPMessage sourceRequest = splitAndJoinService.rejoinSourceMessage(groupId);
-                                    Messaging sourceMessaging = messageUtil.getMessage(sourceRequest);
-
-                                    MessageExchangeConfiguration userMessageExchangeContext = null;
-                                    try {
-                                        userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(sourceMessaging.getUserMessage(), MSHRole.RECEIVING);
-                                        String sourcePmodeKey = userMessageExchangeContext.getPmodeKey();
-                                        sourceRequest.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, sourcePmodeKey);
-                                    } catch (EbMS3Exception | SOAPException e) {
-                                        //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
-                                        LOG.error("Error getting the pmodeKey");
-                                        return;
-                                    }
-
-                                    incomingSourceMessageHandler.processMessage(sourceRequest, sourceMessaging);
-                                    userMessageService.scheduleSourceMessageReceipt(sourceMessaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
-                                },
-                                currentDomain,
-                                false,
-                                domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
+                        userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId(), backendName);
                     }
                 }
             }
@@ -328,8 +328,17 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
         LOG.debug("Compression for message with id: {} applied: {}", userMessage.getMessageInfo().getMessageId(), compressed);
+        return saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName, userMessage);
+    }
 
+    protected String persistReceivedSourceMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
+        LOG.info("Persisting received SourceMessage");
+        UserMessage userMessage = messaging.getUserMessage();
 
+        return saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName, userMessage);
+    }
+
+    protected String saveReceivedMessage(SOAPMessage request, LegConfiguration legConfiguration, String pmodeKey, Messaging messaging, MessageFragmentType messageFragmentType, String backendName, UserMessage userMessage) throws EbMS3Exception {
         //skip payload and property profile validations for message fragments
         if (messageFragmentType == null) {
             try {
@@ -375,6 +384,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
         return userMessage.getMessageInfo().getMessageId();
     }
+
 
     protected void handleMessageFragment(UserMessage userMessage, MessageFragmentType messageFragmentType) throws EbMS3Exception {
         validateUserMessageFragment(userMessage, messageFragmentType);
@@ -444,7 +454,9 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
 
-    protected void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         LOG.debug("Start handling payloads");
 
         boolean bodyloadFound = false;

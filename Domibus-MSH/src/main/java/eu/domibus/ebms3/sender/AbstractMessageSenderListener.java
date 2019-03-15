@@ -67,5 +67,7 @@ public abstract class AbstractMessageSenderListener implements MessageListener {
         }
 
         messageSenderService.sendUserMessage(messageId, retryCount);
+
+        LOG.debug("Finished sending message ID [{}] for domain [{}]", messageId, domainCode);
     }
 }

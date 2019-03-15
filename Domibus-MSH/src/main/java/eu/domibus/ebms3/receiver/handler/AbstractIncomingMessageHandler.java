@@ -14,6 +14,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.util.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
@@ -44,6 +45,7 @@ public abstract class AbstractIncomingMessageHandler implements IncomingMessageH
     @Autowired
     protected PModeProvider pModeProvider;
 
+    @Transactional
     @Override
     public SOAPMessage processMessage(SOAPMessage request, Messaging messaging) {
         SOAPMessage responseMessage = null;

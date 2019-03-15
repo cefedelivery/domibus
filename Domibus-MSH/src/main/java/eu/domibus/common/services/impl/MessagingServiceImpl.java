@@ -82,7 +82,7 @@ public class MessagingServiceImpl implements MessagingService {
             return;
         }
 
-        if (messaging.getUserMessage().isSourceMessage()) {
+        if (MSHRole.SENDING == mshRole && messaging.getUserMessage().isSourceMessage()) {
             LOG.debug("Scheduling saving the SourceMessage");
             final Domain currentDomain = domainContextProvider.getCurrentDomain();
             domainTaskExecutor.submitLongRunningTask(
@@ -118,13 +118,15 @@ public class MessagingServiceImpl implements MessagingService {
         }
     }
 
-    protected void storePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration, String backendName) {
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public void storePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration, String backendName) {
         LOG.debug("Storing payloads");
         if (messaging.getUserMessage().getPayloadInfo() != null && messaging.getUserMessage().getPayloadInfo().getPartInfo() != null) {
             for (PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
                 try {
                     if (MSHRole.RECEIVING.equals(mshRole)) {
-                        storeIncomingPayload(partInfo, messaging.getUserMessage().getMessageInfo().getMessageId());
+                        storeIncomingPayload(partInfo, messaging.getUserMessage());
                     } else {
                         storeOutgoingPayload(partInfo, messaging.getUserMessage(), legConfiguration, backendName);
                     }
@@ -134,9 +136,11 @@ public class MessagingServiceImpl implements MessagingService {
                 }
             }
         }
+        LOG.debug("Finished storing payloads");
     }
 
-    protected void storeIncomingPayload(PartInfo partInfo, String messageId) throws IOException {
+    protected void storeIncomingPayload(PartInfo partInfo, UserMessage userMessage) throws IOException {
+        String messageId = userMessage.getMessageInfo().getMessageId();
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
         LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
@@ -145,24 +149,41 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if (savePayloadsInDatabase(currentStorage)) {
-            try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
-                byte[] binaryData = IOUtils.toByteArray(is);
-                partInfo.setBinaryData(binaryData);
-                partInfo.setLength(binaryData.length);
-                partInfo.setFileName(null);
-            }
+            saveIncomingPayloadToDatabase(partInfo);
         } else {
-            final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
-            partInfo.setFileName(attachmentStore.getAbsolutePath());
-            try (final InputStream inputStream = partInfo.getPayloadDatahandler().getInputStream()) {
-                final long fileLength = saveIncomingFileToDisk(attachmentStore, inputStream);
-                partInfo.setLength(fileLength);
+            if (StringUtils.isBlank(partInfo.getFileName())) {
+                saveIncomingPayloadToDisk(partInfo, currentStorage);
+            } else {
+                LOG.debug("Incoming payload [{}] is already saved on file disk under [{}]", partInfo.getHref(), partInfo.getFileName());
             }
         }
 
-
         // Log Payload size
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
+    }
+
+    protected void saveIncomingPayloadToDisk(PartInfo partInfo, Storage currentStorage) throws IOException {
+        LOG.debug("Saving incoming payload [{}] to file disk", partInfo.getHref());
+
+        final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
+        partInfo.setFileName(attachmentStore.getAbsolutePath());
+        try (final InputStream inputStream = partInfo.getPayloadDatahandler().getInputStream()) {
+            final long fileLength = saveIncomingFileToDisk(attachmentStore, inputStream);
+            partInfo.setLength(fileLength);
+        }
+
+        LOG.debug("Finished saving incoming payload [{}] to file disk", partInfo.getHref());
+    }
+
+    protected void saveIncomingPayloadToDatabase(PartInfo partInfo) throws IOException {
+        LOG.debug("Saving incoming payload [{}] to database", partInfo.getHref());
+        try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
+            byte[] binaryData = IOUtils.toByteArray(is);
+            partInfo.setBinaryData(binaryData);
+            partInfo.setLength(binaryData.length);
+            partInfo.setFileName(null);
+        }
+        LOG.debug("Finished saving incoming payload [{}] to database", partInfo.getHref());
     }
 
 
@@ -177,11 +198,11 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if (savePayloadsInDatabase(currentStorage)) {
-            saveOutgoingFileToDatabase(partInfo, userMessage, legConfiguration, backendName);
+            saveOutgoingPayloadToDatabase(partInfo, userMessage, legConfiguration, backendName);
         } else {
             //message fragment files are already saved on the file system
             if (!userMessage.isUserMessageFragment()) {
-                saveOutgoingFileToDisk(partInfo, userMessage, legConfiguration, currentStorage, backendName);
+                saveOutgoingPayloadToDisk(partInfo, userMessage, legConfiguration, currentStorage, backendName);
             }
         }
 
@@ -194,7 +215,9 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
 
-    protected void saveOutgoingFileToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage, String backendName) throws IOException, EbMS3Exception {
+    protected void saveOutgoingPayloadToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage, String backendName) throws IOException, EbMS3Exception {
+        LOG.debug("Saving outgoing payload [{}] to file disk", partInfo.getHref());
+
         try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
             final String originalFileName = partInfo.getFileName();
 
@@ -203,17 +226,23 @@ public class MessagingServiceImpl implements MessagingService {
             final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
             partInfo.setLength(fileLength);
 
+            LOG.debug("Finished saving outgoing payload [{}] to file disk", partInfo.getHref());
+
             backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
         }
     }
 
-    protected void saveOutgoingFileToDatabase(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, String backendName) throws IOException, EbMS3Exception {
+    protected void saveOutgoingPayloadToDatabase(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, String backendName) throws IOException, EbMS3Exception {
+        LOG.debug("Saving outgoing payload [{}] to database", partInfo.getHref());
+
         try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
             final String originalFileName = partInfo.getFileName();
             byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);
             partInfo.setBinaryData(binaryData);
             partInfo.setLength(binaryData.length);
             partInfo.setFileName(null);
+
+            LOG.debug("Finished saving outgoing payload [{}] to database", partInfo.getHref());
 
             backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
         }
@@ -285,7 +314,8 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected byte[] compress(byte[] binaryData) throws IOException {
         LOG.debug("Compressing binary data");
-        final byte[] buffer = new byte[1024];
+        int maxReadBufferSize = 32 * 1024;
+        final byte[] buffer = new byte[maxReadBufferSize];
         InputStream sourceStream = new ByteArrayInputStream(binaryData);
         ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
         GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);

@@ -1,12 +1,20 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.AS4ReceiptService;
+import eu.domibus.common.services.impl.MessagingServiceImpl;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -31,6 +39,8 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.TransformerException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Cosmin Baciu
@@ -70,6 +80,21 @@ public class SplitAndJoinListener implements MessageListener {
     @Autowired
     protected MSHDispatcher mshDispatcher;
 
+    @Autowired
+    protected DomainTaskExecutor domainTaskExecutor;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected MessagingService messagingService;
+
+    @Autowired
+    protected UserMessageHandlerService userMessageHandlerService;
+
+    @Autowired
+    protected UserMessageLogDao userMessageLogDao;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
@@ -92,22 +117,44 @@ public class SplitAndJoinListener implements MessageListener {
 
             if (StringUtils.equals(messageType, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)) {
                 final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
-                final SOAPMessage request = splitAndJoinService.rejoinSourceMessage(groupId);
-                Messaging messaging = messageUtil.getMessage(request);
+                final String backendName = message.getStringProperty(UserMessageService.MSG_BACKEND_NAME);
+                final Domain currentDomain = domainContextProvider.getCurrentDomain();
+                domainTaskExecutor.submitLongRunningTask(
+                        () -> {
+                            LOG.debug("Saving the incoming SourceMessage payloads");
 
-                MessageExchangeConfiguration userMessageExchangeContext = null;
-                try {
-                    userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING);
-                    String pmodeKey = userMessageExchangeContext.getPmodeKey();
-                    request.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
-                } catch (EbMS3Exception | SOAPException e) {
-                    //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
-                    LOG.error("Error getting the pmodeKey");
-                    return;
-                }
+                            final SOAPMessage sourceRequest = splitAndJoinService.rejoinSourceMessage(groupId);
+                            Messaging sourceMessaging = messageUtil.getMessage(sourceRequest);
 
-                incomingSourceMessageHandler.processMessage(request, messaging);
-                userMessageService.scheduleSourceMessageReceipt(messaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
+                            MessageExchangeConfiguration userMessageExchangeContext = null;
+                            LegConfiguration legConfiguration = null;
+                            try {
+                                userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(sourceMessaging.getUserMessage(), MSHRole.RECEIVING);
+                                String sourcePmodeKey = userMessageExchangeContext.getPmodeKey();
+                                legConfiguration = pModeProvider.getLegConfiguration(sourcePmodeKey);
+                                sourceRequest.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, sourcePmodeKey);
+                            } catch (EbMS3Exception | SOAPException e) {
+                                //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
+                                LOG.error("Error getting the pmodeKey", e);
+                                return;
+                            }
+
+                            try {
+                                userMessageHandlerService.handlePayloads(sourceRequest, sourceMessaging.getUserMessage());
+                            } catch (EbMS3Exception | SOAPException | TransformerException e) {
+                                //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
+                                LOG.error("Error handling payloads", e);
+                                return;
+                            }
+
+                            messagingService.storePayloads(sourceMessaging, MSHRole.RECEIVING, legConfiguration, backendName);
+
+                            incomingSourceMessageHandler.processMessage(sourceRequest, sourceMessaging);
+                            userMessageService.scheduleSourceMessageReceipt(sourceMessaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
+                        },
+                        currentDomain,
+                        false,
+                        domibusPropertyProvider.getLongDomainProperty(currentDomain, MessagingServiceImpl.PROPERTY_WAIT_FOR_TASK), TimeUnit.MINUTES);
             } else if (StringUtils.equals(messageType, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)) {
                 final String sourceMessageId = message.getStringProperty(UserMessageService.MSG_SOURCE_MESSAGE_ID);
                 final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
