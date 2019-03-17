@@ -30,9 +30,12 @@ public class TestService {
 
     private static final String TEST_PAYLOAD = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello>world</hello>";
 
+    private static final String MESSAGE_PROPERTY_KEY_FINAL_RECIPIENT = "finalRecipient";
+
+    private static final String BACKEND_NAME = "TestService";
+
     @Autowired
     private PModeProvider pModeProvider;
-
 
     @Autowired
     private DatabaseMessageHandler databaseMessageHandler;
@@ -44,9 +47,9 @@ public class TestService {
 
         // Set Receiver
         messageData.getToParties().clear();
-        messageData.getToParties().add(new Submission.Party(receiver, pModeProvider.getPartyIdType(receiver)));
+        messageData.addToParty(receiver, pModeProvider.getPartyIdType(receiver));
 
-        return databaseMessageHandler.submit(messageData, "TestService");
+        return databaseMessageHandler.submit(messageData, BACKEND_NAME);
     }
 
     public String submitTestDynamicDiscovery(String sender, String receiver, String receiverType) throws MessagingProcessingException, IOException {
@@ -59,13 +62,13 @@ public class TestService {
 
         // Set Final Recipient Value and Type
         for (Submission.TypedProperty property : messageData.getMessageProperties()) {
-            if (property.getKey().equals("finalRecipient")) {
+            if (property.getKey().equals(MESSAGE_PROPERTY_KEY_FINAL_RECIPIENT)) {
                 property.setValue(receiver);
                 property.setType(receiverType);
             }
         }
 
-        return databaseMessageHandler.submit(messageData, "TestService");
+        return databaseMessageHandler.submit(messageData, BACKEND_NAME);
     }
 
     protected Submission createSubmission(String sender) throws IOException {
@@ -81,7 +84,7 @@ public class TestService {
 
         // Set Sender
         submission.getFromParties().clear();
-        submission.getFromParties().add(new Submission.Party(sender, pModeProvider.getPartyIdType(sender)));
+        submission.addFromParty(sender, pModeProvider.getPartyIdType(sender));
 
         // Set ServiceType
         submission.setServiceType(pModeProvider.getServiceType(Ebms3Constants.TEST_SERVICE));

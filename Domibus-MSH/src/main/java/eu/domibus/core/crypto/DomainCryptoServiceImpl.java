@@ -134,7 +134,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     private synchronized void persistTrustStore() throws CryptoException {
         String trustStoreFileValue = getTrustStoreLocation();
-        LOG.debug("TrustoreLocation is: [{}]", trustStoreFileValue);
+        LOG.debug("TrustStoreLocation is: [{}]", trustStoreFileValue);
         File trustStoreFile = new File(trustStoreFileValue);
         if (!trustStoreFile.getParentFile().exists()) {
             LOG.debug("Creating directory [" + trustStoreFile.getParentFile() + "]");
@@ -166,7 +166,9 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @Override
     public synchronized boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
         boolean added = doAddCertificate(certificate, alias, overwrite);
-        persistTrustStore();
+        if(added) {
+            persistTrustStore();
+        }
         return added;
     }
 
@@ -285,7 +287,9 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @Override
     public boolean removeCertificate(String alias) {
         boolean removed = doRemoveCertificate(alias);
-        persistTrustStore();
+        if(removed) {
+            persistTrustStore();
+        }
         return removed;
     }
 
