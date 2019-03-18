@@ -1,4 +1,5 @@
 Domibus 4.1
+- Upgrade the Tomcat distribution to 8.5.38
 - Password policy enforcement for admin users: check complexity, expiration, reuse. Send Alerts on expiration event. Added corresponding properties in configuration.
 - Align the WS Plugin/FS Plugin XSDs with the ebMS3 XSD
 - Remove domibus.msh.retry.tolerance from domibus.properties
