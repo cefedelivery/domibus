@@ -4,7 +4,6 @@ import {AuthenticatedGuard} from './common/guards/authenticated.guard';
 import {ErrorLogComponent} from './errorlog/errorlog.component';
 import {CurrentPModeComponent} from './pmode/current/currentPMode.component';
 import {PModeArchiveComponent} from './pmode/archive/pmodeArchive.component';
-import {AuthorizedGuard} from "./common/guards/authorized.guard";
 import {AuthorizedAdminGuard} from './common/guards/authorized-admin.guard';
 import {MessageFilterComponent} from './messagefilter/messagefilter.component';
 import {MessageLogComponent} from './messagelog/messagelog.component';
@@ -24,37 +23,53 @@ import {ChangePasswordComponent} from './security/change-password/change-passwor
 import {LogoutAuthExtProviderComponent} from "./security/logout/logout.components";
 import {RedirectHomeGuard} from "./common/guards/redirect-home.guard";
 import {NotAuthorizedComponent} from "./security/not-authorized/not-authorized.components";
+import {SecurityService} from "./security/security.service";
 
 
 const appRoutes: Routes = [
   {
     path: '',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedGuard,*/ DefaultPasswordGuard],
+    data: {
+      checkRoles:  SecurityService.USER_ROLES
+    }
   },
   {
     path: 'pmode-current',
     component: CurrentPModeComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
-    canDeactivate: [DirtyGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard,*/ DefaultPasswordGuard],
+    canDeactivate: [DirtyGuard],
+    data: {
+      checkRoles: SecurityService.ADMIN_ROLES
+    }
   },
   {
     path: 'pmode-archive',
     component: PModeArchiveComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
-    canDeactivate: [DirtyGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard*/ DefaultPasswordGuard],
+    canDeactivate: [DirtyGuard],
+    data: {
+      checkRoles: SecurityService.ADMIN_ROLES
+    }
   },
   {
     path: 'pmode-party',
     component: PartyComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
-    canDeactivate: [DirtyGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard*/ DefaultPasswordGuard],
+    canDeactivate: [DirtyGuard],
+    data: {
+      checkRoles: SecurityService.USER_ROLES
+    }
   },
   {
     path: 'jms',
     component: JmsComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
-    canDeactivate: [DirtyGuard]
+    canActivate: [AuthenticatedGuard,/* AuthorizedAdminGuard*/ DefaultPasswordGuard],
+    canDeactivate: [DirtyGuard],
+    data: {
+      checkAdminRoles: true
+    }
   },
   {
     path: 'messagefilter',
@@ -65,12 +80,18 @@ const appRoutes: Routes = [
   {
     path: 'truststore',
     component: TruststoreComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard,*/ DefaultPasswordGuard],
+    data: {
+      checkRoles: SecurityService.ADMIN_ROLES
+    }
   },
   {
     path: 'messagelog',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedGuard,*/ DefaultPasswordGuard],
+    data: {
+      checkRoles: SecurityService.USER_ROLES
+    }
   },
   {
     path: 'user',
@@ -81,25 +102,54 @@ const appRoutes: Routes = [
   {
     path: 'pluginuser',
     component: PluginUserComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
-    canDeactivate: [DirtyGuard]
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard,*/ DefaultPasswordGuard],
+    canDeactivate: [DirtyGuard],
+    data: {
+      checkRoles: SecurityService.ADMIN_ROLES
+    }
   },
-  {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard, AuthorizedGuard, DefaultPasswordGuard]},
+  {
+    path: 'errorlog',
+    component: ErrorLogComponent,
+    canActivate: [AuthenticatedGuard, /*AuthorizedGuard,*/ DefaultPasswordGuard],
+    data: {
+      checkRoles: SecurityService.USER_ROLES
+    }
+  },
   {path: 'login', component: LoginComponent, canActivate: [AuthExternalProviderGuard, RedirectHomeGuard]},
-  {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
-  {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
+  {
+    path: 'audit',
+    component: AuditComponent,
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard,*/ DefaultPasswordGuard],
+    data: {
+      checkRoles: SecurityService.ADMIN_ROLES
+    }
+  },
+  {
+    path: 'alerts',
+    component: AlertsComponent,
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard,*/ DefaultPasswordGuard],
+    data: {
+      checkRoles: SecurityService.ADMIN_ROLES
+    }
+  },
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'changePassword', component: ChangePasswordComponent, canActivate: [AuthenticatedGuard, AuthExternalProviderGuard]},
   {
     path: 'logging',
     component: LoggingComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedGuard, /*AuthorizedAdminGuard,*/ DefaultPasswordGuard],
     data: {
-      isDomainIndependent: true
+      isDomainIndependent: true,
+      checkRoles: SecurityService.ADMIN_ROLES
     }
   },
   {path: 'logout', component: LogoutAuthExtProviderComponent},
-  {path: 'notAuthorized', component: NotAuthorizedComponent, canActivate: [AuthenticatedGuard]},
+  {
+    path: 'notAuthorized',
+    component: NotAuthorizedComponent,
+    canActivate: [AuthenticatedGuard]
+  },
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];

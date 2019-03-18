@@ -74,6 +74,7 @@ public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdap
                         "/rest/application/name",
                         "/rest/application/fourcornerenabled",
                         "/rest/application/extauthproviderenabled",
+                        "/rest/application/supportteam",
                         "/rest/application/multitenancy").permitAll()
                 .antMatchers("/rest/application/domains").hasAnyAuthority(AuthRole.ROLE_AP_ADMIN.name())
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
