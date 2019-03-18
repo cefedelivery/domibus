@@ -75,10 +75,11 @@ public class PullReceiptListener implements MessageListener {
                 LOG.error("Domain is empty: could not send message");
                 return;
             }
-
             domainContextProvider.setCurrentDomain(domainCode);
             final String refToMessageId = message.getStringProperty(UserMessageService.PULL_RECEIPT_REF_TO_MESSAGE_ID);
             final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+            LOG.info("Sending pull receipt for pulled UserMessage [{}], domain [{}].", refToMessageId, domainCode);
+            LOG.debug("pModekey is [{}]", pModeKey);
             final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
             final Policy policy = policyService.getPolicy(legConfiguration);
