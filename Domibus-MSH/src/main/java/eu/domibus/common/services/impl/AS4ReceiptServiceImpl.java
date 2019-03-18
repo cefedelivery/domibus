@@ -197,6 +197,8 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
      */
     protected void saveResponse(final SOAPMessage responseMessage, boolean selfSendingFlag) {
         try {
+            LOG.debug("Saving response, self sending  [{}]", selfSendingFlag);
+
             Messaging messaging = messageUtil.getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
 
@@ -207,12 +209,14 @@ public class AS4ReceiptServiceImpl implements AS4ReceiptService {
                 signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
                 signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
             }
+            LOG.debug("Save signalMessage with messageId [{}], refToMessageId [{}]", signalMessage.getMessageInfo().getMessageId(), signalMessage.getMessageInfo().getRefToMessageId());
             // Stores the signal message
             signalMessageDao.create(signalMessage);
             // Updating the reference to the signal message
             Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
             MessageSubtype messageSubtype = null;
             if (sentMessage != null) {
+                LOG.debug("Updating the reference to the signal message [{}]", sentMessage.getUserMessage().getMessageInfo().getMessageId());
                 if (userMessageHandlerService.checkTestMessage(sentMessage.getUserMessage())) {
                     messageSubtype = MessageSubtype.TEST;
                 }

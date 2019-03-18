@@ -14,9 +14,8 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
-import eu.domibus.core.pull.PullReceiptSender;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -140,7 +139,10 @@ public class PullMessageSender {
             userMessageHandlerService.handleNewUserMessage(legConfiguration, pModeKey, response, messaging, testMessage);
             final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
-            final String sendMessageId = messageId;
+            String sendMessageId = messageId;
+            if (userMessageHandlerService.checkSelfSending(pModeKey)) {
+                sendMessageId += UserMessageHandlerService.SELF_SENDING_SUFFIX;
+            }
             try {
                 userMessageDefaultService.scheduleSendingPullReceipt(sendMessageId, pModeKey);
             } catch (Exception ex) {
