@@ -1,5 +1,10 @@
 package eu.domibus.core.crypto.spi.dss;
 
+import com.google.common.collect.Lists;
+import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.europa.esig.dss.client.http.DataLoader;
 import eu.europa.esig.dss.tsl.OtherTrustedList;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
@@ -12,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -24,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+
 /**
  * @author Thomas Dussart
  * @since 4.1
@@ -32,7 +39,6 @@ import java.util.List;
  */
 @Configuration
 @PropertySource(value = "classpath:authentication-dss-extension-default.properties")
-@PropertySource(ignoreResourceNotFound = true, value = "file:${domibus.config.location}/extensions/config/authentication-dss-extension.properties")
 public class DssConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DssConfiguration.class);
@@ -94,6 +100,15 @@ public class DssConfiguration {
     @Value("${domibus.dss.refresh.cron}")
     private String dssRefreshCronExpression;
 
+    @Value("domibus.enable.dss.custom.trusted.list.for.multitenant")
+    private String enableDssCustomTrustedListForMultiTenant;
+
+    @Value("domibus.enable.dss.custom.trusted.list.for.multitenant")
+    private String enableExceptionOnMissingRevocationData;
+
+    @Value("domibus.dss.check.revocation.for.untrusted.chains")
+    private String checkRevocationForUntrustedChain;
+
     @Bean
     public TrustedListsCertificateSource trustedListSource() {
         return new TrustedListsCertificateSource();
@@ -113,13 +128,9 @@ public class DssConfiguration {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
         certificateVerifier.setTrustedCertSource(trustedListSource());
         certificateVerifier.setDataLoader(dataLoader);
-        /*certificateVerifier.setCrlSource(cachedCRLSource());
-        certificateVerifier.setOcspSource(ocspSource());
-        certificateVerifier.setDataLoader(dataLoader());*/
 
-        // Default configs
-        certificateVerifier.setExceptionOnMissingRevocationData(false);
-        certificateVerifier.setCheckRevocationForUntrustedChains(false);
+        certificateVerifier.setExceptionOnMissingRevocationData(Boolean.parseBoolean(enableExceptionOnMissingRevocationData));
+        certificateVerifier.setCheckRevocationForUntrustedChains(Boolean.parseBoolean(checkRevocationForUntrustedChain));
 
         return certificateVerifier;
     }
@@ -140,8 +151,21 @@ public class DssConfiguration {
     }
 
     @Bean
-    List<OtherTrustedList> otherTrustedLists(Environment env) {
-        return new OtherTrustedListPropertyMapper(env).map();
+    List<OtherTrustedList> otherTrustedLists(DomibusPropertyExtService domibusPropertyExtService,
+                                             DomainContextExtService domainContextExtService,
+                                             DomibusConfigurationExtService domibusConfigurationExtService,
+                                             Environment environment) {
+        final boolean multiTenant = domibusConfigurationExtService.isMultiTenantAware();
+        final List<OtherTrustedList> otherTrustedLists = new OtherTrustedListPropertyMapper(domibusPropertyExtService, domainContextExtService, environment).map();
+        if (multiTenant && !otherTrustedLists.isEmpty()) {
+            if (Boolean.parseBoolean(enableDssCustomTrustedListForMultiTenant)) {
+                LOG.warn("Configured custom trusted lists are shared by all tenants.");
+            } else {
+                LOG.info("In multi-tenant configuration custom DSS trusted list are shared. Therefore they are deactivated by default. Please adapt property:[domibus.enable.dss.custom.trusted.list.for.multitenant] to change that behavior");
+                return Lists.newArrayList();
+            }
+        }
+        return otherTrustedLists;
     }
 
     @Bean
@@ -166,21 +190,6 @@ public class DssConfiguration {
         return validationJob;
     }
 
-   /* private void checkCacheConfigAndInitialize(TSLValidationJob validationJob) {
-        final File file = new File(dssCachePath);
-        if (!file.exists()) {
-            LOG.warn("Dss cache directory:[{}] does not exist, trusted lists can not be loaded", dssCachePath);
-            return;
-        }
-        final String[] cacheFiles = file.list();
-        if (cacheFiles == null || cacheFiles.length == 0) {
-            LOG.info("Dss cache directory:[{}] is empty at start up, loading trusted lists.", dssCachePath);
-            validationJob.refresh();
-        } else {
-            LOG.info("Dss cache directory:[{}] contains:[{}] file", dssCachePath, cacheFiles.length);
-        }
-    }*/
-
     @Bean
     public JobDetailFactoryBean dssRefreshJob() {
         JobDetailFactoryBean obj = new JobDetailFactoryBean();
@@ -201,8 +210,29 @@ public class DssConfiguration {
     }
 
     @Bean
-    public ValidationReport validationReport(Environment env) {
-        final List<ConstraintInternal> constraints = new ConstraintPropertyMapper(env).map();
-        return new ValidationReport(constraints);
+    public ValidationConstraintPropertyMapper contraints(DomibusPropertyExtService domibusPropertyExtService,
+                                                         DomainContextExtService domainContextExtService, Environment environment) {
+        return new ValidationConstraintPropertyMapper(domibusPropertyExtService, domainContextExtService, environment);
+
+    }
+
+    @Bean
+    public ValidationReport validationReport() {
+        return new ValidationReport();
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public DomibusDssCryptoProvider domibusDssCryptoProvider(final DomainCryptoServiceSpi defaultDomainCryptoService,
+                                                             final CertificateVerifier certificateVerifier,
+                                                             final TSLRepository tslRepository,
+                                                             final ValidationReport validationReport,
+                                                             final ValidationConstraintPropertyMapper constraintMapper) {
+        return new DomibusDssCryptoProvider(
+                defaultDomainCryptoService,
+                certificateVerifier,
+                tslRepository,
+                validationReport,
+                constraintMapper);
     }
 }

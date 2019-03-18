@@ -24,8 +24,8 @@ public class ValidationReportTest {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         final DetailedReport detailedReport = (DetailedReport) unmarshaller.unmarshal(xmlStream);
 
-        ValidationReport validationReport = new ValidationReport(new ArrayList<>());
-        Assert.assertFalse(validationReport.isValid(detailedReport));
+        ValidationReport validationReport = new ValidationReport();
+        Assert.assertFalse(validationReport.isValid(detailedReport, new ArrayList<>()));
     }
 
     @Test
@@ -38,8 +38,8 @@ public class ValidationReportTest {
         final ArrayList<ConstraintInternal> constraints = new ArrayList<>();
         constraints.add(new ConstraintInternal("BBB_XCV_CCCBB", "OK"));
         constraints.add(new ConstraintInternal("BBB_XCV_ICTIVRSC", "OK"));
-        ValidationReport validationReport = new ValidationReport(constraints);
-        Assert.assertTrue(validationReport.isValid(detailedReport));
+        ValidationReport validationReport = new ValidationReport();
+        Assert.assertTrue(validationReport.isValid(detailedReport, constraints));
     }
 
     @Test
@@ -53,8 +53,8 @@ public class ValidationReportTest {
         constraints.add(new ConstraintInternal("BBB_XCV_CCCBB", "OK"));
         constraints.add(new ConstraintInternal("BBB_XCV_ICTIVRS", "OK"));
         constraints.add(new ConstraintInternal("QUAL_HAS_CAQC", "OK"));
-        ValidationReport validationReport = new ValidationReport(constraints);
-        Assert.assertFalse(validationReport.isValid(detailedReport));
+        ValidationReport validationReport = new ValidationReport();
+        Assert.assertFalse(validationReport.isValid(detailedReport, constraints));
     }
 
 

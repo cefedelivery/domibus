@@ -19,13 +19,7 @@ public class ValidationReport {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationReport.class);
 
-    private List<ConstraintInternal> constraints;
-
-    public ValidationReport(List<ConstraintInternal> contraints) {
-        this.constraints = contraints;
-    }
-
-    public boolean isValid(final DetailedReport detailedReport) {
+    public boolean isValid(final DetailedReport detailedReport, List<ConstraintInternal> constraints) {
         if (constraints == null || constraints.isEmpty()) {
             throw new IllegalStateException("A minimum set of constraints should be set.");
         }

@@ -6,6 +6,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -80,7 +81,7 @@ public class AuthorizationService {
 
         final List<X509Certificate> x509Certificates = getCertificates(request);
         getAuthorizationService().authorize(x509Certificates.toArray(new X509Certificate[]{}),
-                domainCoreConverter.convert(userMessage, eu.domibus.core.crypto.spi.model.UserMessage.class),
+                domainCoreConverter.convert(userMessage, UserMessageDTO.class),
                 pModeProvider.getMessageMapping(userMessage));
     }
 
