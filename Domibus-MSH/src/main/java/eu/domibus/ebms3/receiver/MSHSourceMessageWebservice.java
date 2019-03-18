@@ -102,7 +102,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
     @WebMethod
     @WebResult(name = "soapMessageResult")
-    @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public SOAPMessage invoke(final SOAPMessage request) {
         LOG.debug("Processing SourceMessage request");
 
@@ -114,10 +114,11 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         final boolean compression = Boolean.valueOf(LOG.getMDC(MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION));
         final String sourceMessageFileName = LOG.getMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE);
 
+        LOG.debug("Parsing the SourceMessage from file [{}]", sourceMessageFileName);
+        UserMessage userMessage = getUserMessage(sourceMessageFileName, contentTypeString);
+
         domainTaskExecutor.submitLongRunningTask(
                 () -> {
-                    UserMessage userMessage = getUserMessage(sourceMessageFileName, contentTypeString);
-
                     MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
                     messageGroupEntity.setGroupId(UUID.randomUUID().toString());
                     File sourceMessageFile = new File(sourceMessageFileName);
