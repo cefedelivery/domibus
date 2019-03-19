@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.ws.rs.core.HttpHeaders;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -59,5 +60,7 @@ public class X509CertificateAuthenticationTest {
             System.out.println("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
         }
     }
+
+
 
 }

@@ -15,10 +15,8 @@ public class DssRefreshWorker extends QuartzJobBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(DssRefreshWorker.class);
 
-    private TSLValidationJob tslValidationJob;
-
     @Autowired
-    private DssRefreshWorker dssRefreshWorker;
+    private TSLValidationJob tslValidationJob;
 
     public DssRefreshWorker() {
     }

@@ -1,5 +1,7 @@
 package eu.domibus.core.crypto.spi.dss;
 
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.europa.esig.dss.tsl.OtherTrustedList;
 import eu.europa.esig.dss.x509.KeyStoreCertificateSource;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -32,12 +34,12 @@ public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTru
 
     private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.dss.custom.trusted.list.country.code";
 
-    private Environment env;
-
-    public OtherTrustedListPropertyMapper(Environment env) {
-        this.env = env;
+    public OtherTrustedListPropertyMapper(final DomibusPropertyExtService domibusPropertyExtService,
+                                          final DomainContextExtService domainContextExtService,
+                                          final Environment environment) {
+        super(domibusPropertyExtService,
+                domainContextExtService, environment);
     }
-
 
     public List<OtherTrustedList> map() {
         return super.map(
@@ -67,10 +69,5 @@ public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTru
             LOG.error("Error while loading custom trust list", e);
         }
         return otherTrustedList;
-    }
-
-    @Override
-    Environment getEnvironment() {
-        return env;
     }
 }

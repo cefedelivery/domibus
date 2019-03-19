@@ -15,11 +15,6 @@ import eu.europa.esig.dss.x509.CommonCertificateSource;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -32,9 +27,6 @@ import java.util.stream.Collectors;
  * <p>
  * Future DSS IAM provider implementation.
  */
-
-@Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomibusDssCryptoProvider.class);
@@ -45,17 +37,20 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     private ValidationReport validationReport;
 
-    @Autowired
+    private ValidationConstraintPropertyMapper constraintMapper;
+
     public DomibusDssCryptoProvider(
             final DomainCryptoServiceSpi defaultDomainCryptoService,
             final CertificateVerifier certificateVerifier,
             final TSLRepository tslRepository,
-            final ValidationReport validationReport) {
+            final ValidationReport validationReport,
+            final ValidationConstraintPropertyMapper constraintMapper
+    ) {
         super(defaultDomainCryptoService);
         this.certificateVerifier = certificateVerifier;
         this.tslRepository = tslRepository;
         this.validationReport = validationReport;
-        //WSSec
+        this.constraintMapper = constraintMapper;
     }
 
     @Override
@@ -82,7 +77,8 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         CertificateReports reports = certificateValidator.validate();
         LOG.debug("Simple report:[{}]", reports.getXmlDetailedReport());
         final DetailedReport detailedReport = reports.getDetailedReportJaxb();
-        final boolean valid = validationReport.isValid(detailedReport);
+        final List<ConstraintInternal> constraints = constraintMapper.map();
+        final boolean valid = validationReport.isValid(detailedReport, constraints);
         if (!valid) {
             throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "certpath", new Object[]{"No trusted certs found"});
         }

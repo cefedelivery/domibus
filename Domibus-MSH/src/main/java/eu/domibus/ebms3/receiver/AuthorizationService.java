@@ -1,11 +1,13 @@
 package eu.domibus.ebms3.receiver;
 
+import com.google.common.collect.Lists;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,9 +82,11 @@ public class AuthorizationService {
         }
 
         final List<X509Certificate> x509Certificates = getCertificates(request);
-        getAuthorizationService().authorize(x509Certificates.toArray(new X509Certificate[]{}),
-                domainCoreConverter.convert(userMessage, eu.domibus.core.crypto.spi.model.UserMessage.class),
-                pModeProvider.getMessageMapping(userMessage));
+        X509Certificate leafCertificate = (X509Certificate) certificateService.extractLeafCertificateFromChain(x509Certificates);
+        final List<X509Certificate> signingCertificateTrustChain= Lists.newArrayList(x509Certificates);
+        signingCertificateTrustChain.remove(leafCertificate);
+        getAuthorizationService().authorize(signingCertificateTrustChain,leafCertificate,
+                domainCoreConverter.convert(userMessage, UserMessageDTO.class), pModeProvider.getMessageMapping(userMessage));
     }
 
     private List<X509Certificate> getCertificates(SOAPMessage request) {
