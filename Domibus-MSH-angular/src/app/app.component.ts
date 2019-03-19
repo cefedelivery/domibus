@@ -49,8 +49,10 @@ export class AppComponent implements OnInit {
     this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
     console.log('ngOnInit extAuthProviderEnabled: ' + this.extAuthProviderEnabled);
     if (this.extAuthProviderEnabled) {
-      this.securityService.getCurrentUserAndSaveLocally();
-
+      const user = await this.securityService.getCurrentUserFromServer();
+      if (user) {
+        this.securityService.updateCurrentUser(user);
+      }
       if (this.extAuthProvideRedirectTo) {
         console.log('going to redirect to: ' + this.extAuthProvideRedirectTo)
         const success = await this.router.navigate([this.extAuthProvideRedirectTo]);
