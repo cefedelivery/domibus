@@ -31,7 +31,7 @@ public class MessageListenerContainerConfiguration {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageListenerContainerConfiguration.class);
     public static final String PROPERTY_LARGE_FILES_CONCURRENCY = "domibus.dispatcher.largeFiles.concurrency";
     public static final String PROPERTY_SPLIT_AND_JOIN_CONCURRENCY = "domibus.dispatcher.splitAndJoin.concurrency";
-    private static final String PROPERTY_RETENTION_CONCURRENCY = "domibus.retention.concurrency";
+    private static final String PROPERTY_RETENTION_JMS_CONCURRENCY = "domibus.retention.jms.concurrency";
     private static final String DOMIBUS_PULL_RECEIPT_QUEUE_CONCURRENCY = "domibus.pull.receipt.queue.concurrency";
 
     @Autowired
@@ -196,7 +196,7 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setDestination(retentionMessageQueue);
         messageListenerContainer.setMessageListener(retentionListener);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, PROPERTY_RETENTION_CONCURRENCY));
+        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, PROPERTY_RETENTION_JMS_CONCURRENCY));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 

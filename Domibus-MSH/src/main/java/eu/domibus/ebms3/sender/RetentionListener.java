@@ -55,16 +55,9 @@ public class RetentionListener implements MessageListener {
 
     protected void handleSignalMessageDelete(String messageId) {
         List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
-        if (!signalMessages.isEmpty()) {
-            for (SignalMessage signalMessage : signalMessages) {
-                signalMessageDao.clear(signalMessage);
-            }
-        }
+        signalMessages.stream().forEach(signalMessage -> signalMessageDao.clear(signalMessage));
+
         List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
-        if (!signalMessageIds.isEmpty()) {
-            for (String signalMessageId : signalMessageIds) {
-                userMessageLogService.setMessageAsDeleted(signalMessageId);
-            }
-        }
+        signalMessageIds.stream().forEach(signalMessageId -> userMessageLogService.setMessageAsDeleted(signalMessageId));
     }
 }
