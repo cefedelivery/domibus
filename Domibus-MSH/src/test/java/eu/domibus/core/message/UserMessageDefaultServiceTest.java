@@ -4,7 +4,6 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -24,6 +23,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.messaging.DispatchMessageCreator;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -63,6 +63,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private Queue sendPullReceiptQueue;
+
+    @Injectable
+    private Queue retentionMessageQueue;
 
     @Injectable
     private UserMessageLogDao userMessageLogDao;
@@ -470,18 +473,15 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testDeleteMessageWhenNoNotificationListenerIsFound(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testDeleteMessageWhenNoNotificationListenerIsFound(@Injectable final UserMessageLog userMessageLog) {
         final String messageId = "1";
-
-        new Expectations(userMessageDefaultService) {{
-            userMessageDefaultService.handleSignalMessageDelete(messageId);
-        }};
 
         userMessageDefaultService.deleteMessage(messageId);
 
         new Verifications() {{
-            messagingDao.clearPayloadData(messageId);
-            userMessageLogService.setMessageAsDeleted(messageId);
+            JmsMessage message;
+            jmsManager.sendMessageToQueue(message = withCapture(), retentionMessageQueue);
+            assertEquals("Should have enqueued the retention message for deletion", messageId, message.getStringProperty(MessageConstants.MESSAGE_ID));
         }};
     }
 
@@ -494,21 +494,13 @@ public class UserMessageDefaultServiceTest {
         notificationListeners.add(notificationListener1);
 
         new Expectations(userMessageDefaultService) {{
-            userMessageDefaultService.handleSignalMessageDelete(messageId);
-
-            backendNotificationService.getNotificationListenerServices();
-            result = notificationListeners;
-
-            notificationListener1.getBackendNotificationQueue().getQueueName();
-            result = queueName;
+            backendNotificationService.getNotificationListenerServices(); result = notificationListeners;
+            notificationListener1.getBackendNotificationQueue().getQueueName(); result = queueName;
         }};
 
         userMessageDefaultService.deleteMessage(messageId);
 
         new Verifications() {{
-            messagingDao.clearPayloadData(messageId);
-            userMessageLogService.setMessageAsDeleted(messageId);
-
             jmsManager.consumeMessage(queueName, messageId);
         }};
     }
