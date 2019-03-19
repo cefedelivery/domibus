@@ -58,8 +58,6 @@ public class FSProcessFileService {
                 String messageId = backendFSPlugin.submit(message);
                 LOG.info("Message [{}] submitted: [{}]", messageId, processableFile.getName());
 
-                fsFilesManager.createLockFile(processableFile);
-
             } else {
                 LOG.error("Metadata file is missing for " + processableFile.getName().getURI());
             }

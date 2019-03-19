@@ -133,6 +133,8 @@ public class FSFilesManager {
         if (lockFile.exists()) {
             LOG.debug("Deleting lock file for [{}]", file.getName().getBaseName());
             return lockFile.delete();
+        } else {
+            LOG.debug("Lock file for [{}] not found", file.getName().getBaseName());
         }
         return false;
     }

@@ -119,9 +119,15 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     }
 
     @Override
-    public void payloadSubmitted(PayloadSubmittedEvent event) {
+    public void payloadSubmittedEvent(PayloadSubmittedEvent event) {
         //this method should be implemented by the plugins needed to be notified about payload submitted events
     }
+
+    @Override
+    public void payloadProcessedEvent(PayloadProcessedEvent event) {
+        //this method should be implemented by the plugins needed to be notified about payload processed events
+    }
+
 
     @Override
     public String getName() {

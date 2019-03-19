@@ -78,7 +78,7 @@ public class SoapUtil {
             final AttachmentPart attachmentPart = message.createAttachmentPart(attachment.getDataHandler());
 
             attachmentPart.setContentId(attachment.getId());
-            attachmentPart.setContentType(attachment.getDataHandler().getContentType());//to check
+            attachmentPart.setContentType(attachment.getDataHandler().getContentType());
             message.addAttachmentPart(attachmentPart);
             LOG.debug("Finished creating attachmentPart [{}]", attachment.getId());
         }

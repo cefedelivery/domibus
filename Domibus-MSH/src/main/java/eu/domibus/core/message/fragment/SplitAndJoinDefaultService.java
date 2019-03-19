@@ -136,7 +136,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         }
 
         final File sourceMessageFile = mergeSourceFile(fragmentFilesInOrder, messageGroupEntity);
-        LOG.debug("Rejoined the SourceMessage for group [{}] into file [{}]", groupId, sourceMessageFile);
+        LOG.debug("Rejoined the SourceMessage for group [{}] into file [{}] of length [{}]", groupId, sourceMessageFile, sourceMessageFile.length());
 
         LOG.debug("Creating the SOAPMessage from file [{}]", sourceMessageFile);
         try (InputStream rawInputStream = new FileInputStream(sourceMessageFile)) {
@@ -178,7 +178,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         LOG.debug("Merging files [{}] for group [{}] into file [{}]", fragmentFilesInOrder, messageGroupEntity.getGroupId(), outputFile);
 
-        try (OutputStream mergingStream = new BufferedOutputStream(Files.newOutputStream(outputFile.toPath()))) {
+        try (OutputStream mergingStream = new FileOutputStream(outputFile)) {
             mergeFiles(fragmentFilesInOrder, mergingStream);
         } catch (IOException exp) {
             throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments", exp);
@@ -210,6 +210,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     protected void mergeFiles(List<File> files, OutputStream mergingStream) throws IOException {
         for (File f : files) {
             Files.copy(f.toPath(), mergingStream);
+            mergingStream.flush();
         }
     }
 

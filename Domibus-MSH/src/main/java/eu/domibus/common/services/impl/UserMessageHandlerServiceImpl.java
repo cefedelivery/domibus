@@ -222,7 +222,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
                     LOG.debug("Received fragments [{}] out of expected [{}] for group [{}]", groupEntity.getReceivedFragments(), groupEntity.getFragmentCount(), groupEntity.getGroupId());
 
-                    if (groupEntity.getReceivedFragments() == groupEntity.getFragmentCount()) {
+                    if (groupEntity.getReceivedFragments().equals(groupEntity.getFragmentCount())) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
 
                         userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId(), backendName);

@@ -110,7 +110,9 @@ public interface BackendConnector<U, T> {
      */
     void messageStatusChanged(MessageStatusChangeEvent event);
 
-    void payloadSubmitted(PayloadSubmittedEvent event);
+    void payloadSubmittedEvent(PayloadSubmittedEvent event);
+
+    void payloadProcessedEvent(PayloadProcessedEvent event);
 
 
     /**

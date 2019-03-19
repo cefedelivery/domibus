@@ -16,10 +16,7 @@ import eu.domibus.common.services.MessagingService;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PartInfo;
-import eu.domibus.ebms3.common.model.Property;
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -32,8 +29,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -46,7 +43,9 @@ public class MessagingServiceImpl implements MessagingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingServiceImpl.class);
     public static final String PAYLOAD_EXTENSION = ".payload";
     public static final String MIME_TYPE_APPLICATION_UNKNOWN = "application/unknown";
-    public static final String PROPERTY_WAIT_FOR_TASK = "domibus.dispatcher.splitAndJoin.waitForTask";
+    public static final String PROPERTY_PAYLOADS_SCHEDULE_THRESHOLD = "domibus.dispatcher.splitAndJoin.payloads.schedule.threshold";
+    private static Long BYTES_IN_MB = 1048576L;
+
 
     @Autowired
     protected MessagingDao messagingDao;
@@ -83,28 +82,65 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if (MSHRole.SENDING == mshRole && messaging.getUserMessage().isSourceMessage()) {
-            LOG.debug("Scheduling saving the SourceMessage");
             final Domain currentDomain = domainContextProvider.getCurrentDomain();
-            domainTaskExecutor.submitLongRunningTask(
-                    () -> {
-                        LOG.debug("Saving the SourceMessage payloads");
-                        try {
-                            storePayloads(messaging, mshRole, legConfiguration, backendName);
-                        } catch (Exception e) {
-                            LOG.error("Error saving the SourceMessage payloads", e);
-                        }
 
-                        final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-                        LOG.debug("Scheduling the SourceMessage sending");
-                        userMessageService.scheduleSourceMessageSending(messageId);
-                    },
-                    currentDomain);
+            if (scheduleSourceMessagePayloads(messaging, currentDomain)) {
+                domainTaskExecutor.submitLongRunningTask(
+                        () -> {
+                            LOG.debug("Scheduling the SourceMessage saving ");
+                            storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
+                        },
+                        currentDomain);
+            } else {
+                storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
+            }
+
+
         } else {
             storePayloads(messaging, mshRole, legConfiguration, backendName);
         }
         LOG.debug("Saving Messaging");
         setPayloadsContentType(messaging);
         messagingDao.create(messaging);
+    }
+
+    protected boolean scheduleSourceMessagePayloads(Messaging messaging, final Domain domain) {
+        final PayloadInfo payloadInfo = messaging.getUserMessage().getPayloadInfo();
+        final List<PartInfo> partInfos = payloadInfo.getPartInfo();
+        if (payloadInfo == null || partInfos == null || partInfos.isEmpty()) {
+            LOG.debug("SourceMessages does not have any payloads");
+            return false;
+        }
+
+        long totalPayloadLength = 0;
+        for (PartInfo partInfo : partInfos) {
+            totalPayloadLength += partInfo.getLength();
+        }
+        LOG.debug("SourceMessage payloads totalPayloadLength(bytes) [{}]", totalPayloadLength);
+
+        final Long payloadsScheduleThresholdMB = domibusPropertyProvider.getLongDomainProperty(domain, PROPERTY_PAYLOADS_SCHEDULE_THRESHOLD);
+        LOG.debug("Using configured payloadsScheduleThresholdMB [{}]", payloadsScheduleThresholdMB);
+
+        final Long payloadsScheduleThresholdBytes = payloadsScheduleThresholdMB * BYTES_IN_MB;
+        if (totalPayloadLength > payloadsScheduleThresholdBytes) {
+            LOG.debug("The SourceMessage payloads will be scheduled for saving");
+            return true;
+        }
+        return false;
+
+    }
+
+    protected void storeSourceMessagePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration, String backendName) {
+        LOG.debug("Saving the SourceMessage payloads");
+        try {
+            storePayloads(messaging, mshRole, legConfiguration, backendName);
+        } catch (Exception e) {
+            LOG.error("Error saving the SourceMessage payloads", e);
+        }
+
+        final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+        LOG.debug("Scheduling the SourceMessage sending");
+        userMessageService.scheduleSourceMessageSending(messageId);
     }
 
     protected void setPayloadsContentType(Messaging messaging) {
@@ -219,6 +255,8 @@ public class MessagingServiceImpl implements MessagingService {
         try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
             final String originalFileName = partInfo.getFileName();
 
+            backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
+
             final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + PAYLOAD_EXTENSION);
             partInfo.setFileName(attachmentStore.getAbsolutePath());
             final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
@@ -226,7 +264,7 @@ public class MessagingServiceImpl implements MessagingService {
 
             LOG.debug("Finished saving outgoing payload [{}] to file disk", partInfo.getHref());
 
-            backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
+            backendNotificationService.notifyPayloadProcessed(userMessage, originalFileName, partInfo, backendName);
         }
     }
 
@@ -235,6 +273,9 @@ public class MessagingServiceImpl implements MessagingService {
 
         try (InputStream is = partInfo.getPayloadDatahandler().getInputStream()) {
             final String originalFileName = partInfo.getFileName();
+
+            backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
+
             byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);
             partInfo.setBinaryData(binaryData);
             partInfo.setLength(binaryData.length);
@@ -242,7 +283,7 @@ public class MessagingServiceImpl implements MessagingService {
 
             LOG.debug("Finished saving outgoing payload [{}] to database", partInfo.getHref());
 
-            backendNotificationService.notifyPayloadSubmitted(userMessage, originalFileName, partInfo, backendName);
+            backendNotificationService.notifyPayloadProcessed(userMessage, originalFileName, partInfo, backendName);
         }
     }
 
@@ -312,7 +353,7 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected byte[] compress(byte[] binaryData) throws IOException {
         LOG.debug("Compressing binary data");
-        final byte[] buffer = new byte[ 32 * 1024];
+        final byte[] buffer = new byte[32 * 1024];
         InputStream sourceStream = new ByteArrayInputStream(binaryData);
         ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
         GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);

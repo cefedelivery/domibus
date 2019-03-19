@@ -248,13 +248,25 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     }
 
     @Override
-    public void payloadSubmitted(PayloadSubmittedEvent event) {
+    public void payloadSubmittedEvent(PayloadSubmittedEvent event) {
+        LOG.debug("Handling PayloadSubmittedEvent [{}]", event);
+        try {
+            FileObject fileObject = fsFilesManager.getEnsureRootLocation(event.getFileName());
+            fsFilesManager.createLockFile(fileObject);
+        } catch (FileSystemException e) {
+            LOG.error("Error handling PayloadSubmittedEvent", e);
+        }
+    }
+
+    @Override
+    public void payloadProcessedEvent(PayloadProcessedEvent event) {
+        LOG.debug("Handling PayloadProcessedEvent [{}]", event);
         try {
             FileObject fileObject = fsFilesManager.getEnsureRootLocation(event.getFileName());
             fsFilesManager.deleteLockFile(fileObject);
             fsProcessFileService.renameProcessedFile(fileObject, event.getMessageId());
         } catch (FileSystemException e) {
-            LOG.error("Error handling payload submitted event", e);
+            LOG.error("Error handling PayloadProcessedEvent", e);
         }
     }
 

@@ -172,8 +172,17 @@ public class BackendNotificationService {
         payloadSubmittedEvent.setFileName(originalFilename);
         payloadSubmittedEvent.setMessageId(userMessage.getMessageInfo().getMessageId());
         payloadSubmittedEvent.setMime(partInfo.getMime());
-        backendConnector.payloadSubmitted(payloadSubmittedEvent);
+        backendConnector.payloadSubmittedEvent(payloadSubmittedEvent);
+    }
 
+    public void notifyPayloadProcessed(final UserMessage userMessage, String originalFilename, PartInfo partInfo, String backendName) {
+        final BackendConnector backendConnector = getBackendConnector(backendName);
+        PayloadProcessedEvent payloadProcessedEvent = new PayloadProcessedEvent();
+        payloadProcessedEvent.setCid(partInfo.getHref());
+        payloadProcessedEvent.setFileName(originalFilename);
+        payloadProcessedEvent.setMessageId(userMessage.getMessageInfo().getMessageId());
+        payloadProcessedEvent.setMime(partInfo.getMime());
+        backendConnector.payloadProcessedEvent(payloadProcessedEvent);
     }
 
     public BackendFilter getMatchingBackendFilter(final UserMessage userMessage) {
