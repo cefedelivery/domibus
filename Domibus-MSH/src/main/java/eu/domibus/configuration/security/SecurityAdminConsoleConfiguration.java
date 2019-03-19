@@ -79,12 +79,7 @@ public class SecurityAdminConsoleConfiguration extends AbstractWebSecurityConfig
                 .authorizeRequests()
                 .antMatchers("/", "/index.html", "/login",
                         "/rest/security/authentication",
-                        "/rest/application/info",
-                        "/rest/application/name",
-                        "/rest/application/fourcornerenabled",
-                        "/rest/application/extauthproviderenabled",
-                        "/rest/application/multitenancy",
-                        "/rest/application/supportteam",
+                        "/rest/application/**",
                         "/rest/security/username").permitAll()
                 .antMatchers("/rest/application/domains").hasAnyAuthority(AuthRole.ROLE_AP_ADMIN.name())
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
