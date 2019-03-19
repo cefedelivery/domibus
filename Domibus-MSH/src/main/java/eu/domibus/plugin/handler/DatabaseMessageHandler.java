@@ -5,7 +5,10 @@ import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
-import eu.domibus.common.dao.*;
+import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
@@ -20,6 +23,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PartyExtractor;
@@ -85,7 +89,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     private UserMessageLogService userMessageLogService;
 
     @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
+    private StorageProvider storageProvider;
 
     @Autowired
     private ErrorLogDao errorLogDao;
@@ -385,6 +389,13 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             final boolean splitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
             userMessage.setSplitAndJoin(splitAndJoin);
 
+            if (splitAndJoin && storageProvider.savePayloadsInDatabase()) {
+                LOG.error("SplitAndJoin feature needs payload storage on the file system");
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", userMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.SENDING);
+                throw ex;
+            }
+
             try {
                 messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration, backendName);
             } catch (CompressionException exc) {
@@ -398,7 +409,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
 
-            if(!userMessage.isSourceMessage()) {
+            if (!userMessage.isSourceMessage()) {
                 if (MessageStatus.READY_TO_PULL != messageStatus) {
                     // Sends message to the proper queue if not a message to be pulled.
                     userMessageService.scheduleSending(messageId);

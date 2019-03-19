@@ -1,7 +1,5 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
@@ -175,17 +173,12 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected void storeIncomingPayload(PartInfo partInfo, UserMessage userMessage) throws IOException {
         String messageId = userMessage.getMessageInfo().getMessageId();
-        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        Storage currentStorage = storageProvider.forDomain(currentDomain);
-        LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
-        if (currentStorage == null) {
-            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
-        }
 
-        if (savePayloadsInDatabase(currentStorage)) {
+        if (storageProvider.savePayloadsInDatabase()) {
             saveIncomingPayloadToDatabase(partInfo);
         } else {
             if (StringUtils.isBlank(partInfo.getFileName())) {
+                Storage currentStorage = storageProvider.getCurrentStorage();
                 saveIncomingPayloadToDisk(partInfo, currentStorage);
             } else {
                 LOG.debug("Incoming payload [{}] is already saved on file disk under [{}]", partInfo.getHref(), partInfo.getFileName());
@@ -224,18 +217,12 @@ public class MessagingServiceImpl implements MessagingService {
     protected void storeOutgoingPayload(PartInfo partInfo, UserMessage userMessage, final LegConfiguration legConfiguration, String backendName) throws IOException, EbMS3Exception {
         String messageId = userMessage.getMessageInfo().getMessageId();
 
-        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        Storage currentStorage = storageProvider.forDomain(currentDomain);
-        LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
-        if (currentStorage == null) {
-            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
-        }
-
-        if (savePayloadsInDatabase(currentStorage)) {
+        if (storageProvider.savePayloadsInDatabase()) {
             saveOutgoingPayloadToDatabase(partInfo, userMessage, legConfiguration, backendName);
         } else {
             //message fragment files are already saved on the file system
             if (!userMessage.isUserMessageFragment()) {
+                Storage currentStorage = storageProvider.getCurrentStorage();
                 saveOutgoingPayloadToDisk(partInfo, userMessage, legConfiguration, currentStorage, backendName);
             }
         }
@@ -247,6 +234,8 @@ public class MessagingServiceImpl implements MessagingService {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
     }
+
+
 
 
     protected void saveOutgoingPayloadToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage, String backendName) throws IOException, EbMS3Exception {
@@ -296,10 +285,6 @@ public class MessagingServiceImpl implements MessagingService {
         }
     }
 
-    protected boolean savePayloadsInDatabase(Storage currentStorage) {
-        return currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null;
-    }
-
     protected void setContentType(PartInfo partInfo) {
         String contentType = partInfo.getPayloadDatahandler().getContentType();
         if (StringUtils.isBlank(contentType)) {
@@ -312,16 +297,11 @@ public class MessagingServiceImpl implements MessagingService {
     protected byte[] getOutgoingBinaryData(PartInfo partInfo, InputStream is, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
         byte[] binaryData = IOUtils.toByteArray(is);
 
-        final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
-        if (!mayUseSplitAndJoin) {
-            boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
-            LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
+        boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
+        LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
 
-            if (useCompression) {
-                binaryData = compress(binaryData);
-            }
-        } else {
-            userMessage.setSplitAndJoin(true);
+        if (useCompression) {
+            binaryData = compress(binaryData);
         }
 
         return binaryData;

@@ -1,6 +1,9 @@
 package eu.domibus.configuration.storage;
 
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -27,6 +30,9 @@ public class StorageProviderImpl implements StorageProvider {
     @Autowired
     protected DomainService domainService;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     protected Map<Domain, Storage> instances = new HashMap<>();
 
     @PostConstruct
@@ -44,4 +50,20 @@ public class StorageProviderImpl implements StorageProvider {
         return instances.get(domain);
     }
 
+    @Override
+    public Storage getCurrentStorage() {
+        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+        Storage currentStorage = forDomain(currentDomain);
+        LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
+        if (currentStorage == null) {
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
+        }
+        return currentStorage;
+    }
+
+    @Override
+    public boolean savePayloadsInDatabase() {
+        final Storage currentStorage = getCurrentStorage();
+        return currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null;
+    }
 }
