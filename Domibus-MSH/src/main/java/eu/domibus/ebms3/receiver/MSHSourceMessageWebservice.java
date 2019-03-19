@@ -16,6 +16,7 @@ import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.core.message.fragment.MessageHeaderEntity;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.AttachmentCleanupService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -96,6 +97,9 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    protected AttachmentCleanupService attachmentCleanupService;
+
     @WebMethod
     @WebResult(name = "soapMessageResult")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -112,9 +116,10 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
         LOG.debug("Parsing the SourceMessage from file [{}]", sourceMessageFileName);
 
+        SOAPMessage userMessageRequest = null;
         Messaging messaging = null;
         try {
-            SOAPMessage userMessageRequest = splitAndJoinService.getUserMessage(new File(sourceMessageFileName), contentTypeString);
+            userMessageRequest = splitAndJoinService.getUserMessage(new File(sourceMessageFileName), contentTypeString);
             messaging = messageUtil.getMessaging(userMessageRequest);
         } catch (Exception e) {
             //TODO notify the backend that an error occured EDELIVERY-4089
@@ -123,6 +128,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         }
         final UserMessage userMessage = messaging.getUserMessage();
 
+        SOAPMessage finalUserMessageRequest = userMessageRequest;
         domainTaskExecutor.submitLongRunningTask(
                 () -> {
                     MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
@@ -180,6 +186,8 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
                     messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
 
                     splitAndJoinService.createMessageFragments(userMessage, messageGroupEntity, fragmentFiles);
+
+                    attachmentCleanupService.cleanAttachments(finalUserMessageRequest);
 
                     LOG.debug("Finished processing source message file");
                 },
