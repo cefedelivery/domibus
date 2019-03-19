@@ -122,7 +122,7 @@ public class MailSender {
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
             if (to.contains(";")) {
-                helper.setTo(to.split(";"));
+                helper.setBcc(to.split(";"));
             } else {
                 helper.setTo(to);
             }
