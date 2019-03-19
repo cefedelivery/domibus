@@ -47,25 +47,14 @@ export class SecurityService {
   }
 
   /**
-   * It simulates the login function for an external authentication provider
-   * Saves current user to local storage, etc
+   * get the user from the server and saves it locally
    */
-  login_extauthprovider(): Promise<boolean> {
-    console.log('login from auth external provider');
-    return new Promise((resolve, reject) => {
-      const res = this.getCurrentUserAndSaveLocally();
-      resolve(res);
-    });
-  }
-
   async getCurrentUserAndSaveLocally() {
     let userSet = false;
     try {
-      //get the user from server and write it in local storage
       const user = await this.getCurrentUserFromServer();
       if (user) {
         this.updateCurrentUser(user);
-        //this.domainService.setAppTitle();
         userSet = true;
       }
     } catch (ex) {
@@ -119,19 +108,9 @@ export class SecurityService {
     sessionStorage.setItem('currentUser', JSON.stringify(user));
   }
 
-  // private getCurrentUsernameFromServer(): Observable<string> {
-  //   const subject = new ReplaySubject();
-  //   this.http.get('rest/security/username')
-  //     .subscribe((res: Response) => {
-  //       subject.next(res.text());
-  //     }, (error: any) => {
-  //       subject.next(null);
-  //     });
-  //   return subject.asObservable();
-  // }
 
   getCurrentUsernameFromServer(): Promise<string> {
-    console.log('getCurrentUserFromServer');
+    console.log('getCurrentUsernameFromServer');
     return this.http.get('rest/security/username').map((resp: Response) => resp.json()).toPromise();
   }
 
@@ -139,27 +118,6 @@ export class SecurityService {
     console.log('getCurrentUserFromServer');
     return this.http.get('rest/security/user').map((res: Response) => res.json()).toPromise();
   }
-
-
-  // isAuthenticated(callServer: boolean = false): Observable<boolean> {
-  //   const subject = new ReplaySubject();
-  //   if (callServer) {
-  //     // we get the username from the server to trigger the redirection to the login screen in case the user is not authenticated
-  //     this.getCurrentUsernameFromServer()
-  //       .subscribe((user: string) => {
-  //         let userUndefined = (user == null || user == "");
-  //         subject.next(!userUndefined);
-  //       }, (error: any) => {
-  //         console.log('isAuthenticated error' + error);
-  //         subject.next(false);
-  //       });
-  //
-  //   } else {
-  //     const currentUser = this.getCurrentUser();
-  //     subject.next(currentUser !== null);
-  //   }
-  //   return subject.asObservable();
-  // }
 
   isAuthenticated(callServer: boolean = false): Promise<boolean> {
 
@@ -179,7 +137,6 @@ export class SecurityService {
           console.log('Error while calling getCurrentUsernameFromServer: ' + reason);
           reject(false);
         });
-
       } else {
         //get the user from session storage
         const currentUser = this.getCurrentUser();
@@ -219,27 +176,10 @@ export class SecurityService {
     return hasRole;
   }
 
-  // isAuthorized(roles: Array<string>): Observable<boolean> {
-  //   const subject = new ReplaySubject();
-  //
-  //   this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
-  //     console.log('isAuthorized -> isAuthenticated:' + isAuthenticated);
-  //     if (isAuthenticated && roles) {
-  //       const hasRole = this.isCurrentUserInRole(roles);
-  //       console.log('isAuthorized - hasRole:' + hasRole);
-  //       subject.next(hasRole);
-  //     } else {
-  //       console.log('isAuthorized - not');
-  //       subject.next(false);
-  //     }
-  //   });
-  //   return subject.asObservable();
-  // }
 
   isAuthorized(roles: Array<string>) {
 
     let isAuthorized = false;
-    //const isAuthenticated = await this.isAuthenticated(false);
     console.log('isAuthorized -> start: ');
     if (roles) {
       isAuthorized = this.isCurrentUserInRole(roles);

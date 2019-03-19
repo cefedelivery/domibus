@@ -36,12 +36,9 @@ export class AppComponent implements OnInit {
     /* ugly but necessary: intercept ECAS redirect */
     this.router.events.subscribe(event => {
       if (event instanceof RoutesRecognized) {
-        console.log('event is: ' + event);
         if (event.url.indexOf('?ticket=ST') !== -1) {
-          console.log('redirect from ECAS found');
           let route = event.state.root.firstChild;
           this.extAuthProvideRedirectTo = '/' + route.url;
-          console.log('this.extAuthProvideRedirectTo set to: ' + this.extAuthProvideRedirectTo);
         }
       }
     });
@@ -52,24 +49,16 @@ export class AppComponent implements OnInit {
     this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
     console.log('ngOnInit extAuthProviderEnabled: ' + this.extAuthProviderEnabled);
     if (this.extAuthProviderEnabled) {
-      const user = await this.securityService.getCurrentUserFromServer();
-      if (user) {
-        this.securityService.updateCurrentUser(user);
-      }
+      this.securityService.getCurrentUserAndSaveLocally();
 
       if (this.extAuthProvideRedirectTo) {
         console.log('going to redirect to: ' + this.extAuthProvideRedirectTo)
         const success = await this.router.navigate([this.extAuthProvideRedirectTo]);
         if (success) {
           console.log('redirect to: ' + this.extAuthProvideRedirectTo + ' done');
-        } else {
-          console.log('cant redirect');
         }
-      } else {
-        console.log('nema redirect');
       }
     }
-
 
     this.httpEventService.subscribe((error) => {
       if (error && (error.status === 403 || error.status === 401)) {

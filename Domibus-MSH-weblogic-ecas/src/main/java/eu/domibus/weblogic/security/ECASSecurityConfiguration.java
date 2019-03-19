@@ -68,14 +68,10 @@ public class ECASSecurityConfiguration extends AbstractWebSecurityConfigurerAdap
                 .csrf().csrfTokenRepository(tokenRepository).requireCsrfProtectionMatcher(csrfURLMatcher)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/", "/index.html",
+                .antMatchers("/", "/index.html", "/login",
                         "/rest/security/authentication",
-                        "/rest/application/info",
-                        "/rest/application/name",
-                        "/rest/application/fourcornerenabled",
-                        "/rest/application/extauthproviderenabled",
-                        "/rest/application/supportteam",
-                        "/rest/application/multitenancy").permitAll()
+                        "/rest/application/**",
+                        "rest/security/username").permitAll()
                 .antMatchers("/rest/application/domains").hasAnyAuthority(AuthRole.ROLE_AP_ADMIN.name())
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").authenticated()
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyAuthority(AuthRole.ROLE_AP_ADMIN.name())

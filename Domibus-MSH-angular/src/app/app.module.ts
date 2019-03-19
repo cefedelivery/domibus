@@ -27,7 +27,6 @@ import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
 import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
 import {AuthenticatedGuard} from "./common/guards/authenticated.guard";
-import {AuthorizedGuard} from "./common/guards/authorized.guard";
 import {routing} from "./app.routes";
 import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./common/http/extended-http-client";
@@ -40,7 +39,6 @@ import {AlertService} from "./common/alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./common/footer/footer.component";
 import {DomibusInfoService} from "./common/appinfo/domibusinfo.service";
-import {AuthorizedAdminGuard} from "./common/guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {UserComponent} from "./user/user.component";
@@ -207,8 +205,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
   ],
   providers: [
     AuthenticatedGuard,
-    AuthorizedGuard,
-    AuthorizedAdminGuard,
     DirtyGuard,
     DefaultPasswordGuard,
     AuthExternalProviderGuard,
