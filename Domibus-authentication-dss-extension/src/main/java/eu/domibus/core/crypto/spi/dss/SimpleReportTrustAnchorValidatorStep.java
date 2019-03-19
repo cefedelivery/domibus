@@ -23,6 +23,7 @@ import java.util.List;
 public class SimpleReportTrustAnchorValidatorStep implements SimpleReportValidationStep {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimpleReportTrustAnchorValidatorStep.class);
+
     /**
      * The method searches for a chain element with a trust anchor and a passed indication.
      *

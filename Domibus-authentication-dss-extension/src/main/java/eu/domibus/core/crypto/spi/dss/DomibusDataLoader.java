@@ -62,7 +62,7 @@ import java.util.*;
 /**
  * @author Thomas Dussart
  * @since 4.1
- *
+ * <p>
  * This class is a copy from DSS CommonsDataLoader.
  * Somme method are adapted because there was a library conflict with SSLContextBuilder.
  */
@@ -155,8 +155,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * The constructor for CommonsDataLoader with defined content-type.
      *
-     * @param contentType
-     *            The content type of each request
+     * @param contentType The content type of each request
      */
     public DomibusDataLoader(final String contentType) {
         this.contentType = contentType;
@@ -399,10 +398,8 @@ public class DomibusDataLoader implements DataLoader {
      * This method is useful only with the cache handling implementation of the
      * {@code DataLoader}.
      *
-     * @param url
-     *            to access
-     * @param refresh
-     *            if true indicates that the cached data should be refreshed
+     * @param url     to access
+     * @param refresh if true indicates that the cached data should be refreshed
      * @return {@code byte} array of obtained data
      */
     @Override
@@ -437,7 +434,7 @@ public class DomibusDataLoader implements DataLoader {
             }
 
             final DirContext ctx = new InitialDirContext(env);
-            final Attributes attributes = ctx.getAttributes(Utils.EMPTY_STRING, new String[] { attributeName });
+            final Attributes attributes = ctx.getAttributes(Utils.EMPTY_STRING, new String[]{attributeName});
             if ((attributes == null) || (attributes.size() < 1)) {
                 LOG.warn("Cannot download binaries from: {}, no attributes with name: {} returned", urlString, attributeName);
             } else {
@@ -484,8 +481,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * This method retrieves data using HTTP or HTTPS protocol and 'get' method.
      *
-     * @param url
-     *            to access
+     * @param url to access
      * @return {@code byte} array of obtained data or null
      */
     protected byte[] httpGet(final String url) {
@@ -625,8 +621,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * Used when the {@code HttpClient} is created.
      *
-     * @param timeoutConnection
-     *            the value (millis)
+     * @param timeoutConnection the value (millis)
      */
     public void setTimeoutConnection(final int timeoutConnection) {
         this.timeoutConnection = timeoutConnection;
@@ -644,8 +639,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * Used when the {@code HttpClient} is created.
      *
-     * @param timeoutSocket
-     *            the value (millis)
+     * @param timeoutSocket the value (millis)
      */
     public void setTimeoutSocket(final int timeoutSocket) {
         this.timeoutSocket = timeoutSocket;
@@ -663,8 +657,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * Used when the {@code HttpClient} is created.
      *
-     * @param connectionsMaxTotal
-     *            maximum number of connections
+     * @param connectionsMaxTotal maximum number of connections
      */
     public void setConnectionsMaxTotal(int connectionsMaxTotal) {
         this.connectionsMaxTotal = connectionsMaxTotal;
@@ -682,8 +675,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * Used when the {@code HttpClient} is created.
      *
-     * @param connectionsMaxPerRoute
-     *            maximum number of connections per one route
+     * @param connectionsMaxPerRoute maximum number of connections per one route
      */
     public void setConnectionsMaxPerRoute(int connectionsMaxPerRoute) {
         this.connectionsMaxPerRoute = connectionsMaxPerRoute;
@@ -701,8 +693,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * Used when the {@code HttpClient} is created.
      *
-     * @param redirectsEnabled
-     *            true if http redirects are allowed
+     * @param redirectsEnabled true if http redirects are allowed
      */
     public void setRedirectsEnabled(boolean redirectsEnabled) {
         this.redirectsEnabled = redirectsEnabled;
@@ -733,8 +724,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * This allows to set a list of accepted http status. Example: 200 (OK)
      *
-     * @param acceptedHttpStatus
-     *            a list of integer which correspond to the http status code
+     * @param acceptedHttpStatus a list of integer which correspond to the http status code
      */
     public void setAcceptedHttpStatus(List<Integer> acceptedHttpStatus) {
         this.acceptedHttpStatus = acceptedHttpStatus;
@@ -748,8 +738,7 @@ public class DomibusDataLoader implements DataLoader {
     }
 
     /**
-     * @param proxyConfig
-     *            the proxyConfig to set
+     * @param proxyConfig the proxyConfig to set
      */
     public void setProxyConfig(final ProxyConfig proxyConfig) {
         this.proxyConfig = proxyConfig;
@@ -758,8 +747,7 @@ public class DomibusDataLoader implements DataLoader {
     /**
      * This method sets the SSL protocol to be used ('TLSv1.2' by default)
      *
-     * @param sslProtocol
-     *                    the ssl protocol to be used
+     * @param sslProtocol the ssl protocol to be used
      */
     public void setSslProtocol(String sslProtocol) {
         this.sslProtocol = sslProtocol;
@@ -794,16 +782,11 @@ public class DomibusDataLoader implements DataLoader {
     }
 
     /**
-     * @param host
-     *            host
-     * @param port
-     *            port
-     * @param scheme
-     *            scheme
-     * @param login
-     *            login
-     * @param password
-     *            password
+     * @param host     host
+     * @param port     port
+     * @param scheme   scheme
+     * @param login    login
+     * @param password password
      * @return this for fluent addAuthentication
      */
     public DomibusDataLoader addAuthentication(final String host, final int port, final String scheme, final String login, final String password) {
@@ -819,9 +802,8 @@ public class DomibusDataLoader implements DataLoader {
      * This method allows to propagate the authentication information from the
      * current object.
      *
-     * @param commonsDataLoader
-     *            {@code CommonsDataLoader} to be initialized with
-     *            authentication information
+     * @param commonsDataLoader {@code CommonsDataLoader} to be initialized with
+     *                          authentication information
      */
     public void propagateAuthentication(final CommonsDataLoader commonsDataLoader) {
 
