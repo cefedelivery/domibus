@@ -3,12 +3,12 @@ import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from '
 import {SecurityService} from '../../security/security.service';
 
 /**
- * It will handle for each routed where is defined:
+ * It will handle for each route where is defined:
  * - authentication
- * - authorization - if the route has data: checkRoles initialized
+ * - authorization - only if the route has data: checkRoles initialized
  */
 @Injectable()
-export class AuthenticatedGuard implements CanActivate {
+export class AuthenticatedAuthorizedGuard implements CanActivate {
 
   constructor (private router: Router, private securityService: SecurityService) {
   }
@@ -16,7 +16,7 @@ export class AuthenticatedGuard implements CanActivate {
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     let canActivate = false;
     const isAuthenticated = await this.securityService.isAuthenticated(true);
-    console.log('AuthenticatedGuard isAuthenticated=' + isAuthenticated);
+    console.log('AuthenticatedAuthorizedGuard isAuthenticated=' + isAuthenticated);
 
     if (isAuthenticated) {
       canActivate = true;

@@ -1,6 +1,6 @@
 import {RouterModule, Routes} from '@angular/router';
 import {LoginComponent} from './security/login/login.component';
-import {AuthenticatedGuard} from './common/guards/authenticated.guard';
+import {AuthenticatedAuthorizedGuard} from './common/guards/authenticated-authorized.guard';
 import {ErrorLogComponent} from './errorlog/errorlog.component';
 import {CurrentPModeComponent} from './pmode/current/currentPMode.component';
 import {PModeArchiveComponent} from './pmode/archive/pmodeArchive.component';
@@ -29,7 +29,7 @@ const appRoutes: Routes = [
   {
     path: '',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.USER_ROLES
     }
@@ -37,7 +37,7 @@ const appRoutes: Routes = [
   {
     path: 'pmode-current',
     component: CurrentPModeComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
@@ -46,7 +46,7 @@ const appRoutes: Routes = [
   {
     path: 'pmode-archive',
     component: PModeArchiveComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
@@ -55,7 +55,7 @@ const appRoutes: Routes = [
   {
     path: 'pmode-party',
     component: PartyComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.USER_ROLES
@@ -64,7 +64,7 @@ const appRoutes: Routes = [
   {
     path: 'jms',
     component: JmsComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
@@ -73,7 +73,7 @@ const appRoutes: Routes = [
   {
     path: 'messagefilter',
     component: MessageFilterComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
@@ -82,7 +82,7 @@ const appRoutes: Routes = [
   {
     path: 'truststore',
     component: TruststoreComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
     }
@@ -90,7 +90,7 @@ const appRoutes: Routes = [
   {
     path: 'messagelog',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.USER_ROLES
     }
@@ -98,7 +98,7 @@ const appRoutes: Routes = [
   {
     path: 'user',
     component: UserComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard, AuthExternalProviderGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard, AuthExternalProviderGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
@@ -107,7 +107,7 @@ const appRoutes: Routes = [
   {
     path: 'pluginuser',
     component: PluginUserComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
@@ -116,7 +116,7 @@ const appRoutes: Routes = [
   {
     path: 'errorlog',
     component: ErrorLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.USER_ROLES
     }
@@ -129,7 +129,7 @@ const appRoutes: Routes = [
   {
     path: 'audit',
     component: AuditComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
     }
@@ -137,7 +137,7 @@ const appRoutes: Routes = [
   {
     path: 'alerts',
     component: AlertsComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
     }
@@ -145,7 +145,7 @@ const appRoutes: Routes = [
   {
     path: 'testservice',
     component: TestServiceComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       checkRoles: SecurityService.ADMIN_ROLES
     }
@@ -153,12 +153,12 @@ const appRoutes: Routes = [
   {
     path: 'changePassword',
     component: ChangePasswordComponent,
-    canActivate: [AuthenticatedGuard, AuthExternalProviderGuard]
+    canActivate: [AuthenticatedAuthorizedGuard, AuthExternalProviderGuard]
   },
   {
     path: 'logging',
     component: LoggingComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard],
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard],
     data: {
       isDomainIndependent: true,
       checkRoles: SecurityService.ADMIN_ROLES
@@ -171,12 +171,12 @@ const appRoutes: Routes = [
   {
     path: 'notAuthorized',
     component: NotAuthorizedComponent,
-    canActivate: [AuthenticatedGuard]
+    canActivate: [AuthenticatedAuthorizedGuard]
   },
   {
     path: '**',
     component: MessageLogComponent,
-    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
+    canActivate: [AuthenticatedAuthorizedGuard, DefaultPasswordGuard]
   },
 
 ];

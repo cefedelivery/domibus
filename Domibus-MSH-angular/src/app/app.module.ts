@@ -26,7 +26,7 @@ import {LoginComponent} from "./security/login/login.component";
 import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
 import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
-import {AuthenticatedGuard} from "./common/guards/authenticated.guard";
+import {AuthenticatedAuthorizedGuard} from "./common/guards/authenticated-authorized.guard";
 import {routing} from "./app.routes";
 import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./common/http/extended-http-client";
@@ -204,7 +204,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MdTooltipModule
   ],
   providers: [
-    AuthenticatedGuard,
+    AuthenticatedAuthorizedGuard,
     DirtyGuard,
     DefaultPasswordGuard,
     AuthExternalProviderGuard,
