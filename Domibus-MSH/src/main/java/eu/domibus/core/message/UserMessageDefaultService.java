@@ -247,10 +247,12 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
-    public void scheduleSourceMessageRejoin(String groupId, String backendName) {
+    public void scheduleSourceMessageRejoinFile(String groupId, String backendName) {
+        LOG.debug("Scheduling the SourceMessage file rejoining for group [{}]", groupId);
+
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()
-                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN_FILE)
                 .property(UserMessageService.MSG_GROUP_ID, groupId)
                 .property(UserMessageService.MSG_BACKEND_NAME, backendName)
                 .build();
@@ -258,10 +260,26 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
-    public void scheduleSourceMessageReceipt(String messageId, String pmodeKey) {
+    public void scheduleSourceMessageRejoin(String groupId, String file, String backendName) {
+        LOG.debug("Scheduling the SourceMessage rejoining for group [{}] from file [{}]", groupId, file);
+
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()
-                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN)
+                .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .property(UserMessageService.MSG_SOURCE_MESSAGE_FILE, file)
+                .property(UserMessageService.MSG_BACKEND_NAME, backendName)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
+    public void scheduleSourceMessageReceipt(String messageId, String pmodeKey) {
+        LOG.debug("Scheduling the SourceMessage receipt for message [{}]", messageId);
+
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SOURCE_MESSAGE_RECEIPT)
                 .property(UserMessageService.MSG_SOURCE_MESSAGE_ID, messageId)
                 .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
                 .build();

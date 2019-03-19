@@ -11,8 +11,11 @@ import java.util.List;
  */
 public interface UserMessageService {
 
-    String MSG_SOURCE_MESSAGE_REJOIN = "SourceMessageRejoin";
-    String MSG_SOURCE_MESSAGE_RECEIPT = "SourceMessageReceipt";
+    String COMMAND_SOURCE_MESSAGE_REJOIN = "SourceMessageRejoin";
+    String COMMAND_SOURCE_MESSAGE_RECEIPT = "SourceMessageReceipt";
+    String COMMAND_SOURCE_MESSAGE_REJOIN_FILE = "SourceMessageRejoinFile";
+
+    String MSG_SOURCE_MESSAGE_FILE = "SourceMessageFile";
     String MSG_TYPE = "messageType";
     String MSG_GROUP_ID = "groupId";
     String MSG_BACKEND_NAME = "backendName";
@@ -42,7 +45,9 @@ public interface UserMessageService {
 
     void scheduleSourceMessageSending(String messageId);
 
-    void scheduleSourceMessageRejoin(String groupId, String backendName);
+    void scheduleSourceMessageRejoinFile(String groupId, String backendName);
+
+    void scheduleSourceMessageRejoin(String groupId, String file, String backendName);
 
     void scheduleSourceMessageReceipt(String messageId, String pmodeKey);
 

@@ -12,6 +12,7 @@ import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.sender.SplitAndJoinException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -116,7 +117,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public SOAPMessage rejoinSourceMessage(String groupId) {
+    public File rejoinMessageFragments(String groupId) {
         LOG.debug("Rejoining the SourceMessage for group [{}]", groupId);
 
         final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
@@ -138,19 +139,40 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         final File sourceMessageFile = mergeSourceFile(fragmentFilesInOrder, messageGroupEntity);
         LOG.debug("Rejoined the SourceMessage for group [{}] into file [{}] of length [{}]", groupId, sourceMessageFile, sourceMessageFile.length());
 
-        LOG.debug("Creating the SOAPMessage from file [{}]", sourceMessageFile);
-        try (InputStream rawInputStream = new FileInputStream(sourceMessageFile)) {
+        return sourceMessageFile;
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public SOAPMessage rejoinSourceMessage(String groupId, File sourceMessageFile) {
+        LOG.debug("Creating the SOAPMessage for group [{}] from file [{}] ", groupId, sourceMessageFile);
+
+        final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
+        final String contentType = createContentType(messageGroupEntity.getMessageHeaderEntity().getBoundary(), messageGroupEntity.getMessageHeaderEntity().getStart());
+
+        return getUserMessage(sourceMessageFile, contentType);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public SOAPMessage getUserMessage(File sourceMessageFileName, String contentTypeString) {
+        LOG.debug("Parsing the SOAPMessage from file [{}]", sourceMessageFileName);
+
+        try (InputStream rawInputStream = new FileInputStream(sourceMessageFileName)) {
             MessageImpl messageImpl = new MessageImpl();
             messageImpl.setContent(InputStream.class, rawInputStream);
-            messageImpl.put(Message.CONTENT_TYPE, createContentType(messageGroupEntity.getMessageHeaderEntity().getBoundary(), messageGroupEntity.getMessageHeaderEntity().getStart()));
+            messageImpl.put(Message.CONTENT_TYPE, contentTypeString);
+
+            LOG.debug("Start initializeAttachments");
             new AttachmentDeserializer(messageImpl).initializeAttachments();
+            LOG.debug("End initializeAttachments");
+
+            LOG.debug("Start createUserMessage");
             final SOAPMessage soapMessage = soapUtil.createUserMessage(messageImpl);
-            LOG.debug("Created the SOAPMessage from file [{}]", sourceMessageFile);
+            LOG.debug("End createUserMessage");
+
             return soapMessage;
         } catch (Exception e) {
-            //TODO return a signal error to C2 and notify the backend
-            LOG.error("Error parsing the source file [{}]", sourceMessageFile);
-            return null;
+            throw new SplitAndJoinException(e);
         }
     }
 

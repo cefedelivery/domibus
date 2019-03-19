@@ -38,6 +38,7 @@ import javax.jms.MessageListener;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
+import java.io.File;
 
 /**
  * @author Cosmin Baciu
@@ -112,15 +113,26 @@ public class SplitAndJoinListener implements MessageListener {
             String messageType = message.getStringProperty(UserMessageService.MSG_TYPE);
             LOG.debug("Processing splitAndJoin message [{}]", messageType);
 
-            if (StringUtils.equals(messageType, UserMessageService.MSG_SOURCE_MESSAGE_REJOIN)) {
+            if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN_FILE)) {
                 final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
                 final String backendName = message.getStringProperty(UserMessageService.MSG_BACKEND_NAME);
                 final Domain currentDomain = domainContextProvider.getCurrentDomain();
                 domainTaskExecutor.submitLongRunningTask(
                         () -> {
-                            LOG.debug("Saving the incoming SourceMessage payloads");
+                            final File sourceMessageFile = splitAndJoinService.rejoinMessageFragments(groupId);
+                            userMessageService.scheduleSourceMessageRejoin(groupId, sourceMessageFile.getAbsolutePath(), backendName);
+                        },
+                        currentDomain);
+            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN)) {
+                final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
+                final String sourceMessageFile = message.getStringProperty(UserMessageService.MSG_SOURCE_MESSAGE_FILE);
+                final String backendName = message.getStringProperty(UserMessageService.MSG_BACKEND_NAME);
+                final Domain currentDomain = domainContextProvider.getCurrentDomain();
+                domainTaskExecutor.submitLongRunningTask(
+                        () -> {
+                            LOG.debug("Rejoining SourceMessage for group [{}]", groupId);
 
-                            final SOAPMessage sourceRequest = splitAndJoinService.rejoinSourceMessage(groupId);
+                            final SOAPMessage sourceRequest = splitAndJoinService.rejoinSourceMessage(groupId, new File(sourceMessageFile));
                             Messaging sourceMessaging = messageUtil.getMessage(sourceRequest);
 
                             MessageExchangeConfiguration userMessageExchangeContext = null;
@@ -150,7 +162,7 @@ public class SplitAndJoinListener implements MessageListener {
                             userMessageService.scheduleSourceMessageReceipt(sourceMessaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
                         },
                         currentDomain);
-            } else if (StringUtils.equals(messageType, UserMessageService.MSG_SOURCE_MESSAGE_RECEIPT)) {
+            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_RECEIPT)) {
                 final String sourceMessageId = message.getStringProperty(UserMessageService.MSG_SOURCE_MESSAGE_ID);
                 final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
                 final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);

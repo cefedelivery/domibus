@@ -225,7 +225,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                     if (groupEntity.getReceivedFragments().equals(groupEntity.getFragmentCount())) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
 
-                        userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId(), backendName);
+                        userMessageService.scheduleSourceMessageRejoinFile(groupEntity.getGroupId(), backendName);
                     }
                 }
             }

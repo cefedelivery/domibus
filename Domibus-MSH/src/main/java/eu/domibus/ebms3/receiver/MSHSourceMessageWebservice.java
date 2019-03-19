@@ -9,7 +9,6 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.MessageGroupDao;
@@ -27,10 +26,8 @@ import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.cxf.attachment.AttachmentDeserializer;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
-import org.apache.cxf.message.MessageImpl;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -47,7 +44,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 
@@ -115,7 +111,17 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         final String sourceMessageFileName = LOG.getMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE);
 
         LOG.debug("Parsing the SourceMessage from file [{}]", sourceMessageFileName);
-        UserMessage userMessage = getUserMessage(sourceMessageFileName, contentTypeString);
+
+        Messaging messaging = null;
+        try {
+            SOAPMessage userMessageRequest = splitAndJoinService.getUserMessage(new File(sourceMessageFileName), contentTypeString);
+            messaging = messageUtil.getMessaging(userMessageRequest);
+        } catch (Exception e) {
+            //TODO notify the backend that an error occured EDELIVERY-4089
+            LOG.error("Error getting the Messaging object from the SOAPMessage", e);
+            throw new WebServiceException(e);
+        }
+        final UserMessage userMessage = messaging.getUserMessage();
 
         domainTaskExecutor.submitLongRunningTask(
                 () -> {
@@ -127,7 +133,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
                         final File compressSourceMessage = compressSourceMessage(sourceMessageFileName);
                         LOG.debug("Deleting file [{}]", sourceMessageFile);
                         final boolean sourceDeleteSuccessful = sourceMessageFile.delete();
-                        if(!sourceDeleteSuccessful) {
+                        if (!sourceDeleteSuccessful) {
                             LOG.warn("Could not delete uncompressed source file [{}]", sourceMessageFile);
                         }
 
@@ -161,7 +167,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
                     messageGroupEntity.setFragmentCount(Long.valueOf(fragmentFiles.size()));
                     LOG.debug("Deleting source file [{}]", sourceMessageFile);
                     final boolean deleteSuccessful = sourceMessageFile.delete();
-                    if(!deleteSuccessful) {
+                    if (!deleteSuccessful) {
                         LOG.warn("Could not delete source file [{}]", sourceMessageFile);
                     }
                     LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
@@ -208,31 +214,6 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         return new File(compressedFileName);
     }
 
-    protected UserMessage getUserMessage(String sourceMessageFileName, String contentTypeString) {
-        LOG.debug("Parsing UserMessage");
-        try (InputStream rawInputStream = new FileInputStream(sourceMessageFileName)) {
-            MessageImpl messageImpl = new MessageImpl();
-            messageImpl.setContent(InputStream.class, rawInputStream);
-            messageImpl.put(Message.CONTENT_TYPE, contentTypeString);
-
-            LOG.debug("Start initializeAttachments");
-            new AttachmentDeserializer(messageImpl).initializeAttachments();
-            LOG.debug("End initializeAttachments");
-
-            LOG.debug("Start createUserMessage");
-            final SOAPMessage soapMessage = soapUtil.createUserMessage(messageImpl);
-            LOG.debug("End createUserMessage");
-
-            Messaging messaging = messageUtil.getMessaging(soapMessage);
-            LOG.debug("Finished parsing UserMessage");
-            return messaging.getUserMessage();
-
-        } catch (Exception e) {
-            //TODO notify the backend that an error occured EDELIVERY-4089
-            LOG.error("Error parsing the source file [{}]", sourceMessageFileName, e);
-            throw new WebServiceException(e);
-        }
-    }
 
     protected List<String> splitSourceMessage(File sourceMessageFile, int fragmentSizeInMB) throws IOException {
         LOG.debug("Source file [{}] will be split into fragments", sourceMessageFile);
