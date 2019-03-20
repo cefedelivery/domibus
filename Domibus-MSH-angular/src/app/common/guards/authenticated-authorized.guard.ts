@@ -16,17 +16,14 @@ export class AuthenticatedAuthorizedGuard implements CanActivate {
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     let canActivate = false;
     const isAuthenticated = await this.securityService.isAuthenticated(true);
-    console.log('AuthenticatedAuthorizedGuard isAuthenticated=' + isAuthenticated);
 
     if (isAuthenticated) {
       canActivate = true;
       const isUserFromExternalAuthProvider = this.securityService.isUserFromExternalAuthProvider();
-      console.log('isUserFromExternalAuthProvider=' + isUserFromExternalAuthProvider);
 
       //check also authorization
       const allowedRoles = route.data.checkRoles;
       if (!!allowedRoles) { //only if there are roles to check
-        console.log('going to check authorization for: ' + allowedRoles);
         const isAuthorized = this.securityService.isAuthorized(allowedRoles);
         if (!isAuthorized) {
           canActivate = false;
@@ -35,7 +32,6 @@ export class AuthenticatedAuthorizedGuard implements CanActivate {
       }
     } else {
       // not logged in so redirect to login page with the return url
-
       // todo: the call to clear is not cohesive, should refactor
       this.securityService.clearSession();
       // todo: the redirect is duplicated, should refactor

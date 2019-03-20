@@ -50,6 +50,7 @@ export class AppComponent implements OnInit {
       const user = await this.securityService.getCurrentUserFromServer();
       if (user) {
         this.securityService.updateCurrentUser(user);
+        this.domainService.setAppTitle();
       }
       if (this.extAuthProvideRedirectTo) {
         const success = await this.router.navigate([this.extAuthProvideRedirectTo]);
