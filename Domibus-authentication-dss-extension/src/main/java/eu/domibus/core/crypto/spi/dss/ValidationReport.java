@@ -13,6 +13,14 @@ import java.util.stream.Collectors;
 /**
  * @author Thomas Dussart
  * @since 4.1
+ * <p>
+ * When DSS validates, it does under the form of report (etsi validation) and it is up to the user
+ * to decide the level of validation needed.
+ * <p>
+ * This class extracts all the constraints from the report and perform a validation by comparing the result of the
+ * report with the constraints configured in the property file.
+ * <p>
+ * The default configuration only checks the trust anchor and the validity dates.
  */
 @Component
 public class ValidationReport {
@@ -66,13 +74,12 @@ public class ValidationReport {
             final long count = allConstraints.stream().
                     filter(xmlConstraint -> constraintInternal.getName().equals(xmlConstraint.getName().getNameId())).count();
             if (count == 0) {
+                LOG.warn("Configured constraint:[{}] was not found in the report, therefore the validation is impossible", constraintInternal.getName());
                 return false;
             }
             final boolean statusOk = allConstraints.stream().
                     filter(xmlConstraint ->
-                            xmlConstraint.getName().getNameId().equals(constraintInternal.getName()) &&
-                                    xmlConstraint.getStatus().name().equals(constraintInternal.getStatus())
-                    ).
+                            xmlConstraint.getName().getNameId().equals(constraintInternal.getName())).
                     allMatch(xmlConstraint -> {
                         LOG.debug("Checking status match for constraint:[{}] and status:[{}]", xmlConstraint.getName().getNameId(), xmlConstraint.getStatus().name());
                         return xmlConstraint.getStatus().name().equals(constraintInternal.getStatus());
