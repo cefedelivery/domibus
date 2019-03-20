@@ -297,7 +297,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
-                    backendName, to.getEndpoint(), userMessage.getCollaborationInfo().getService().getValue(), userMessage.getCollaborationInfo().getAction());
+                    backendName, to.getEndpoint(), userMessage.getCollaborationInfo().getService().getValue(), userMessage.getCollaborationInfo().getAction(), null, true);
             if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
@@ -409,7 +409,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             final boolean sourceMessage = userMessage.isSourceMessage();
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
-                    backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
+                    backendName, to.getEndpoint(), messageData.getService(), messageData.getAction(), sourceMessage, null);
 
             if (!sourceMessage) {
                 if (MessageStatus.READY_TO_PULL != messageStatus) {

@@ -16,6 +16,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.*;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
@@ -24,7 +25,6 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
 import eu.domibus.ebms3.common.model.mf.MessageHeaderType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -129,7 +129,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
     protected SplitAndJoinService splitAndJoinService;
 
     @Autowired
-    protected IncomingSourceMessageHandler incomingSourceMessageHandler;
+    protected StorageProvider storageProvider;
 
     @Override
     public SOAPMessage handleNewUserMessage(final LegConfiguration legConfiguration, String pmodeKey, final SOAPMessage request, final Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, SOAPException {
@@ -215,6 +215,13 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
                 if (messageFragmentType != null) {
                     LOG.debug("Received UserMessage fragment");
+
+                    if (storageProvider.savePayloadsInDatabase()) {
+                        LOG.error("SplitAndJoin feature needs payload storage on the file system");
+                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", messageId, null);
+                        ex.setMshRole(MSHRole.RECEIVING);
+                        throw ex;
+                    }
 
                     final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
                     groupEntity.incrementReceivedFragments();
@@ -338,6 +345,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
     protected String persistReceivedSourceMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received SourceMessage");
         UserMessage userMessage = messaging.getUserMessage();
+        userMessage.setSplitAndJoin(true);
 
         return saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName, userMessage);
     }
@@ -378,7 +386,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                 backendName,
                 to.getEndpoint(),
                 userMessage.getCollaborationInfo().getService().getValue(),
-                userMessage.getCollaborationInfo().getAction());
+                userMessage.getCollaborationInfo().getAction(), userMessage.isSourceMessage(), userMessage.isUserMessageFragment());
 
         uiReplicationSignalService.userMessageReceived(userMessage.getMessageInfo().getMessageId());
 

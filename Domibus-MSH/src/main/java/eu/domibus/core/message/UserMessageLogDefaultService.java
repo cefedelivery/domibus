@@ -61,10 +61,13 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     }
 
     @Override
-    public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String service, String action) {
+    public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String action, String service, Boolean sourceMessage, Boolean messageFragment) {
         final MessageStatus status = MessageStatus.valueOf(messageStatus);
         // Builds the user message log
         final UserMessageLogEntity userMessageLog = createUserMessageLog(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint);
+        userMessageLog.setSourceMessage(sourceMessage);
+        userMessageLog.setMessageFragment(messageFragment);
+
         // Sets the subtype
         MessageSubtype messageSubtype = null;
         if (checkTestMessage(service, action)) {
@@ -77,6 +80,11 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
         //we set the status after we send the status change event; otherwise the old status and the new status would be the same
         userMessageLog.setMessageStatus(status);
         userMessageLogDao.create(userMessageLog);
+    }
+
+    @Override
+    public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String service, String action) {
+        save(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint, service, action, null, null);
     }
 
     protected void updateMessageStatus(final String messageId, final MessageStatus newStatus) {
