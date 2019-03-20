@@ -60,5 +60,7 @@ public interface UserMessageHandlerService {
 
     Boolean checkTestMessage(final LegConfiguration legConfiguration);
 
+    Boolean checkSelfSending(String pmodeKey);
+
     ErrorResult createErrorResult(EbMS3Exception ebm3Exception);
 }

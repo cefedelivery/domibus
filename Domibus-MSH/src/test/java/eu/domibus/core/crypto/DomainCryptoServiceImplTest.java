@@ -2,8 +2,8 @@ package eu.domibus.core.crypto;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.crypto.spi.DomainSpi;
 import eu.domibus.core.crypto.spi.DomainCryptoServiceSpi;
+import eu.domibus.core.crypto.spi.DomainSpi;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,3 +76,4 @@ public class DomainCryptoServiceImplTest {
         domainCryptoService.init();
     }
 }
+

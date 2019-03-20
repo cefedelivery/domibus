@@ -152,6 +152,37 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>ubuntu</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.22.1</version>
+						<configuration>
+							<failIfNoTests>true</failIfNoTests>
+							<groups>multiTenancy,independent</groups>
+							<systemPropertyVariables>
+								<webdriver.ie.driver>.\src\main\resources\IEDriverServer.exe</webdriver.ie.driver>
+								<webdriver.chrome.driver>chromedriver.exe</webdriver.chrome.driver>
+								<webdriver.ghecko.driver>.\src\main\resources\gheckodriver.exe</webdriver.ghecko.driver>
+								<reports.folder>./target/</reports.folder>
+								<data.folder>./src/main/resources/</data.folder>
+								<test_data.file>multiTenenacytestData.json</test_data.file>
+								<isMultiDomain>true</isMultiDomain>
+								<LONG_TIMEOUT>20</LONG_TIMEOUT>
+								<SHORT_TIMEOUT>10</SHORT_TIMEOUT>
+								<UI_BASE_URL>http://localhost:8080/domibus/</UI_BASE_URL>
+
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 </project>

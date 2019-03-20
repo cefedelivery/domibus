@@ -71,6 +71,7 @@ public class ToStringAdapter extends XmlAdapter<Node, List<String>> {
     }
 
     protected Node stringToNode(final String content) {
+        documentBuilderFactory.setNamespaceAware(true);
         try {
             final Document doc = this.documentBuilderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(content)));
 

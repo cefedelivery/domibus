@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {SecurityService} from './security/security.service';
-import {Router, RouterOutlet} from '@angular/router';
+import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
 import {Http} from '@angular/http';
 import {DomainService} from './security/domain.service';
@@ -33,11 +33,7 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit () {
-
     this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
-    if (this.extAuthProviderEnabled) {
-      this.securityService.login_extauthprovider();
-    }
 
     this.httpEventService.subscribe((error) => {
       if (error && (error.status === 403 || error.status === 401)) {
@@ -50,6 +46,19 @@ export class AppComponent implements OnInit {
       data => {
         this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']);
       });
+
+    /* ugly but necessary: intercept ECAS redirect
+     */
+    this.router.events.subscribe(async event => {
+      if (event instanceof NavigationEnd) {
+         if (event.url.indexOf('?ticket=ST') !== -1) {
+          if (this.extAuthProviderEnabled) {
+            await this.securityService.login_extauthprovider();
+            this.router.navigate(['/']);
+          }
+        }
+      }
+    });
   }
 
   isAdmin (): boolean {
@@ -57,7 +66,7 @@ export class AppComponent implements OnInit {
   }
 
   isUser (): boolean {
-    return !!this.currentUser;
+    return this.securityService.hasCurrentUserPrivilegeUser();
   }
 
   isExtAuthProviderEnabled (): boolean {
