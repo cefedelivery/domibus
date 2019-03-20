@@ -159,6 +159,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         try (InputStream rawInputStream = new FileInputStream(sourceMessageFileName)) {
             MessageImpl messageImpl = new MessageImpl();
+            final String temporaryDirectoryLocation = domibusPropertyProvider.getProperty(Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION);
+            LOG.debug("Using temporaryDirectoryLocation for attachments [{}]", temporaryDirectoryLocation);
+            messageImpl.put(AttachmentDeserializer.ATTACHMENT_DIRECTORY, temporaryDirectoryLocation);
             messageImpl.setContent(InputStream.class, rawInputStream);
             messageImpl.put(Message.CONTENT_TYPE, contentTypeString);
 
