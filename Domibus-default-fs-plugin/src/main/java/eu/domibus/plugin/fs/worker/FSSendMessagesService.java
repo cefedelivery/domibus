@@ -25,8 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -209,17 +212,29 @@ public class FSSendMessagesService {
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
         List<FileObject> filteredFiles = new LinkedList<>();
-        
+
+        // locked file names
+        List<String> lockedFileNames = Arrays.stream(files)
+                .map(f -> f.getName().getBaseName())
+                .filter(fname -> FSFileNameHelper.isLockFile(fname))
+                .map(fname -> FSFileNameHelper.stripLockSuffix(fname))
+                .collect(Collectors.toList());
+
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
             
             if (!StringUtils.equals(baseName, METADATA_FILE_NAME)
                     && !FSFileNameHelper.isAnyState(baseName)
-                    && !FSFileNameHelper.isProcessed(baseName)) {
+                    && !FSFileNameHelper.isProcessed(baseName)
+                    // exclude lock files:
+                    && !FSFileNameHelper.isLockFile(baseName)
+                    // exclude locked files:
+                    && !lockedFileNames.stream().anyMatch(fname -> fname.equals(baseName))) {
+
                 filteredFiles.add(file);
             }
         }
-        
+
         return filteredFiles;
     }
 

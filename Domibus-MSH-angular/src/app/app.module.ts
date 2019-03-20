@@ -93,6 +93,7 @@ import {FilterableListComponent} from './common/filterable-list.component';
 import {AuthExternalProviderGuard} from "./common/guards/auth-external-provider.guard";
 import {LogoutAuthExtProviderComponent} from "./security/logout/logout.components";
 import {RedirectHomeGuard} from "./common/guards/redirect-home.guard";
+import {NotAuthorizedComponent} from "./security/not-authorized/not-authorized.components";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -151,7 +152,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     LoggingComponent,
     ChangePasswordComponent,
     FilterableListComponent,
-    LogoutAuthExtProviderComponent
+    LogoutAuthExtProviderComponent,
+    NotAuthorizedComponent
   ],
   entryComponents: [
     AppComponent,
