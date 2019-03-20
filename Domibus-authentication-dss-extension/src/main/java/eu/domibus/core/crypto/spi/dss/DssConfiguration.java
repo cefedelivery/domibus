@@ -106,7 +106,7 @@ public class DssConfiguration {
     @Value("domibus.enable.dss.custom.trusted.list.for.multitenant")
     private String enableDssCustomTrustedListForMultiTenant;
 
-    @Value("domibus.enable.dss.custom.trusted.list.for.multitenant")
+    @Value("domibus.dss.exception.on.missing.revocation.data")
     private String enableExceptionOnMissingRevocationData;
 
     @Value("domibus.dss.check.revocation.for.untrusted.chains")
