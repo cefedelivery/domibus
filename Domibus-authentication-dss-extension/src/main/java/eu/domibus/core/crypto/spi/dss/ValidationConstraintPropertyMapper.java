@@ -4,8 +4,6 @@ import eu.domibus.ext.services.DomainContextExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.europa.esig.dss.validation.process.MessageTag;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
@@ -14,14 +12,22 @@ import java.util.Map;
 /**
  * @author Thomas Dussart
  * @since 4.1
+ *
+ * Load multiple ConstraintInternal objects based on properties with the following format:
+ * @see ConstraintInternal
+ *
+ * domibus.dss.default.constraint.name[0]=
+ * domibus.dss.default.constraint.status[0]=
+ *
+ * domibus.dss.default.constraint.name[1]=
+ * domibus.dss.default.constraint.status[1]=
  */
 public class ValidationConstraintPropertyMapper extends PropertyGroupMapper<ConstraintInternal> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ValidationConstraintPropertyMapper.class);
 
-    static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_NAME = "domibus.dss.default.constraint.name";
+    private static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_NAME = "domibus.dss.default.constraint.name";
 
-    static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_STATUS = "domibus.dss.default.constraint.status";
+    private static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_STATUS = "domibus.dss.default.constraint.status";
 
 
     public ValidationConstraintPropertyMapper(final DomibusPropertyExtService domibusPropertyExtService,
