@@ -123,15 +123,12 @@ export class SecurityService {
 
     return new Promise((resolve, reject) => {
       let isAuthenticated = false;
-      console.log('securityService isAuthenticated - start, callServer=' + callServer);
       if (callServer) {
         // we get the username from the server to trigger the redirection
         // to the login screen in case the user is not authenticated
         this.getCurrentUsernameFromServer().then(username => {
-          console.log('securityService isAuthenticated getCurrentUsernameFromServer: username=' + username);
           let userUndefined = (username == null || username == "");
           isAuthenticated = !userUndefined;
-          console.log('securityService isAuthenticated then: ' + isAuthenticated);
           resolve(isAuthenticated);
         }).catch(reason => {
           console.log('Error while calling getCurrentUsernameFromServer: ' + reason);
@@ -178,14 +175,10 @@ export class SecurityService {
 
 
   isAuthorized(roles: Array<string>) {
-
     let isAuthorized = false;
-    console.log('isAuthorized -> start: ');
     if (roles) {
       isAuthorized = this.isCurrentUserInRole(roles);
     }
-    console.log('securityService isAuthorized:' + isAuthorized);
-
     return isAuthorized;
   }
 
