@@ -1,6 +1,6 @@
 package eu.domibus.common.aspect;
 
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import org.junit.Test;
 
 import static eu.domibus.logging.DomibusLogger.MDC_USER;
@@ -17,7 +17,7 @@ public class BasicAuditAspectTest {
     public void addBasicAudit() {
         BasicAuditAspect basicAuditAspect = new BasicAuditAspect();
         basicAuditAspect.LOG.putMDC(MDC_USER, "thomas");
-        UserMessageLog auditEntity = new UserMessageLog();
+        UserMessageLogEntity auditEntity = new UserMessageLogEntity();
         basicAuditAspect.addBasicAudit(auditEntity);
         assertEquals("thomas", auditEntity.getCreatedBy());
     }

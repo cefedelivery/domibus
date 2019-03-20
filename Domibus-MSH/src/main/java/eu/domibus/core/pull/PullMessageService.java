@@ -2,7 +2,7 @@ package eu.domibus.core.pull;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -64,7 +64,7 @@ public interface PullMessageService {
     PullRequestResult updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
             ResponseHandler.CheckResult isOk,
-            UserMessageLog userMessageLog,
+            UserMessageLogEntity userMessageLog,
             LegConfiguration legConfiguration,
             UserMessage userMessage);
 

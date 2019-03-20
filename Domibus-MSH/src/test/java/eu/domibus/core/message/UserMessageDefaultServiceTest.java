@@ -4,7 +4,6 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -14,7 +13,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
@@ -152,7 +151,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testGetFailedMessageElapsedTime(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testGetFailedMessageElapsedTime(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
         final Date failedDate = new Date();
 
@@ -171,7 +170,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test(expected = UserMessageException.class)
-    public void testGetFailedMessageElapsedTimeWhenFailedDateIsNull(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testGetFailedMessageElapsedTimeWhenFailedDateIsNull(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
 
         new CurrentTimeMillisMock();
@@ -188,7 +187,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test(expected = UserMessageException.class)
-    public void testRestoreMessageWhenMessageIsDeleted(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testRestoreMessageWhenMessageIsDeleted(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
@@ -204,7 +203,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testRestorePushedMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testRestorePushedMessage(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
         final Integer newMaxAttempts = 5;
 
@@ -226,7 +225,7 @@ public class UserMessageDefaultServiceTest {
         userMessageDefaultService.restoreFailedMessage(messageId);
 
         new FullVerifications(userMessageDefaultService) {{
-            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLog()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
+            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLogEntity()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
 
             userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
             userMessageLog.setRestored(withAny(new Date()));
@@ -242,7 +241,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog, @Injectable final UserMessage userMessage) throws Exception {
+    public void testRestorePUlledMessage(@Injectable final UserMessageLogEntity userMessageLog, @Injectable final UserMessage userMessage) throws Exception {
         final String messageId = "1";
         final Integer newMaxAttempts = 5;
         final String mpc = "mpc";
@@ -322,7 +321,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testComputeMaxAttempts(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testComputeMaxAttempts(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
         final Integer pModeMaxAttempts = 5;
 
@@ -427,7 +426,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test(expected = UserMessageException.class)
-    public void testFailedMessageWhenNoMessageIsFound(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testFailedMessageWhenNoMessageIsFound(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
@@ -439,7 +438,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test(expected = UserMessageException.class)
-    public void testFailedMessageWhenStatusIsNotFailed(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testFailedMessageWhenStatusIsNotFailed(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
@@ -454,7 +453,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testGetFailedMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testGetFailedMessage(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
@@ -465,12 +464,12 @@ public class UserMessageDefaultServiceTest {
             result = MessageStatus.SEND_FAILURE;
         }};
 
-        final UserMessageLog failedMessage = userMessageDefaultService.getFailedMessage(messageId);
+        final UserMessageLogEntity failedMessage = userMessageDefaultService.getFailedMessage(messageId);
         Assert.assertNotNull(failedMessage);
     }
 
     @Test
-    public void testDeleteMessageWhenNoNotificationListenerIsFound(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testDeleteMessageWhenNoNotificationListenerIsFound(@Injectable final UserMessageLogEntity userMessageLog) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{

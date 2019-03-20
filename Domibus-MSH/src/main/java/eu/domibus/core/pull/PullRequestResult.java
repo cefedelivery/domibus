@@ -1,7 +1,7 @@
 package eu.domibus.core.pull;
 
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 
 import java.util.Date;
 
@@ -15,7 +15,7 @@ public class PullRequestResult {
 
     private final String messageId;
 
-    public PullRequestResult(final UserMessageLog userMessageLog) {
+    public PullRequestResult(final UserMessageLogEntity userMessageLog) {
         this.sendAttempts = userMessageLog.getSendAttempts();
         this.nextAttempts = userMessageLog.getNextAttempt();
         this.messageStatus = userMessageLog.getMessageStatus();

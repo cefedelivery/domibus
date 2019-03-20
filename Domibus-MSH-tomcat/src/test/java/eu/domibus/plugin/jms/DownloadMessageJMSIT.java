@@ -6,7 +6,7 @@ import eu.domibus.AbstractBackendJMSIT;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -93,7 +93,7 @@ public class DownloadMessageJMSIT extends AbstractBackendJMSIT {
         messaging.setUserMessage(userMessage);
         messagingService.storeMessage(messaging, MSHRole.RECEIVING, null, "backendWebservice");
 
-        UserMessageLog userMessageLog = new UserMessageLog();
+        UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setMessageStatus(eu.domibus.common.MessageStatus.RECEIVED);
         userMessageLog.setMessageId(messageId);
         userMessageLog.setMessageType(MessageType.USER_MESSAGE);

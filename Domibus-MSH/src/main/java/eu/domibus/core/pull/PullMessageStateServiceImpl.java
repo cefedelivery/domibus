@@ -4,7 +4,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -54,7 +54,7 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void expirePullMessage(final String messageId) {
         LOG.debug("Message:[{}] expired.", messageId);
-        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
         rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
         sendFailed(userMessageLog);
     }
@@ -64,7 +64,7 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
      */
     @Override
     @Transactional
-    public void sendFailed(final UserMessageLog userMessageLog) {
+    public void sendFailed(final UserMessageLogEntity userMessageLog) {
         LOG.debug("Message:[{}] failed to be pull.", userMessageLog.getMessageId());
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(userMessageLog.getMessageId());
         updateRetryLoggingService.messageFailed(userMessage, userMessageLog);
@@ -74,7 +74,7 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
      * {@inheritDoc}
      */
     @Override
-    public void reset(final UserMessageLog userMessageLog) {
+    public void reset(final UserMessageLogEntity userMessageLog) {
         final MessageStatus readyToPull = MessageStatus.READY_TO_PULL;
         LOG.debug("Change message:[{}] with state:[{}] to state:[{}].", userMessageLog.getMessageId(), userMessageLog.getMessageStatus(), readyToPull);
         userMessageLog.setMessageStatus(readyToPull);

@@ -9,7 +9,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.SignalMessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
 import eu.domibus.ebms3.common.model.*;
@@ -128,7 +128,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testMessageStatusChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
             userMessageLogDao.findByMessageId(anyString);
@@ -163,7 +163,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testMessageStatusChange_EntityNotFound_Warning() {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
 
         new Expectations() {{
             userMessageLogDao.findByMessageId(anyString);
@@ -183,7 +183,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testMessageNotificationStatusChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
             userMessageLogDao.findByMessageId(anyString);
@@ -214,7 +214,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testMessageNotificationStatusChange_EntityNotFound_Warning() {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
             userMessageLogDao.findByMessageId(anyString);
@@ -234,7 +234,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testMessageChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
             userMessageLogDao.findByMessageId(anyString);
@@ -254,7 +254,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testMessageChange_EntityNotFound_Warn() {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
             userMessageLogDao.findByMessageId(anyString);
@@ -308,7 +308,7 @@ public class UIReplicationDataServiceImplTest {
 
     @Test
     public void testSaveUIMessageFromSignalMessageLog(final @Mocked UIMessageEntity uiMessageEntity) {
-        final UserMessageLog userMessageLog = createUserMessageLog();
+        final UserMessageLogEntity userMessageLog = createUserMessageLog();
         final UserMessage userMessage = createUserMessage();
 
         new Expectations(uiReplicationDataService) {{
@@ -449,8 +449,8 @@ public class UIReplicationDataServiceImplTest {
         }};
     }
 
-    private UserMessageLog createUserMessageLog() {
-        UserMessageLog userMessageLog = new UserMessageLog();
+    private UserMessageLogEntity createUserMessageLog() {
+        UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setMessageId(messageId);
         userMessageLog.setMessageStatus(messageStatus);
         userMessageLog.setNotificationStatus(notificationStatus);

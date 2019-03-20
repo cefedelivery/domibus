@@ -13,10 +13,9 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReceptionAwareness;
 import eu.domibus.common.model.configuration.RetryStrategy;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import junit.framework.Assert;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
@@ -103,7 +102,7 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
@@ -149,7 +148,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; //Received one hour ago
         final long restoredTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Restored 5 min ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(4);
         userMessageLog.setSendAttemptsMax(5);
         userMessageLog.setReceived(new Date(receivedTime));
@@ -191,7 +190,7 @@ public class UpdateRetryLoggingServiceTest {
         final long receivedTime = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; //Received one hour ago
         final long restoredTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Restored 5 min ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(6);
         userMessageLog.setReceived(new Date(receivedTime));
@@ -229,7 +228,7 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
@@ -271,7 +270,7 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long receivedTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Received 5 min ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
@@ -310,7 +309,7 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long received = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; // received one hour ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(0);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(received));
@@ -354,7 +353,7 @@ public class UpdateRetryLoggingServiceTest {
         final String messageId = UUID.randomUUID().toString();
         final long received = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; // received one hour ago
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(0);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(received));
@@ -397,7 +396,7 @@ public class UpdateRetryLoggingServiceTest {
         final long received = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016;
 
 
-        final UserMessageLog userMessageLog = new UserMessageLog();
+        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
         userMessageLog.setSendAttempts(0);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(received));

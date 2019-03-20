@@ -135,6 +135,11 @@
             <column name="FK_MESSAGE_FRAGMENT_ID"/>
         </createIndex>
 
+        <addColumn tableName="TB_MESSAGE_LOG">
+            <column name="SOURCE_MESSAGE" type="BOOLEAN"/>
+            <column name="MESSAGE_FRAGMENT" type="BOOLEAN"/>
+        </addColumn>
+
         <createTable tableName="TB_MESSAGE_FRAGMENT">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>

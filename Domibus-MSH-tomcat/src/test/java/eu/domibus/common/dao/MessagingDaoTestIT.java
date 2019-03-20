@@ -6,7 +6,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.PartyIdType;
-import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.common.model.logging.UserMessageLogEntityBuilder;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -64,7 +64,7 @@ public class MessagingDaoTestIT extends AbstractIT{
         messagingDao.create(firstMessage);
         //@thom fix this late because their is a weird contraint exception here.
     //    messagingDao.create(secondMessage);
-        UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
+        UserMessageLogEntityBuilder umlBuilder = UserMessageLogEntityBuilder.create()
                 .setMessageId(messageInfo.getMessageId())
                 .setMessageStatus(MessageStatus.READY_TO_PULL)
                 .setMshRole(MSHRole.SENDING)

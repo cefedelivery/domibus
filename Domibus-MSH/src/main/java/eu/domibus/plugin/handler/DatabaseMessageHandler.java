@@ -16,7 +16,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
@@ -145,7 +145,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             // Authorization check
             validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
 
-            UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
                 throw new MessageNotFoundException(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR);
             }
@@ -302,7 +302,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             } else {
-                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
@@ -405,16 +405,18 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 throw ex;
             }
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+
+            final boolean sourceMessage = userMessage.isSourceMessage();
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
 
-            if (!userMessage.isSourceMessage()) {
+            if (!sourceMessage) {
                 if (MessageStatus.READY_TO_PULL != messageStatus) {
                     // Sends message to the proper queue if not a message to be pulled.
                     userMessageService.scheduleSending(messageId);
                 } else {
-                    final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                    final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
                     LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                     pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
                 }

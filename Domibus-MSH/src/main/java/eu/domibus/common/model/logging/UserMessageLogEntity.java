@@ -23,24 +23,45 @@ import java.util.Date;
         @NamedQuery(name = "UserMessageLog.findByMessageIdAndRole", query = "select userMessageLog from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID and userMessageLog.mshRole=:MSH_ROLE"),
         @NamedQuery(name = "UserMessageLog.findBackendForMessage", query = "select userMessageLog.backend from UserMessageLog userMessageLog where userMessageLog.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "UserMessageLog.findEntries", query = "select userMessageLog from UserMessageLog userMessageLog"),
-        @NamedQuery(name = "UserMessageLog.findUndownloadedUserMessagesOlderThan", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where (userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and userMessageLog.deleted is null and userMessageLog.mpc = :MPC and userMessageLog.received < :DATE"),
-        @NamedQuery(name = "UserMessageLog.findDownloadedUserMessagesOlderThan", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where (userMessageLog.messageStatus = eu.domibus.common.MessageStatus.DOWNLOADED) and userMessageLog.mpc = :MPC and userMessageLog.downloaded is not null and userMessageLog.downloaded < :DATE"),
+        @NamedQuery(name = "UserMessageLog.findUndownloadedUserMessagesOlderThan", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where (userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED or userMessageLog.messageStatus = eu.domibus.common.MessageStatus.RECEIVED_WITH_WARNINGS) and userMessageLog.deleted is null and userMessageLog.mpc = :MPC and userMessageLog.received < :DATE and userMessageLog.messageFragment is null"),
+        @NamedQuery(name = "UserMessageLog.findDownloadedUserMessagesOlderThan", query = "select userMessageLog.messageId from UserMessageLog userMessageLog where (userMessageLog.messageStatus = eu.domibus.common.MessageStatus.DOWNLOADED) and userMessageLog.mpc = :MPC and userMessageLog.downloaded is not null and userMessageLog.downloaded < :DATE and userMessageLog.messageFragment is null"),
         @NamedQuery(name = "UserMessageLog.setNotificationStatus", query = "update UserMessageLog userMessageLog set userMessageLog.notificationStatus=:NOTIFICATION_STATUS where userMessageLog.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "UserMessageLog.countEntries", query = "select count(userMessageLog.messageId) from UserMessageLog userMessageLog"),
         @NamedQuery(name = "UserMessageLog.setMessageStatusAndNotificationStatus",
                 query = "update UserMessageLog userMessageLog set userMessageLog.deleted=:TIMESTAMP, userMessageLog.messageStatus=:MESSAGE_STATUS, userMessageLog.notificationStatus=:NOTIFICATION_STATUS where userMessageLog.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "UserMessageLog.findAllInfo", query = "select userMessageLog from UserMessageLog userMessageLog")
 })
-public class UserMessageLog extends MessageLog {
+public class UserMessageLogEntity extends MessageLog {
 
     @ManyToOne
     @JoinColumn(name = "MESSAGE_ID", referencedColumnName = "MESSAGE_ID", updatable = false, insertable = false)
     protected MessageInfo messageInfo;
 
-    public UserMessageLog() {
+    @Column(name = "SOURCE_MESSAGE")
+    protected Boolean sourceMessage;
+
+    @Column(name = "MESSAGE_FRAGMENT")
+    protected Boolean messageFragment;
+
+    public UserMessageLogEntity() {
         setMessageType(MessageType.USER_MESSAGE);
         setReceived(new Date());
         setSendAttempts(0);
     }
 
+    public Boolean getSourceMessage() {
+        return sourceMessage;
+    }
+
+    public void setSourceMessage(Boolean sourceMessage) {
+        this.sourceMessage = sourceMessage;
+    }
+
+    public Boolean getMessageFragment() {
+        return messageFragment;
+    }
+
+    public void setMessageFragment(Boolean messageFragment) {
+        this.messageFragment = messageFragment;
+    }
 }
