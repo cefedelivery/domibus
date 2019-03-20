@@ -18,6 +18,11 @@ import java.util.regex.Pattern;
 /**
  * @author Thomas Dussart
  * @since 4.1
+ * <p>
+ * This class has a similar behavior than @ConfigurationProperties annotation and allows
+ * to parse list of properties in the format domibus.example.name[0],domibus.example.name[1].
+ * <p>
+ * Subclasses implement a transform method to create the model needed <E> and the map method will then return a List<E>.
  */
 
 public abstract class PropertyGroupMapper<E> {
@@ -31,7 +36,6 @@ public abstract class PropertyGroupMapper<E> {
     private final Environment environment;
 
     private final Pattern passwordPattern = Pattern.compile(".*password.*", Pattern.CASE_INSENSITIVE);
-
 
     public PropertyGroupMapper(final DomibusPropertyExtService domibusPropertyExtService,
                                final DomainContextExtService domainContextExtService,
@@ -47,29 +51,18 @@ public abstract class PropertyGroupMapper<E> {
         List<E> elements = new ArrayList<>();
         do {
             Map<String, ImmutablePair<String, String>> keyValues = new HashMap<>();
-            int propertyCount = 0;
             for (String propertyName : Lists.newArrayList(propertyNames)) {
                 final String format = propertyName + "[%s]";
-                if (propertyCount == 0) {
-                    final String firstPropertyKey = String.format(format, count);
-                    final String firstPropertyValue = getPropertyValue(firstPropertyKey);
-                    propertyEmpty = StringUtils.isEmpty(firstPropertyValue);
-                    if (propertyEmpty) {
-                        break;
-                    }
-                    keyValues.put(propertyName, new ImmutablePair<>(propertyName, firstPropertyValue));
-                    if (!passwordPattern.matcher(firstPropertyKey).matches()) {
-                        LOG.debug("Property:[{}] has following value:[{}]", firstPropertyKey, firstPropertyValue);
-                    }
-                    propertyCount++;
-                } else {
-                    final String otherPropertyKey = String.format(format, count);
-                    final String otherPropertyValue = getPropertyValue(otherPropertyKey);
-                    keyValues.put(propertyName, new ImmutablePair<>(propertyName, otherPropertyValue));
-                    if (!passwordPattern.matcher(otherPropertyKey).matches()) {
-                        LOG.debug("Property:[{}] has following value:[{}]", otherPropertyKey, otherPropertyValue);
-                    }
+                final String propertyKey = String.format(format, count);
+                if (!propertyKeyExists(propertyKey)) {
+                    propertyEmpty = true;
+                    break;
                 }
+                final String propertyValue = getPropertyValue(propertyKey);
+                if (!passwordPattern.matcher(propertyKey).matches()) {
+                    LOG.debug("Property:[{}] has following value:[{}]", propertyKey, propertyValue);
+                }
+                keyValues.put(propertyName, new ImmutablePair<>(propertyName, propertyValue));
             }
             if (!propertyEmpty) {
                 elements.add(transForm(keyValues));
@@ -77,6 +70,15 @@ public abstract class PropertyGroupMapper<E> {
             count++;
         } while (!propertyEmpty);
         return elements;
+    }
+
+    private boolean propertyKeyExists(final String key) {
+        final boolean keyExistsInDomain = domibusPropertyExtService.containsDomainPropertyKey(domainContextExtService.getCurrentDomain(), key);
+        if (keyExistsInDomain) {
+            return keyExistsInDomain;
+        }
+        return environment.containsProperty(key);
+
     }
 
     private String getPropertyValue(String key) {

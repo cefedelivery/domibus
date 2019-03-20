@@ -34,12 +34,20 @@ public class ConstraintPropertyMapperTest {
             this.result = result;
             domibusPropertyExtService.getDomainProperty(result, "domibus.dss.default.constraint.name[0]");
             this.result = ADEST_IRTPTBST.name();
+            domibusPropertyExtService.containsDomainPropertyKey(result, "domibus.dss.default.constraint.name[0]");
+            this.result = true;
             domibusPropertyExtService.getDomainProperty(result, "domibus.dss.default.constraint.status[0]");
             this.result = "OK";
+            domibusPropertyExtService.containsDomainPropertyKey(result, "domibus.dss.default.constraint.status[0]");
+            this.result = true;
             domibusPropertyExtService.getDomainProperty(result, "domibus.dss.default.constraint.name[1]");
             this.result = QUAL_FOR_SIGN_AT_CC.name();
+            domibusPropertyExtService.containsDomainPropertyKey(result, "domibus.dss.default.constraint.name[1]");
+            this.result = true;
             domibusPropertyExtService.getDomainProperty(result, "domibus.dss.default.constraint.status[1]");
             this.result = "WARNING";
+            domibusPropertyExtService.containsDomainPropertyKey(result, "domibus.dss.default.constraint.status[1]");
+            this.result = true;
         }};
         ValidationConstraintPropertyMapper constraintPropertyMapper =
                 new ValidationConstraintPropertyMapper(

@@ -240,6 +240,12 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         return getBooleanInternal(propertyName, optionalDomainValue);
     }
 
+    @Override
+    public boolean containsDomainPropertyKey(Domain domain, String propertyName) {
+        final String domainPropertyName = getPropertyName(domain, propertyName);
+        return domibusProperties.containsKey(domainPropertyName);
+    }
+
     private Boolean getBooleanInternal(String propertyName, String customValue) {
         if (customValue != null) {
             Boolean customBoolean = BooleanUtils.toBooleanObject(customValue);
