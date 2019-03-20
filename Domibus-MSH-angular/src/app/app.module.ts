@@ -28,7 +28,6 @@ import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
 import {AuthenticatedAuthorizedGuard} from "./common/guards/authenticated-authorized.guard";
 import {routing} from "./app.routes";
-import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./common/http/extended-http-client";
 import {HttpEventService} from "./common/http/http.event.service";
 import {SecurityService} from "./security/security.service";
@@ -109,7 +108,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     FooterComponent,
     CurrentPModeComponent,
     PModeArchiveComponent,
-    IsAuthorized,
     TruststoreComponent,
     PmodeUploadComponent,
     PmodeViewComponent,
