@@ -23,6 +23,7 @@ import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
@@ -33,7 +34,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DelayedDispatchMessageCreator;
 import eu.domibus.messaging.DispatchMessageCreator;
-import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,10 +71,6 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     @Qualifier("sendPullReceiptQueue")
     private Queue sendPullReceiptQueue;
-
-    @Autowired
-    @Qualifier("retentionMessageQueue")
-    private Queue retentionMessageQueue;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -361,10 +357,16 @@ public class UserMessageDefaultService implements UserMessageService {
                 }
             }
         }
+        messagingDao.clearPayloadData(messageId);
+        userMessageLogService.setMessageAsDeleted(messageId);
+        handleSignalMessageDelete(messageId);
+    }
 
-        JmsMessage message = JMSMessageBuilder.create()
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .build();
-        jmsManager.sendMessageToQueue(message, retentionMessageQueue);
+    protected void handleSignalMessageDelete(String messageId) {
+        List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
+        signalMessages.stream().forEach(signalMessage -> signalMessageDao.clear(signalMessage));
+
+        List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
+        signalMessageIds.stream().forEach(signalMessageId -> userMessageLogService.setMessageAsDeleted(signalMessageId));
     }
 }

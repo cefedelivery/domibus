@@ -1,9 +1,6 @@
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.MDCKey;
@@ -16,10 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import java.util.List;
 
 /**
- * Listeners that deletes messages by their identifiers and clears any signal message related to them.
+ * Listeners that deletes messages by their identifiers.
  *
  * @author Sebastian-Ion TINCU
  * @since 4.1
@@ -30,13 +26,7 @@ public class RetentionListener implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetentionListener.class);
 
     @Autowired
-    private MessagingDao messagingDao;
-
-    @Autowired
-    private UserMessageLogService userMessageLogService;
-
-    @Autowired
-    private SignalMessageDao signalMessageDao;
+    private UserMessageDefaultService userMessageDefaultService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
@@ -45,19 +35,9 @@ public class RetentionListener implements MessageListener {
             String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             LOG.debug("Processing retention message [{}]", messageId);
 
-            messagingDao.clearPayloadData(messageId);
-            userMessageLogService.setMessageAsDeleted(messageId);
-            handleSignalMessageDelete(messageId);
+            userMessageDefaultService.deleteMessage(messageId);
         } catch (final JMSException e) {
             LOG.error("Error processing JMS message", e);
         }
-    }
-
-    protected void handleSignalMessageDelete(String messageId) {
-        List<SignalMessage> signalMessages = signalMessageDao.findSignalMessagesByRefMessageId(messageId);
-        signalMessages.stream().forEach(signalMessage -> signalMessageDao.clear(signalMessage));
-
-        List<String> signalMessageIds = signalMessageDao.findSignalMessageIdsByRefMessageId(messageId);
-        signalMessageIds.stream().forEach(signalMessageId -> userMessageLogService.setMessageAsDeleted(signalMessageId));
     }
 }
