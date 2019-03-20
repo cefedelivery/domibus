@@ -1,25 +1,14 @@
 package eu.domibus.configuration;
 
-import com.codahale.metrics.MetricFilter;
-import com.codahale.metrics.graphite.Graphite;
-import com.codahale.metrics.graphite.GraphiteReporter;
 import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Cosmin Baciu
@@ -32,8 +21,6 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     private static final String DATABASE_DIALECT = "domibus.entityManagerFactory.jpaProperty.hibernate.dialect";
 
-    public static final String DOMIBUS_SYSTEM_GRAPHITE_NAME = "domibus.system.graphite.name";
-
     private DataBaseEngine dataBaseEngine;
 
     @Autowired
@@ -42,21 +29,6 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     @Override
     public String getConfigLocation() {
         return System.getProperty(DOMIBUS_CONFIG_LOCATION);
-    }
-
-    @PostConstruct
-    public void init(){
-        final String graphiteSystem = domibusPropertyProvider.getProperty(DOMIBUS_SYSTEM_GRAPHITE_NAME);
-        if(graphiteSystem!=null) {
-            final Graphite graphite = new Graphite(new InetSocketAddress("localhost", 2003));
-            final GraphiteReporter reporter = GraphiteReporter.forRegistry(Metrics.METRIC_REGISTRY)
-                    .prefixedWith(graphiteSystem)
-                    .convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MILLISECONDS)
-                    .filter(MetricFilter.ALL)
-                    .build(graphite);
-            reporter.start(10, TimeUnit.SECONDS);
-        }
     }
 
     //TODO add caching

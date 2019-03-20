@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.security.KeyStoreException;
 
+/**
+ * Interceptor in charge of converting authentication spi exceptions into crypto exceptions.
+ */
 @Aspect
 @Component
 public class DomainCryptoServiceInterceptor extends ServiceInterceptor {

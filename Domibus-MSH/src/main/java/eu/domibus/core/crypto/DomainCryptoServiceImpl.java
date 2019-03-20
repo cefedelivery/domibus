@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static eu.domibus.core.crypto.spi.AbstractCryptoServiceSpi.DEFAULT_IAM_AUTHENTICATION_SPI;
-import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING;
 
 /**
  * @author Cosmin Baciu
@@ -38,6 +37,8 @@ import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TR
 public class DomainCryptoServiceImpl implements DomainCryptoService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainCryptoServiceImpl.class);
+
+    protected static final String IAM_AUTHENTICATION_IDENTIFIER = "domibus.extension.iam.authentication.identifier";
 
     private DomainCryptoServiceSpi iamProvider;
 
@@ -52,7 +53,6 @@ public class DomainCryptoServiceImpl implements DomainCryptoService {
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
 
-    protected static final String IAM_AUTHENTICATION_IDENTIFIER = "domibus.extension.iam.authentication.identifier";
 
     public DomainCryptoServiceImpl() {
     }
