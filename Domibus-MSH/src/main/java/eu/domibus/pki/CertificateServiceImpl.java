@@ -440,7 +440,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates) {
