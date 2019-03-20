@@ -5,30 +5,46 @@ package eu.domibus.core.crypto.spi.model;
  */
 public class AuthorizationException extends RuntimeException {
 
-    private final String code;
+    private String httpCode;
 
     private AuthorizationError authorizationError;
 
+    private String messageId;
+
+    public AuthorizationException(Throwable e) {
+        super(e);
+    }
     public AuthorizationException(final String httpCode, final String message) {
         super(message);
-        this.code = httpCode;
+        this.httpCode = httpCode;
     }
 
-    public AuthorizationException(final String httpCode, final String message, final Throwable cause) {
+    protected AuthorizationException(final String httpCode, final String message, final Throwable cause) {
         super(message, cause);
-        this.code = httpCode;
+        this.httpCode = httpCode;
     }
 
-    public AuthorizationException(final AuthorizationError authorizationError, final String httpCode, final String message) {
+    public AuthorizationException(final AuthorizationError authorizationError, final String httpCode, final String messageID, final String message) {
         this(httpCode, message);
         this.authorizationError = authorizationError;
     }
 
-    public String getCode() {
-        return code;
+    public AuthorizationException(final AuthorizationError authorizationError, final String httpCode, final String messageID, final String message, Throwable throwable) {
+        super(message, throwable);
+        this.httpCode = httpCode;
+        this.authorizationError = authorizationError;
+        this.messageId = messageID;
+    }
+
+    public String getHttpCode() {
+        return httpCode;
     }
 
     public AuthorizationError getAuthorizationError() {
         return authorizationError;
+    }
+
+    public String getMessageId() {
+        return messageId;
     }
 }

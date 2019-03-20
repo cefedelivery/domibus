@@ -3,8 +3,8 @@ package eu.domibus.core.pmode;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -208,6 +208,11 @@ public class PModeDao extends PModeProvider {
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_ACTION_NOT_FOUND, e, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
         }
+    }
+
+    @Override
+    protected Mpc findMpc(String mpcValue) throws EbMS3Exception {
+        return null;
     }
 
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {

@@ -2,6 +2,7 @@ package eu.domibus.ebms3.receiver.handler;
 
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.core.security.AuthorizationService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.logging.DomibusLogger;
@@ -28,8 +29,12 @@ public class IncomingPullRequestHandler implements IncomingMessageHandler {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     @Override
     public SOAPMessage processMessage(SOAPMessage request, Messaging messaging) {
+        authorizationService.authorizePullRequest(request, messaging.getSignalMessage().getPullRequest());
         LOG.trace("before pull request.");
         final SOAPMessage soapMessage = handlePullRequest(messaging);
         LOG.trace("returning pull request message.");

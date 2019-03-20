@@ -6,8 +6,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -142,6 +142,16 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
+    }
+
+    @Override
+    protected Mpc findMpc(final String mpcValue) throws EbMS3Exception {
+        for (final Mpc mpc : this.getConfiguration().getMpcs()) {
+            if (StringUtils.equalsIgnoreCase(mpc.getQualifiedName(), mpcValue)) {
+                return mpc;
+            }
+        }
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching mpc found", null, null);
     }
 
     @Override

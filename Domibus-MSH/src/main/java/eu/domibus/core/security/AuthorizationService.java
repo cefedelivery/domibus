@@ -1,15 +1,18 @@
-package eu.domibus.ebms3.receiver;
+package eu.domibus.core.security;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
 import eu.domibus.core.crypto.spi.model.AuthorizationException;
+import eu.domibus.core.crypto.spi.model.PullRequestMapping;
+import eu.domibus.core.crypto.spi.model.UserMessageMapping;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.CertificateExchangeType;
+import eu.domibus.ext.domain.PullRequestDTO;
 import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -21,6 +24,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING;
@@ -28,6 +32,9 @@ import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TR
 /**
  * @author Thomas Dussart
  * @since 4.1
+ * <p>
+ * Authorization service that will extract data from the SoapMessage before delegating the authorization
+ * call to the configured SPI.
  */
 @Component
 public class AuthorizationService {
@@ -71,43 +78,60 @@ public class AuthorizationService {
         return authorizationServiceList.get(0);
     }
 
-    public void authorizePullRequest(SOAPMessage request, PullRequest pullRequest) throws EbMS3Exception {
+    public void authorizePullRequest(SOAPMessage request, PullRequest pullRequest) {
+        if (!isAuthorizationEnabled(request)) {
+            return;
+        }
+        final CertificateTrust certificateTrust = getCertificateTrust(request);
+        final Map<PullRequestMapping, String> pullRequestMapping;
+        try {
+            pullRequestMapping = pModeProvider.getPullRequestMapping(pullRequest);
+        } catch (EbMS3Exception e) {
+            throw new AuthorizationException(e);
+        }
+        getAuthorizationService().authorize(certificateTrust.getTrustChain(), certificateTrust.getSigningCertificate(),
+                domainCoreConverter.convert(pullRequest, PullRequestDTO.class), pullRequestMapping);
+    }
+
+    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) {
+        if (!isAuthorizationEnabled(request)) {
+            return;
+        }
+        final CertificateTrust certificateTrust = getCertificateTrust(request);
+        final Map<UserMessageMapping, String> userMessageMapping;
+        try {
+            userMessageMapping = pModeProvider.getUserMessageMapping(userMessage);
+        } catch (EbMS3Exception e) {
+            throw new AuthorizationException(e);
+        }
+        getAuthorizationService().authorize(certificateTrust.getTrustChain(), certificateTrust.getSigningCertificate(),
+                domainCoreConverter.convert(userMessage, UserMessageDTO.class), userMessageMapping);
 
     }
-    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception {
+
+    private boolean isAuthorizationEnabled(SOAPMessage request) {
         if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
             LOG.debug("No trust verification of sending certificate");
-            return;
+            return false;
         }
-        final CertificateExchangeType certificateExchangeType = getCertificateExchangeType(request);
+        final CertificateExchangeType certificateExchangeType = getCertificateExchangeTypeFromSoapMessage(request);
         if (CertificateExchangeType.NONE.equals(certificateExchangeType)) {
             LOG.debug("Message has no security configured, skipping authorization");
-            return;
+            return false;
         }
+        return true;
+    }
 
-        final List<X509Certificate> x509Certificates = getCertificates(request);
+    private CertificateTrust getCertificateTrust(SOAPMessage request) {
+        final List<X509Certificate> x509Certificates = getCertificatesFromSoapMessage(request);
         X509Certificate leafCertificate = (X509Certificate) certificateService.extractLeafCertificateFromChain(x509Certificates);
         final List<X509Certificate> signingCertificateTrustChain = Lists.newArrayList(x509Certificates);
         signingCertificateTrustChain.remove(leafCertificate);
-        try {
-            getAuthorizationService().authorize(signingCertificateTrustChain, leafCertificate,
-                    domainCoreConverter.convert(userMessage, UserMessageDTO.class), pModeProvider.getMessageMapping(userMessage));
-        } catch (AuthorizationException a) {
-            switch (a.getAuthorizationError()) {
-                case INVALID_FORMAT:
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, a.getMessage(), userMessage.getMessageInfo().getMessageId(), a.getCause());
-                case AUTHORIZATION_REJECTED:
-                case AUTHORIZATION_SYSTEM_DOWN:
-                case AUTHORIZATION_CONNECTION_REJECTED:
-                default:
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, a.getMessage(), userMessage.getMessageInfo().getMessageId(), a.getCause());
-            }
-        } catch (Exception e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), userMessage.getMessageInfo().getMessageId(), e.getCause());
-        }
+        final CertificateTrust certificateTrust = new CertificateTrust(leafCertificate, signingCertificateTrustChain);
+        return certificateTrust;
     }
 
-    private List<X509Certificate> getCertificates(SOAPMessage request) {
+    private List<X509Certificate> getCertificatesFromSoapMessage(SOAPMessage request) {
         String certificateChainValue;
         try {
             certificateChainValue = (String) request.getProperty(CertificateExchangeType.getValue());
@@ -119,7 +143,7 @@ public class AuthorizationService {
 
     }
 
-    private CertificateExchangeType getCertificateExchangeType(SOAPMessage request) {
+    private CertificateExchangeType getCertificateExchangeTypeFromSoapMessage(SOAPMessage request) {
         String certificateExchangeTypeValue;
         try {
             certificateExchangeTypeValue = (String) request.getProperty(CertificateExchangeType.getKey());

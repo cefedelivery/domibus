@@ -6,8 +6,8 @@ import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -93,6 +93,11 @@ public class MultiDomainPModeProvider extends PModeProvider {
     @Override
     protected String findActionName(String action) throws EbMS3Exception {
         return getCurrentPModeProvider().findActionName(action);
+    }
+
+    @Override
+    protected Mpc findMpc(String mpcValue) throws EbMS3Exception {
+        return getCurrentPModeProvider().findMpc(mpcValue);
     }
 
     @Override
