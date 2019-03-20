@@ -59,7 +59,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         logDebugTslInfo();
         //should receive at least two certificates.
         if (certs == null || certs.length == 1) {
-            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "The chain of certificate should contain at least two certificates");
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "The signing trust chain is expected to trust anchor with DSS, but the size of the list of certificate is one.");
         }
         final X509Certificate leafCertificate = getX509LeafCertificate(certs);
         //add signing certificate to DSS.
