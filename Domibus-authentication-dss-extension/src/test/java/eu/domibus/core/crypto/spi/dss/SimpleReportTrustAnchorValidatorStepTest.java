@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 @RunWith(JMockit.class)
 public class SimpleReportTrustAnchorValidatorStepTest {

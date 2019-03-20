@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 public interface AuthorizationServiceSpi {
 

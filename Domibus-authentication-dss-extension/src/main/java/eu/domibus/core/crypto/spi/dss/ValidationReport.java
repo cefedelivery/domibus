@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 @Component
 public class ValidationReport {

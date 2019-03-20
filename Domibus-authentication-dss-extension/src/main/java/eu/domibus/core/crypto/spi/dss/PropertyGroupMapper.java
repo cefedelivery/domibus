@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 
 public abstract class PropertyGroupMapper<E> {

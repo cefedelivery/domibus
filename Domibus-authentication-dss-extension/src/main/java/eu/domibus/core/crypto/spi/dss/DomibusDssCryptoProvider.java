@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
  * @author Thomas Dussart
  * @since 4.1
  * <p>
- * Future DSS IAM provider implementation.
+ * Dss implementation to verify the trust of incoming certificates.
+ * This class is within external module and is only loaded it the dss module is added
+ * in the ${domibus.config.location}/extensions/lib/ directory.
  */
 public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 

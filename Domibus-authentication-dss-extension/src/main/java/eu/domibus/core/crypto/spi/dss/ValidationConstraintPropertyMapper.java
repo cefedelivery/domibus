@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 public class ValidationConstraintPropertyMapper extends PropertyGroupMapper<ConstraintInternal> {
 

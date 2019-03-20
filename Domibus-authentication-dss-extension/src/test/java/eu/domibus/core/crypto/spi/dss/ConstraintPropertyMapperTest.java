@@ -18,7 +18,7 @@ import static eu.europa.esig.dss.validation.process.MessageTag.QUAL_FOR_SIGN_AT_
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
  */
 @RunWith(JMockit.class)
 public class ConstraintPropertyMapperTest {
