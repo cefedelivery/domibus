@@ -6,11 +6,15 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.ReliabilityService;
-import eu.domibus.common.services.impl.*;
+import eu.domibus.common.services.impl.CompressionService;
+import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.security.AuthorizationService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -139,6 +143,9 @@ public class IncomingPullRequestHandlerTest {
 
     @Injectable
     MessageUtil messageUtil;
+
+    @Injectable
+    AuthorizationService authorizationService;
 
     @Test
     public void testHandlePullRequest(
