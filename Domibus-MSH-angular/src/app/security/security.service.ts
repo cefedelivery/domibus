@@ -104,18 +104,15 @@ export class SecurityService {
   }
 
   updateCurrentUser(user: User): void {
-    console.log('save current user on local storage');
     sessionStorage.setItem('currentUser', JSON.stringify(user));
   }
 
 
   getCurrentUsernameFromServer(): Promise<string> {
-    console.log('getCurrentUsernameFromServer');
     return this.http.get('rest/security/username').map((resp: Response) => resp.json()).toPromise();
   }
 
   getCurrentUserFromServer(): Promise<User> {
-    console.log('getCurrentUserFromServer');
     return this.http.get('rest/security/user').map((res: Response) => res.json()).toPromise();
   }
 

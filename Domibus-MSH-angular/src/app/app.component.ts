@@ -31,7 +31,6 @@ export class AppComponent implements OnInit {
                private domibusInfoService: DomibusInfoService) {
 
     this.domainService.setAppTitle();
-    console.log('constructor start');
 
     /* ugly but necessary: intercept ECAS redirect */
     this.router.events.subscribe(event => {
