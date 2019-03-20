@@ -53,7 +53,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This interceptor is responsible of the trust of an incoming messages.
@@ -285,7 +286,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     private void addSerializedCertificateToMessage(SoapMessage msg, List<? extends Certificate> certificateChain, CertificateExchangeType binarySecurityToken) {
         msg.put(CertificateExchangeType.getKey(), binarySecurityToken.name());
-        final String chain = certificateService.serializeCertificateChain(certificateChain);
+        final String chain = certificateService.serializeCertificateChainIntoPemFormat(certificateChain);
         msg.put(CertificateExchangeType.getValue(), chain);
     }
 

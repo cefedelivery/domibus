@@ -2,10 +2,13 @@ package eu.domibus.ebms3.receiver;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
+import eu.domibus.core.crypto.spi.model.AuthorizationException;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.logging.DomibusLogger;
@@ -16,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,8 +71,10 @@ public class AuthorizationService {
         return authorizationServiceList.get(0);
     }
 
-    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception {
+    public void authorizePullRequest(SOAPMessage request, PullRequest pullRequest) throws EbMS3Exception {
 
+    }
+    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception {
         if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
             LOG.debug("No trust verification of sending certificate");
             return;
@@ -83,10 +87,24 @@ public class AuthorizationService {
 
         final List<X509Certificate> x509Certificates = getCertificates(request);
         X509Certificate leafCertificate = (X509Certificate) certificateService.extractLeafCertificateFromChain(x509Certificates);
-        final List<X509Certificate> signingCertificateTrustChain= Lists.newArrayList(x509Certificates);
+        final List<X509Certificate> signingCertificateTrustChain = Lists.newArrayList(x509Certificates);
         signingCertificateTrustChain.remove(leafCertificate);
-        getAuthorizationService().authorize(signingCertificateTrustChain,leafCertificate,
-                domainCoreConverter.convert(userMessage, UserMessageDTO.class), pModeProvider.getMessageMapping(userMessage));
+        try {
+            getAuthorizationService().authorize(signingCertificateTrustChain, leafCertificate,
+                    domainCoreConverter.convert(userMessage, UserMessageDTO.class), pModeProvider.getMessageMapping(userMessage));
+        } catch (AuthorizationException a) {
+            switch (a.getAuthorizationError()) {
+                case INVALID_FORMAT:
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, a.getMessage(), userMessage.getMessageInfo().getMessageId(), a.getCause());
+                case AUTHORIZATION_REJECTED:
+                case AUTHORIZATION_SYSTEM_DOWN:
+                case AUTHORIZATION_CONNECTION_REJECTED:
+                default:
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, a.getMessage(), userMessage.getMessageInfo().getMessageId(), a.getCause());
+            }
+        } catch (Exception e) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), userMessage.getMessageInfo().getMessageId(), e.getCause());
+        }
     }
 
     private List<X509Certificate> getCertificates(SOAPMessage request) {
@@ -97,7 +115,7 @@ public class AuthorizationService {
             throw new IllegalStateException(String.
                     format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
         }
-        return certificateService.deserializeCertificateChain(certificateChainValue);
+        return certificateService.deserializeCertificateChainFromPemFormat(certificateChainValue);
 
     }
 

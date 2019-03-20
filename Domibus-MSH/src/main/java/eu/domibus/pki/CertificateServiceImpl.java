@@ -392,8 +392,11 @@ public class CertificateServiceImpl implements CertificateService {
         return cert;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String serializeCertificateChain(List<? extends Certificate> certificates) {
+    public String serializeCertificateChainIntoPemFormat(List<? extends Certificate> certificates) {
         StringWriter sw = new StringWriter();
         for (Certificate certificate : certificates) {
             try {
@@ -410,8 +413,11 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateChainValue;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<X509Certificate> deserializeCertificateChain(String chain) {
+    public List<X509Certificate> deserializeCertificateChainFromPemFormat(String chain) {
         List<X509Certificate> certificates = new ArrayList<>();
         try (PemReader reader = new PemReader(new StringReader(chain))) {
             CertificateFactory cf = CertificateFactory.getInstance("X509");
@@ -433,6 +439,9 @@ public class CertificateServiceImpl implements CertificateService {
         return certificates;
     }
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates) {
         if (LOG.isTraceEnabled()) {

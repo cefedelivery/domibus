@@ -72,10 +72,29 @@ public interface CertificateService {
      */
     TrustStoreEntry getPartyCertificateFromTruststore(String alias) throws KeyStoreException;
 
-    String serializeCertificateChain(List<? extends Certificate> certificates);
+    /**
+     * Given a list of certificates, returns a string containing the certificates in a 64 base encoded format and
+     * separated in the Pem style.
+     *
+     * @param certificates the list of certificates.
+     * @return the pem formatted string.
+     */
+    String serializeCertificateChainIntoPemFormat(List<? extends Certificate> certificates);
 
-    List<X509Certificate> deserializeCertificateChain(String chain);
+    /**
+     * Given a pem formatted string containing a list of certificates, the method returns a list of X509 certificates.
+     *
+     * @param chain the pem formatted string.
+     * @return the list of certificates.
+     */
+    List<X509Certificate> deserializeCertificateChainFromPemFormat(String chain);
 
+    /**
+     * Given a chain of signing certificates (Trust chain + leaf), extract the leaf one.
+     *
+     * @param certificates list containing the trust chain and the leaf.
+     * @return the leaf certificate.
+     */
     Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates);
 
     /**
