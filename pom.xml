@@ -26,7 +26,9 @@
         <cxf.version>3.2.6</cxf.version>
         <spring.version>4.3.17.RELEASE</spring.version>
         <spring.security.version>4.2.6.RELEASE</spring.security.version>
-        <activemq.version>5.15.6</activemq.version>
+        <hibernate.version>5.2.12.Final</hibernate.version>
+        <hibernate.validator.version>5.1.2.Final</hibernate.validator.version>
+        <activemq.version>5.15.8</activemq.version>
         <aspectj.version>1.8.13</aspectj.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
@@ -41,9 +43,24 @@
         <commons-codec.version>1.9</commons-codec.version>
         <bouncycastle.version>1.58</bouncycastle.version>
         <quartz.version>2.3.0</quartz.version>
+        <c3p0.version>0.9.5.3</c3p0.version>
         <dozer.version>5.5.1</dozer.version>
-        <jackson.version>2.9.7</jackson.version>
+        <jackson.version>2.9.8</jackson.version>
         <commons-test.version>4.2</commons-test.version>
+        <xstream.version>1.4.10</xstream.version>
+        <freemarker.version>2.3.23</freemarker.version>
+        <mail.version>1.6.1</mail.version>
+        <jaxb.version>2.3.0</jaxb.version>
+        <dom4j.version>2.1.1</dom4j.version>
+        <tika.version>1.20</tika.version>
+        <peppol.version>1.0.4</peppol.version>
+        <dynamic.discovery.client.version>1.9</dynamic.discovery.client.version>
+        <javax.validation.version>1.1.0.Final</javax.validation.version>
+        <mockito.version>1.10.19</mockito.version>
+        <h2.version>1.4.178</h2.version>
+        <liquibase.version>3.4.2</liquibase.version>
+        <mysql.connector.java.version>5.1.34</mysql.connector.java.version>
+        <wiremock.version>2.0.8-beta</wiremock.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>
@@ -175,6 +192,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
@@ -234,7 +256,6 @@
                 <artifactId>gson</artifactId>
                 <version>2.7</version>
             </dependency>
-
 
             <!-- Spring -->
             <dependency>
@@ -319,11 +340,62 @@
             </dependency>
             <!-- End Spring Security -->
 
+            <!-- Hibernate -->
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>cglib</groupId>
+                        <artifactId>cglib</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>dom4j</groupId>
+                        <artifactId>dom4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-envers</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate.validator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-jpamodelgen</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mchange</groupId>
+                <artifactId>c3p0</artifactId>
+                <version>${c3p0.version}</version>
+            </dependency>
+            <!-- End Hibernate -->
+
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
                 <version>7.0</version>
             </dependency>
+
+            <!-- JAXB -->
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-core</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+            <!-- End JAXB -->
 
             <!-- ActiveMQ -->
             <dependency>
@@ -420,6 +492,33 @@
             </dependency>
             <!-- End CXF -->
 
+            <!-- Difi libraries -->
+            <dependency>
+                <groupId>no.difi.vefa</groupId>
+                <artifactId>peppol-sbdh</artifactId>
+                <version>${peppol.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.vefa</groupId>
+                <artifactId>peppol-lookup</artifactId>
+                <version>${peppol.version}</version>
+            </dependency>
+            <!-- End Difi libraries -->
+
+            <!-- eDelivery SMP profile  -->
+            <dependency>
+                <groupId>eu.europa.ec.dynamic-discovery</groupId>
+                <artifactId>dynamic-discovery-client</artifactId>
+                <version>${dynamic.discovery.client.version}</version>
+            </dependency>
+            <!-- End eDelivery SMP profile -->
+
+            <!-- Miscellaneous -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>27.0.1-jre</version>
+            </dependency>
             <dependency>
                 <groupId>org.joda</groupId>
                 <artifactId>joda-convert</artifactId>
@@ -430,12 +529,66 @@
                 <artifactId>jsr305</artifactId>
                 <version>3.0.0</version>
             </dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${javax.validation.version}</version>
+            </dependency>
+
+            <!-- XStream -->
+            <dependency>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstream.version}</version>
+            </dependency>
+
+            <!-- FreeMarker-->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+
+            <!-- Java mail -->
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>${mail.version}</version>
+            </dependency>
+
+            <!-- opencsv -->
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>4.2</version>
+            </dependency>
+
+            <!-- DOM4J -->
+            <dependency>
+                <groupId>org.dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${dom4j.version}</version>
+            </dependency>
+
+            <!-- Apache Tika -->
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>${tika.version}</version>
+            </dependency>
+            <!-- End Miscellaneous -->
 
             <!-- Test dependencies -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-test</artifactId>
                 <version>${spring.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-test</artifactId>
+                <version>${spring.security.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -451,6 +604,24 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>${liquibase.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>eu.europa.ec.digit.commons</groupId>
                 <artifactId>commons-test</artifactId>
                 <version>${commons-test.version}</version>
@@ -460,6 +631,18 @@
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>1.2.14</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.connector.java.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
                 <scope>test</scope>
             </dependency>
             <!-- End Test dependencies -->
@@ -807,7 +990,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>3.3.2</version>
+                        <version>4.0.2</version>
                         <inherited>false</inherited>
                         <configuration>
                             <skipProvidedScope>true</skipProvidedScope>

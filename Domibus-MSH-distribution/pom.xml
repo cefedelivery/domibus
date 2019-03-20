@@ -69,7 +69,7 @@
             </activation>
 
             <properties>
-                <tomcat.version>8.0.24</tomcat.version>
+                <tomcat.version>8.5.38</tomcat.version>
             </properties>
             <build>
                 <plugins>

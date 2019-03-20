@@ -167,6 +167,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             if (!signalMessageIds.isEmpty()) {
                 for (String signalMessageId : signalMessageIds) {
                     userMessageLogService.setMessageAsDeleted(signalMessageId);
+                    LOG.info("SignalMessage [{}] was set as DELETED.", signalMessageId);
                 }
             }
         }

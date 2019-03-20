@@ -5,7 +5,7 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans.xsd
-	http://www.springframework.org/schema/jee 
+	http://www.springframework.org/schema/jee
     http://www.springframework.org/schema/jee/spring-jee.xsd">
 
     <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
@@ -26,6 +26,9 @@
     </bean>
     <bean id="sendPullReceiptQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.pull.receipt.queue"/>
+    </bean>
+    <bean id="retentionMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.retentionMessage.queue"/>
     </bean>
     <bean id="alertMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.alert.queue"/>

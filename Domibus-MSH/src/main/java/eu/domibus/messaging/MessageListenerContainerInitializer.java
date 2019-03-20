@@ -40,6 +40,7 @@ public class MessageListenerContainerInitializer {
             createSendLargeMessageListenerContainer(domain);
             createSplitAndJoinListenerContainer(domain);
             createPullReceiptListenerContainer(domain);
+            createRetentionListenerContainer(domain);
         }
     }
 
@@ -69,6 +70,7 @@ public class MessageListenerContainerInitializer {
         instances.add(instance);
         LOG.info("LargeMessageListenerContainer initialized for domain [{}]", domain);
     }
+
     public void createPullReceiptListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createPullReceiptListenerContainer(domain);
         instance.start();
@@ -76,12 +78,17 @@ public class MessageListenerContainerInitializer {
         LOG.info("PullReceiptListenerContainer initialized for domain [{}]", domain);
     }
 
-
-
     public void createSplitAndJoinListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createSplitAndJoinListenerContainer(domain);
         instance.start();
         instances.add(instance);
         LOG.info("SplitAndJoinListenerContainer initialized for domain [{}]", domain);
+    }
+
+    public void createRetentionListenerContainer(Domain domain) {
+        MessageListenerContainer instance = messageListenerContainerFactory.createRetentionListenerContainer(domain);
+        instance.start();
+        instances.add(instance);
+        LOG.info("RetentionListenerContainer initialized for domain [{}]", domain);
     }
 }

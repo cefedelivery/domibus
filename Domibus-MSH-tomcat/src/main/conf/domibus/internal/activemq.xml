@@ -43,6 +43,8 @@
                    physicalName="domibus.internal.splitAndJoin.queue"/>
             <queue id="pullMessageQueue"
                    physicalName="domibus.internal.pull.queue"/>
+            <queue id="retentionMessageQueue"
+                   physicalName="domibus.internal.retentionMessage.queue"/>
             <queue id="sendPullReceiptQueue"
                    physicalName="domibus.internal.pull.receipt.queue"/>
             <queue id="alertMessageQueue"

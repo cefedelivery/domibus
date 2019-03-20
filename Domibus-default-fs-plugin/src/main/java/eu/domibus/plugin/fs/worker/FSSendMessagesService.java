@@ -214,10 +214,11 @@ public class FSSendMessagesService {
         List<FileObject> filteredFiles = new LinkedList<>();
 
         // locked file names
-        Stream<String> lockedFileNames = Arrays.stream(files)
+        List<String> lockedFileNames = Arrays.stream(files)
                 .map(f -> f.getName().getBaseName())
                 .filter(fname -> FSFileNameHelper.isLockFile(fname))
-                .map(fname -> FSFileNameHelper.stripLockSuffix(fname));
+                .map(fname -> FSFileNameHelper.stripLockSuffix(fname))
+                .collect(Collectors.toList());
 
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
@@ -228,7 +229,7 @@ public class FSSendMessagesService {
                     // exclude lock files:
                     && !FSFileNameHelper.isLockFile(baseName)
                     // exclude locked files:
-                    && !lockedFileNames.anyMatch(fname -> fname.equals(baseName))) {
+                    && !lockedFileNames.stream().anyMatch(fname -> fname.equals(baseName))) {
 
                 filteredFiles.add(file);
             }
