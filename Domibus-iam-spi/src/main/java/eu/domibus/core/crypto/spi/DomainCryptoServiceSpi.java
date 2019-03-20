@@ -15,9 +15,10 @@ import java.util.regex.Pattern;
 
 /**
  * @author Thomas Dussart
+ * @see org.apache.wss4j.common.crypto.CryptoBase
  * @since 4.1
  * <p>
- * Externalized interface thant enable to implement identification and access management extensions.
+ * Same methods as CryptoBase defined in the IAM api. Will be used as a delegate by core DomainCryptoService
  */
 public interface DomainCryptoServiceSpi {
     /* START - Methods required to be implemented by the org.apache.wss4j.common.crypto.CryptoBase */

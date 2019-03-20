@@ -13,19 +13,46 @@ import java.util.Map;
 /**
  * @author Thomas Dussart
  * @since 4.1
+ * <p>
+ * Custom authorization implementation should implement this class.
  */
 public interface AuthorizationServiceSpi {
 
-    boolean authorize(
+    /**
+     * Authorize a user message based its content, some metadata, the leaf certificate and its trust chaing.
+     *
+     * @param signingCertificateTrustChain the signing certificate trust chain.
+     * @param signingCertificate           the signing certificate
+     * @param userMessageDTO               the UserMessage information.
+     * @param messageMappings              a map containing information from domibus configuration.
+     * @throws AuthorizationException if the message is not authorized.
+     */
+    void authorize(
             List<X509Certificate> signingCertificateTrustChain,
             X509Certificate signingCertificate,
-            UserMessageDTO userMessage,
+            UserMessageDTO userMessageDTO,
             Map<UserMessageMapping, String> messageMappings) throws AuthorizationException;
 
-    boolean authorize(List<X509Certificate> signingCertificateTrustChain,
-                      X509Certificate signingCertificate,
-                      PullRequestDTO pullRequestDTO,
-                      Map<PullRequestMapping, String> pullRequestMapping) throws AuthorizationException;
+    /**
+     * Authorize a user message based its content, some metadata, the leaf certificate and its trust chain.
+     *
+     * @param signingCertificateTrustChain the signing certificate trust chain.
+     * @param signingCertificate           the signing certificate.
+     * @param pullRequestDTO               the PullRequest information.
+     * @param pullRequestMapping           a map containing information from domibus configuration.
+     * @throws AuthorizationException if the message is not authorized.
+     */
+    void authorize(List<X509Certificate> signingCertificateTrustChain,
+                   X509Certificate signingCertificate,
+                   PullRequestDTO pullRequestDTO,
+                   Map<PullRequestMapping, String> pullRequestMapping) throws AuthorizationException;
 
+    /**
+     * If multiple instances of the AuthorizatoinServiceSpi are found,
+     * the system will use the one that has identifier equal with the following property:
+     * domibus.extension.iam.authorization.identifier
+     *
+     * @return the identifier of Authorization implementation.
+     */
     String getIdentifier();
 }

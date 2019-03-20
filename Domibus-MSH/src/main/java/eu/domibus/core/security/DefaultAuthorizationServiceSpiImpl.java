@@ -16,7 +16,10 @@ import java.util.Map;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 4.1
+ *
+ * Default authorization implementation.
+ * Still needs to be implemented.
  */
 @Component
 public class DefaultAuthorizationServiceSpiImpl implements AuthorizationServiceSpi {
@@ -25,17 +28,25 @@ public class DefaultAuthorizationServiceSpiImpl implements AuthorizationServiceS
 
     protected static final String DEFAULT_IAM_AUTHORIZATION_IDENTIFIER = "DEFAULT_IAM_AUTHORIZATION_SPI";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, UserMessageDTO userMessage, Map<UserMessageMapping, String> messageMapping) {
+    public void authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, UserMessageDTO userMessageDTO, Map<UserMessageMapping, String> messageMapping) {
         LOG.info("Default authorization not implemented.");
-        return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, PullRequestDTO pullRequestDTO, Map<PullRequestMapping, String> pullRequestMapping) throws AuthorizationException {
-        return false;
+    public void authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, PullRequestDTO pullRequestDTO, Map<PullRequestMapping, String> pullRequestMapping) throws AuthorizationException {
+        LOG.info("Default authorization not implemented.");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getIdentifier() {
         return DEFAULT_IAM_AUTHORIZATION_IDENTIFIER;

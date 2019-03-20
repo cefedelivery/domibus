@@ -9,7 +9,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 /**
  * @author Thomas Dussart
  * @since 4.1
- *
+ * <p>
  * Job to launch dss refresh mechanism.
  */
 public class DssRefreshWorker extends QuartzJobBean {

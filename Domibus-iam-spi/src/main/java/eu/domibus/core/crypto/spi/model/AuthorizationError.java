@@ -4,7 +4,7 @@ package eu.domibus.core.crypto.spi.model;
  * @author Thomas Dussart
  * @since 4.1
  * <p>
- * Represent the different states of an authorization problem.
+ * Represent the different states that can returned by the authorization module.
  */
 public enum AuthorizationError {
 

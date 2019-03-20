@@ -11,16 +11,16 @@ import java.util.Map;
 
 /**
  * @author Thomas Dussart
- * @since 4.1
- *
- * Load multiple ConstraintInternal objects based on properties with the following format:
  * @see ConstraintInternal
- *
+ * <p>
  * domibus.dss.default.constraint.name[0]=
  * domibus.dss.default.constraint.status[0]=
- *
+ * <p>
  * domibus.dss.default.constraint.name[1]=
  * domibus.dss.default.constraint.status[1]=
+ * @since 4.1
+ * <p>
+ * Load multiple ConstraintInternal objects based on properties with the following format:
  */
 public class ValidationConstraintPropertyMapper extends PropertyGroupMapper<ConstraintInternal> {
 

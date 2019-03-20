@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Thomas Dussart
  * @since 4.1
- *
+ * <p>
  * Model class containing the constraints configured in the property file.
  * Used to compare with the constraints of the DSS validation report.
  */

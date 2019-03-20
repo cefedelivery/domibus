@@ -3,6 +3,9 @@ package eu.domibus.core.crypto.spi;
 /**
  * @author Thomas Dussart
  * @since 4.1
+ * <p>
+ * Equivalent of CryptoException within the IAM module.
+ * Will be transformed to CryptoException in the core.
  */
 public class CryptoSpiException extends RuntimeException {
 

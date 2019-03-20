@@ -17,23 +17,22 @@ import java.util.Map;
 
 /**
  * @author Thomas Dussart
- * @since 4.1
- *
- * Load multiple OtherTrustedList objects based on properties with the following format:
  * @see eu.europa.esig.dss.tsl.OtherTrustedList
- *
+ * <p>
  * domibus.dss.custom.trusted.list.url[0]=
  * domibus.dss.custom.trusted.list.keystore.path[0]=
  * domibus.dss.custom.trusted.list.keystore.type[0]=
  * domibus.dss.custom.trusted.list.keystore.password[0]=
  * domibus.dss.custom.trusted.list.country.code[0]=
- *
+ * <p>
  * domibus.dss.custom.trusted.list.url[1]=
  * domibus.dss.custom.trusted.list.keystore.path[1]=
  * domibus.dss.custom.trusted.list.keystore.type[1]=
  * domibus.dss.custom.trusted.list.keystore.password[1]=
  * domibus.dss.custom.trusted.list.country.code[1]=
- *
+ * @since 4.1
+ * <p>
+ * Load multiple OtherTrustedList objects based on properties with the following format:
  */
 @Component
 public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTrustedList> {

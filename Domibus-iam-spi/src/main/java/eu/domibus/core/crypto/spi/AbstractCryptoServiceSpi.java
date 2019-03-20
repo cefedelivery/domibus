@@ -2,8 +2,6 @@ package eu.domibus.core.crypto.spi;
 
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.security.KeyStore;
@@ -18,11 +16,13 @@ import java.util.regex.Pattern;
 /**
  * @author Thomas Dussart
  * @since 4.1
+ * <p>
+ * Abstraction wrapper around the default CryptorService that use Merlin within CXF.
+ * Any custom authentication implementation should extend this class and override needed method.
  */
 public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi {
 
     public static final String DEFAULT_IAM_AUTHENTICATION_SPI = "DEFAULT_IAM_AUTHENTICATION_SPI";
-
 
     private DomainCryptoServiceSpi defaultDomainCryptoService;
 

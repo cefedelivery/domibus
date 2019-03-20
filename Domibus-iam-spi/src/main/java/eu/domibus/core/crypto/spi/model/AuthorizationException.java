@@ -1,5 +1,8 @@
 package eu.domibus.core.crypto.spi.model;
 
+/**
+ * Exception thrown by the new Authorization module.
+ */
 public class AuthorizationException extends RuntimeException {
 
     private final String code;

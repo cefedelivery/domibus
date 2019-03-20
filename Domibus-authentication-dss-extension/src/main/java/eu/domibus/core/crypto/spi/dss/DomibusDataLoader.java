@@ -66,7 +66,6 @@ import java.util.*;
  * This class is a copy from DSS CommonsDataLoader.
  * Somme method are adapted because there was a library conflict with SSLContextBuilder.
  * The version associated with DSS is using setProtocol and the domibus is using useProtocol.
- *
  */
 public class DomibusDataLoader implements DataLoader {
 
