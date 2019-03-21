@@ -14,7 +14,12 @@ public class LongTaskRunnable implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(LongTaskRunnable.class);
 
     protected Runnable runnable;
+    protected Runnable errorHandler;
 
+    public LongTaskRunnable(final Runnable runnable, Runnable errorHandler) {
+        this.runnable = runnable;
+        this.errorHandler = errorHandler;
+    }
 
     public LongTaskRunnable(final Runnable runnable) {
         this.runnable = runnable;
@@ -23,10 +28,28 @@ public class LongTaskRunnable implements Runnable {
     @Override
     public void run() {
         try {
+            LOG.trace("Start executing task");
             runnable.run();
+            LOG.trace("Finished executing task");
         } catch (Throwable e) {
             LOG.error("Error executing task", e);
+
+            executeErrorHandler();
+        }
+    }
+
+    protected void executeErrorHandler() {
+        if (errorHandler == null) {
+            LOG.trace("No error handler has been set");
+            return;
         }
 
+        try {
+            LOG.trace("Start executing error handler");
+            errorHandler.run();
+            LOG.trace("Finished executing error handler");
+        } catch (Throwable e) {
+            LOG.error("Error executing error handler", e);
+        }
     }
 }

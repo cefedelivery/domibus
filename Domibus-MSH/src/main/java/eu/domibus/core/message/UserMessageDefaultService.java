@@ -19,6 +19,8 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.core.message.fragment.MessageGroupDao;
+import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.core.replication.UIReplicationSignalService;
@@ -27,6 +29,7 @@ import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
+import eu.domibus.ebms3.sender.SplitAndJoinException;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -34,11 +37,16 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DelayedDispatchMessageCreator;
 import eu.domibus.messaging.DispatchMessageCreator;
+import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.NotificationListener;
+import eu.domibus.plugin.handler.DatabaseMessageHandler;
+import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
@@ -117,6 +125,35 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private UIReplicationSignalService uiReplicationSignalService;
+
+    @Autowired
+    protected MessageGroupDao messageGroupDao;
+
+    @Autowired
+    protected UserMessageFactory userMessageFactory;
+
+    @Autowired
+    protected DatabaseMessageHandler databaseMessageHandler;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
+    public void createMessageFragments(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, List<String> fragmentFiles) {
+        messageGroupDao.create(messageGroupEntity);
+
+        String backendName = userMessageLogDao.findBackendForMessageId(sourceMessage.getMessageInfo().getMessageId());
+        for (int index = 0; index < fragmentFiles.size(); index++) {
+            try {
+                final String fragmentFile = fragmentFiles.get(index);
+                createMessagingForFragment(sourceMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
+            } catch (MessagingProcessingException e) {
+                throw new SplitAndJoinException("Could not create Messaging for fragment " + index, e);
+            }
+        }
+    }
+
+    protected void createMessagingForFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, String backendName, String fragmentFile, int index) throws MessagingProcessingException {
+        final UserMessage userMessageFragment = userMessageFactory.createUserMessageFragment(userMessage, messageGroupEntity, Long.valueOf(index), fragmentFile);
+        databaseMessageHandler.submitMessageFragment(userMessageFragment, backendName);
+    }
 
     @Override
     public String getFinalRecipient(String messageId) {

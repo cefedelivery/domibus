@@ -6,6 +6,7 @@ import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.domain.LegConfiguration;
 import eu.domibus.api.pmode.domain.ReceptionAwareness;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -57,5 +58,9 @@ public class PModeDefaultService implements PModeService {
         result.setRetryCount(receptionAwarenessEntity.getRetryCount());
         result.setRetryTimeout(receptionAwarenessEntity.getRetryTimeout());
         return result;
+    }
+
+    public NotificationStatus getNotificationStatus(eu.domibus.common.model.configuration.LegConfiguration legConfiguration) {
+        return legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
     }
 }

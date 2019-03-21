@@ -151,7 +151,7 @@ public abstract class AbstractUserMessageSender implements MessageSender {
                 reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
                 updateAndCreateAttempt(attempt, attemptError, attemptStatus);
             } catch (Exception ex) {
-                getLog().warn("Finally exception when handlingReliability: ", ex);
+                getLog().warn("Finally exception when handlingReliability", ex);
                 reliabilityService.handleReliabilityInNewTransaction(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
                 updateAndCreateAttempt(attempt, attemptError, attemptStatus);
             }

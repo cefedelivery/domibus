@@ -1,43 +1,66 @@
 package eu.domibus.core.message.fragment;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.messaging.MessagingException;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.usermessage.UserMessageService;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Splitting;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.services.MessagingService;
+import eu.domibus.common.services.impl.AS4ReceiptService;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
+import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.AttachmentCleanupService;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
+import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.ebms3.sender.SplitAndJoinException;
+import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.handler.DatabaseMessageHandler;
-import eu.domibus.plugin.transformer.impl.UserMessageFactory;
+import eu.domibus.pki.PolicyService;
 import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.attachment.AttachmentDeserializer;
+import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageImpl;
+import org.apache.http.entity.ContentType;
+import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.ws.WebServiceException;
+import javax.xml.transform.TransformerException;
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Cosmin Baciu
@@ -46,7 +69,15 @@ import java.util.zip.GZIPInputStream;
 @Service
 public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
+    private static final Long MB_IN_BYTES = 1048576L;
+    public static final String BOUNDARY = "boundary";
+    public static final String START = "start";
+    public static final String FRAGMENT_FILENAME_SEPARATOR = "_";
+
     public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SplitAndJoinDefaultService.class);
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     @Autowired
     protected MessagingDao messagingDao;
@@ -70,13 +101,155 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     protected MessageUtil messageUtil;
 
     @Autowired
-    protected UserMessageFactory userMessageFactory;
+    protected UserMessageDefaultService userMessageDefaultService;
 
     @Autowired
-    private DatabaseMessageHandler databaseMessageHandler;
+    protected UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private UserMessageLogDao userMessageLogDao;
+    protected UpdateRetryLoggingService updateRetryLoggingService;
+
+    @Autowired
+    protected AttachmentCleanupService attachmentCleanupService;
+
+    @Autowired
+    protected UserMessageHandlerService userMessageHandlerService;
+
+    @Autowired
+    protected MessagingService messagingService;
+
+    @Autowired
+    protected UserMessageService userMessageService;
+
+    @Autowired
+    protected IncomingSourceMessageHandler incomingSourceMessageHandler;
+
+    @Autowired
+    protected PolicyService policyService;
+
+    @Autowired
+    protected MSHDispatcher mshDispatcher;
+
+    @Autowired
+    protected AS4ReceiptService as4ReceiptService;
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public void createUserFragmentsFromSourceFile(String sourceMessageFileName, SOAPMessage sourceMessageRequest, UserMessage userMessage, String contentTypeString, boolean compression) {
+        MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
+        messageGroupEntity.setGroupId(UUID.randomUUID().toString());
+        File sourceMessageFile = new File(sourceMessageFileName);
+        messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
+        if (compression) {
+            final File compressSourceMessage = compressSourceMessage(sourceMessageFileName);
+            LOG.debug("Deleting file [{}]", sourceMessageFile);
+            final boolean sourceDeleteSuccessful = sourceMessageFile.delete();
+            if (!sourceDeleteSuccessful) {
+                LOG.warn("Could not delete uncompressed source file [{}]", sourceMessageFile);
+            }
+
+            LOG.debug("Using [{}] as source message file ", compressSourceMessage);
+            sourceMessageFile = compressSourceMessage;
+            messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(compressSourceMessage.length()));
+            messageGroupEntity.setCompressionAlgorithm("application/gzip");
+        }
+
+        messageGroupEntity.setSoapAction(StringUtils.EMPTY);
+        messageGroupEntity.setSourceMessageId(userMessage.getMessageInfo().getMessageId());
+
+        MessageExchangeConfiguration userMessageExchangeConfiguration = null;
+        LegConfiguration legConfiguration = null;
+        try {
+            userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
+            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+        } catch (EbMS3Exception e) {
+            throw new SplitAndJoinException("Could not get LegConfiguration", e);
+        }
+
+        List<String> fragmentFiles = null;
+        try {
+            fragmentFiles = splitSourceMessage(sourceMessageFile, legConfiguration.getSplitting().getFragmentSize());
+        } catch (IOException e) {
+            throw new SplitAndJoinException("Could not split SourceMessage " + sourceMessageFileName, e);
+        }
+        messageGroupEntity.setFragmentCount(Long.valueOf(fragmentFiles.size()));
+        LOG.debug("Deleting source file [{}]", sourceMessageFile);
+        final boolean deleteSuccessful = sourceMessageFile.delete();
+        if (!deleteSuccessful) {
+            LOG.warn("Could not delete source file [{}]", sourceMessageFile);
+        }
+        LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
+
+        final ContentType contentType = ContentType.parse(contentTypeString);
+        MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
+        messageHeaderEntity.setBoundary(contentType.getParameter(BOUNDARY));
+        final String start = contentType.getParameter(START);
+        messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"", ""}));
+        messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
+
+        userMessageDefaultService.createMessageFragments(userMessage, messageGroupEntity, fragmentFiles);
+
+        attachmentCleanupService.cleanAttachments(sourceMessageRequest);
+
+        LOG.debug("Finished processing source message file");
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void rejoinSourceMessage(String groupId, String sourceMessageFile, String backendName) {
+        LOG.debug("Rejoining SourceMessage for group [{}]", groupId);
+
+        final SOAPMessage sourceRequest = rejoinSourceMessage(groupId, new File(sourceMessageFile));
+        Messaging sourceMessaging = messageUtil.getMessage(sourceRequest);
+
+        MessageExchangeConfiguration userMessageExchangeContext = null;
+        LegConfiguration legConfiguration = null;
+        try {
+            userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(sourceMessaging.getUserMessage(), MSHRole.RECEIVING);
+            String sourcePmodeKey = userMessageExchangeContext.getPmodeKey();
+            legConfiguration = pModeProvider.getLegConfiguration(sourcePmodeKey);
+            sourceRequest.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, sourcePmodeKey);
+        } catch (EbMS3Exception | SOAPException e) {
+            //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
+            LOG.error("Error getting the pmodeKey", e);
+            return;
+        }
+
+        try {
+            userMessageHandlerService.handlePayloads(sourceRequest, sourceMessaging.getUserMessage());
+        } catch (EbMS3Exception | SOAPException | TransformerException e) {
+            //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
+            LOG.error("Error handling payloads", e);
+            return;
+        }
+
+        messagingService.storePayloads(sourceMessaging, MSHRole.RECEIVING, legConfiguration, backendName);
+
+        incomingSourceMessageHandler.processMessage(sourceRequest, sourceMessaging);
+        userMessageService.scheduleSourceMessageReceipt(sourceMessaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
+
+        LOG.debug("Finished rejoining SourceMessage for group [{}]", groupId);
+    }
+
+    @Override
+    public void sendSourceMessageReceipt(String sourceMessageId, String pModeKey) {
+        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+        final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+        final Policy policy = policyService.getPolicy(legConfiguration);
+        SOAPMessage receiptMessage = null;
+        try {
+            receiptMessage = as4ReceiptService.generateReceipt(sourceMessageId, false);
+        } catch (EbMS3Exception e) {
+            LOG.error("Error generating the source message receipt", e);
+        }
+        try {
+            mshDispatcher.dispatch(receiptMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
+        } catch (EbMS3Exception e) {
+            LOG.error("Error dispatching SourceMessage receipt", e);
+            throw new SplitAndJoinException("Error dispatching SourceMessage receipt", e);
+        }
+    }
 
     @Override
     public boolean mayUseSplitAndJoin(LegConfiguration legConfiguration) {
@@ -91,28 +264,6 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     public String generateSourceFileName(String temporaryDirectoryLocation) {
         final String uuid = UUID.randomUUID().toString();
         return temporaryDirectoryLocation + "/" + uuid;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
-    @Override
-    public void createMessageFragments(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, List<String> fragmentFiles) {
-        messageGroupDao.create(messageGroupEntity);
-
-        String backendName = userMessageLogDao.findBackendForMessageId(sourceMessage.getMessageInfo().getMessageId());
-        for (int index = 0; index < fragmentFiles.size(); index++) {
-            try {
-                final String fragmentFile = fragmentFiles.get(index);
-                createMessagingForFragment(sourceMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
-            } catch (MessagingProcessingException e) {
-                LOG.error("Could not create Messaging for fragment [{}]", index);
-                throw new WebServiceException(e);
-            }
-        }
-    }
-
-    protected void createMessagingForFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, String backendName, String fragmentFile, int index) throws MessagingProcessingException {
-        final UserMessage userMessageFragment = userMessageFactory.createUserMessageFragment(userMessage, messageGroupEntity, Long.valueOf(index), fragmentFile);
-        databaseMessageHandler.submitMessageFragment(userMessageFragment, backendName);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -142,9 +293,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         return sourceMessageFile;
     }
 
-    @Transactional(propagation = Propagation.SUPPORTS)
-    @Override
-    public SOAPMessage rejoinSourceMessage(String groupId, File sourceMessageFile) {
+    protected SOAPMessage rejoinSourceMessage(String groupId, File sourceMessageFile) {
         LOG.debug("Creating the SOAPMessage for group [{}] from file [{}] ", groupId, sourceMessageFile);
 
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
@@ -177,6 +326,130 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         } catch (Exception e) {
             throw new SplitAndJoinException(e);
         }
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public void setSourceMessageAsFailed(UserMessage userMessage) {
+        final String messageId = userMessage.getMessageInfo().getMessageId();
+        final UserMessageLogEntity messageLog = userMessageLogDao.findByMessageId(messageId);
+        if (messageLog == null) {
+            LOG.error("Could not mark the message as failed");
+            return;
+        }
+        updateRetryLoggingService.messageFailedInANewTransaction(userMessage, messageLog);
+    }
+
+    protected File compressSourceMessage(String fileName) {
+        String compressedFileName = fileName + ".zip";
+        LOG.debug("Compressing the source message file [{}] to [{}]", fileName, compressedFileName);
+        try (GZIPOutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(compressedFileName)));
+             FileInputStream sourceMessageInputStream = new FileInputStream(fileName)) {
+            byte[] buffer = new byte[32 * 1024];
+            int len;
+            while ((len = sourceMessageInputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            LOG.error("Could not compress the message content to file " + fileName);
+            throw new Fault(e);
+        }
+        LOG.debug("Finished compressing the source message file [{}] to [{}]", fileName, compressedFileName);
+        return new File(compressedFileName);
+    }
+
+
+    protected List<String> splitSourceMessage(File sourceMessageFile, int fragmentSizeInMB) throws IOException {
+        LOG.debug("Source file [{}] will be split into fragments", sourceMessageFile);
+
+        final long sourceSize = sourceMessageFile.length();
+        long fragmentSizeInBytes = fragmentSizeInMB * MB_IN_BYTES;
+
+        long bytesPerSplit;
+        long fragmentCount = 1;
+        long remainingBytes = 0;
+        if (sourceSize > fragmentSizeInBytes) {
+            fragmentCount = sourceSize / fragmentSizeInBytes;
+            bytesPerSplit = fragmentSizeInBytes;
+
+            if (fragmentCount > 0) {
+                remainingBytes = sourceSize % (fragmentCount * fragmentSizeInBytes);
+            }
+        } else {
+            bytesPerSplit = sourceSize;
+        }
+        final File storageDirectory = getFragmentStorageDirectory();
+        return splitSourceFileIntoFragments(sourceMessageFile, storageDirectory, fragmentCount, bytesPerSplit, remainingBytes);
+    }
+
+    protected File getFragmentStorageDirectory() {
+        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+        Storage currentStorage = storageProvider.forDomain(currentDomain);
+        LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
+        if (currentStorage == null) {
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
+        }
+        if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not store fragment payload. Please configure " + Storage.ATTACHMENT_STORAGE_LOCATION + " when using SplitAndJoin");
+        }
+        return currentStorage.getStorageDirectory();
+    }
+
+    protected List<String> splitSourceFileIntoFragments(File sourceMessageFile, File storageDirectory, long fragmentCount, long bytesPerSplit, long remainingBytes) throws IOException {
+        List<String> result = new ArrayList<>();
+
+        LOG.debug("Splitting SourceMessage [{}] into [{}] fragments, bytesPerSplit [{}], remainingBytes [{}]", sourceMessageFile, fragmentCount, bytesPerSplit, remainingBytes);
+
+        int maxReadBufferSize = 32 * 1024; //16KB
+        try (RandomAccessFile raf = new RandomAccessFile(sourceMessageFile, "r")) {
+            for (int index = 1; index <= fragmentCount; index++) {
+                final String fragmentFileName = getFragmentFileName(storageDirectory, sourceMessageFile.getName(), index);
+                result.add(fragmentFileName);
+                saveFragmentPayload(bytesPerSplit, maxReadBufferSize, raf, fragmentFileName);
+            }
+            if (remainingBytes > 0) {
+                final String remainingFragmentFileName = getFragmentFileName(storageDirectory, sourceMessageFile.getName(), (fragmentCount + 1));
+                result.add(remainingFragmentFileName);
+
+                try (final FileOutputStream outputStream = new FileOutputStream(remainingFragmentFileName);
+                     final BufferedOutputStream bw = new BufferedOutputStream(outputStream)) {
+                    readWrite(raf, bw, remainingBytes);
+                }
+            }
+        }
+        return result;
+    }
+
+    protected void saveFragmentPayload(long bytesPerSplit, int maxReadBufferSize, RandomAccessFile raf, final String fragmentFileName) throws IOException {
+        LOG.debug("Saving fragment file [{}]", fragmentFileName);
+
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(fragmentFileName);
+             BufferedOutputStream bw = new BufferedOutputStream(fileOutputStream)) {
+            if (bytesPerSplit > maxReadBufferSize) {
+                long numReads = bytesPerSplit / maxReadBufferSize;
+                long numRemainingRead = bytesPerSplit % maxReadBufferSize;
+                for (int index = 0; index < numReads; index++) {
+                    readWrite(raf, bw, maxReadBufferSize);
+                }
+                if (numRemainingRead > 0) {
+                    readWrite(raf, bw, numRemainingRead);
+                }
+            } else {
+                readWrite(raf, bw, bytesPerSplit);
+            }
+        }
+    }
+
+    protected void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
+        byte[] buf = new byte[(int) numBytes];
+        int val = raf.read(buf);
+        if (val != -1) {
+            bw.write(buf);
+        }
+    }
+
+    protected String getFragmentFileName(File outputDirectory, String sourceFileName, long fragmentNumber) {
+        return outputDirectory.getAbsolutePath() + File.separator + sourceFileName + FRAGMENT_FILENAME_SEPARATOR + fragmentNumber;
     }
 
     protected String createContentType(String boundary, String start) {

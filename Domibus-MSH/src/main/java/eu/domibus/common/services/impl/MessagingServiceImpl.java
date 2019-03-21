@@ -7,6 +7,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -72,6 +73,9 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     protected BackendNotificationService backendNotificationService;
 
+    @Autowired
+    protected UserMessageLogDao userMessageLogDao;
+
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration, String backendName) throws CompressionException {
@@ -88,12 +92,11 @@ public class MessagingServiceImpl implements MessagingService {
                             LOG.debug("Scheduling the SourceMessage saving ");
                             storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
                         },
+                        () -> splitAndJoinService.setSourceMessageAsFailed(messaging.getUserMessage()),
                         currentDomain);
             } else {
                 storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
             }
-
-
         } else {
             storePayloads(messaging, mshRole, legConfiguration, backendName);
         }
@@ -130,11 +133,8 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected void storeSourceMessagePayloads(Messaging messaging, MSHRole mshRole, LegConfiguration legConfiguration, String backendName) {
         LOG.debug("Saving the SourceMessage payloads");
-        try {
-            storePayloads(messaging, mshRole, legConfiguration, backendName);
-        } catch (Exception e) {
-            LOG.error("Error saving the SourceMessage payloads", e);
-        }
+
+        storePayloads(messaging, mshRole, legConfiguration, backendName);
 
         final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
         LOG.debug("Scheduling the SourceMessage sending");
@@ -234,8 +234,6 @@ public class MessagingServiceImpl implements MessagingService {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
     }
-
-
 
 
     protected void saveOutgoingPayloadToDisk(PartInfo partInfo, UserMessage userMessage, LegConfiguration legConfiguration, Storage currentStorage, String backendName) throws IOException, EbMS3Exception {

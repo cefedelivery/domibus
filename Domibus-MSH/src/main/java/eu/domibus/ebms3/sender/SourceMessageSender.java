@@ -13,6 +13,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -69,16 +70,13 @@ public class SourceMessageSender implements MessageSender {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    protected UpdateRetryLoggingService updateRetryLoggingService;
+
     @Override
     public void sendMessage(final UserMessage userMessage) {
         final Domain currentDomain = domainContextProvider.getCurrentDomain();
-        domainTaskExecutor.submitLongRunningTask(
-                () -> {
-                    doSendMessage(userMessage);
-                },
-                currentDomain);
-
-
+        domainTaskExecutor.submitLongRunningTask(() -> doSendMessage(userMessage), currentDomain);
     }
 
     protected void doSendMessage(final UserMessage userMessage) {
@@ -93,6 +91,7 @@ public class SourceMessageSender implements MessageSender {
         MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
         String attemptError = null;
 
+        ReliabilityChecker.CheckResult reliabilityCheck = ReliabilityChecker.CheckResult.SEND_FAIL;
         try {
             final String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
@@ -116,9 +115,9 @@ public class SourceMessageSender implements MessageSender {
                 return;
             }
 
-
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             mshDispatcher.dispatchLocal(userMessage, soapMessage, legConfiguration);
+            reliabilityCheck = ReliabilityChecker.CheckResult.OK;
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
@@ -139,6 +138,11 @@ public class SourceMessageSender implements MessageSender {
             throw t;
         } finally {
             try {
+                if (ReliabilityChecker.CheckResult.SEND_FAIL == reliabilityCheck) {
+                    final UserMessageLogEntity userMessageLogEntity = userMessageLogDao.findByMessageId(messageId);
+                    updateRetryLoggingService.messageFailedInANewTransaction(userMessage, userMessageLogEntity);
+                }
+
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);
                 attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
@@ -146,7 +150,7 @@ public class SourceMessageSender implements MessageSender {
 
                 LOG.debug("Finished sending SourceMessage");
             } catch (Exception ex) {
-                LOG.error("Finally: ", ex);
+                LOG.error("Finally exception when marking message as failed", ex);
             }
         }
     }

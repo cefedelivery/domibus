@@ -1,12 +1,12 @@
 package eu.domibus.common.dao;
 
 import com.google.common.collect.Maps;
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.UserMessageLogEntity;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
-import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -100,7 +100,12 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
     public UserMessageLogEntity findByMessageId(String messageId) {
         TypedQuery<UserMessageLogEntity> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLogEntity.class);
         query.setParameter(STR_MESSAGE_ID, messageId);
-        return query.getSingleResult();
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException nrEx) {
+            LOG.debug("Query UserMessageLog.findByMessageId did not find any result for message with id [" + messageId + "]");
+            return null;
+        }
     }
 
     public UserMessageLogEntity findByMessageId(String messageId, MSHRole mshRole) {
@@ -237,7 +242,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
 
     public String findLastUserTestMessageId(String party) {
         HashMap<String, Object> filters = new HashMap<>();
-        filters.put("messageSubtype",MessageSubtype.TEST);
+        filters.put("messageSubtype", MessageSubtype.TEST);
         filters.put("mshRole", MSHRole.SENDING);
         filters.put("toPartyId", party);
         filters.put("messageType", MessageType.USER_MESSAGE);

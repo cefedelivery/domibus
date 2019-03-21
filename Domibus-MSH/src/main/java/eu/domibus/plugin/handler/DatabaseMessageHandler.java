@@ -25,6 +25,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
+import eu.domibus.core.pmode.PModeDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.PullMessageService;
@@ -116,16 +117,19 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     private PullMessageService pullMessageService;
 
     @Autowired
-    AuthUtils authUtils;
+    protected AuthUtils authUtils;
 
     @Autowired
-    UserMessageService userMessageService;
+    protected UserMessageService userMessageService;
 
     @Autowired
-    UIReplicationSignalService uiReplicationSignalService;
+    protected UIReplicationSignalService uiReplicationSignalService;
 
     @Autowired
-    SplitAndJoinService splitAndJoinService;
+    protected SplitAndJoinService splitAndJoinService;
+
+    @Autowired
+    protected PModeDefaultService pModeDefaultService;
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -295,7 +299,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 throw ex;
             }
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
+            userMessageLogService.save(messageId, messageStatus.toString(), pModeDefaultService.getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), userMessage.getCollaborationInfo().getService().getValue(), userMessage.getCollaborationInfo().getAction(), null, true);
             if (MessageStatus.READY_TO_PULL != messageStatus) {
@@ -407,7 +411,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
 
             final boolean sourceMessage = userMessage.isSourceMessage();
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
+            userMessageLogService.save(messageId, messageStatus.toString(), pModeDefaultService.getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction(), sourceMessage, null);
 
@@ -461,10 +465,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]", runTimEx);
             throw MessagingExceptionFactory.transform(runTimEx, ErrorCode.EBMS_0003);
         }
-    }
-
-    private NotificationStatus getNotificationStatus(LegConfiguration legConfiguration) {
-        return legConfiguration.getErrorHandling().isBusinessErrorNotifyProducer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
     }
 
     private int getMaxAttempts(LegConfiguration legConfiguration) {

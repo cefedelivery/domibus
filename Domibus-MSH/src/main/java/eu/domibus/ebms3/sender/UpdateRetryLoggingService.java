@@ -92,14 +92,27 @@ public class UpdateRetryLoggingService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void messageFailedInANewTransaction(UserMessage userMessage, MessageLog userMessageLog) {
+        LOG.debug("Marking message as failed in a new transaction");
+
         messageFailed(userMessage, userMessageLog);
         rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void messageFailedInANewTransaction(UserMessage userMessage, final String messageId, NotificationStatus notificationStatus, boolean isTestMessage) {
+        messageFailed(userMessage, messageId, notificationStatus, isTestMessage);
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+    }
+
     public void messageFailed(UserMessage userMessage, MessageLog userMessageLog) {
+        LOG.debug("Marking message as failed");
         final String messageId = userMessageLog.getMessageId();
+        messageFailed(userMessage, messageId, userMessageLog.getNotificationStatus(), userMessageLog.isTestMessage());
+    }
+
+    public void messageFailed(UserMessage userMessage, final String messageId, NotificationStatus notificationStatus, boolean isTestMessage) {
         LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
-        if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus()) && !userMessageLog.isTestMessage()) {
+        if (NotificationStatus.REQUIRED.equals(notificationStatus) && !isTestMessage) {
             LOG.info("Notifying backend for message failure");
             backendNotificationService.notifyOfSendFailure(userMessage);
         }
@@ -138,7 +151,7 @@ public class UpdateRetryLoggingService {
      * @return true if the message can be sent again
      */
     public boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
-        if(legConfiguration.getReceptionAwareness() == null){
+        if (legConfiguration.getReceptionAwareness() == null) {
             return false;
         }
         LOG.debug("Send attempts [{}], max send attempts [{}], scheduled start time [{}], retry timeout [{}]",
@@ -186,14 +199,14 @@ public class UpdateRetryLoggingService {
 
     public boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         int delay = domibusPropertyProvider.getIntegerProperty(MESSAGE_EXPIRATION_DELAY);
-        Boolean isExpired =  (getMessageExpirationDate(userMessageLog, legConfiguration).getTime() + delay) < System.currentTimeMillis();
+        Boolean isExpired = (getMessageExpirationDate(userMessageLog, legConfiguration).getTime() + delay) < System.currentTimeMillis();
         LOG.debug("Verify if message expired: [{}]", isExpired);
         return isExpired;
     }
 
     public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         Date nextAttempt = new Date();
-        if (userMessageLog.getNextAttempt() !=null) {
+        if (userMessageLog.getNextAttempt() != null) {
             nextAttempt = new Date(userMessageLog.getNextAttempt().getTime());
         }
         RetryStrategy.AttemptAlgorithm algorithm = legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm();
