@@ -15,11 +15,15 @@ public class AuthorizationException extends RuntimeException {
         super(e);
     }
 
-    public AuthorizationException(final String httpCode, final String message) {
+    public AuthorizationException(final AuthorizationError authorizationError, final String message) {
         super(message);
-        this.httpCode = httpCode;
+        this.authorizationError = authorizationError;
     }
 
+    public AuthorizationException(final AuthorizationError authorizationError, final Throwable cause) {
+        super(cause);
+        this.authorizationError = authorizationError;
+    }
 
     public AuthorizationException(final AuthorizationError authorizationError, final String message, final Throwable cause) {
         super(message, cause);
@@ -29,11 +33,6 @@ public class AuthorizationException extends RuntimeException {
     protected AuthorizationException(final String httpCode, final String message, final Throwable cause) {
         super(message, cause);
         this.httpCode = httpCode;
-    }
-
-    public AuthorizationException(final AuthorizationError authorizationError, final String httpCode, final String messageID, final String message) {
-        this(httpCode, message);
-        this.authorizationError = authorizationError;
     }
 
     public AuthorizationException(final AuthorizationError authorizationError, final String httpCode, final String messageID, final String message, Throwable throwable) {
