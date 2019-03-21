@@ -23,5 +23,9 @@ public enum AuthorizationError {
     /**
      * Authorization system not reachable.
      */
-    AUTHORIZATION_SYSTEM_DOWN
+    AUTHORIZATION_SYSTEM_DOWN,
+    /**
+     * Authorization module has a configuration issue.
+     */
+    AUTHORIZATION_MODULE_CONFIGURATION_ISSUE;
 }

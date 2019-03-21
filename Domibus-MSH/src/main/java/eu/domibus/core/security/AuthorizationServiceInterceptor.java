@@ -38,19 +38,19 @@ public class AuthorizationServiceInterceptor extends ServiceInterceptor {
                         return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, a.getMessage(), a.getMessageId(), a.getCause());
                     case AUTHORIZATION_REJECTED:
                         LOG.error("Authorization for incoming message was not granted:[{}]", a.getMessage());
-                        break;
+                        return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0001:Authorization to access the targeted application refused to sender.", a.getMessageId(), null);
+                    case AUTHORIZATION_MODULE_CONFIGURATION_ISSUE:
                     case AUTHORIZATION_SYSTEM_DOWN:
-                        LOG.error("Authorization system is down:[{}]", a.getMessage());
-                        break;
+                        LOG.error("Technical issue with the authorization module:[{}]", a.getMessage());
+                        return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0003:Technical issue.", a.getMessageId(), null);
                     case AUTHORIZATION_CONNECTION_REJECTED:
                         LOG.error("Connection credential to Authorization were rejecte:[{}]", a.getMessage());
-                        break;
+                        return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0002:Technical issue.", a.getMessageId(), null);
                 }
             }
-            return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, a.getMessage(), a.getMessageId(), a.getCause());
-        } else {
-            return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, e.getMessage(), null, e.getCause());
         }
+        LOG.error("Authorization module Unforeseen error:[{}]", e.getMessage(), e);
+        return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0003:Technical issue.", null, null);
     }
 
     @Override

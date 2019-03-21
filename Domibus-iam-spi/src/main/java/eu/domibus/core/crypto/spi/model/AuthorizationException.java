@@ -14,9 +14,16 @@ public class AuthorizationException extends RuntimeException {
     public AuthorizationException(Throwable e) {
         super(e);
     }
+
     public AuthorizationException(final String httpCode, final String message) {
         super(message);
         this.httpCode = httpCode;
+    }
+
+
+    public AuthorizationException(final AuthorizationError authorizationError, final String message, final Throwable cause) {
+        super(message, cause);
+        this.authorizationError = authorizationError;
     }
 
     protected AuthorizationException(final String httpCode, final String message, final Throwable cause) {
