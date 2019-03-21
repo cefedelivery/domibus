@@ -121,7 +121,7 @@ public class DomibusRestClient {
 			domainName = "default";
 		}
 
-		if (getDomainNames().contains(domainName)) {
+		if (getDomainCodes().contains(domainName)) {
 			WebResource.Builder builder = decorateBuilder(resource.path(RestServicePaths.SESSION_DOMAIN));
 
 			builder.accept(MediaType.TEXT_PLAIN_TYPE).type(MediaType.TEXT_PLAIN_TYPE)
@@ -314,17 +314,24 @@ public class DomibusRestClient {
 		}
 	}
 
-	public List<String> getDomainNames() {
+	private JSONArray getDomains(){
+		JSONArray domainArray = null;
 		ClientResponse response = requestGET(resource.path(RestServicePaths.DOMAINS), null);
-		if (response.getStatus() != 200) {
-			return null;
-		}
-		String rawStringResponse = response.getEntity(String.class);
-
-		List<String> toReturn = null;
 		try {
-			JSONArray domainArray = new JSONArray(sanitizeResponse(rawStringResponse));
-			toReturn = new ArrayList<>();
+			if (response.getStatus() == 200) {
+				String rawStringResponse = response.getEntity(String.class);
+				domainArray = new JSONArray(sanitizeResponse(rawStringResponse));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return domainArray;
+	}
+
+	public List<String> getDomainNames() {
+		List<String> toReturn = new ArrayList<>();;
+		try {
+			JSONArray domainArray = getDomains();
 			for (int i = 0; i < domainArray.length(); i++) {
 				toReturn.add(domainArray.getJSONObject(i).getString("name"));
 			}
@@ -333,6 +340,36 @@ public class DomibusRestClient {
 		}
 		return toReturn;
 	}
+
+	public List<String> getDomainCodes() {
+
+		List<String> toReturn = new ArrayList<>();;
+		try {
+			JSONArray domainArray = getDomains();
+			for (int i = 0; i < domainArray.length(); i++) {
+				toReturn.add(domainArray.getJSONObject(i).getString("code"));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
+	}
+
+	public String getDomainCodeForName(String name) {
+		try {
+				JSONArray domainArray = getDomains();
+				for (int i = 0; i < domainArray.length(); i++) {
+					String currentName = domainArray.getJSONObject(i).getString("name");
+					if(currentName.equalsIgnoreCase(name)){
+						return domainArray.getJSONObject(i).getString("code");
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		return null;
+	}
+
 
 
 	public void createMessageFilter(String actionName, String domain) {

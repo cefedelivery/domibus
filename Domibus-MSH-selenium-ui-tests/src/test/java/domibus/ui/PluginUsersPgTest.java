@@ -63,12 +63,12 @@ public class PluginUsersPgTest extends BaseTest {
 		SoftAssert soft = new SoftAssert();
 //		login with Admin and go to plugin users page
 		PluginUsersPage page = login(data.getAdminUser());
+		page.refreshPage();
 
-		DGrid grid = page.grid();
-		int index = grid.scrollTo("User Name", username);
-		HashMap<String, String> row = grid.getRowInfo(index);
+		int index = page.grid().scrollTo("User Name", username);
+		HashMap<String, String> row = page.grid().getRowInfo(index);
 
-		grid.scrollToAndDoubleClick("User Name", username);
+		page.grid().scrollToAndDoubleClick("User Name", username);
 
 
 		PluginUserModal pum = new PluginUserModal(driver);
@@ -437,7 +437,7 @@ public class PluginUsersPgTest extends BaseTest {
 				break;
 			}
 		}
-		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), domain1);
+		rest.createPluginUser(username, DRoles.USER, data.getDefaultTestPass(), rest.getDomainCodeForName(domain1));
 
 		SoftAssert soft = new SoftAssert();
 //		login with Admin and go to plugin users page

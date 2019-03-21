@@ -1,6 +1,7 @@
 package ddsl.dcomponents.grid;
 
 import ddsl.dcomponents.DComponent;
+import ddsl.dcomponents.popups.EditModal;
 import ddsl.dobjects.DObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -9,6 +10,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.DefaultElementLocatorFactory;
+import pages.plugin_users.PluginUserModal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -160,7 +162,7 @@ public class DGrid extends DComponent {
 	public void scrollToAndDoubleClick(String columnName, String value) throws Exception {
 		int index = scrollTo(columnName, value);
 		doubleClickRow(index);
-		wait.forXMillis(500);
+		wait.forXMillis(1000);
 	}
 
 
