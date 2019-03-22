@@ -54,7 +54,7 @@ public class FSMessageListenerContainerConfiguration {
         messageListenerContainer.setDestination(fsPluginOutQueue);
         messageListenerContainer.setMessageListener(fsOutMessageListener);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(fsPluginProperties.getMessageOutQueueConcurrency());
+        messageListenerContainer.setConcurrency(fsPluginProperties.getMessageOutQueueConcurrency(domain.getCode()));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 

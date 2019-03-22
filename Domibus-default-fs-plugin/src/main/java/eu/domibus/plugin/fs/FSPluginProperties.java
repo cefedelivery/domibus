@@ -202,13 +202,6 @@ public class FSPluginProperties {
     }
 
     /**
-     * @return FSPluginOut queue concurrency
-     */
-    public String getMessageOutQueueConcurrency() {
-        return properties.getProperty(PROPERTY_PREFIX + OUT_QUEUE_CONCURRENCY);
-    }
-
-    /**
      * @param domain The domain property qualifier
      * @return the user used to access the location specified by the property
      */
@@ -277,6 +270,16 @@ public class FSPluginProperties {
     }
 
     /**
+     * FSPluginOut queue concurrency
+     *
+     * @param domain the domain
+     * @return concurrency value
+     */
+    public String getMessageOutQueueConcurrency(final String domain) {
+        return getDomainProperty(domain, OUT_QUEUE_CONCURRENCY, "5-10");
+    }
+
+    /**
      * @param domain The domain property qualifier
      * @return True if the sent messages action is "archive"
      */
@@ -307,6 +310,8 @@ public class FSPluginProperties {
     public boolean isFailedActionDelete(String domain) {
         return ACTION_DELETE.equals(getFailedAction(domain));
     }
+
+
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
         String domainFullPropertyName = getDomainPropertyName(domain, propertyName);
