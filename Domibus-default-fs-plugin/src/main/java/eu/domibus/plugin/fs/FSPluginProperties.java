@@ -45,6 +45,8 @@ public class FSPluginProperties {
 
     private static final String RECEIVED_PURGE_WORKER_CRONEXPRESSION = "messages.received.purge.worker.cronExpression";
 
+    private static final String OUT_QUEUE_CONCURRENCY = "out.queue.concurrency";
+
     private static final String USER = "messages.user";
 
     private static final String PAYLOAD_ID = "messages.payload.id";
@@ -197,6 +199,13 @@ public class FSPluginProperties {
      */
     public String getReceivedPurgeWorkerCronExpression() {
         return properties.getProperty(PROPERTY_PREFIX + RECEIVED_PURGE_WORKER_CRONEXPRESSION);
+    }
+
+    /**
+     * @return FSPluginOut queue concurrency
+     */
+    public String getMessageOutQueueConcurrency() {
+        return properties.getProperty(PROPERTY_PREFIX + OUT_QUEUE_CONCURRENCY);
     }
 
     /**

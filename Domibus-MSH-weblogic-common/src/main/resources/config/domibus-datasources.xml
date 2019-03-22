@@ -47,10 +47,6 @@
     <bean id="uiReplicationQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.ui.replication.queue"/>
     </bean>
-    <bean id="fsPluginOutQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="jms/domibus.internal.fsplugin.out.queue"/>
-    </bean>
-
     <bean id="clusterCommandTopic" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.command"/>
     </bean>
