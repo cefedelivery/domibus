@@ -10,6 +10,7 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
+import eu.domibus.ebms3.common.model.MessageExchangePattern;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -94,12 +95,25 @@ public class CachingPModeProvider extends PModeProvider {
         }
     }
 
+    protected List<Process> keepPullProcessesOnly(List<Process> processes) {
+        List<Process> pullProcesses = new ArrayList<>();
+        for(Process process : processes) {
+            if(MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process.getMepBinding().getValue()))
+                pullProcesses.add(process);
+        }
+        return pullProcesses;
+    }
 
     @Override
     //FIXME: only works for the first leg, as sender=initiator
-    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String mpc, final Boolean pullOnly) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
-        for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+        List<Process> processes = this.getConfiguration().getBusinessProcesses().getProcesses();
+        if (pullOnly) {
+            processes = keepPullProcessesOnly(processes);
+        }
+
+        for (final Process process : processes) {
             final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(process.getMepBinding().getValue(), senderParty, receiverParty);
             for (final Party party : process.getInitiatorParties()) {
                 if (StringUtils.equalsIgnoreCase(party.getName(), processTypePartyExtractor.getSenderParty())) {
@@ -126,7 +140,9 @@ public class CachingPModeProvider extends PModeProvider {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
         }
         for (final LegConfiguration candidate : candidates) {
-            if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service) && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)) {
+            if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service)
+                    && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)
+                    && (mpc == null || StringUtils.equalsIgnoreCase(candidate.getDefaultMpc().getName(), mpc))) {
                 return candidate.getName();
             }
         }
@@ -144,9 +160,20 @@ public class CachingPModeProvider extends PModeProvider {
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
     }
 
+
+    @Override
+    protected String findMpcName(final String mpc) throws EbMS3Exception {
+        for (final Mpc mpc1 : this.getConfiguration().getMpcs()) {
+            if (StringUtils.equalsIgnoreCase(mpc1.getQualifiedName(), mpc)) {
+                return mpc1.getName();
+            }
+        }
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching mpc found", null, null);
+    }
+
     @Override
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
-        if(service == null) {
+        if (service == null) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Service is not found in the message", null, null);
         }
 
@@ -210,7 +237,7 @@ public class CachingPModeProvider extends PModeProvider {
         for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {
             final Set<Identifier> identifiers = party.getIdentifiers();
             for (Identifier identifier : identifiers) {
-                if(StringUtils.equalsIgnoreCase(identifier.getPartyId(), partyIdentifier)) {
+                if (StringUtils.equalsIgnoreCase(identifier.getPartyId(), partyIdentifier)) {
                     return party;
                 }
             }
@@ -383,7 +410,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public boolean isConfigurationLoaded() {
-        if(this.configuration != null) return true;
+        if (this.configuration != null) return true;
         return configurationDAO.configurationExists();
     }
 

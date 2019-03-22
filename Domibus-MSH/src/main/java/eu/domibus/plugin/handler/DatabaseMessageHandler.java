@@ -378,7 +378,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
-            fillMpc(userMessage, legConfiguration, to);
+            if(userMessage.getMpc() == null) {
+                fillMpc(userMessage, legConfiguration, to);
+            }
 
             payloadProfileValidator.validate(message, pModeKey);
             propertyProfileValidator.validate(message, pModeKey);

@@ -99,11 +99,12 @@ public class PullRequestHandler {
         UserMessage userMessage = null;
         try {
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
-            leg = pullContext.filterLegOnMpc();
+            String mpc = pullMessageService.extractBaseMpc(pullContext.getMpcQualifiedName());
+            leg = pullContext.filterLegOnMpc(mpc);
             try {
-                messageExchangeService.verifyReceiverCertificate(leg, pullContext.getInitiator().getName());
-                messageExchangeService.verifySenderCertificate(leg, pullContext.getResponder().getName());
-                leg = pullContext.filterLegOnMpc();
+                messageExchangeService.verifyReceiverCertificate(leg, userMessage.getPartyInfo().getTo().getFirstPartyId());
+                messageExchangeService.verifySenderCertificate(leg, userMessage.getPartyInfo().getFrom().getFirstPartyId());
+                //leg = pullContext.filterLegOnMpc();
                 soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
                 if (pullRequestMatcher.matchReliableCallBack(leg.getReliability()) &&

@@ -15,6 +15,7 @@ import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
@@ -76,6 +77,9 @@ public abstract class PModeProvider {
     @Autowired
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
+
+    @Autowired
+    private PullMessageService pullMessageService;
 
 //    @Autowired
 //    protected JMSManager jmsManager;
@@ -200,8 +204,8 @@ public abstract class PModeProvider {
     }
 
     private String validateDescriptionSize(final String description) {
-        if(StringUtils.isNotEmpty(description) && description.length()>255){
-            return description.substring(0,254);
+        if (StringUtils.isNotEmpty(description) && description.length() > 255) {
+            return description.substring(0, 254);
         }
         return description;
     }
@@ -251,6 +255,7 @@ public abstract class PModeProvider {
         final String service;
         final String action;
         final String leg;
+        String mpc = null;
 
         final String messageId = userMessage.getMessageInfo().getMessageId();
         //add messageId to MDC map
@@ -270,18 +275,20 @@ public abstract class PModeProvider {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, service, userMessage.getCollaborationInfo().getService());
             action = findActionName(userMessage.getCollaborationInfo().getAction());
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_ACTION_FOUND, action, userMessage.getCollaborationInfo().getAction());
-            leg = findLegName(agreementName, senderParty, receiverParty, service, action);
-            LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
+            mpc = findMpcName(userMessage);
+
+            leg = findLegName(agreementName, senderParty, receiverParty, service, action, mpc, pullMessageService.useMpcOnly(userMessage.getMpc()));
+            LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action, mpc);
 
             if ((StringUtils.equalsIgnoreCase(action, Ebms3Constants.TEST_ACTION) && (!StringUtils.equalsIgnoreCase(service, Ebms3Constants.TEST_SERVICE)))) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", messageId, null);
             }
 
-            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);
+            MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg, userMessage.getMpc());
             LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeConfiguration.getPmodeKey(), userMessage);
             return messageExchangeConfiguration;
         } catch (EbMS3Exception e) {
-            if(userMessage.getMessageInfo() != null) {
+            if (userMessage.getMessageInfo() != null) {
                 e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
             }
 
@@ -307,9 +314,11 @@ public abstract class PModeProvider {
 
     public abstract List<String> getMpcURIList();
 
-    protected abstract String findLegName(String agreementRef, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception;
+    protected abstract String findLegName(String agreementRef, String senderParty, String receiverParty, String service, String action, String mpc, Boolean pullOnly) throws EbMS3Exception;
 
     protected abstract String findActionName(String action) throws EbMS3Exception;
+
+    protected abstract String findMpcName(String mpc) throws EbMS3Exception;
 
     protected abstract String findServiceName(eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception;
 
@@ -344,6 +353,35 @@ public abstract class PModeProvider {
     public abstract int getRetentionUndownloadedByMpcURI(final String mpcURI);
 
     public abstract Role getBusinessProcessRole(String roleValue);
+
+    protected String findMpcName(UserMessage userMessage) throws EbMS3Exception {
+        if (userMessage.getMpc() == null) {
+            return null;
+        }
+        // try first with the unmodified mpc
+        LOG.info("Mpc attribut present in userMessage [{}], messageId [{}]", userMessage.getMpc(), userMessage.getMessageInfo().getMessageId());
+        String mpc = null;
+        try {
+            mpc = findMpcName(userMessage.getMpc());
+            LOG.debug("Mpc [{}] found", mpc);
+        } catch (EbMS3Exception exc) {
+            // try now with base mpc
+            String baseMpc = pullMessageService.extractBaseMpc(userMessage.getMpc());
+            LOG.debug("Could not find mpc [{}], searching for base mpc [{}] ", mpc, baseMpc);
+            try {
+                mpc = findMpcName(baseMpc);
+                LOG.debug("Base mpc [{}] found", mpc);
+            } catch (EbMS3Exception e) {
+                // try now with base mpc
+                String gatewayPartyId = getGatewayParty().getIdentifiers().iterator().next().getPartyId();
+                String fullMpc = pullMessageService.buildFullMpc(userMessage.getMpc(), gatewayPartyId);
+                LOG.debug("Could not find base mpc [{}], searching for full mpc [{}] ", mpc, fullMpc);
+                mpc = findMpcName(fullMpc);
+                LOG.debug("Full mpc [{}] found", mpc);
+            }
+        }
+        return mpc;
+    }
 
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
         return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[0];

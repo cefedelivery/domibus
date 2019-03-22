@@ -22,6 +22,16 @@ public interface PullMessageService {
     String getPullMessageId(String initiator, String mpc);
 
     /**
+     * Search if a message ready for being pull exists for that mpc.
+     * If it exists the message will be locked until the end of the transaction.
+     *
+     * @param mpc       the mpc contained in the pull request.
+     * @return the id of the message or null.
+     */
+    String getPullMessageId(String mpc);
+
+
+    /**
      * When a message arrives in the system, if it is configured to be pulled, some extra information needed for finding
      * the message later will be extracted and saved in a different place where the message lock will be facilitated.
      *
@@ -105,4 +115,52 @@ public interface PullMessageService {
      * @param requestResult the pull request result.
      */
     void releaseLockAfterReceipt(PullRequestResult requestResult);
+
+    /**
+     * Decides whether the pulling should be done only by mpc, when it contains party information.
+     *
+     * @param fullMpc Full qualified name of the mpc
+     * @return true if the mpc contains party info
+     *
+     * TAPAS example for urn:fdc:ec.europa.eu:2019:eu_ics2_c2t/EORI/BE1234567890
+     * the result is true
+     *
+     */
+    boolean useMpcOnly(String fullMpc);
+
+    /**
+     * Extracts the base part of the mpc when it contains party info
+     *
+     * @param fullMpc Full qualified name of the mpc
+     * @return the base part of the Mpc.
+     *
+     * E.g for urn:fdc:ec.europa.eu:2019:eu_ics2_c2t/EORI/BE1234567890
+     * the result is urn:fdc:ec.europa.eu:2019:eu_ics2_c2t
+     */
+    String extractBaseMpc(String fullMpc);
+
+    /**
+     * Builds a full mpc containing the partyId
+     *
+     * @param mpc Base mpc value
+     * @param partyId The partyId to be added to the mpc
+     * @return full Mpc including the partyId
+     *
+     * E.g for mpc=urn:fdc:ec.europa.eu:2019:eu_ics2_c2t and partyId=BE1234567890
+     * result is urn:fdc:ec.europa.eu:2019:eu_ics2_c2t/EORI/BE1234567890
+     */
+    String buildFullMpc(String mpc, String partyId);
+
+    /**
+     * Verifies the mpc and decides if the pulling should
+     *
+     * @param fullMpc Full qualified name of the mpc
+     * @return the base part of the Mpc.
+     *
+     * E.g for urn:fdc:ec.europa.eu:2019:eu_ics2_c2t/EORI/BE1234567890,
+     * BE1234567890 is the PartyId
+     */
+    String extractPartyIdFromMpc(String fullMpc);
+
+
 }

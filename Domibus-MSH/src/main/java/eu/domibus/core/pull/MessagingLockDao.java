@@ -28,6 +28,8 @@ public interface MessagingLockDao {
 
     List<MessagingLock> findReadyToPull(String mpc, String initiator);
 
+    List<MessagingLock> findReadyToPull(String mpc);
+
     List<MessagingLock> findWaitingForReceipt();
 
 }

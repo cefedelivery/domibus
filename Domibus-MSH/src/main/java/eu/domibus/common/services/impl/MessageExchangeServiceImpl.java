@@ -33,6 +33,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -178,20 +180,27 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return;
         }
         for (Process pullProcess : pullProcesses) {
+            Set<String> mpcs = new HashSet<>();
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
-                    for (Party initiatorParty : pullProcess.getResponderParties()) {
+                    for (Party responderParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
+                        // mpc is not null when it is a pull on demand
                         if (mpc != null && !mpc.equals(mpcQualifiedName)) {
                             continue;
                         }
+                        // we now allow multiple legs with the same mpc (and the same security policy)
+                        if(mpcs.contains(mpc)) {
+                            continue;
+                        }
+                        mpcs.add(mpc);
                         //@thom remove the pullcontext from here.
                         PullContext pullContext = new PullContext(pullProcess,
-                                initiatorParty,
+                                responderParty,
                                 mpcQualifiedName);
                         MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
-                                initiatorParty.getName(),
+                                responderParty.getName(),
                                 initiator.getName(),
                                 legConfiguration.getService().getName(),
                                 legConfiguration.getAction().getName(),
@@ -242,6 +251,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
+        if(initiator == null || pullMessageService.useMpcOnly(mpc)) {
+            return pullMessageService.getPullMessageId(mpc);
+        }
         Set<Identifier> identifiers = initiator.getIdentifiers();
         if (identifiers.isEmpty()) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
@@ -258,14 +270,22 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();
-            List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
+            String mpc = mpcQualifiedName;
+            Party initiator = null;
+            List<Process> processes = pModeProvider.findPullProcessByMpc(mpc);
+            if(CollectionUtils.isEmpty(processes)) {
+                mpc = pullMessageService.extractBaseMpc(mpcQualifiedName);
+                initiator = pModeProvider.getPartyByIdentifier(pullMessageService.extractPartyIdFromMpc(mpcQualifiedName));
+                processes = pModeProvider.findPullProcessByMpc(mpc);
+            }
             if (LOG.isDebugEnabled()) {
                 for (Process process : processes) {
                     LOG.debug("Process:[{}] correspond to mpc:[{}]", process.getName(), mpcQualifiedName);
                 }
             }
             processValidator.validatePullProcess(processes);
-            return new PullContext(processes.get(0), gatewayParty, mpcQualifiedName);
+            LOG.debug("Creating new PullContext with [{}] [{}] [{}]", processes.get(0).getName(), gatewayParty, mpcQualifiedName);
+            return new PullContext(processes.get(0), gatewayParty, initiator, mpcQualifiedName);
         } catch (IllegalArgumentException e) {
             throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
         }

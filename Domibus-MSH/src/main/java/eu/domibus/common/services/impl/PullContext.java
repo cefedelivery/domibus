@@ -5,6 +5,7 @@ import com.google.common.collect.Collections2;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
@@ -19,6 +20,7 @@ public class PullContext {
 
     private Process process;
     private Party responder;
+    private Party initiator;
     private String mpcQualifiedName;
     public static final String MPC = "mpc";
     public static final String PMODE_KEY = "pmodKey";
@@ -28,11 +30,22 @@ public class PullContext {
         Validate.notNull(process);
         Validate.notNull(responder);
         Validate.notNull(mpcQualifiedName);
-        Validate.isTrue(process.getInitiatorParties().size() == 1);
         this.process = process;
         this.mpcQualifiedName = mpcQualifiedName;
         this.responder = responder;
+        this.initiator = null;
     }
+
+    public PullContext(final Process process, final Party responder, final Party initiator, final String mpcQualifiedName) {
+        Validate.notNull(process);
+        Validate.notNull(responder);
+        Validate.notNull(mpcQualifiedName);
+        this.process = process;
+        this.mpcQualifiedName = mpcQualifiedName;
+        this.responder = responder;
+        this.initiator = initiator;
+    }
+
 
     public String getAgreement() {
         if (process.getAgreement() != null) {
@@ -46,6 +59,12 @@ public class PullContext {
     }
 
     public Party getInitiator() {
+        if(initiator != null) {
+            return initiator;
+        }
+        if(CollectionUtils.isEmpty(process.getInitiatorParties())) {
+            return null;
+        }
         return process.getInitiatorParties().iterator().next();
     }
 
@@ -58,11 +77,15 @@ public class PullContext {
     }
 
     public LegConfiguration filterLegOnMpc() {
-        if (mpcQualifiedName != null) {
+        return filterLegOnMpc(mpcQualifiedName);
+    }
+
+    public LegConfiguration filterLegOnMpc(String mpc) {
+        if (mpc != null) {
             Collection<LegConfiguration> filter = Collections2.filter(process.getLegs(), new Predicate<LegConfiguration>() {
                 @Override
                 public boolean apply(LegConfiguration legConfiguration) {
-                    return mpcQualifiedName.equalsIgnoreCase(legConfiguration.getDefaultMpc().getQualifiedName());
+                    return mpc.equalsIgnoreCase(legConfiguration.getDefaultMpc().getQualifiedName());
                 }
             });
             return filter.iterator().next();

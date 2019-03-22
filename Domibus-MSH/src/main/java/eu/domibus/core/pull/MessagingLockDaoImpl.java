@@ -151,6 +151,16 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<MessagingLock> findReadyToPull(final String mpc) {
+        final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findReadyToPullByMpc", MessagingLock.class);
+        namedQuery.setFirstResult(0);
+        namedQuery.setMaxResults(50);
+        namedQuery.setParameter(MPC, mpc);
+        return namedQuery.getResultList();
+    }
+
+    @Override
     public List<MessagingLock> findWaitingForReceipt() {
         final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findWaitingForReceipt", MessagingLock.class);
         return namedQuery.getResultList();

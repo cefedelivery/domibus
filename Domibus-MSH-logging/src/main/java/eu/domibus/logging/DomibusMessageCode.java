@@ -38,7 +38,7 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_SERVICE_FOUND("BUS-027", "Message service [{}] found for value [{}]"),
     BUS_MESSAGE_SERVICE_NOT_FOUND("BUS-028", "Message service not found for value [{}]"),
     BUS_MESSAGE_SERVICE_INVALID_URI("BUS-029", "Message service [{}] is not a valid URI [CORE]"),
-    BUS_LEG_NAME_FOUND("BUS-030", "Leg name found [{}] for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
+    BUS_LEG_NAME_FOUND("BUS-030", "Leg name found [{}] for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}] and mpc [{}]"),
     BUS_LEG_NAME_NOT_FOUND("BUS-031", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_MESSAGE_SEND_INITIATION("BUS-032", "Preparing to send message"),
     BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully [{}] from [{}] to [{}]"),
@@ -72,6 +72,8 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE("BUS-061", "Received payload with cid [{}] for message [{}] of size [{}] (in bytes)"),
     BUS_MESSAGE_SENDING_PAYLOAD_SIZE("BUS-062", "Saved payload with cid [{}] for message [{}] of size [{}] (in bytes) for sending"),
     BUS_MESSAGE_STATUS_CHANGED("BUS-063", "Notifying about message status change from [{}] to [{}]"),
+    BUS_MESSAGE_MPC_NOT_FOUND("BUS-064", "Message mpc not found for value [{}]"),
+
 
     SEC_UNSECURED_LOGIN_ALLOWED("SEC-001", "Unsecure login is allowed, no authentication will be performed"),
     SEC_BASIC_AUTHENTICATION_USE("SEC-002", "Basic authentication is used"),

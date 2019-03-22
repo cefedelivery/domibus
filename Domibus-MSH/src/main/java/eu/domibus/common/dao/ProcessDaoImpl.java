@@ -9,7 +9,10 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static eu.domibus.common.model.configuration.Process.*;
 
@@ -63,7 +66,9 @@ public class ProcessDaoImpl implements ProcessDao{
         TypedQuery<Process> processQuery= entityManager.createNamedQuery(FIND_PULL_PROCESS_FROM_MPC,Process.class);
         processQuery.setParameter(MEP_BINDING,BackendConnector.Mode.PULL.getFileMapping());
         processQuery.setParameter(MPC_NAME, mpc);
-        return processQuery.getResultList();
+
+        // remove duplicates
+        return new ArrayList<>(new HashSet<>(processQuery.getResultList()));
     }
 
     /**

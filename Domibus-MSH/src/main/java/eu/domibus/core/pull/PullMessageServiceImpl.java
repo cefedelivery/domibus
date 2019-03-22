@@ -169,9 +169,26 @@ public class PullMessageServiceImpl implements PullMessageService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public String getPullMessageId(final String mpc) {
+        final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(mpc);
+        LOG.trace("[PULL_REQUEST]:Reading messages for mpc[{}].", mpc);
+
+        return getPullMessageId(messagingLock);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public String getPullMessageId(final String initiator, final String mpc) {
         final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(mpc, initiator);
         LOG.trace("[PULL_REQUEST]:Reading messages for initiatior [{}] mpc[{}].", initiator, mpc);
+
+        return getPullMessageId(messagingLock);
+    }
+
+    protected String getPullMessageId(List<MessagingLock> messagingLock) {
         for (MessagingLock lock : messagingLock) {
             LOG.trace("[getPullMessageId]:Message[{}]] try to acquire lock", lock.getMessageId());
             PullMessageId pullMessageId = null;
@@ -423,6 +440,59 @@ public class PullMessageServiceImpl implements PullMessageService {
             delete(lock);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String extractPartyIdFromMpc(String fullMpc) {
+
+        String resultMpc = fullMpc;
+        if(fullMpc.contains("/EORI")) {
+            resultMpc = fullMpc.substring(fullMpc.indexOf("/EORI") + "/EORI".length() +1);
+        }
+        LOG.info("PartyId from mpc is [{}]", resultMpc);
+        return resultMpc;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    //TODO - add domibus property with the right expression for parsing
+    public boolean useMpcOnly(String fullMpc) {
+        if(fullMpc == null)
+            return false;
+        return fullMpc.contains("/EORI");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    //TODO - add domibus property with the right expression for parsing
+    public String extractBaseMpc(String fullMpc) {
+
+        String resultMpc = fullMpc;
+        if(fullMpc.contains("/EORI")) {
+            resultMpc = fullMpc.substring(0, fullMpc.indexOf("/EORI"));
+        }
+        LOG.info("Base Mpc to be used is [{}]", resultMpc);
+        return resultMpc;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    //TODO - add domibus property with the right expression for parsing
+    public String buildFullMpc(String mpc, String partyId) {
+
+        String resultMpc = mpc + "/EORI" + "/" + partyId;
+        LOG.info("Full Mpc to be used is [{}]", resultMpc);
+        return resultMpc;
+    }
+
 
     /**
      * {@inheritDoc}

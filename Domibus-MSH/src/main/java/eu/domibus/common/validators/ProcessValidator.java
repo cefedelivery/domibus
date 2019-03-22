@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,6 +96,22 @@ public class ProcessValidator {
         return status;
     }
 
+    protected boolean isSameSecurityPolicyForMultipleLegs(final Process process) {
+        // when there are multiple legs with the same mpc in a pull process, all legs must have the same security policy
+        HashMap<String, String> mpcsSecurityMapping = new HashMap<>();
+        for (LegConfiguration legConfiguration : process.getLegs()) {
+            String mpc = legConfiguration.getDefaultMpc().getQualifiedName();
+            String securityPolicyName = legConfiguration.getSecurity().getName();
+            if (mpcsSecurityMapping.containsKey(mpc) &&
+                    !mpcsSecurityMapping.get(mpc).equals(securityPolicyName)) {
+                LOG.warn("Different security policies configured in legs authorized with the same mpc in a oneway pull process [{}].", process.getName());
+                return false;
+            }
+            mpcsSecurityMapping.put(mpc, securityPolicyName);
+        }
+        return true;
+    }
+
     private PullProcessStatus checkMpcConfiguration(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
         Multiset<String> mpcs = HashMultiset.create();
@@ -103,8 +120,8 @@ public class ProcessValidator {
         }
 
         for (String mpc : mpcs) {
-            if (mpcs.count(mpc) > 1) {
-                LOG.warn("Only one leg authorized with the same mpc in a oneway pull. PMode skipped!");
+            if (mpcs.count(mpc) > 1 && !isSameSecurityPolicyForMultipleLegs(process)) {
+                LOG.warn("More than one leg authorized with the same mpc in a oneway pull.");
                 status = MORE_THAN_ONE_LEG_FOR_THE_SAME_MPC;
                 break;
             }
@@ -123,11 +140,11 @@ public class ProcessValidator {
 
     private PullProcessStatus checkResponderConfiguration(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
-        if (process.getInitiatorParties().size() > 1) {
+        if (process.getResponderParties().size() > 1) {
             LOG.warn("Pull process should only have one responder configured for mpc");
             status = TOO_MANY_RESPONDER;
         }
-        if (process.getInitiatorParties().size() == 0) {
+        if (process.getResponderParties().size() == 0) {
             LOG.warn("No responder configured.");
             status = NO_RESPONDER;
         }

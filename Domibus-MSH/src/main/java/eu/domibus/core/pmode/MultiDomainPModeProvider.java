@@ -86,8 +86,8 @@ public class MultiDomainPModeProvider extends PModeProvider {
     }
 
     @Override
-    protected String findLegName(String agreementRef, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception {
-        return getCurrentPModeProvider().findLegName(agreementRef, senderParty, receiverParty, service, action);
+    protected String findLegName(String agreementRef, String senderParty, String receiverParty, String service, String action, String mpc, Boolean pullOnly) throws EbMS3Exception {
+        return getCurrentPModeProvider().findLegName(agreementRef, senderParty, receiverParty, service, action, mpc, pullOnly);
     }
 
     @Override
@@ -98,6 +98,11 @@ public class MultiDomainPModeProvider extends PModeProvider {
     @Override
     protected String findServiceName(Service service) throws EbMS3Exception {
         return getCurrentPModeProvider().findServiceName(service);
+    }
+
+    @Override
+    protected String findMpcName(String mpc) throws EbMS3Exception {
+        return getCurrentPModeProvider().findMpcName(mpc);
     }
 
     @Override

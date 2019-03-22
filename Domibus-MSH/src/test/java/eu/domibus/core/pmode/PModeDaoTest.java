@@ -78,7 +78,7 @@ public class PModeDaoTest {
             pModeDao.findLegNameMepBindingAgnostic("agreementName", "senderParty", "receiverParty", "service", "action");
             result = "pushLeg";
         }};
-        final String legName = pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action");
+        final String legName = pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action", "mpc", false);
         Assert.assertEquals("pushLeg", legName);
     }
 
@@ -92,7 +92,7 @@ public class PModeDaoTest {
         }};
         EbMS3Exception check = null;
         try {
-            pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action");
+            pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action", "mpc", false);
             Assert.assertTrue(false);
         } catch (EbMS3Exception e) {
             check = e;
@@ -114,7 +114,7 @@ public class PModeDaoTest {
         }};
         EbMS3Exception check = null;
         try {
-            pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action");
+            pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action", "mpc", false);
             Assert.assertTrue(false);
         } catch (EbMS3Exception e) {
             check = e;
@@ -135,7 +135,7 @@ public class PModeDaoTest {
 
         }};
 
-        String legName = pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action");
+        String legName = pModeDao.findLegName("agreementName", "senderParty", "receiverParty", "service", "action", "mpc", false);
         Assert.assertEquals(pullLegFound, legName);
 
     }

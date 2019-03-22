@@ -38,9 +38,15 @@ public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfi
             PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
             LegConfiguration legConfiguration = pullContext.getProcess().getLegs().iterator().next();
             //TODO check why pullContext.getInitiator().getName() was set a the sender and there was no bug. verify where is the pmodekey used and remove if not used.
+
+            String initiator = null;
+            if(pullContext.getInitiator() != null) {
+                initiator = pullContext.getInitiator().getName();
+            }
+
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(pullContext.getAgreement(),
                     pullContext.getResponder().getName(),
-                    pullContext.getInitiator().getName(),
+                    initiator,
                     legConfiguration.getService().getName(),
                     legConfiguration.getAction().getName(),
                     legConfiguration.getName());
