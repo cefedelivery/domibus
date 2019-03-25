@@ -5,7 +5,7 @@ import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLogger;
@@ -28,7 +28,7 @@ import java.util.*;
  * @since 3.0
  */
 @Repository
-public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
+public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
 
     private static final String STR_MESSAGE_ID = "MESSAGE_ID";
 
@@ -38,7 +38,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageLogDao.class);
 
     public UserMessageLogDao() {
-        super(UserMessageLogEntity.class);
+        super(UserMessageLog.class);
     }
 
     public List<String> findRetryMessages() {
@@ -97,8 +97,8 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
         return query.getResultList();
     }
 
-    public UserMessageLogEntity findByMessageId(String messageId) {
-        TypedQuery<UserMessageLogEntity> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLogEntity.class);
+    public UserMessageLog findByMessageId(String messageId) {
+        TypedQuery<UserMessageLog> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLog.class);
         query.setParameter(STR_MESSAGE_ID, messageId);
         try {
             return query.getSingleResult();
@@ -108,8 +108,8 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
         }
     }
 
-    public UserMessageLogEntity findByMessageId(String messageId, MSHRole mshRole) {
-        TypedQuery<UserMessageLogEntity> query = this.em.createNamedQuery("UserMessageLog.findByMessageIdAndRole", UserMessageLogEntity.class);
+    public UserMessageLog findByMessageId(String messageId, MSHRole mshRole) {
+        TypedQuery<UserMessageLog> query = this.em.createNamedQuery("UserMessageLog.findByMessageIdAndRole", UserMessageLog.class);
         query.setParameter(STR_MESSAGE_ID, messageId);
         query.setParameter("MSH_ROLE", mshRole);
 
@@ -124,7 +124,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
     public Long countMessages(Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<UserMessageLogEntity> mle = cq.from(UserMessageLogEntity.class);
+        Root<UserMessageLog> mle = cq.from(UserMessageLog.class);
         cq.select(cb.count(mle));
         List<Predicate> predicates = getPredicates(filters, cb, mle);
         cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
@@ -132,10 +132,10 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
         return query.getSingleResult();
     }
 
-    public List<UserMessageLogEntity> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
+    public List<UserMessageLog> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        CriteriaQuery<UserMessageLogEntity> cq = cb.createQuery(UserMessageLogEntity.class);
-        Root<UserMessageLogEntity> mle = cq.from(UserMessageLogEntity.class);
+        CriteriaQuery<UserMessageLog> cq = cb.createQuery(UserMessageLog.class);
+        Root<UserMessageLog> mle = cq.from(UserMessageLog.class);
         cq.select(mle);
         List<Predicate> predicates = getPredicates(filters, cb, mle);
         cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
@@ -147,7 +147,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
             }
 
         }
-        TypedQuery<UserMessageLogEntity> query = this.em.createQuery(cq);
+        TypedQuery<UserMessageLog> query = this.em.createQuery(cq);
         query.setFirstResult(from);
         query.setMaxResults(max);
         return query.getResultList();
@@ -186,7 +186,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLogEntity> {
     }
 
     public void setAsNotified(String messageId) {
-        final UserMessageLogEntity messageLog = findByMessageId(messageId);
+        final UserMessageLog messageLog = findByMessageId(messageId);
         messageLog.setNotificationStatus(NotificationStatus.NOTIFIED);
         super.update(messageLog);
     }

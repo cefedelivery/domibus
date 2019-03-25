@@ -4,7 +4,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -49,9 +49,9 @@ public class UserMessageLogDefaultServiceTest {
         userMessageLogDefaultService.save(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint, null, null, null, null);
 
         new Verifications() {{
-            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLogEntity()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
+            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLog()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
 
-            UserMessageLogEntity userMessageLog = null;
+            UserMessageLog userMessageLog = null;
             userMessageLogDao.create(userMessageLog = withCapture());
             Assert.assertEquals(messageId, userMessageLog.getMessageId());
             Assert.assertEquals(MessageStatus.SEND_ENQUEUED, userMessageLog.getMessageStatus());
@@ -65,7 +65,7 @@ public class UserMessageLogDefaultServiceTest {
     }
 
     @Test
-    public void testUpdateMessageStatus(@Injectable final UserMessageLogEntity messageLog) throws Exception {
+    public void testUpdateMessageStatus(@Injectable final UserMessageLog messageLog) throws Exception {
         final String messageId = "1";
         final MessageStatus messageStatus = MessageStatus.SEND_ENQUEUED;
 
@@ -90,7 +90,7 @@ public class UserMessageLogDefaultServiceTest {
     }
 
     @Test
-    public void testSetMessageAsDeleted(@Injectable final UserMessageLogEntity messageLog) throws Exception {
+    public void testSetMessageAsDeleted(@Injectable final UserMessageLog messageLog) throws Exception {
         final String messageId = "1";
 
         userMessageLogDefaultService.setMessageAsDeleted(messageId);

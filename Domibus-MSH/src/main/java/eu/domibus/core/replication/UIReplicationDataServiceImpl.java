@@ -6,7 +6,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.SignalMessageLog;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -86,7 +86,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void messageStatusChange(String messageId, MessageStatus messageStatus, long jmsTimestamp) {
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
         if (entity != null && entity.getLastModified().getTime() <= jmsTimestamp) {
@@ -110,7 +110,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void messageNotificationStatusChange(String messageId, NotificationStatus notificationStatus, long jmsTimestamp) {
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
         if (entity != null && entity.getLastModified2().getTime() <= jmsTimestamp) {
@@ -131,7 +131,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void messageChange(String messageId, long jmsTimestamp) {
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
         final Date jmsTime = new Date(jmsTimestamp);
 
@@ -209,7 +209,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      * @param jmsTimestamp
      */
     protected void saveUIMessageFromUserMessageLog(String messageId, long jmsTimestamp) {
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
 
         //using Dozer

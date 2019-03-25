@@ -9,7 +9,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Reliability;
 import eu.domibus.common.model.configuration.ReplyPattern;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -79,7 +79,7 @@ public class IncomingUserMessageReceiptHandler implements IncomingMessageHandler
     protected SOAPMessage handleUserMessageReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
 
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (MessageStatus.ACKNOWLEDGED == userMessageLog.getMessageStatus()) {
             LOG.error("Received a UserMessage receipt for an already acknowledged message with status [{}]", userMessageLog.getMessageStatus());
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("UserMessage with ID [%s] is already acknowledged", messageId), messageId, null);

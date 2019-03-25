@@ -10,7 +10,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
@@ -99,7 +99,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
         UserMessage userMessage = null;
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (MessageStatus.WAITING_FOR_RECEIPT != userMessageLog.getMessageStatus()) {
             LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId(), userMessageLog.getMessageStatus());
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);

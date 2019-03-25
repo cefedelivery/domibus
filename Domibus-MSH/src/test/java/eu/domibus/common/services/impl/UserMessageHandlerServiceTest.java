@@ -10,7 +10,7 @@ import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
@@ -394,7 +394,7 @@ public class UserMessageHandlerServiceTest {
     @Test
     public void testPersistReceivedMessage_HappyFlow(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging,
                                                      @Injectable final UserMessage userMessage, @Injectable final Party receiverParty,
-                                                     @Injectable final UserMessageLogEntity userMessageLog,
+                                                     @Injectable final UserMessageLog userMessageLog,
                                                      @Injectable MessageFragmentType messageFragment)
             throws EbMS3Exception, TransformerException, SOAPException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -483,7 +483,7 @@ public class UserMessageHandlerServiceTest {
     public void testPersistReceivedMessage_ValidationException(@Injectable final LegConfiguration legConfiguration,
                                                                @Injectable final Messaging messaging,
                                                                @Injectable final UserMessage userMessage,
-                                                               @Injectable final UserMessageLogEntity userMessageLog,
+                                                               @Injectable final UserMessageLog userMessageLog,
                                                                @Injectable MessageFragmentType messageFragment)
             throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -523,7 +523,7 @@ public class UserMessageHandlerServiceTest {
                                                             @Injectable final Messaging messaging,
                                                             @Injectable final UserMessage userMessage,
                                                             @Injectable final Party receiverParty,
-                                                            @Injectable final UserMessageLogEntity userMessageLog,
+                                                            @Injectable final UserMessageLog userMessageLog,
                                                             @Injectable MessageFragmentType messageFragment)
             throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -664,7 +664,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testCheckDuplicate(@Injectable final UserMessageLogEntity userMessageLog) {
+    public void testCheckDuplicate(@Injectable final UserMessageLog userMessageLog) {
         new Expectations() {{
             userMessageLogDao.findByMessageId(withSubstring("1234"), MSHRole.RECEIVING);
             result = userMessageLog;

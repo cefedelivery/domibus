@@ -11,7 +11,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
@@ -91,7 +91,7 @@ public class RetryService {
     }
 
     protected boolean failIfExpired(String messageId) {
-        UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         eu.domibus.common.model.configuration.LegConfiguration legConfiguration = null;
         final String pModeKey;
 

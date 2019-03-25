@@ -63,7 +63,7 @@ public class MessageLogBuilderTest {
                 .setBackendName(backendName)
                 .setEndpoint(endpoint);
 
-        UserMessageLogEntity userMessageLog = umlBuilder.build();
+        UserMessageLog userMessageLog = umlBuilder.build();
 
         assertEquals(MessageType.USER_MESSAGE, userMessageLog.getMessageType());
         assertEquals(messageId, userMessageLog.getMessageId());

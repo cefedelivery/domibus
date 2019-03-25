@@ -13,7 +13,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -139,7 +139,7 @@ public class SourceMessageSender implements MessageSender {
         } finally {
             try {
                 if (ReliabilityChecker.CheckResult.SEND_FAIL == reliabilityCheck) {
-                    final UserMessageLogEntity userMessageLogEntity = userMessageLogDao.findByMessageId(messageId);
+                    final UserMessageLog userMessageLogEntity = userMessageLogDao.findByMessageId(messageId);
                     updateRetryLoggingService.messageFailedInANewTransaction(userMessage, userMessageLogEntity);
                 }
 

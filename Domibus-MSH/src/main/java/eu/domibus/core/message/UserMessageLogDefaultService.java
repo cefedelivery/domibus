@@ -6,7 +6,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogEntityBuilder;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
@@ -33,7 +33,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     @Autowired
     protected UIReplicationSignalService uiReplicationSignalService;
 
-    private UserMessageLogEntity createUserMessageLog(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint) {
+    private UserMessageLog createUserMessageLog(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint) {
         // Builds the user message log
         UserMessageLogEntityBuilder umlBuilder = UserMessageLogEntityBuilder.create()
                 .setMessageId(messageId)
@@ -52,7 +52,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String action, String service, Boolean sourceMessage, Boolean messageFragment) {
         final MessageStatus status = MessageStatus.valueOf(messageStatus);
         // Builds the user message log
-        final UserMessageLogEntity userMessageLog = createUserMessageLog(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint);
+        final UserMessageLog userMessageLog = createUserMessageLog(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint);
         userMessageLog.setSourceMessage(sourceMessage);
         userMessageLog.setMessageFragment(messageFragment);
 
@@ -71,7 +71,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     }
 
     protected void updateMessageStatus(final String messageId, final MessageStatus newStatus) {
-        final UserMessageLogEntity messageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
         if (MessageType.USER_MESSAGE == messageLog.getMessageType() && !messageLog.isTestMessage()) {
             backendNotificationService.notifyOfMessageStatusChange(messageLog, newStatus, new Timestamp(System.currentTimeMillis()));
         }

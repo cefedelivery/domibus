@@ -11,7 +11,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
@@ -102,7 +102,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         }
 
 
-        UserMessageLogEntity userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         final int sendAttempts = userMessageLog.getSendAttempts() + 1;
         LOG.debug("[PULL_REQUEST]:Message[{}]:Increasing send attempts to[{}]", messageId, sendAttempts);
         userMessageLog.setSendAttempts(sendAttempts);
@@ -132,7 +132,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     public PullRequestResult updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
             ResponseHandler.CheckResult isOk,
-            UserMessageLogEntity userMessageLog,
+            UserMessageLog userMessageLog,
             LegConfiguration legConfiguration,
             UserMessage userMessage) {
         final String messageId = userMessageLog.getMessageId();
@@ -264,7 +264,7 @@ public class PullMessageServiceImpl implements PullMessageService {
      * @param legConfiguration processing information for the message
      * @param userMessageLog the user message
      */
-    protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLogEntity
+    protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
         final MessagingLock lock = messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
         if (updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
@@ -322,7 +322,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         return false;
     }
 
-    protected void pullFailedOnRequest(LegConfiguration legConfiguration, UserMessageLogEntity
+    protected void pullFailedOnRequest(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
         LOG.debug("[PULL_REQUEST]:Message:[{}] failed on pull message retrieval", userMessageLog.getMessageId());
         final MessagingLock lock = messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
@@ -344,7 +344,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         messagingLockDao.save(lock);
     }
 
-    protected PullRequestResult pullFailedOnReceipt(LegConfiguration legConfiguration, UserMessageLogEntity
+    protected PullRequestResult pullFailedOnReceipt(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
         LOG.debug("[PULL_RECEIPT]:Message:[{}] failed on pull message acknowledgement", userMessageLog.getMessageId());
         if (attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration)) {
@@ -393,7 +393,7 @@ public class PullMessageServiceImpl implements PullMessageService {
             return;
         }
         LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] checking if can be retry, attempts[{}], max attempts[{}], expiration date[{}]", lock.getMessageId(), lock.getSendAttempts(), lock.getSendAttemptsMax(), lock.getStaled());
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(lock.getMessageId());
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(lock.getMessageId());
         if (lock.getSendAttempts() < lock.getSendAttemptsMax() && lock.getStaled().getTime() > System.currentTimeMillis()) {
             LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] set ready for pulling", lock.getMessageId());
             pullMessageStateService.reset(userMessageLog);

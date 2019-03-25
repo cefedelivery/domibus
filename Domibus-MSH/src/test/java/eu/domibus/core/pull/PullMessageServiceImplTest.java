@@ -12,7 +12,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
@@ -261,7 +261,7 @@ public class PullMessageServiceImplTest {
     public void waitingForCallExpired(
             @Mocked final MessagingLock lock,
             @Mocked final LegConfiguration legConfiguration,
-            @Mocked final UserMessageLogEntity userMessageLog,
+            @Mocked final UserMessageLog userMessageLog,
             @Mocked final Timestamp timestamp) {
         new Expectations(pullMessageService){{
             messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
@@ -285,7 +285,7 @@ public class PullMessageServiceImplTest {
     public void waitingForCallBackWithAttempt(
             @Mocked final MessagingLock lock,
             @Mocked final LegConfiguration legConfiguration,
-            @Mocked final UserMessageLogEntity userMessageLog,
+            @Mocked final UserMessageLog userMessageLog,
             @Mocked final Timestamp timestamp) {
         new Expectations(pullMessageService){{
             messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
@@ -385,7 +385,7 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void pullFailedOnRequestWithNoAttempt(@Mocked final MessagingLock lock,@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLogEntity userMessageLog) {
+    public void pullFailedOnRequestWithNoAttempt(@Mocked final MessagingLock lock,@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
 
         final String messageID = "123456";
         new Expectations(pullMessageService) {{
@@ -409,7 +409,7 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void pullFailedOnRequestWithAttempt(@Mocked final MessagingLock lock, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLogEntity userMessageLog) {
+    public void pullFailedOnRequestWithAttempt(@Mocked final MessagingLock lock, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
 
         final String messageID = "123456";
         final Date nextAttempt = new Date(1528110891749l);
@@ -441,7 +441,7 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void pullFailedOnReceiptWithAttemptLeft(@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLogEntity userMessageLog) {
+    public void pullFailedOnReceiptWithAttemptLeft(@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
         final String messageID = "123456";
         new Expectations(pullMessageService) {{
             userMessageLog.getMessageId();
@@ -458,7 +458,7 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void pullFailedOnReceiptWithNoAttemptLeft(@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLogEntity userMessageLog) {
+    public void pullFailedOnReceiptWithNoAttemptLeft(@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
         final String messageID = "123456";
         new Expectations(pullMessageService) {{
             userMessageLog.getMessageId();

@@ -8,7 +8,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.ReliabilityService;
@@ -163,7 +163,7 @@ public class IncomingPullReceiptHandlerTest {
                                                       @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
-        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
+        final UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageId(messageId);
         userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
         new Expectations() {{
@@ -226,7 +226,7 @@ public class IncomingPullReceiptHandlerTest {
                                                               @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
-        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
+        final UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageId(messageId);
         userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
         new Expectations(incomingPullReceiptHandler) {{
@@ -269,7 +269,7 @@ public class IncomingPullReceiptHandlerTest {
                                                                      @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
-        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
+        final UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageId(messageId);
         userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
         new Expectations(incomingPullReceiptHandler) {{

@@ -16,7 +16,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
@@ -149,7 +149,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             // Authorization check
             validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
 
-            UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
+            UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
                 throw new MessageNotFoundException(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR);
             }
@@ -307,7 +307,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             } else {
-                final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
@@ -421,7 +421,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                     // Sends message to the proper queue if not a message to be pulled.
                     userMessageService.scheduleSending(messageId);
                 } else {
-                    final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                    final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
                     LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                     pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
                 }

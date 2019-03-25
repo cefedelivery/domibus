@@ -31,7 +31,7 @@ import java.util.Date;
                 query = "update UserMessageLog userMessageLog set userMessageLog.deleted=:TIMESTAMP, userMessageLog.messageStatus=:MESSAGE_STATUS, userMessageLog.notificationStatus=:NOTIFICATION_STATUS where userMessageLog.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "UserMessageLog.findAllInfo", query = "select userMessageLog from UserMessageLog userMessageLog")
 })
-public class UserMessageLogEntity extends MessageLog {
+public class UserMessageLog extends MessageLog {
 
     @ManyToOne
     @JoinColumn(name = "MESSAGE_ID", referencedColumnName = "MESSAGE_ID", updatable = false, insertable = false)
@@ -43,7 +43,7 @@ public class UserMessageLogEntity extends MessageLog {
     @Column(name = "MESSAGE_FRAGMENT")
     protected Boolean messageFragment;
 
-    public UserMessageLogEntity() {
+    public UserMessageLog() {
         setMessageType(MessageType.USER_MESSAGE);
         setReceived(new Date());
         setSendAttempts(0);

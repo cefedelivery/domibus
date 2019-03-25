@@ -9,7 +9,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
@@ -249,7 +249,7 @@ public class MessageLogResource {
             return ResponseEntity.noContent().build();
         }
 
-        UserMessageLogEntity userMessageLog = null;
+        UserMessageLog userMessageLog = null;
         //TODO create a UserMessageLog object independent of Hibernate annotations in the domibus-api and use the UserMessageLogService instead
         try {
             userMessageLog = userMessageLogDao.findByMessageId(userMessageId);

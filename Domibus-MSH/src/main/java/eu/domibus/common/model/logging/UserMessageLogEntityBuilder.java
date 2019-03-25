@@ -10,17 +10,17 @@ import eu.domibus.common.NotificationStatus;
  */
 public class UserMessageLogEntityBuilder {
 
-    private UserMessageLogEntity userMessageLog;
+    private UserMessageLog userMessageLog;
 
     public static UserMessageLogEntityBuilder create() {
         return new UserMessageLogEntityBuilder();
     }
 
     private UserMessageLogEntityBuilder() {
-        this.userMessageLog = new UserMessageLogEntity();
+        this.userMessageLog = new UserMessageLog();
     }
 
-    public UserMessageLogEntity build() {
+    public UserMessageLog build() {
         return userMessageLog;
     }
 

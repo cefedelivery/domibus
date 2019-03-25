@@ -17,7 +17,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.message.fragment.MessageGroupDao;
 import eu.domibus.core.message.fragment.MessageGroupEntity;
@@ -173,7 +173,7 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public Long getFailedMessageElapsedTime(String messageId) {
-        final UserMessageLogEntity userMessageLog = getFailedMessage(messageId);
+        final UserMessageLog userMessageLog = getFailedMessage(messageId);
         final Date failedDate = userMessageLog.getFailed();
         if (failedDate == null) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not compute failed elapsed time for message [" + messageId + "]: failed date is empty");
@@ -185,7 +185,7 @@ public class UserMessageDefaultService implements UserMessageService {
     @Override
     public void restoreFailedMessage(String messageId) {
         LOG.info("Restoring message [{}]", messageId);
-        final UserMessageLogEntity userMessageLog = getFailedMessage(messageId);
+        final UserMessageLog userMessageLog = getFailedMessage(messageId);
 
         if (MessageStatus.DELETED == userMessageLog.getMessageStatus()) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Could not restore message [" + messageId + "]. Message status is [" + MessageStatus.DELETED + "]");
@@ -219,7 +219,7 @@ public class UserMessageDefaultService implements UserMessageService {
     public void sendEnqueuedMessage(String messageId) {
         LOG.info("Sending enqueued message [{}]", messageId);
 
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (userMessageLog == null) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
         }
@@ -243,7 +243,7 @@ public class UserMessageDefaultService implements UserMessageService {
         return result;
     }
 
-    protected Integer computeNewMaxAttempts(final UserMessageLogEntity userMessageLog, final String messageId) {
+    protected Integer computeNewMaxAttempts(final UserMessageLog userMessageLog, final String messageId) {
         Integer maxAttemptsConfiguration = getMaxAttemptsConfiguration(messageId);
         // always increase maxAttempts (even when not reached by sendAttempts)
         return userMessageLog.getSendAttemptsMax() + maxAttemptsConfiguration + 1; // max retries plus initial reattempt
@@ -397,8 +397,8 @@ public class UserMessageDefaultService implements UserMessageService {
         deleteMessage(messageId);
     }
 
-    protected UserMessageLogEntity getFailedMessage(String messageId) {
-        final UserMessageLogEntity userMessageLog = userMessageLogDao.findByMessageId(messageId);
+    protected UserMessageLog getFailedMessage(String messageId) {
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (userMessageLog == null) {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
         }

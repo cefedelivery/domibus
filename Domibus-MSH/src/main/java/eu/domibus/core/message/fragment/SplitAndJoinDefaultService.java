@@ -13,7 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Splitting;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.AS4ReceiptService;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
@@ -334,7 +334,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         final String messageId = userMessage.getMessageInfo().getMessageId();
         LOG.debug("Setting the SourceMessage [{}] as failed", messageId);
 
-        final UserMessageLogEntity messageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
         if (messageLog == null) {
             LOG.error("UserMessageLogEntity not found for message [{}]: could not mark the message as failed", messageId);
             return;
@@ -353,7 +353,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             return;
         }
 
-        final UserMessageLogEntity messageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
         if (messageLog == null) {
             LOG.error("UserMessageLogEntity not found for message [{}]: could not mark the message as failed", messageId);
             return;

@@ -19,7 +19,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -261,7 +261,7 @@ public class MessageExchangeServiceImplTest {
 
         final String testMessageId = "testMessageId";
         when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
-        UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
+        UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
         when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
 

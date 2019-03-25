@@ -15,7 +15,7 @@ import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
@@ -447,7 +447,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
             times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
 
@@ -490,7 +490,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
             times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
 
@@ -548,7 +548,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
             times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
 
@@ -598,7 +598,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
             times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
     }
@@ -641,7 +641,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
             times = 0;
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
     }
@@ -685,7 +685,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
             userMessageService.scheduleSending(MESS_ID);
             times = 0;
@@ -810,7 +810,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING, legConfiguration, anyString);
-            userMessageLogDao.create(withAny(new UserMessageLogEntity()));
+            userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
 
@@ -894,7 +894,7 @@ public class DatabaseMessageHandlerTest {
             result = userMessage;
 
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-            result = new UserMessageLogEntity();
+            result = new UserMessageLog();
 
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
             result = 0;
@@ -956,7 +956,7 @@ public class DatabaseMessageHandlerTest {
             result = userMessage;
 
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-            result = new UserMessageLogEntity();
+            result = new UserMessageLog();
 
             pModeProvider.getRetentionDownloadedByMpcURI(userMessage.getMpc());
             result = 5;

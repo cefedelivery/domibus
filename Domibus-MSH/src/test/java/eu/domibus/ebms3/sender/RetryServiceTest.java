@@ -13,7 +13,7 @@ import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
@@ -128,7 +128,7 @@ public class RetryServiceTest {
 
         List<String> messagesNotAlreadyQueued = retryService.getMessagesNotAlreadyQueued();
 
-        final UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
+        final UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setSendAttempts(2);
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RETRY);
@@ -137,7 +137,7 @@ public class RetryServiceTest {
             result = userMessageLog;
             updateRetryLoggingService.isExpired((LegConfiguration) any, userMessageLog);
             result = true;
-            updateRetryLoggingService.isExpired((LegConfiguration) any, (UserMessageLogEntity) any );
+            updateRetryLoggingService.isExpired((LegConfiguration) any, (UserMessageLog) any );
             result = false;
         }};
         assertTrue(retryService.failIfExpired("expired123@domibus.eu"));

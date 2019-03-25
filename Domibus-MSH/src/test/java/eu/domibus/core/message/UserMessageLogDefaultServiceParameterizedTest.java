@@ -4,7 +4,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.api.message.MessageSubtype;
@@ -68,10 +68,10 @@ public class UserMessageLogDefaultServiceParameterizedTest {
         userMessageLogDefaultService.save(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint, service, action, null, null);
 
         new Verifications() {{
-            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLogEntity()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
+            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLog()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
             times = userMessageLogDefaultService.checkTestMessage(service,action)?0:1;
 
-            UserMessageLogEntity userMessageLog;
+            UserMessageLog userMessageLog;
             userMessageLogDao.create(userMessageLog = withCapture());
             Assert.assertEquals(messageId, userMessageLog.getMessageId());
             Assert.assertEquals(MessageStatus.SEND_ENQUEUED, userMessageLog.getMessageStatus());

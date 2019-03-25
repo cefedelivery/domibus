@@ -1,6 +1,6 @@
 package eu.domibus.core.pull;
 
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 
 /**
  * @author Thomas Dussart
@@ -23,7 +23,7 @@ public interface PullMessageStateService {
      *
      * @param userMessageLog the user message.
      */
-    void sendFailed(UserMessageLogEntity userMessageLog);
+    void sendFailed(UserMessageLog userMessageLog);
 
 
     /**
@@ -31,6 +31,6 @@ public interface PullMessageStateService {
      *
      * @param userMessageLog the user message.
      */
-    void reset(UserMessageLogEntity userMessageLog);
+    void reset(UserMessageLog userMessageLog);
 
 }

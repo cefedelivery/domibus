@@ -13,7 +13,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
-import eu.domibus.common.model.logging.UserMessageLogEntity;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
@@ -102,8 +102,8 @@ public class MessageLogResourceTest {
     @Parameterized.Parameters(name = "{index}: messageType=\"{0}\" messageSubtype=\"{2}\"")
     public static Collection<Object[]> values() {
         return Arrays.asList(new Object[][]{
-                {MessageType.USER_MESSAGE, new UserMessageLogEntity(), null, false},
-                {MessageType.USER_MESSAGE, new UserMessageLogEntity(), MessageSubtype.TEST, false},
+                {MessageType.USER_MESSAGE, new UserMessageLog(), null, false},
+                {MessageType.USER_MESSAGE, new UserMessageLog(), MessageSubtype.TEST, false},
                 {MessageType.SIGNAL_MESSAGE, new SignalMessageLog(), null, false},
                 {MessageType.SIGNAL_MESSAGE, new SignalMessageLog(), MessageSubtype.TEST, false},
         });
@@ -200,7 +200,7 @@ public class MessageLogResourceTest {
         // Given
         String partyId = "test";
         String userMessageId = "testmessageid";
-        UserMessageLogEntity userMessageLog = new UserMessageLogEntity();
+        UserMessageLog userMessageLog = new UserMessageLog();
         new Expectations() {{
             userMessageLogDao.findLastUserTestMessageId(partyId);
             result = userMessageId;
