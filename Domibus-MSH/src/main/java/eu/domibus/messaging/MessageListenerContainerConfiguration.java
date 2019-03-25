@@ -151,6 +151,17 @@ public class MessageListenerContainerConfiguration {
         );
     }
 
+    /**
+     * It will create a {@code DefaultMessageListenerContainer}
+     *
+     * @param domain domain
+     * @param connectionFactory JMS connection factory
+     * @param destination JMS queue
+     * @param messageListener JMS message listener
+     * @param transactionManager Transaction manager
+     * @param domainPropertyConcurrency domain property key for retrieving queue concurrency value
+     * @return
+     */
     private DefaultMessageListenerContainer createDefaultMessageListenerContainer(Domain domain, ConnectionFactory connectionFactory, Queue destination,
                                                                                   MessageListener messageListener, PlatformTransactionManager transactionManager,
                                                                                   String domainPropertyConcurrency) {

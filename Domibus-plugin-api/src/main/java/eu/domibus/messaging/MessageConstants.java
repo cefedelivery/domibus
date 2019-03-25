@@ -4,6 +4,7 @@ package eu.domibus.messaging;
  * @author Christian Koch, Stefan Mueller
  */
 public class MessageConstants {
+
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final String DOMAIN = "DOMAIN";
     public static final String ENDPOINT = "ENDPOINT";
@@ -14,6 +15,8 @@ public class MessageConstants {
     public static final String ERROR_CODE = "errorCode";
     public static final String ERROR_DETAIL = "errorDetail";
     public static final String RETRY_COUNT = "RETRY_COUNT";
+    public static final String FILE_NAME = "FILE_NAME";
+
 
 
 }

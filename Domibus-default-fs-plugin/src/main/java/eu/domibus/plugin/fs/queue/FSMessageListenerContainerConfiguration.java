@@ -17,12 +17,15 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 
 /**
- * Confgiyraiton class for JMS MessageListenerConfiguration
+ * Configuration class for JMS queues used in FS Plugin
+ * <p>
+ * It will contain all configuration for all defined queues
+ *
+ * @author Catalin Enache
+ * @since 4.1
  */
 @Configuration
 public class FSMessageListenerContainerConfiguration {
-
-
 
     @Autowired
     @Qualifier("fsPluginOutQueue")
@@ -48,13 +51,14 @@ public class FSMessageListenerContainerConfiguration {
         DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
 
         final String messageSelector = MessageConstants.DOMAIN + "='" + domain.getCode() + "'";
-        messageListenerContainer.setMessageSelector(messageSelector);
+        final String queueConcurrency = fsPluginProperties.getMessageOutQueueConcurrency(domain.getCode());
 
+        messageListenerContainer.setMessageSelector(messageSelector);
         messageListenerContainer.setConnectionFactory(connectionFactory);
         messageListenerContainer.setDestination(fsPluginOutQueue);
         messageListenerContainer.setMessageListener(fsOutMessageListener);
         messageListenerContainer.setTransactionManager(transactionManager);
-        messageListenerContainer.setConcurrency(fsPluginProperties.getMessageOutQueueConcurrency(domain.getCode()));
+        messageListenerContainer.setConcurrency(queueConcurrency);
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 

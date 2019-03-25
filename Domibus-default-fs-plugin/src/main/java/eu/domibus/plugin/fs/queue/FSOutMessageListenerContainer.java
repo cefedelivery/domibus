@@ -11,6 +11,8 @@ import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.stereotype.Service;
 
 /**
+ * FSPlugin Out {@code MessageListenerContainer} which implements {@code PluginMessageListenerContainer}
+ *
  * @author Catalin Enache
  * @since 4.1
  */

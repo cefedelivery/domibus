@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs.worker;
 
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
+import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.*;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
@@ -17,9 +18,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.jms.Queue;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +56,13 @@ public class FSSendMessagesServiceTest {
 
     @Injectable
     private FSMultiTenancyService fsMultiTenancyService;
+
+    @Injectable
+    private JMSExtService jmsExtService;
+
+    @Injectable
+    @Qualifier("fsPluginOutQueue")
+    private Queue fsPluginOutQueue;
 
     @Tested
     @Injectable

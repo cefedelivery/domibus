@@ -1,12 +1,14 @@
 package eu.domibus.plugin.fs.worker;
 
-import eu.domibus.common.ErrorCode;
-import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
+import eu.domibus.ext.domain.JMSMessageDTOBuilder;
+import eu.domibus.ext.domain.JmsMessageDTO;
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
+import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.fs.FSFileNameHelper;
 import eu.domibus.plugin.fs.FSFilesManager;
@@ -16,12 +18,13 @@ import eu.domibus.plugin.fs.exception.FSSetUpException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.tika.io.IOExceptionWithCause;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.Queue;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,7 +32,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -62,6 +64,13 @@ public class FSSendMessagesService {
 
     @Autowired
     private FSMultiTenancyService fsMultiTenancyService;
+
+    @Autowired
+    private JMSExtService jmsExtService;
+
+    @Autowired
+    @Qualifier("fsPluginOutQueue")
+    private Queue fsPluginOutQueue;
 
     /**
      * Triggering the send messages means that the message files from the OUT directory
@@ -111,7 +120,9 @@ public class FSSendMessagesService {
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
             LOG.debug("Processable files [{}]", processableFiles);
             for (FileObject processableFile : processableFiles) {
-                processFileSafely(processableFile, domain);
+                //TODO here is the place
+                sendJMSMessageToOutQueue(processableFile, domain);
+                //processFileSafely(processableFile, domain);
             }
 
         } catch (FileSystemException ex) {
@@ -125,7 +136,12 @@ public class FSSendMessagesService {
         }
     }
 
-    private void processFileSafely(FileObject processableFile, String domain) {
+    /**
+     * process the file - to be called by JMS message listener
+     * @param processableFile
+     * @param domain
+     */
+    public void processFileSafely(FileObject processableFile, String domain) {
         String errorMessage = null;
         try {
             fsProcessFileService.processFile(processableFile, domain);
@@ -236,6 +252,20 @@ public class FSSendMessagesService {
         }
 
         return filteredFiles;
+    }
+
+    private void sendJMSMessageToOutQueue(final FileObject processableFile, final String domain) throws FileSystemException {
+        final String fileName = processableFile.getURL().getFile();
+        LOG.debug("Going to send JMS message for file={}", fileName);
+
+        final JmsMessageDTO jmsMessage = JMSMessageDTOBuilder.
+                create().
+                property(MessageConstants.DOMAIN, domain).
+                property(MessageConstants.FILE_NAME, fileName).
+                build();
+
+        LOG.debug("send message: {} to fsPluginOutQueue", jmsMessage);
+        jmsExtService.sendMessageToQueue(jmsMessage, fsPluginOutQueue);
     }
 
 }
