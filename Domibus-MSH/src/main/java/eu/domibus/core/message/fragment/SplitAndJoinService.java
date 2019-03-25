@@ -53,6 +53,10 @@ public interface SplitAndJoinService {
 
     void setSourceMessageAsFailed(final UserMessage userMessage);
 
+    void setUserMessageFragmentAsFailed(String messageId);
+
+    void splitAndJoinSendFailed(final String groupId);
+
     void sendSourceMessageReceipt(String sourceMessageId, String pModeKey);
 
 }

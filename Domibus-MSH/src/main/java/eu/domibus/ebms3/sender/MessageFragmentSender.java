@@ -27,6 +27,15 @@ public class MessageFragmentSender extends AbstractUserMessageSender {
     protected MessageGroupDao messageGroupDao;
 
     @Override
+    protected void validateBeforeSending(UserMessage userMessage) {
+        final String groupId = userMessage.getMessageFragment().getGroupId();
+        final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(groupId);
+        if (groupEntity.getRejected()) {
+            throw new SplitAndJoinException("Group [" + groupId + "] is marked as rejected");
+        }
+    }
+
+    @Override
     protected SOAPMessage createSOAPMessage(UserMessage userMessage, LegConfiguration legConfiguration) throws EbMS3Exception {
         final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(userMessage.getMessageFragment().getGroupId());
         return messageBuilder.buildSOAPMessageForFragment(userMessage, groupEntity, legConfiguration);

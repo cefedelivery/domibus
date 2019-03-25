@@ -216,12 +216,6 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
                 if (messageFragmentType != null) {
                     LOG.debug("Received UserMessage fragment");
 
-                    if (storageProvider.savePayloadsInDatabase()) {
-                        LOG.error("SplitAndJoin feature needs payload storage on the file system");
-                        EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", messageId, null);
-                        ex.setMshRole(MSHRole.RECEIVING);
-                        throw ex;
-                    }
 
                     final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
                     groupEntity.incrementReceivedFragments();
@@ -326,7 +320,6 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
      * @throws IOException
      * @throws EbMS3Exception
      */
-    //TODO: improve error handling
     protected String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
@@ -399,26 +392,12 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
 
 
     protected void handleMessageFragment(UserMessage userMessage, MessageFragmentType messageFragmentType) throws EbMS3Exception {
-        validateUserMessageFragment(userMessage, messageFragmentType);
-        addPartInfoFromFragment(userMessage, messageFragmentType);
-    }
+        MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
+        validateUserMessageFragment(userMessage, messageGroupEntity, messageFragmentType);
 
-    protected void validateUserMessageFragment(UserMessage userMessage, MessageFragmentType messageFragmentType) throws EbMS3Exception {
-        final String groupId = messageFragmentType.getGroupId();
-        MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
-        if (messageGroupEntity != null) {
-            if (messageGroupEntity.getRejected()) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0040, "A fragment is received that relates to a group that was previously rejected", userMessage.getMessageInfo().getMessageId(), null);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-            }
-            final Long fragmentCount = messageGroupEntity.getFragmentCount();
-            if (fragmentCount != null && messageFragmentType.getFragmentCount() != null && messageFragmentType.getFragmentCount() > fragmentCount) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0048, "An incoming message fragment has a a value greater than the known FragmentCount", userMessage.getMessageInfo().getMessageId(), null);
-                ex.setMshRole(MSHRole.RECEIVING);
-                throw ex;
-            }
-        } else {
+        if (messageGroupEntity == null) {
+            LOG.debug("Creating messageGroupEntity");
+
             messageGroupEntity = new MessageGroupEntity();
             MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
             final MessageHeaderType messageHeader = messageFragmentType.getMessageHeader();
@@ -433,13 +412,37 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
             messageGroupEntity.setFragmentCount(messageFragmentType.getFragmentCount());
             messageGroupDao.create(messageGroupEntity);
         }
-
         MessageFragmentEntity messageFragmentEntity = new MessageFragmentEntity();
-        messageFragmentEntity.setGroupId(groupId);
+        messageFragmentEntity.setGroupId(messageFragmentType.getGroupId());
         messageFragmentEntity.setFragmentNumber(messageFragmentType.getFragmentNum());
         userMessage.setMessageFragment(messageFragmentEntity);
 
+        addPartInfoFromFragment(userMessage, messageFragmentType);
+    }
 
+    protected void validateUserMessageFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, MessageFragmentType messageFragmentType) throws EbMS3Exception {
+        if (storageProvider.savePayloadsInDatabase()) {
+            LOG.error("SplitAndJoin feature needs payload storage on the file system");
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", userMessage.getMessageInfo().getMessageId(), null);
+            ex.setMshRole(MSHRole.RECEIVING);
+            throw ex;
+        }
+
+        final String groupId = messageFragmentType.getGroupId();
+        if (messageGroupEntity != null) {
+            if (messageGroupEntity.getRejected()) {
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0040, "A fragment is received that relates to a group that was previously rejected", userMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+            }
+            final Long fragmentCount = messageGroupEntity.getFragmentCount();
+            if (fragmentCount != null && messageFragmentType.getFragmentCount() != null && messageFragmentType.getFragmentCount() > fragmentCount) {
+                LOG.error("An incoming message fragment has a a value greater than the known FragmentCount for group [{}]", groupId);
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0048, "An incoming message fragment has a a value greater than the known FragmentCount", userMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+            }
+        }
     }
 
     protected void addPartInfoFromFragment(UserMessage userMessage, final MessageFragmentType messageFragment) {

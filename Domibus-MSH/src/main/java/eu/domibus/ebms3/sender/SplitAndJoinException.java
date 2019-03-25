@@ -17,6 +17,10 @@ public class SplitAndJoinException extends DomibusCoreException {
         super(dce, message, cause);
     }
 
+    public SplitAndJoinException(String message) {
+        super(DomibusCoreErrorCode.DOM_001, message);
+    }
+
     public SplitAndJoinException(String message, Throwable cause) {
         super(DomibusCoreErrorCode.DOM_001, message, cause);
     }

@@ -79,7 +79,6 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         LOG.debug("Finished parsing the SourceMessage from file [{}]", sourceMessageFileName);
 
         final UserMessage userMessage = messaging.getUserMessage();
-
         SOAPMessage finalUserMessageRequest = userMessageRequest;
 
         domainTaskExecutor.submitLongRunningTask(

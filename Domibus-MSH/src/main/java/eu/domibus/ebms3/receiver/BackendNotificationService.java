@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -115,6 +116,9 @@ public class BackendNotificationService {
     @Autowired
     protected List<BackendConnector> backendConnectors;
 
+    @Autowired
+    protected UserMessageService userMessageService;
+
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -146,7 +150,7 @@ public class BackendNotificationService {
         }
         properties.put(MessageConstants.ERROR_DETAIL, errorResult.getErrorDetail());
         NotificationType notificationType = NotificationType.MESSAGE_RECEIVED_FAILURE;
-        if(userMessage.isUserMessageFragment()) {
+        if (userMessage.isUserMessageFragment()) {
             notificationType = NotificationType.MESSAGE_FRAGMENT_RECEIVED_FAILURE;
         }
 
@@ -158,7 +162,7 @@ public class BackendNotificationService {
             return;
         }
         NotificationType notificationType = NotificationType.MESSAGE_RECEIVED;
-        if(userMessage.isUserMessageFragment()) {
+        if (userMessage.isUserMessageFragment()) {
             notificationType = NotificationType.MESSAGE_FRAGMENT_RECEIVED;
         }
 
@@ -334,7 +338,7 @@ public class BackendNotificationService {
         final String messageId = userMessage.getMessageInfo().getMessageId();
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         NotificationType notificationType = NotificationType.MESSAGE_SEND_FAILURE;
-        if(userMessage.isUserMessageFragment()) {
+        if (userMessage.isUserMessageFragment()) {
             notificationType = NotificationType.MESSAGE_FRAGMENT_SEND_FAILURE;
         }
 

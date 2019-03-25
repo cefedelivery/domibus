@@ -2,7 +2,6 @@ package eu.domibus.core.message.fragment;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -132,6 +131,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Autowired
     protected AS4ReceiptService as4ReceiptService;
+
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
@@ -274,7 +274,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
         if (messageGroupEntity.getFragmentCount() != userMessageFragments.size()) {
-            throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments: number of fragments found do not correspond with the total fragment count", null);
+            throw new SplitAndJoinException("Could not rejoin fragments: number of fragments found do not correspond with the total fragment count");
         }
 
         List<File> fragmentFilesInOrder = new ArrayList<>();
@@ -282,7 +282,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             final PartInfo partInfo = userMessage.getPayloadInfo().getPartInfo().iterator().next();
             final String fileName = partInfo.getFileName();
             if (StringUtils.isBlank(fileName)) {
-                throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments: filename is null for part [" + partInfo.getHref() + "]", null);
+                throw new SplitAndJoinException("Could not rejoin fragments: filename is null for part [" + partInfo.getHref() + "]");
             }
             fragmentFilesInOrder.add(new File(fileName));
         }
@@ -332,12 +332,54 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     @Override
     public void setSourceMessageAsFailed(UserMessage userMessage) {
         final String messageId = userMessage.getMessageInfo().getMessageId();
+        LOG.debug("Setting the SourceMessage [{}] as failed", messageId);
+
         final UserMessageLogEntity messageLog = userMessageLogDao.findByMessageId(messageId);
         if (messageLog == null) {
-            LOG.error("Could not mark the message as failed");
+            LOG.error("UserMessageLogEntity not found for message [{}]: could not mark the message as failed", messageId);
             return;
         }
         updateRetryLoggingService.messageFailedInANewTransaction(userMessage, messageLog);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public void setUserMessageFragmentAsFailed(String messageId) {
+        LOG.debug("Setting the UserMessage fragment [{}] as failed", messageId);
+
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        if (userMessage == null) {
+            LOG.error("UserMessage not found for message [{}]: could not mark the message as failed", messageId);
+            return;
+        }
+
+        final UserMessageLogEntity messageLog = userMessageLogDao.findByMessageId(messageId);
+        if (messageLog == null) {
+            LOG.error("UserMessageLogEntity not found for message [{}]: could not mark the message as failed", messageId);
+            return;
+        }
+        updateRetryLoggingService.messageFailed(userMessage, messageLog);
+    }
+
+    @Override
+    public void splitAndJoinSendFailed(String groupId) {
+        LOG.debug("SplitAndJoin sending failed");
+
+        final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
+        if (messageGroupEntity == null) {
+            LOG.warn("Group not found [{}]: could't clear SplitAndJoin messages for group", groupId);
+            return;
+        }
+
+        LOG.debug("Marking the group [{}] as rejected", groupId);
+        messageGroupEntity.setRejected(true);
+        messageGroupDao.update(messageGroupEntity);
+
+        final UserMessage sourceUserMessage = messagingDao.findUserMessageByMessageId(messageGroupEntity.getSourceMessageId());
+        setSourceMessageAsFailed(sourceUserMessage);
+
+        final List<UserMessage> groupUserMessages = messagingDao.findUserMessageByGroupId(groupId);
+        groupUserMessages.stream().forEach(userMessage -> userMessageService.scheduleUserMessageFragmentFailed(userMessage.getMessageInfo().getMessageId()));
     }
 
     protected File compressSourceMessage(String fileName) {
@@ -459,11 +501,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     }
 
     protected File mergeSourceFile(List<File> fragmentFilesInOrder, MessageGroupEntity messageGroupEntity) {
-
-
         final String temporaryDirectoryLocation = domibusPropertyProvider.getProperty(Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION);
         if (StringUtils.isEmpty(temporaryDirectoryLocation)) {
-            throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments: the property [" + Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION + "] is not defined", null);
+            throw new SplitAndJoinException("Could not rejoin fragments: the property [" + Storage.TEMPORARY_ATTACHMENT_STORAGE_LOCATION + "] is not defined");
         }
         String sourceFileName = generateSourceFileName(temporaryDirectoryLocation);
         String outputFileName = sourceFileName;
@@ -479,12 +519,11 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         try (OutputStream mergingStream = new FileOutputStream(outputFile)) {
             mergeFiles(fragmentFilesInOrder, mergingStream);
         } catch (IOException exp) {
-            throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments", exp);
+            throw new SplitAndJoinException("Could not rejoin fragments", exp);
         }
         if (!sourceMessageCompressed) {
             return outputFile;
         }
-
 
         final File decompressedSourceFile = new File(sourceFileName);
         try {
@@ -496,7 +535,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
                 LOG.warn("Could not delete file [{}]", outputFile);
             }
         } catch (IOException exp) {
-            throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Could not rejoin fragments", exp);
+            throw new SplitAndJoinException("Could not rejoin fragments", exp);
         }
         return decompressedSourceFile;
     }

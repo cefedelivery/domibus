@@ -28,6 +28,7 @@ public class MessageGroupDao extends BasicDao<MessageGroupEntity> {
         try {
             return namedQuery.getSingleResult();
         } catch (NoResultException ex) {
+            LOG.trace("Could not found MessageGroupEntity for group [{}]", groupId);
             return null;
         }
     }

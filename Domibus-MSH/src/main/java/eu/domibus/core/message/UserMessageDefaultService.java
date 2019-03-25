@@ -284,6 +284,31 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
+    public void scheduleSplitAndJoinGroupFailed(String groupId, String backendName) {
+        LOG.debug("Scheduling marking the group [{}] as failed", groupId);
+
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SPLIT_AND_JOIN_SEND_FAILED)
+                .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .property(UserMessageService.MSG_BACKEND_NAME, backendName)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
+    public void scheduleUserMessageFragmentFailed(String messageId) {
+        LOG.debug("Scheduling marking the UserMessage fragment [{}] as failed", messageId);
+
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_USER_MESSAGE_FRAGMENT_FAILED)
+                .property(UserMessageService.MSG_USER_MESSAGE_ID, messageId)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
     public void scheduleSourceMessageRejoinFile(String groupId, String backendName) {
         LOG.debug("Scheduling the SourceMessage file rejoining for group [{}]", groupId);
 

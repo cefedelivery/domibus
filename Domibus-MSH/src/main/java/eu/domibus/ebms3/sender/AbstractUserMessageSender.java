@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
@@ -84,6 +85,19 @@ public abstract class AbstractUserMessageSender implements MessageSender {
         final String pModeKey;
 
         try {
+
+            try {
+                validateBeforeSending(userMessage);
+            } catch (DomibusCoreException e) {
+                getLog().error("Validation exception: message [{}] will not be send", messageId, e);
+                attemptError = e.getMessage();
+                attemptStatus = MessageAttemptStatus.ABORT;
+                // this flag is used in the finally clause
+                reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.ABORT;
+                return;
+            }
+
+
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             getLog().debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
@@ -158,6 +172,14 @@ public abstract class AbstractUserMessageSender implements MessageSender {
         }
     }
 
+    protected void validateBeforeSending(final UserMessage userMessage) {
+        //can be overridden by child implementations
+    }
+
+    protected abstract SOAPMessage createSOAPMessage(final UserMessage userMessage, LegConfiguration legConfiguration) throws EbMS3Exception;
+
+    protected abstract DomibusLogger getLog();
+
     protected void updateAndCreateAttempt(MessageAttempt attempt, String attemptError, MessageAttemptStatus attemptStatus) {
         attempt.setError(attemptError);
         attempt.setStatus(attemptStatus);
@@ -165,7 +187,5 @@ public abstract class AbstractUserMessageSender implements MessageSender {
         messageAttemptService.create(attempt);
     }
 
-    protected abstract SOAPMessage createSOAPMessage(final UserMessage userMessage, LegConfiguration legConfiguration) throws EbMS3Exception;
 
-    protected abstract DomibusLogger getLog();
 }

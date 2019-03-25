@@ -89,7 +89,7 @@ public class MessagingServiceImpl implements MessagingService {
             if (scheduleSourceMessagePayloads(messaging, currentDomain)) {
                 domainTaskExecutor.submitLongRunningTask(
                         () -> {
-                            LOG.debug("Scheduling the SourceMessage saving ");
+                            LOG.debug("Scheduling the SourceMessage saving");
                             storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
                         },
                         () -> splitAndJoinService.setSourceMessageAsFailed(messaging.getUserMessage()),

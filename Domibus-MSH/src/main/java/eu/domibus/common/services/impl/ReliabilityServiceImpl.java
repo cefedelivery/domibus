@@ -56,6 +56,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleReliability(final String messageId, UserMessage userMessage, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
+        LOG.debug("Handling reliability");
         changeMessageStatusAndNotify(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
@@ -65,10 +66,13 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleReliabilityInNewTransaction(final String messageId, UserMessage userMessage, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
+        LOG.debug("Handling reliability in a new transaction");
         handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
     private void changeMessageStatusAndNotify(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        LOG.debug("Start changeMessageStatusAndNotify");
+
         final Boolean isTestMessage = userMessageHandlerService.checkTestMessage(legConfiguration);
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
 
@@ -102,5 +106,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 updateRetryLoggingService.messageFailedInANewTransaction(userMessage, userMessageLog);
                 break;
         }
+
+        LOG.debug("Finished changeMessageStatusAndNotify");
     }
 }
