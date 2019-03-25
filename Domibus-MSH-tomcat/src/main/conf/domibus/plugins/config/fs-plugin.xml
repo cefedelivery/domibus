@@ -19,6 +19,8 @@
 
     <amq:queue id="notifyBackendFSQueue"
                physicalName="domibus.notification.filesystem"/>
+    <amq:queue id="fsPluginOutQueue"
+               physicalName="${fsplugin.out.queue}"/>
 
     <bean id="backendFSPlugin"
           class="eu.domibus.plugin.fs.BackendFSImpl">
