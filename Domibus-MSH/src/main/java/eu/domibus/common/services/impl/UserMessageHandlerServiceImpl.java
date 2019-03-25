@@ -240,7 +240,8 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
      * @param pmodeKey pmode key
      * @return boolean true if there is the same AP
      */
-    protected boolean checkSelfSending(String pmodeKey) {
+    @Override
+    public Boolean checkSelfSending(String pmodeKey) {
         final Party receiver = pModeProvider.getReceiverParty(pmodeKey);
         final Party sender = pModeProvider.getSenderParty(pmodeKey);
 

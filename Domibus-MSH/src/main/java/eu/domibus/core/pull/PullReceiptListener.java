@@ -8,6 +8,7 @@ import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
@@ -54,6 +55,8 @@ public class PullReceiptListener implements MessageListener {
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
 
+    @Autowired
+    UserMessageHandlerService userMessageHandlerService;
 
     @Autowired
     private SignalMessageDao signalMessageDao;
@@ -72,10 +75,11 @@ public class PullReceiptListener implements MessageListener {
                 LOG.error("Domain is empty: could not send message");
                 return;
             }
-
             domainContextProvider.setCurrentDomain(domainCode);
             final String refToMessageId = message.getStringProperty(UserMessageService.PULL_RECEIPT_REF_TO_MESSAGE_ID);
             final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+            LOG.info("Sending pull receipt for pulled UserMessage [{}], domain [{}].", refToMessageId, domainCode);
+            LOG.debug("pModekey is [{}]", pModeKey);
             final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
             final Policy policy = policyService.getPolicy(legConfiguration);
@@ -89,6 +93,9 @@ public class PullReceiptListener implements MessageListener {
             for (SignalMessage signalMessage : signalMessages) {
                 if (signalMessage.getReceipt() != null) { // we have a receipt (it can also be a signal pull request for which we do nothing)
                     if (signalMessage.getReceipt().getAny().size() == 1) {
+                        if (userMessageHandlerService.checkSelfSending(pModeKey)) {
+                            removeSelfSendingPrefix(signalMessage);
+                        }
                         SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, legConfiguration);
                         pullReceiptSender.sendReceipt(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey, refToMessageId, domainCode);
                     } else {
@@ -103,5 +110,25 @@ public class PullReceiptListener implements MessageListener {
         }
 
         LOG.trace("[PullReceiptListener] ~~~ The end of onMessage ~~~");
+    }
+
+    protected void removeSelfSendingPrefix(SignalMessage signalMessage) {
+        if (signalMessage == null || signalMessage.getMessageInfo() == null) {
+            return;
+        }
+        String messageId = removePrefix(signalMessage.getMessageInfo().getMessageId(), UserMessageHandlerService.SELF_SENDING_SUFFIX);
+        String refToMessageId = removePrefix(signalMessage.getMessageInfo().getRefToMessageId(), UserMessageHandlerService.SELF_SENDING_SUFFIX);
+
+        signalMessage.getMessageInfo().setMessageId(messageId);
+        signalMessage.getMessageInfo().setRefToMessageId(refToMessageId);
+    }
+
+    protected String removePrefix(String messageId, String prefix) {
+        String result = messageId;
+        if (messageId.endsWith(prefix)) {
+            result = messageId.substring(0, messageId.length() - prefix.length());
+            LOG.info("Cut prefix from messageId [{}], result is [{}]", messageId, result);
+        }
+        return result;
     }
 }

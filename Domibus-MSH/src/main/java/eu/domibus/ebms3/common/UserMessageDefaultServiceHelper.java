@@ -8,7 +8,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -40,6 +39,7 @@ public class UserMessageDefaultServiceHelper implements UserMessageServiceHelper
         if (partyId == null || partyId.isEmpty()) {
             return null;
         }
+        // TODO maybe use To#getFirstPartyId() instead
         return partyId.iterator().next().getValue();
     }
 

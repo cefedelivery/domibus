@@ -163,6 +163,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
             userDetail.setDomain(domain.getCode());
             domainContextProvider.setCurrentDomain(domain.getCode());
         }
+        LOG.debug("Domain set to: {}", domain);
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
 
         LOG.debug("createUserDetails - end");

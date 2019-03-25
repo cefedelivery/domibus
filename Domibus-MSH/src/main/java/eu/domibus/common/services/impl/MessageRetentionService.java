@@ -1,18 +1,24 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.Queue;
 import java.util.Date;
 import java.util.List;
 
@@ -42,7 +48,11 @@ public class MessageRetentionService {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private UserMessageService userMessageService;
+    private JMSManager jmsManager;
+
+    @Autowired
+    @Qualifier("retentionMessageQueue")
+    private Queue retentionMessageQueue;
 
 
     /**
@@ -91,7 +101,7 @@ public class MessageRetentionService {
             if (CollectionUtils.isNotEmpty(downloadedMessageIds)) {
                 final int deleted = downloadedMessageIds.size();
                 LOG.debug("Found [{}] downloaded messages to delete", deleted);
-                userMessageService.delete(downloadedMessageIds);
+                scheduleDeleteMessages(downloadedMessageIds);
                 LOG.debug("Deleted [{}] downloaded messages", deleted);
             }
         }
@@ -106,10 +116,19 @@ public class MessageRetentionService {
             if (CollectionUtils.isNotEmpty(notDownloadedMessageIds)) {
                 final int deleted = notDownloadedMessageIds.size();
                 LOG.debug("Found [{}] not-downloaded messages to delete", deleted);
-                userMessageService.delete(notDownloadedMessageIds);
+                scheduleDeleteMessages(notDownloadedMessageIds);
                 LOG.debug("Deleted [{}] not-downloaded messages", deleted);
             }
         }
+    }
+
+    private void scheduleDeleteMessages(List<String> messageIds) {
+        messageIds.forEach(messageId -> {
+            JmsMessage message = JMSMessageBuilder.create()
+                    .property(MessageConstants.MESSAGE_ID, messageId)
+                    .build();
+            jmsManager.sendMessageToQueue(message, retentionMessageQueue);
+        });
     }
 
     protected Integer getRetentionValue(String propertyName) {
