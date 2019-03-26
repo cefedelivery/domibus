@@ -15,7 +15,6 @@ import eu.europa.esig.dss.tsl.service.TSLValidationJob;
 import eu.europa.esig.dss.validation.CertificateVerifier;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.x509.KeyStoreCertificateSource;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +45,8 @@ public class DssConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(DssConfiguration.class);
 
+    private static final String NONE = "NONE";
+
     @Value("${domibus.oj.content.keystore.type}")
     private String keystoreType;
 
@@ -70,11 +71,11 @@ public class DssConfiguration {
     @Value("${domibus.dss.cache.path}")
     private String dssCachePath;
 
-    @Value("${domibus.dss.proxy.https.host}")
+    @Value("${domibus.dss.proxy.https.host:NONE}")
     private String proxyHttpsHost;
 
-    @Value("${domibus.dss.proxy.https.port}")
-    private String proxyHttpsPort;
+    @Value("${domibus.dss.proxy.https.port:0}")
+    private int proxyHttpsPort;
 
     @Value("${domibus.dss.proxy.https.user}")
     private String proxyHttpsUser;
@@ -85,11 +86,11 @@ public class DssConfiguration {
     @Value("${domibus.dss.proxy.https.excludedHosts}")
     private String proxyHttpsExcludesHosts;
 
-    @Value("${domibus.dss.proxy.http.host}")
+    @Value("${domibus.dss.proxy.http.host:NONE}")
     private String proxyHttpHost;
 
-    @Value("${domibus.dss.proxy.http.port}")
-    private String proxyHttpPort;
+    @Value("${domibus.dss.proxy.http.port:0}")
+    private int proxyHttpPort;
 
     @Value("${domibus.dss.proxy.http.user}")
     private String proxyHttpUser;
@@ -150,12 +151,12 @@ public class DssConfiguration {
     public DomibusDataLoader dataLoader() {
         DomibusDataLoader dataLoader = new DomibusDataLoader();
         ProxyConfig proxyConfig = new ProxyConfig();
-        if (StringUtils.isNotEmpty(proxyHttpsHost)) {
+        if (!NONE.equals(proxyHttpsHost)) {
             LOG.debug("Configuring Dss https proxy:");
             final ProxyProperties httpsProperties = getProxyProperties(proxyHttpsHost, proxyHttpsPort, proxyHttpsUser, proxyHttpsPassword, proxyHttpsExcludesHosts);
             proxyConfig.setHttpsProperties(httpsProperties);
         }
-        if (StringUtils.isNotEmpty(proxyHttpHost)) {
+        if (!NONE.equals(proxyHttpHost)) {
             LOG.debug("Configuring Dss http proxy:");
             final ProxyProperties httpProperties = getProxyProperties(proxyHttpHost, proxyHttpPort, proxyHttpUser, proxyHttpPassword, proxyHttpExcludedHosts);
             proxyConfig.setHttpProperties(httpProperties);
@@ -165,7 +166,7 @@ public class DssConfiguration {
     }
 
     private ProxyProperties getProxyProperties(final String host,
-                                               final String port,
+                                               final int port,
                                                final String user,
                                                final String password,
                                                final String excludedHosts) {
@@ -173,11 +174,7 @@ public class DssConfiguration {
         LOG.debug("\n\thost:[{}],port:[{}],user:[{}],excludedHosts:[{}]", host, port, user, excludedHosts);
         final ProxyProperties httpsProperties = new ProxyProperties();
         httpsProperties.setHost(host);
-        try {
-            httpsProperties.setPort(Integer.parseInt(port));
-        } catch (NumberFormatException e) {
-            LOG.warn("Impossible to parse https proxy port:[{}], skipping proxy configuration", port);
-        }
+        httpsProperties.setPort(port);
         httpsProperties.setUser(user);
         httpsProperties.setPassword(password);
         httpsProperties.setExcludedHosts(excludedHosts);
