@@ -334,7 +334,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         final String messageId = userMessage.getMessageInfo().getMessageId();
         LOG.debug("Setting the SourceMessage [{}] as failed", messageId);
 
-        final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog messageLog = userMessageLogDao.findByMessageIdSafely(messageId);
         if (messageLog == null) {
             LOG.error("UserMessageLogEntity not found for message [{}]: could not mark the message as failed", messageId);
             return;
@@ -353,7 +353,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             return;
         }
 
-        final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
+        final UserMessageLog messageLog = userMessageLogDao.findByMessageIdSafely(messageId);
         if (messageLog == null) {
             LOG.error("UserMessageLogEntity not found for message [{}]: could not mark the message as failed", messageId);
             return;

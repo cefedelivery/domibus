@@ -97,15 +97,21 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         return query.getResultList();
     }
 
+    public UserMessageLog findByMessageIdSafely(String messageId) {
+        try {
+            return findByMessageId(messageId);
+        } catch (NoResultException nrEx) {
+            LOG.debug("Could not find any result for message with id [" + messageId + "]");
+            return null;
+        }
+    }
+
+    //TODO do not bubble up DAO specific exceptions; just return null and make sure it is treated accordingly
     public UserMessageLog findByMessageId(String messageId) {
         TypedQuery<UserMessageLog> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLog.class);
         query.setParameter(STR_MESSAGE_ID, messageId);
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException nrEx) {
-            LOG.debug("Query UserMessageLog.findByMessageId did not find any result for message with id [" + messageId + "]");
-            return null;
-        }
+        return query.getSingleResult();
+
     }
 
     public UserMessageLog findByMessageId(String messageId, MSHRole mshRole) {
