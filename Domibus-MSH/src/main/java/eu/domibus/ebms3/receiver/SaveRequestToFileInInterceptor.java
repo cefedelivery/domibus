@@ -72,7 +72,7 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
         try (InputStream in = message.getContent(InputStream.class)) {
             LOG.debug("Start copying message [{}] to file [{}]", messageId, fileName);
 
-            Files.copy(in, Paths.get(temporaryDirectoryLocation));
+            Files.copy(in, Paths.get(fileName));
 
             LOG.debug("Finished copying message [{}] to file [{}]", messageId, fileName);
         } catch (IOException e) {

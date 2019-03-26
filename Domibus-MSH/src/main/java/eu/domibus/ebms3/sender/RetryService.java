@@ -84,7 +84,7 @@ public class RetryService {
     public void enqueueMessages() {
         final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
         for (final String messageId : messagesNotAlreadyQueued) {
-            if(!failIfExpired(messageId)) {
+            if (!failIfExpired(messageId)) {
                 userMessageService.scheduleSending(messageId);
             }
         }
@@ -105,8 +105,12 @@ public class RetryService {
             LOG.warn("Could not find LegConfiguration for message [{}]", messageId);
             return false;
         }
-        if(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
+        if (updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
             updateRetryLoggingService.messageFailed(userMessage, userMessageLog);
+
+            if (userMessage.isUserMessageFragment()) {
+                userMessageService.scheduleSplitAndJoinGroupFailed(userMessage.getMessageFragment().getGroupId(), userMessageLog.getBackend());
+            }
             return true;
         }
         return false;

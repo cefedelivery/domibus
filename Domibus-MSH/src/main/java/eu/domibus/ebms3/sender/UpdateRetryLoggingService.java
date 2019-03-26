@@ -90,6 +90,10 @@ public class UpdateRetryLoggingService {
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
             messageFailed(userMessage, userMessageLog);
+
+            if (userMessage.isUserMessageFragment()) {
+                userMessageService.scheduleSplitAndJoinGroupFailed(userMessage.getMessageFragment().getGroupId(), userMessageLog.getBackend());
+            }
         }
         uiReplicationSignalService.messageChange(userMessageLog.getMessageId());
     }
@@ -113,9 +117,6 @@ public class UpdateRetryLoggingService {
         if (NotificationStatus.REQUIRED.equals(notificationStatus) && !isTestMessage) {
             LOG.info("Notifying backend for message failure");
             backendNotificationService.notifyOfSendFailure(userMessage);
-        }
-        if (userMessage.isUserMessageFragment()) {
-            userMessageService.scheduleSplitAndJoinGroupFailed(userMessage.getMessageFragment().getGroupId(), backendName);
         }
 
         userMessageLogService.setMessageAsSendFailure(messageId);
