@@ -19,6 +19,10 @@
         <property name="jndiName" value="jms/domibus.notification.filesystem" />
     </bean>
 
+    <bean id="fsPluginOutQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="${fsplugin.out.queue}"/>
+    </bean>
+
     <bean id="backendFSPlugin"
           class="eu.domibus.plugin.fs.BackendFSImpl">
         <constructor-arg value="backendFSPlugin"/>
