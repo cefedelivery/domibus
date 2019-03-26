@@ -41,7 +41,7 @@ public class FSProcessFileService {
     public void processFile(FileObject processableFile, String domain) throws FileSystemException, JAXBException, MessagingProcessingException {
         LOG.debug("processFile start for file: {}", processableFile);
 
-        try(FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME);) {
+        try(FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
                 LOG.debug("Metadata found and valid: [{}]", processableFile.getName());

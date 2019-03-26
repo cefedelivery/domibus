@@ -18,6 +18,12 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+/**
+ * FS Plugin Out Queue message listener
+ *
+ * @since 4.1
+ * @author Catalin Enacje
+ */
 @Service("fsOutMessageListener")
 public class FSOutMessageListener implements MessageListener {
 
@@ -42,8 +48,6 @@ public class FSOutMessageListener implements MessageListener {
         }
 
         if (StringUtils.isNoneBlank(domain, fileName)) {
-
-
             FileObject fileObject  = null;
             try {
                 FileSystemManager fileSystemManager = VFS.getManager();

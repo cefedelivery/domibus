@@ -1,6 +1,8 @@
 package eu.domibus.plugin.fs.queue;
 
 import eu.domibus.ext.domain.DomainDTO;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.fs.FSPluginProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import javax.jms.Queue;
  */
 @Configuration
 public class FSMessageListenerContainerConfiguration {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageListenerContainerConfiguration.class);
 
     @Autowired
     @Qualifier("fsPluginOutQueue")
@@ -52,6 +55,7 @@ public class FSMessageListenerContainerConfiguration {
 
         final String messageSelector = MessageConstants.DOMAIN + "='" + domain.getCode() + "'";
         final String queueConcurrency = fsPluginProperties.getMessageOutQueueConcurrency(domain.getCode());
+        LOG.debug("fsPluginOutQueue concurrency set to: {}", queueConcurrency);
 
         messageListenerContainer.setMessageSelector(messageSelector);
         messageListenerContainer.setConnectionFactory(connectionFactory);

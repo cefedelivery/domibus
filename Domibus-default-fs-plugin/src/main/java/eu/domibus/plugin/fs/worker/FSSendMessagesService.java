@@ -111,6 +111,7 @@ public class FSSendMessagesService {
         }
 
         FileObject[] contentFiles = null;
+        final String domainCode = domain;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
 
@@ -119,11 +120,8 @@ public class FSSendMessagesService {
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
             LOG.debug("Processable files [{}]", processableFiles);
-            for (FileObject processableFile : processableFiles) {
-                //TODO here is the place
-                sendJMSMessageToOutQueue(processableFile, domain);
-                //processFileSafely(processableFile, domain);
-            }
+
+            processableFiles.parallelStream().forEach(file -> sendJMSMessageToOutQueue(file, domainCode));
 
         } catch (FileSystemException ex) {
             LOG.error("Error sending messages", ex);
@@ -254,9 +252,21 @@ public class FSSendMessagesService {
         return filteredFiles;
     }
 
-    private void sendJMSMessageToOutQueue(final FileObject processableFile, final String domain) throws FileSystemException {
-        final String fileName = processableFile.getURL().getFile();
-        LOG.debug("Going to send JMS message for file={}", fileName);
+    /**
+     * Put a JMS message to FS Plugin Out queue
+     *
+     * @param processableFile
+     * @param domain
+     */
+    private void sendJMSMessageToOutQueue(final FileObject processableFile, final String domain) {
+
+        String fileName;
+        try {
+             fileName = processableFile.getURL().getFile();
+        } catch (FileSystemException e) {
+            LOG.error("Exception while getting filename: ", e);
+            return;
+        }
 
         final JmsMessageDTO jmsMessage = JMSMessageDTOBuilder.
                 create().
@@ -264,7 +274,7 @@ public class FSSendMessagesService {
                 property(MessageConstants.FILE_NAME, fileName).
                 build();
 
-        LOG.debug("send message: {} to fsPluginOutQueue", jmsMessage);
+        LOG.debug("send message: {} to fsPluginOutQueue for file={}", jmsMessage, fileName);
         jmsExtService.sendMessageToQueue(jmsMessage, fsPluginOutQueue);
     }
 
