@@ -4,6 +4,7 @@ import {NavigationStart, Router} from '@angular/router';
 import {isNullOrUndefined} from 'util';
 import {DomibusInfoService} from '../appinfo/domibusinfo.service';
 
+
 @Component({
   selector: 'page-helper',
   templateUrl: './page-helper.component.html',
@@ -19,40 +20,37 @@ export class PageHelperComponent implements OnInit {
   }
 
   async ngOnInit() {
-    const domibusInfo = await this.domibusInfoService.getDomibusInfo();
+    await this.setHelpPages();
 
+    this.router.events.subscribe(event => this.processRouteChange(event));
+  }
+
+  private processRouteChange(event) {
+    if (event instanceof NavigationStart) {
+      let url = event.url.split('?')[0];
+      let page = this.helpPages.get(url);
+
+      if (isNullOrUndefined(page)) {
+        this.activateHelp = false;
+      } else {
+        this.activateHelp = true;
+        this.pageName = page.toString();
+      }
+    }
+  }
+
+  private async setHelpPages() {
+    const domibusInfo = await this.domibusInfoService.getDomibusInfo();
     let MAIN_HELP_PAGE = `https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v${domibusInfo.versionNumber}+Admin+Console+Help`;
     let VERSION_SPECIFIC_PAGE = `#Domibusv${domibusInfo.versionNumber}AdminConsoleHelp-`;
 
-    this.helpPages.set('/', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Messages');
-    this.helpPages.set('/login', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Login');
-    this.helpPages.set('/messagefilter', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'MessageFilter');
-    this.helpPages.set('/truststore', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Truststore');
-    this.helpPages.set('/pmode-current', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PMode-Current');
-    this.helpPages.set('/pmode-archive', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PMode-Archive');
-    this.helpPages.set('/pmode-party', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PMode-Parties');
-    this.helpPages.set('/errorlog', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'ErrorLog');
-    this.helpPages.set('/jms', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'JMSMonitoring');
-    this.helpPages.set('/user', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Users');
-    this.helpPages.set('/pluginuser', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'PluginUsers');
-    this.helpPages.set('/audit', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Audit');
-    this.helpPages.set('/alerts', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'Alerts');
-    this.helpPages.set('/testservice', MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + 'TestService');
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        let url = event.url.split('?')[0];
-        // console.log("Navigation change [" + url + "]");
-        let page = this.helpPages.get(url);
-        if (isNullOrUndefined(page)) {
-          this.activateHelp = false;
-        } else {
-          this.activateHelp = true;
-          this.pageName = page.toString();
-        }
+    const routes = this.router.config;
+    routes.forEach(route => {
+      if (route.data && route.data.helpPage) {
+        this.helpPages.set('/' + route.path, MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + route.data.helpPage);
       }
-    });
+    })
   }
-
 
   openHelpDialog() {
     window.open(this.pageName, '_blank');
