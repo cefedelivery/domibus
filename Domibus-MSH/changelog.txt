@@ -14,6 +14,7 @@ Domibus 4.1
 - Allow PayloadInfo with one PartInfo (one payload) as input in the message metadata.xml of the FS plugin
 - Added sendPullReceiptQueue for sending the asynchronous pull receipt
 - Added domibus.ui.support.team.name and domibus.ui.support.team.email properties for Support Team information on GUI
+- Added a new JMS queue in Default FS Plugin - DomibusFSPluginOutQueue - for improve the speed of sending files in OUT folder
 Domibus 4.0.2
 - Improved the logging in the Default JMS Plugin
 - Allow sending an XML payload in the Soap body
