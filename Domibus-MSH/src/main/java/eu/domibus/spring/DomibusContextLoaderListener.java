@@ -15,7 +15,6 @@ import javax.servlet.ServletContextEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -38,11 +37,11 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
         String resolvedPluginsLocation = new PropertyResolver().getResolvedValue(pluginsLocation);
         Set<File> pluginsDirectories = Sets.newHashSet(new File(resolvedPluginsLocation));
         if (StringUtils.isNotEmpty(extensionsLocation)) {
-            String resolvedExtensionsLocation = servletContext.getInitParameter("extensionsLocation");
+            String resolvedExtensionsLocation = new PropertyResolver().getResolvedValue(extensionsLocation);
             pluginsDirectories.add(new File(resolvedExtensionsLocation));
-            LOG.info("Resolved extension location [" + extensionsLocation+ "] to [" + resolvedExtensionsLocation + "]");
+            LOG.info("Resolved extension location [{}] to [{}]", extensionsLocation, resolvedExtensionsLocation);
         }
-        LOG.info("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
+        LOG.info("Resolved plugins location [{}] to [{}]", pluginsLocation, resolvedPluginsLocation);
 
         try {
             pluginClassLoader = new PluginClassLoader(pluginsDirectories, Thread.currentThread().getContextClassLoader());

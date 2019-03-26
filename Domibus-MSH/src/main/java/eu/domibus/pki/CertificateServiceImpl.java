@@ -399,11 +399,9 @@ public class CertificateServiceImpl implements CertificateService {
     public String serializeCertificateChainIntoPemFormat(List<? extends Certificate> certificates) {
         StringWriter sw = new StringWriter();
         for (Certificate certificate : certificates) {
-            try {
-                try (PemWriter pw = new PemWriter(sw)) {
-                    PemObjectGenerator gen = new JcaMiscPEMGenerator(certificate);
-                    pw.writeObject(gen);
-                }
+            try (PemWriter pw = new PemWriter(sw)) {
+                PemObjectGenerator gen = new JcaMiscPEMGenerator(certificate);
+                pw.writeObject(gen);
             } catch (IOException e) {
                 throw new IllegalArgumentException(String.format("Error while serializing certificates:[%s]", certificate.getType()), e);
             }
@@ -447,7 +445,7 @@ public class CertificateServiceImpl implements CertificateService {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Extracting leaf certificate from chain");
             for (Certificate certificate : certificates) {
-                LOG.trace("Certificate:[{}]" + certificate);
+                LOG.trace("Certificate:[{}]", certificate);
             }
         }
         Set<String> issuerSet = new HashSet<>();
@@ -469,6 +467,10 @@ public class CertificateServiceImpl implements CertificateService {
             final String leafSubjet = allSubject.iterator().next();
             LOG.debug("Not an issuer:[{}]", leafSubjet);
             return subjectMap.get(leafSubjet);
+        }
+        //In case of unique self-signed certificate, the issuer and the subject are the same.
+        if (certificates.size() == 1) {
+            return certificates.get(0);
         }
         LOG.error("Certificate exchange type is X_509_PKIPATHV_1 but no leaf certificate has been found");
         return null;

@@ -48,7 +48,7 @@ public class PluginClassLoader extends URLClassLoader {
         final URL[] urls = new URL[jarUris.size()];
         for (int i = 0; i < jarUris.size(); i++) {
             urls[i] = jarUris.get(i).toURL();
-            LOG.info("Adding the following plugin to the classpath:[{}] ", urls[i]);
+            LOG.info("Adding the following plugin/extension to the classpath:[{}] ", urls[i]);
         }
         return urls;
     }

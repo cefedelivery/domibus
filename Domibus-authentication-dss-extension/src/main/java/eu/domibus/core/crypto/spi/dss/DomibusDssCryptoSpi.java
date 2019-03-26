@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 /**
  * @author Thomas Dussart
  * @since 4.1
- * <p>
+ *
  * Dss implementation to verify the trust of incoming certificates.
- * This class is within external module and is only loaded it the dss module is added
- * in the ${domibus.config.location}/extensions/lib/ directory.
+ * This class is within external module and is only loaded if the dss module is added
+ * in the directory ${domibus.config.location}/extensions/lib/
  */
-public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
+public class DomibusDssCryptoSpi extends AbstractCryptoServiceSpi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DomibusDssCryptoProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DomibusDssCryptoSpi.class);
 
     private CertificateVerifier certificateVerifier;
 
@@ -41,7 +41,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
 
     private ValidationConstraintPropertyMapper constraintMapper;
 
-    public DomibusDssCryptoProvider(
+    public DomibusDssCryptoSpi(
             final DomainCryptoServiceSpi defaultDomainCryptoService,
             final CertificateVerifier certificateVerifier,
             final TSLRepository tslRepository,
@@ -60,8 +60,8 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         //display some trusted list information.
         logDebugTslInfo();
         //should receive at least two certificates.
-        if (certs == null || certs.length == 1) {
-            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, "The signing trust chain is expected to trust anchor with DSS, but the size of the list of certificate is one.");
+        if (certs == null || certs.length < 2) {
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILURE, String.format("The signing trust chain is expected to trust anchor with DSS, but the size of the list of certificate is:[%d].", certs == null ? 0 : certs.length));
         }
         final X509Certificate leafCertificate = getX509LeafCertificate(certs);
         //add signing certificate to DSS.
@@ -75,7 +75,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         LOG.debug("Certificate:[{}] passed DSS trust validation:", leafCertificate.getSubjectDN());
     }
 
-    private void validate(CertificateValidator certificateValidator) throws WSSecurityException {
+    protected void validate(CertificateValidator certificateValidator) throws WSSecurityException {
         CertificateReports reports = certificateValidator.validate();
         LOG.debug("Simple report:[{}]", reports.getXmlDetailedReport());
         final DetailedReport detailedReport = reports.getDetailedReportJaxb();
@@ -86,7 +86,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         }
     }
 
-    private CertificateValidator prepareCertificateValidator(X509Certificate leafCertificate) {
+    protected CertificateValidator prepareCertificateValidator(X509Certificate leafCertificate) {
         CertificateValidator certificateValidator = CertificateValidator.fromCertificate(new CertificateToken(leafCertificate));
         certificateValidator.setCertificateVerifier(certificateVerifier);
         certificateValidator.setValidationTime(new Date(System.currentTimeMillis()));
@@ -94,7 +94,8 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
     }
 
 
-    private CertificateSource prepareCertificateSource(X509Certificate[] certs, X509Certificate leafCertificate) {
+    protected CertificateSource prepareCertificateSource(X509Certificate[] certs, X509Certificate leafCertificate) {
+        LOG.debug("Setting up DSS with trust chain");
         final List<X509Certificate> trustChain = Lists.newArrayList(Arrays.asList(certs));
         trustChain.remove(leafCertificate);
         CertificateSource adjunctCertSource = new CommonCertificateSource();
@@ -106,7 +107,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         return adjunctCertSource;
     }
 
-    private X509Certificate getX509LeafCertificate(X509Certificate[] certs) throws WSSecurityException {
+    protected X509Certificate getX509LeafCertificate(X509Certificate[] certs) throws WSSecurityException {
         final List<X509Certificate> leafCertificate = Arrays.stream(certs).
                 filter(x509Certificate -> x509Certificate.getBasicConstraints() == -1).collect(Collectors.toList());
         if (leafCertificate.size() != 1) {
@@ -115,7 +116,7 @@ public class DomibusDssCryptoProvider extends AbstractCryptoServiceSpi {
         return leafCertificate.get(0);
     }
 
-    private void logDebugTslInfo() {
+    protected void logDebugTslInfo() {
         if (LOG.isDebugEnabled()) {
             final Map<String, TLInfo> summary = tslRepository.getSummary();
             for (Map.Entry<String, TLInfo> stringTLInfoEntry : summary.entrySet()) {

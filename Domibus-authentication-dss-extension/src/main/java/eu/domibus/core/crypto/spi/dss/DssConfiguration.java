@@ -47,16 +47,16 @@ public class DssConfiguration {
 
     private static final String NONE = "NONE";
 
-    @Value("${domibus.oj.content.keystore.type}")
+    @Value("${domibus.official.journal.content.keystore.type}")
     private String keystoreType;
 
-    @Value("${domibus.oj.content.keystore.path}")
+    @Value("${domibus.official.journal.content.keystore.path}")
     private String keystorePath;
 
-    @Value("${domibus.oj.content.keystore.password}")
+    @Value("${domibus.official.journal.content.keystore.password}")
     private String keystorePassword;
 
-    @Value("${domibus.current.oj.url}")
+    @Value("${domibus.current.official.journal.url}")
     private String currentOjUrl;
 
     @Value("${domibus.current.lotl.url}")
@@ -77,14 +77,14 @@ public class DssConfiguration {
     @Value("${domibus.dss.proxy.https.port:0}")
     private int proxyHttpsPort;
 
-    @Value("${domibus.dss.proxy.https.user}")
+    @Value("${domibus.dss.proxy.https.user:NONE}")
     private String proxyHttpsUser;
 
-    @Value("${domibus.dss.proxy.https.password}")
+    @Value("${domibus.dss.proxy.https.password:NONE}")
     private String proxyHttpsPassword;
 
-    @Value("${domibus.dss.proxy.https.excludedHosts}")
-    private String proxyHttpsExcludesHosts;
+    @Value("${domibus.dss.proxy.https.excludedHosts:NONE}")
+    private String proxyHttpsExcludedHosts;
 
     @Value("${domibus.dss.proxy.http.host:NONE}")
     private String proxyHttpHost;
@@ -92,25 +92,25 @@ public class DssConfiguration {
     @Value("${domibus.dss.proxy.http.port:0}")
     private int proxyHttpPort;
 
-    @Value("${domibus.dss.proxy.http.user}")
+    @Value("${domibus.dss.proxy.http.user:NONE}")
     private String proxyHttpUser;
 
-    @Value("${domibus.dss.proxy.http.password}")
+    @Value("${domibus.dss.proxy.http.password:NONE}")
     private String proxyHttpPassword;
 
-    @Value("${domibus.dss.proxy.http.excludedHosts}")
+    @Value("${domibus.dss.proxy.http.excludedHosts:NONE}")
     private String proxyHttpExcludedHosts;
 
     @Value("${domibus.dss.refresh.cron}")
     private String dssRefreshCronExpression;
 
-    @Value("domibus.enable.dss.custom.trusted.list.for.multitenant")
+    @Value("${domibus.enable.dss.custom.trusted.list.for.multitenant}")
     private String enableDssCustomTrustedListForMultiTenant;
 
-    @Value("domibus.dss.exception.on.missing.revocation.data")
+    @Value("${domibus.dss.exception.on.missing.revocation.data}")
     private String enableExceptionOnMissingRevocationData;
 
-    @Value("domibus.dss.check.revocation.for.untrusted.chains")
+    @Value("${domibus.dss.check.revocation.for.untrusted.chains}")
     private String checkRevocationForUntrustedChain;
 
     @Bean
@@ -120,7 +120,7 @@ public class DssConfiguration {
 
     @Bean
     public TSLRepository tslRepository(TrustedListsCertificateSource trustedListSource) {
-        LOG.info("Dss trust list cache path:[{}]", dssCachePath);
+        LOG.debug("Dss trusted list cache path:[{}]", dssCachePath);
         TSLRepository tslRepository = new TSLRepository();
         tslRepository.setTrustedListsCertificateSource(trustedListSource);
         tslRepository.setCacheDirectoryPath(dssCachePath);
@@ -128,9 +128,9 @@ public class DssConfiguration {
     }
 
     @Bean
-    public CertificateVerifier certificateVerifier(DomibusDataLoader dataLoader) {
+    public CertificateVerifier certificateVerifier(DomibusDataLoader dataLoader, TrustedListsCertificateSource trustedListSource) {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-        certificateVerifier.setTrustedCertSource(trustedListSource());
+        certificateVerifier.setTrustedCertSource(trustedListSource);
         certificateVerifier.setDataLoader(dataLoader);
 
         certificateVerifier.setExceptionOnMissingRevocationData(Boolean.parseBoolean(enableExceptionOnMissingRevocationData));
@@ -141,9 +141,7 @@ public class DssConfiguration {
 
     @Bean
     public KeyStoreCertificateSource ojContentKeyStore() throws IOException {
-        LOG.info("Initializing DSS trust list trustStore:");
-        LOG.info("  trustStore type:[{}]", keystoreType);
-        LOG.info("  trustStore path:[{}]", keystorePassword);
+        LOG.debug("Initializing DSS trust list trustStore with type:[{}], path:[{}]", keystoreType, keystorePath);
         return new KeyStoreCertificateSource(new File(keystorePath), keystoreType, keystorePassword);
     }
 
@@ -153,7 +151,7 @@ public class DssConfiguration {
         ProxyConfig proxyConfig = new ProxyConfig();
         if (!NONE.equals(proxyHttpsHost)) {
             LOG.debug("Configuring Dss https proxy:");
-            final ProxyProperties httpsProperties = getProxyProperties(proxyHttpsHost, proxyHttpsPort, proxyHttpsUser, proxyHttpsPassword, proxyHttpsExcludesHosts);
+            final ProxyProperties httpsProperties = getProxyProperties(proxyHttpsHost, proxyHttpsPort, proxyHttpsUser, proxyHttpsPassword, proxyHttpsExcludedHosts);
             proxyConfig.setHttpsProperties(httpsProperties);
         }
         if (!NONE.equals(proxyHttpHost)) {
@@ -165,13 +163,14 @@ public class DssConfiguration {
         return dataLoader;
     }
 
+    //TODO remove proxy properties and use the one from domibus.
     private ProxyProperties getProxyProperties(final String host,
                                                final int port,
                                                final String user,
                                                final String password,
                                                final String excludedHosts) {
 
-        LOG.debug("\n\thost:[{}],port:[{}],user:[{}],excludedHosts:[{}]", host, port, user, excludedHosts);
+        LOG.debug("Using proxy properties host:[{}],port:[{}],user:[{}],excludedHosts:[{}]", host, port, user, excludedHosts);
         final ProxyProperties httpsProperties = new ProxyProperties();
         httpsProperties.setHost(host);
         httpsProperties.setPort(port);
@@ -187,7 +186,7 @@ public class DssConfiguration {
                                              DomibusConfigurationExtService domibusConfigurationExtService,
                                              Environment environment) {
         final boolean multiTenant = domibusConfigurationExtService.isMultiTenantAware();
-        final List<OtherTrustedList> otherTrustedLists = new OtherTrustedListPropertyMapper(domibusPropertyExtService, domainContextExtService, environment).map();
+        final List<OtherTrustedList> otherTrustedLists = new CustomTrustedListPropertyMapper(domibusPropertyExtService, domainContextExtService, environment).map();
         if (multiTenant && !otherTrustedLists.isEmpty()) {
             if (Boolean.parseBoolean(enableDssCustomTrustedListForMultiTenant)) {
                 LOG.warn("Configured custom trusted lists are shared by all tenants.");
@@ -196,15 +195,15 @@ public class DssConfiguration {
                 return Lists.newArrayList();
             }
         }
+        for (OtherTrustedList otherTrustedList : otherTrustedLists) {
+            LOG.info("Custom trusted list configured with url:[{}], code:[{}]", otherTrustedList.getUrl(), otherTrustedList.getCountryCode());
+        }
         return otherTrustedLists;
     }
 
     @Bean
     public TSLValidationJob tslValidationJob(DataLoader dataLoader, TSLRepository tslRepository, KeyStoreCertificateSource ojContentKeyStore, List<OtherTrustedList> otherTrustedLists) {
-        LOG.info("Dss lotl url:[{}]", currentLotlUrl);
-        LOG.info("Dss lotl schema uri:[{}]", lotlSchemeUri);
-        LOG.info("Dss lotl country code:[{}]", lotlCountryCode);
-        LOG.info("Dss oj url:[{}]", currentOjUrl);
+        LOG.info("Configuring DSS lotl with url:[{}],schema uri:[{}],country code:[{}],oj url:[{}]", currentLotlUrl, lotlSchemeUri, lotlCountryCode, currentOjUrl);
         TSLValidationJob validationJob = new TSLValidationJob();
         validationJob.setDataLoader(dataLoader);
         validationJob.setRepository(tslRepository);
@@ -254,12 +253,12 @@ public class DssConfiguration {
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public DomibusDssCryptoProvider domibusDssCryptoProvider(final DomainCryptoServiceSpi defaultDomainCryptoService,
-                                                             final CertificateVerifier certificateVerifier,
-                                                             final TSLRepository tslRepository,
-                                                             final ValidationReport validationReport,
-                                                             final ValidationConstraintPropertyMapper constraintMapper) {
-        return new DomibusDssCryptoProvider(
+    public DomibusDssCryptoSpi domibusDssCryptoProvider(final DomainCryptoServiceSpi defaultDomainCryptoService,
+                                                        final CertificateVerifier certificateVerifier,
+                                                        final TSLRepository tslRepository,
+                                                        final ValidationReport validationReport,
+                                                        final ValidationConstraintPropertyMapper constraintMapper) {
+        return new DomibusDssCryptoSpi(
                 defaultDomainCryptoService,
                 certificateVerifier,
                 tslRepository,

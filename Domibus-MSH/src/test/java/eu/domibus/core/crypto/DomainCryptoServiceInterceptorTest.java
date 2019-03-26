@@ -11,12 +11,11 @@ import org.junit.Test;
 
 import java.security.KeyStoreException;
 
-import static org.junit.Assert.*;
-
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
+//TODO split into multipe test methods.
 public class DomainCryptoServiceInterceptorTest {
 
     @Test

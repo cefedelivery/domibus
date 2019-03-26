@@ -12,7 +12,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 /**
- * Interceptor in charge of converting authentication spi exceptions into crypto exceptions.
+ *  @author Thomas Dussart
+ *  @since 4.1
+ *
+ *  Interceptor in charge of converting authentication spi exceptions into crypto exceptions.
  */
 @Aspect
 @Component
@@ -46,6 +49,8 @@ public class AuthorizationServiceInterceptor extends ServiceInterceptor {
                     case AUTHORIZATION_CONNECTION_REJECTED:
                         LOG.error("Connection credential to Authorization were rejecte:[{}]", a.getMessage());
                         return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0002:Technical issue.", a.getMessageId(), null);
+                    default:
+                        LOG.warn("Unknown authorization error:[{}]", a.getAuthorizationError());
                 }
             }
         }

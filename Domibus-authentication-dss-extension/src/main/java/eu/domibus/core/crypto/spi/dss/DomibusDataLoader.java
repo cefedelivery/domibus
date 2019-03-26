@@ -69,7 +69,7 @@ import java.util.*;
  */
 public class DomibusDataLoader implements DataLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CommonsDataLoader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DomibusDataLoader.class);
 
     public static final int TIMEOUT_CONNECTION = 6000;
 

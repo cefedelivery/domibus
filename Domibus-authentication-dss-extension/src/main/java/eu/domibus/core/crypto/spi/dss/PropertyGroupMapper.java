@@ -46,10 +46,9 @@ public abstract class PropertyGroupMapper<E> {
     }
 
     protected List<E> map(String... propertyNames) {
-        int count = 0;
         boolean propertyEmpty = false;
         List<E> elements = new ArrayList<>();
-        do {
+        for (int count = 0; count < 100; count++) {
             Map<String, ImmutablePair<String, String>> keyValues = new HashMap<>();
             for (String propertyName : Lists.newArrayList(propertyNames)) {
                 final String format = propertyName + "[%s]";
@@ -65,10 +64,14 @@ public abstract class PropertyGroupMapper<E> {
                 keyValues.put(propertyName, new ImmutablePair<>(propertyName, propertyValue));
             }
             if (!propertyEmpty) {
-                elements.add(transForm(keyValues));
+                final E transform = transform(keyValues);
+                if (transform != null) {
+                    elements.add(transform);
+                }
+            } else {
+                break;
             }
-            count++;
-        } while (!propertyEmpty);
+        }
         return elements;
     }
 
@@ -89,6 +92,6 @@ public abstract class PropertyGroupMapper<E> {
         return propertyValue;
     }
 
-    abstract E transForm(Map<String, ImmutablePair<String, String>> keyValues);
+    abstract E transform(Map<String, ImmutablePair<String, String>> keyValues);
 
 }

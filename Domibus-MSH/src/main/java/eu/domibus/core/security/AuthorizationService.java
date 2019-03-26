@@ -6,6 +6,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
 import eu.domibus.core.crypto.spi.PullRequestPmodeData;
+import eu.domibus.core.crypto.spi.model.AuthorizationError;
 import eu.domibus.core.crypto.spi.model.AuthorizationException;
 import eu.domibus.core.crypto.spi.model.UserMessagePmodeData;
 import eu.domibus.core.pmode.PModeProvider;
@@ -126,8 +127,7 @@ public class AuthorizationService {
         X509Certificate leafCertificate = (X509Certificate) certificateService.extractLeafCertificateFromChain(x509Certificates);
         final List<X509Certificate> signingCertificateTrustChain = Lists.newArrayList(x509Certificates);
         signingCertificateTrustChain.remove(leafCertificate);
-        final CertificateTrust certificateTrust = new CertificateTrust(leafCertificate, signingCertificateTrustChain);
-        return certificateTrust;
+        return new CertificateTrust(leafCertificate, signingCertificateTrustChain);
     }
 
     private List<X509Certificate> getCertificatesFromSoapMessage(SOAPMessage request) {
@@ -135,7 +135,7 @@ public class AuthorizationService {
         try {
             certificateChainValue = (String) request.getProperty(CertificateExchangeType.getValue());
         } catch (SOAPException e) {
-            throw new IllegalStateException(String.
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_OTHER, String.
                     format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
         }
         return certificateService.deserializeCertificateChainFromPemFormat(certificateChainValue);
@@ -147,16 +147,15 @@ public class AuthorizationService {
         try {
             certificateExchangeTypeValue = (String) request.getProperty(CertificateExchangeType.getKey());
         } catch (SOAPException e) {
-            throw new IllegalStateException(String.
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_OTHER, String.
                     format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
         }
 
         try {
             return CertificateExchangeType.valueOf(certificateExchangeTypeValue);
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(String.format("Invalid certificate exchange type:[%s]", certificateExchangeTypeValue));
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_OTHER, String.format("Invalid certificate exchange type:[%s]", certificateExchangeTypeValue), e);
         }
     }
-
 
 }

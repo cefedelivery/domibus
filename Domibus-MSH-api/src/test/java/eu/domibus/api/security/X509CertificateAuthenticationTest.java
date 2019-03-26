@@ -1,20 +1,19 @@
 package eu.domibus.api.security;
 
-import org.junit.Assert;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.ws.rs.core.HttpHeaders;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.*;
+import java.security.cert.X509Certificate;
 
 /**
  * @author idragusa
@@ -53,14 +52,13 @@ public class X509CertificateAuthenticationTest {
 
             KeyStore keyStore = KeyStore.getInstance("JKS");
             keyStore.load(fileInputStream, password.toCharArray());
-            X509Certificate cert = (X509Certificate)keyStore.getCertificate(alias);
+            X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             certificates = new X509Certificate[1];
             certificates[0] = cert;
         } catch (KeyStoreException | java.security.cert.CertificateException | NoSuchAlgorithmException | IOException e) {
             System.out.println("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
         }
     }
-
 
 
 }

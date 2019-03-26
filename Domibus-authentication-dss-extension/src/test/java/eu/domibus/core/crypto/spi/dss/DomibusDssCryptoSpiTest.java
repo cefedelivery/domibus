@@ -19,14 +19,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Thomas Dussart
  * @since 4.1
  */
 @RunWith(JMockit.class)
-public class DomibusDssCryptoProviderTest {
+public class DomibusDssCryptoSpiTest {
 
     @org.junit.Test(expected = WSSecurityException.class)
     public void verifyTrustNoChain(@Mocked DomainCryptoServiceSpi defaultDomainCryptoService,
@@ -35,9 +35,9 @@ public class DomibusDssCryptoProviderTest {
                                    @Mocked ValidationReport validationReport,
                                    @Mocked X509Certificate leafCertificate) throws WSSecurityException {
         final X509Certificate[] x509Certificates = {leafCertificate};
-        final DomibusDssCryptoProvider domibusDssCryptoProvider = new DomibusDssCryptoProvider(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, null);
+        final DomibusDssCryptoSpi domibusDssCryptoProvider = new DomibusDssCryptoSpi(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, null);
         domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
-        assertTrue(false);
+        fail("WSSecurityException expected");
     }
 
     @org.junit.Test(expected = WSSecurityException.class)
@@ -55,9 +55,9 @@ public class DomibusDssCryptoProviderTest {
             chainCertificate.getBasicConstraints();
             result = 0;
         }};
-        final DomibusDssCryptoProvider domibusDssCryptoProvider = new DomibusDssCryptoProvider(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, null);
+        final DomibusDssCryptoSpi domibusDssCryptoProvider = new DomibusDssCryptoSpi(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, null);
         domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
-        assertTrue(false);
+        fail("WSSecurityException expected");
     }
 
     @org.junit.Test(expected = WSSecurityException.class)
@@ -95,9 +95,9 @@ public class DomibusDssCryptoProviderTest {
             result = detailedReport;
 
         }};
-        final DomibusDssCryptoProvider domibusDssCryptoProvider = new DomibusDssCryptoProvider(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, constraintMapper);
+        final DomibusDssCryptoSpi domibusDssCryptoProvider = new DomibusDssCryptoSpi(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, constraintMapper);
         domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
-        assertTrue(false);
+        fail("WSSecurityException expected");
         new Verifications() {{
             List constraints = new ArrayList<>();
             validationReport.isValid(detailedReport, withAny(constraints));
@@ -146,7 +146,7 @@ public class DomibusDssCryptoProviderTest {
             result = true;
 
         }};
-        final DomibusDssCryptoProvider domibusDssCryptoProvider = new DomibusDssCryptoProvider(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, constraintMapper);
+        final DomibusDssCryptoSpi domibusDssCryptoProvider = new DomibusDssCryptoSpi(defaultDomainCryptoService, certificateVerifier, tslRepository, validationReport, constraintMapper);
         domibusDssCryptoProvider.verifyTrust(x509Certificates, true, null, null);
 
     }
