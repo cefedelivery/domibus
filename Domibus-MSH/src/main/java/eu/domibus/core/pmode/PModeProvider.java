@@ -16,8 +16,10 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.configuration.Service;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.core.crypto.spi.PullRequestPmodeData;
 import eu.domibus.core.crypto.spi.model.PullRequestMapping;
 import eu.domibus.core.crypto.spi.model.UserMessageMapping;
+import eu.domibus.core.crypto.spi.model.UserMessagePmodeData;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
@@ -48,8 +50,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.*;
-
-import static eu.domibus.core.crypto.spi.model.UserMessageMapping.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -318,21 +318,20 @@ public abstract class PModeProvider {
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 
-    public Map<UserMessageMapping, String> getUserMessageMapping(UserMessage userMessage) throws EbMS3Exception {
+    public UserMessagePmodeData getUserMessagePmodeData(UserMessage userMessage) throws EbMS3Exception {
         Map<UserMessageMapping, String> mappings = new HashMap<>();
         final String actionValue = userMessage.getCollaborationInfo().getAction();
-        mappings.put(ACTION_NAME, findActionName(actionValue));
+        final String actionName = findActionName(actionValue);
         final eu.domibus.ebms3.common.model.Service service = userMessage.getCollaborationInfo().getService();
-        mappings.put(SERVICE_NAME, findServiceName(service));
-        mappings.put(FROM_PARTY_NAME, findPartyName(userMessage.getPartyInfo().getFrom().getPartyId()));
-        return mappings;
+        final String serviceName = findServiceName(service);
+        final String partyName = findPartyName(userMessage.getPartyInfo().getFrom().getPartyId());
+        return new UserMessagePmodeData(serviceName, actionName, partyName);
     }
 
-    public Map<PullRequestMapping, String> getPullRequestMapping(PullRequest pullRequest) throws EbMS3Exception {
+    public PullRequestPmodeData getPullRequestMapping(PullRequest pullRequest) throws EbMS3Exception {
         Map<PullRequestMapping, String> mappings = new HashMap<>();
         final Mpc mpc = findMpc(pullRequest.getMpc());
-        mappings.put(PullRequestMapping.MPC_NAME, mpc.getName());
-        return mappings;
+        return new PullRequestPmodeData(mpc.getName());
     }
 
     public abstract Party getGatewayParty();

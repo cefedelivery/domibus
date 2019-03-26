@@ -14,9 +14,10 @@
     <name>Domibus iam spi</name>
 
     <dependencies>
+        <!--Domibus dependencies-->
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-plugin-api</artifactId>
+            <artifactId>domibus-ext-model</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

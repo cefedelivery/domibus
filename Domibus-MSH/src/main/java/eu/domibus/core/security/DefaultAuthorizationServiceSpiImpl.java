@@ -1,9 +1,9 @@
 package eu.domibus.core.security;
 
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
+import eu.domibus.core.crypto.spi.PullRequestPmodeData;
 import eu.domibus.core.crypto.spi.model.AuthorizationException;
-import eu.domibus.core.crypto.spi.model.PullRequestMapping;
-import eu.domibus.core.crypto.spi.model.UserMessageMapping;
+import eu.domibus.core.crypto.spi.model.UserMessagePmodeData;
 import eu.domibus.ext.domain.PullRequestDTO;
 import eu.domibus.ext.domain.UserMessageDTO;
 import org.slf4j.Logger;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Thomas Dussart
@@ -32,7 +31,7 @@ public class DefaultAuthorizationServiceSpiImpl implements AuthorizationServiceS
      * {@inheritDoc}
      */
     @Override
-    public void authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, UserMessageDTO userMessageDTO, Map<UserMessageMapping, String> messageMapping) {
+    public void authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, UserMessageDTO userMessageDTO, UserMessagePmodeData userMessagePmodeData) {
         LOG.info("Default authorization not implemented.");
     }
 
@@ -40,7 +39,7 @@ public class DefaultAuthorizationServiceSpiImpl implements AuthorizationServiceS
      * {@inheritDoc}
      */
     @Override
-    public void authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, PullRequestDTO pullRequestDTO, Map<PullRequestMapping, String> pullRequestMapping) throws AuthorizationException {
+    public void authorize(List<X509Certificate> signingCertificateTrustChain, X509Certificate signingCertificate, PullRequestDTO pullRequestDTO, PullRequestPmodeData pullRequestPmodeData) throws AuthorizationException {
         LOG.info("Default authorization not implemented.");
     }
 

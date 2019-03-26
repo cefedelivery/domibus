@@ -22,6 +22,7 @@
         <module>Domibus-MSH-fiware</module>
         <module>Domibus-MSH-test</module>
         <module>Domibus-iam-spi</module>
+        <module>Domibus-ext-model</module>
     </modules>
     <properties>
         <cxf.version>3.2.6</cxf.version>

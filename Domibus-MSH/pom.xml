@@ -64,6 +64,11 @@
             <artifactId>domibus-ext-services-delegate</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-ext-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- End Domibus modules -->
 
         <!-- AspectJ -->
