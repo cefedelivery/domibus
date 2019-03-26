@@ -137,7 +137,7 @@ public class AuthenticationResource {
 
     @RequestMapping(value = "username", method = RequestMethod.GET)
     public String getUsername() {
-        return Optional.ofNullable(getLoggedUser()).map(UserDetail::getUsername).orElse(null);
+        return Optional.ofNullable(getLoggedUser()).map(UserDetail::getUsername).orElse(StringUtils.EMPTY);
     }
 
     @RequestMapping(value = "user", method = RequestMethod.GET)

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from '@angular/router';
-import {SecurityService} from '../../security/security.service';
+import {DomibusInfoService} from "../appinfo/domibusinfo.service";
 
 /**
  * It will redirect to home ('/') if the external provider = true
@@ -8,11 +8,11 @@ import {SecurityService} from '../../security/security.service';
 @Injectable()
 export class AuthExternalProviderGuard implements CanActivate {
 
-  constructor(private router: Router, private securityService: SecurityService) {
+  constructor(private router: Router, private domibusInfoService: DomibusInfoService) {
   }
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    const isUserFromExternalAuthProvider = this.securityService.isUserFromExternalAuthProvider();
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+    const isUserFromExternalAuthProvider = await this.domibusInfoService.isExtAuthProviderEnabled();
 
     if (isUserFromExternalAuthProvider) {
       this.router.navigate(['/']);
