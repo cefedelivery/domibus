@@ -4,9 +4,9 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ebms3.sender.LargeMessageSenderListener;
 import eu.domibus.ebms3.sender.MessageSenderListener;
+import eu.domibus.ebms3.sender.RetentionListener;
 import eu.domibus.ebms3.sender.SplitAndJoinListener;
 import eu.domibus.core.pull.PullReceiptListener;
-import eu.domibus.ebms3.sender.MessageSender;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,7 @@ public class MessageListenerContainerConfiguration {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageListenerContainerConfiguration.class);
     public static final String PROPERTY_LARGE_FILES_CONCURRENCY = "domibus.dispatcher.largeFiles.concurrency";
     public static final String PROPERTY_SPLIT_AND_JOIN_CONCURRENCY = "domibus.dispatcher.splitAndJoin.concurrency";
+    private static final String PROPERTY_RETENTION_JMS_CONCURRENCY = "domibus.retention.jms.concurrency";
     private static final String DOMIBUS_PULL_RECEIPT_QUEUE_CONCURRENCY = "domibus.pull.receipt.queue.concurrency";
 
     @Autowired
@@ -50,6 +51,10 @@ public class MessageListenerContainerConfiguration {
     private Queue splitAndJoinQueue;
 
     @Autowired
+    @Qualifier("retentionMessageQueue")
+    private Queue retentionMessageQueue;
+
+    @Autowired
     @Qualifier("messageSenderListener")
     private MessageSenderListener messageSenderListener;
 
@@ -64,6 +69,10 @@ public class MessageListenerContainerConfiguration {
     @Autowired
     @Qualifier("pullReceiptListener")
     private PullReceiptListener pullReceiptListener;
+
+    @Autowired
+    @Qualifier("retentionListener")
+    private RetentionListener retentionListener;
 
     @Autowired
     @Qualifier("domibusJMS-XAConnectionFactory")
@@ -147,6 +156,7 @@ public class MessageListenerContainerConfiguration {
 
         return messageListenerContainer;
     }
+
     @Bean(name = "pullReceiptContainer")
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public DefaultMessageListenerContainer createPullReceiptListener(Domain domain) {
@@ -160,6 +170,33 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setMessageListener(pullReceiptListener);
         messageListenerContainer.setTransactionManager(transactionManager);
         messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_PULL_RECEIPT_QUEUE_CONCURRENCY));
+        messageListenerContainer.setSessionTransacted(true);
+        messageListenerContainer.setSessionAcknowledgeMode(0);
+
+        messageListenerContainer.afterPropertiesSet();
+
+        return messageListenerContainer;
+    }
+
+    /**
+     * Creates the Retention Message JMS listener (domain dependent)
+     *
+     * @param domain the domain to which this bean is created for
+     * @return the retention listener prototype bean dedicated to the provided domain
+     */
+    @Bean(name = "retentionContainer")
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public DefaultMessageListenerContainer createRetentionListener(Domain domain) {
+        LOG.debug("Instantiating the createRetentionListener for domain [{}]", domain);
+        DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
+
+        messageListenerContainer.setMessageSelector(MessageConstants.DOMAIN + "='" + domain.getCode() + "'");
+
+        messageListenerContainer.setConnectionFactory(connectionFactory);
+        messageListenerContainer.setDestination(retentionMessageQueue);
+        messageListenerContainer.setMessageListener(retentionListener);
+        messageListenerContainer.setTransactionManager(transactionManager);
+        messageListenerContainer.setConcurrency(domibusPropertyProvider.getDomainProperty(domain, PROPERTY_RETENTION_JMS_CONCURRENCY));
         messageListenerContainer.setSessionTransacted(true);
         messageListenerContainer.setSessionAcknowledgeMode(0);
 

@@ -43,6 +43,8 @@
                physicalName="domibus.internal.pull.queue"/>
     <amq:queue id="sendPullReceiptQueue"
                physicalName="domibus.internal.pull.receipt.queue"/>
+    <amq:queue id="retentionMessageQueue"
+               physicalName="domibus.internal.retentionMessage.queue"/>
     <amq:queue id="alertMessageQueue"
                physicalName="domibus.internal.alert.queue"/>
     <amq:queue id="uiReplicationQueue"

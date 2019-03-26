@@ -29,7 +29,7 @@ public class RetentionWorker extends DomibusQuartzJobBean {
     private ConfigurationDAO configurationDAO;
 
     @Autowired
-    AuthUtils authUtils;
+    private AuthUtils authUtils;
 
     @Override
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
