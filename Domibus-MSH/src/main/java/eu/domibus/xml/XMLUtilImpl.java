@@ -4,6 +4,7 @@ import eu.domibus.api.util.xml.DefaultUnmarshallerResult;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.validators.XmlValidationEventHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -75,8 +76,8 @@ public class XMLUtilImpl implements XMLUtil {
 
     private Schema getSchema(InputStream xsdStream) throws SAXException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, StringUtils.EMPTY);
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, StringUtils.EMPTY);
         return schemaFactory.newSchema(new StreamSource(xsdStream));
     }
 
