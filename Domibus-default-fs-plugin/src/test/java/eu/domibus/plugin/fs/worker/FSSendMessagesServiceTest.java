@@ -61,8 +61,8 @@ public class FSSendMessagesServiceTest {
     private JMSExtService jmsExtService;
 
     @Injectable
-    @Qualifier("fsPluginOutQueue")
-    private Queue fsPluginOutQueue;
+    @Qualifier("fsPluginSendQueue")
+    private Queue fsPluginSendQueue;
 
     @Tested
     @Injectable

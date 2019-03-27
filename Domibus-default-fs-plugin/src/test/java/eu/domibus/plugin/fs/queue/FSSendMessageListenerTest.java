@@ -16,13 +16,13 @@ import javax.jms.Message;
  * @since 4.1
  */
 @RunWith(JMockit.class)
-public class FSOutMessageListenerTest {
+public class FSSendMessageListenerTest {
 
     @Injectable
     private FSSendMessagesService fsSendMessagesService;
 
     @Tested
-    FSOutMessageListener fsOutMessageListener;
+    FSSendMessageListener fsSendMessageListener;
 
     @Test
     public void test_onMessage_FileExists_Success(final @Mocked Message message, final @Mocked FileObject fileObject) throws Exception {
@@ -39,7 +39,7 @@ public class FSOutMessageListenerTest {
         }};
 
         //tested method
-        fsOutMessageListener.onMessage(message);
+        fsSendMessageListener.onMessage(message);
 
         new FullVerifications(fsSendMessagesService) {{
             String domainActual;

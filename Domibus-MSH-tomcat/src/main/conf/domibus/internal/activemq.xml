@@ -71,8 +71,8 @@
                    physicalName="domibus.notification.kerkovi"/>
 
             <!-- FSPlugin queues -->
-            <queue id="fsPluginOutQueue"
-                   physicalName="${fsplugin.out.queue}"/>
+            <queue id="fsPluginSendQueue"
+                   physicalName="${fsplugin.send.queue}"/>
 
             <!-- Internal queues of JMS backend plugin -->
             <queue id="jmsPluginToBackendQueue"

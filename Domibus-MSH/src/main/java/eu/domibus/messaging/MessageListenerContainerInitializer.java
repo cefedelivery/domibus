@@ -82,7 +82,7 @@ public class MessageListenerContainerInitializer {
             final String pluginMessageListenerContainerName = entry.getKey();
             final PluginMessageListenerContainer pluginMessageListenerContainer = entry.getValue();
 
-            MessageListenerContainer instance = pluginMessageListenerContainer.createDefaultMessageListenerContainer(domainDTO);
+            MessageListenerContainer instance = pluginMessageListenerContainer.createMessageListenerContainer(domainDTO);
             instance.start();
             instances.add(instance);
             LOG.info("{} initialized for domain [{}]", pluginMessageListenerContainerName, domain);

@@ -31,12 +31,12 @@ public class FSMessageListenerContainerConfiguration {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSMessageListenerContainerConfiguration.class);
 
     @Autowired
-    @Qualifier("fsPluginOutQueue")
-    private Queue fsPluginOutQueue;
+    @Qualifier("fsPluginSendQueue")
+    private Queue fsPluginSendQueue;
 
-    @Qualifier("fsOutMessageListener")
+    @Qualifier("fsSendMessageListener")
     @Autowired
-    private FSOutMessageListener fsOutMessageListener;
+    private FSSendMessageListener fsSendMessageListener;
 
     @Autowired
     @Qualifier("domibusJMS-XAConnectionFactory")
@@ -55,12 +55,12 @@ public class FSMessageListenerContainerConfiguration {
 
         final String messageSelector = MessageConstants.DOMAIN + "='" + domain.getCode() + "'";
         final String queueConcurrency = fsPluginProperties.getMessageOutQueueConcurrency(domain.getCode());
-        LOG.debug("fsPluginOutQueue concurrency set to: {}", queueConcurrency);
+        LOG.debug("fsPluginSendQueue concurrency set to: {}", queueConcurrency);
 
         messageListenerContainer.setMessageSelector(messageSelector);
         messageListenerContainer.setConnectionFactory(connectionFactory);
-        messageListenerContainer.setDestination(fsPluginOutQueue);
-        messageListenerContainer.setMessageListener(fsOutMessageListener);
+        messageListenerContainer.setDestination(fsPluginSendQueue);
+        messageListenerContainer.setMessageListener(fsSendMessageListener);
         messageListenerContainer.setTransactionManager(transactionManager);
         messageListenerContainer.setConcurrency(queueConcurrency);
         messageListenerContainer.setSessionTransacted(true);

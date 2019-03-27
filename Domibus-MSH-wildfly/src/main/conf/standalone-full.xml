@@ -542,7 +542,7 @@
                         <redelivery-delay>300000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
-                    <address-setting match="jms.queue.DomibusFSPluginOutQueue">
+                    <address-setting match="jms.queue.DomibusFSPluginSendQueue">
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <redelivery-delay>10000</redelivery-delay>
                         <max-delivery-attempts>0</max-delivery-attempts>
@@ -685,9 +685,9 @@
                         <entry name="java:/jms/queue/DomibusNotifyBackendQueue"/>
                         <durable>true</durable>
                     </jms-queue>
-                    <jms-queue name="DomibusFSPluginOutQueue">
-                        <entry name="java:/jms/domibus.fsplugin.out.queue"/>
-                        <entry name="java:/jms/queue/DomibusFSPluginOutQueue"/>
+                    <jms-queue name="DomibusFSPluginSendQueue">
+                        <entry name="java:/jms/domibus.fsplugin.send.queue"/>
+                        <entry name="java:/jms/queue/DomibusFSPluginSendQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusDLQ">

@@ -19,15 +19,15 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 /**
- * FS Plugin Out Queue message listener
+ * FS Plugin Send Queue message listener
  *
  * @since 4.1
- * @author Catalin Enacje
+ * @author Catalin Enache
  */
-@Service("fsOutMessageListener")
-public class FSOutMessageListener implements MessageListener {
+@Service("fsSendMessageListener")
+public class FSSendMessageListener implements MessageListener {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSOutMessageListener.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessageListener.class);
 
     @Autowired
     private FSSendMessagesService fsSendMessagesService;
@@ -35,13 +35,13 @@ public class FSOutMessageListener implements MessageListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void onMessage(Message message) {
-        LOG.debug("received message on fsPluginOutQueue");
+        LOG.debug("received message on fsPluginSendQueue");
 
         String domain, fileName;
         try {
             domain = message.getStringProperty(MessageConstants.DOMAIN);
             fileName = message.getStringProperty(MessageConstants.FILE_NAME);
-            LOG.debug("received message on fsPluginOutQueue for domain={} and fileName={}", domain, fileName);
+            LOG.debug("received message on fsPluginSendQueue for domain={} and fileName={}", domain, fileName);
         } catch (JMSException e) {
             LOG.error("Unable to extract domainCode or fileName from JMS message");
             return;
@@ -57,7 +57,7 @@ public class FSOutMessageListener implements MessageListener {
                     return;
                 }
             } catch (FileSystemException e) {
-                LOG.error("Error occurred while trying to access the file to be sent: {}", fileName);
+                LOG.error("Error occurred while trying to access the file to be sent: " + fileName, e);
             }
 
             //send the file

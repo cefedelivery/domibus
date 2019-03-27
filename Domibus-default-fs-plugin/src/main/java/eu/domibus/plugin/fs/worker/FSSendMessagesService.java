@@ -69,8 +69,8 @@ public class FSSendMessagesService {
     private JMSExtService jmsExtService;
 
     @Autowired
-    @Qualifier("fsPluginOutQueue")
-    private Queue fsPluginOutQueue;
+    @Qualifier("fsPluginSendQueue")
+    private Queue fsPluginSendQueue;
 
     /**
      * Triggering the send messages means that the message files from the OUT directory
@@ -274,8 +274,8 @@ public class FSSendMessagesService {
                 property(MessageConstants.FILE_NAME, fileName).
                 build();
 
-        LOG.debug("send message: {} to fsPluginOutQueue for file={}", jmsMessage, fileName);
-        jmsExtService.sendMessageToQueue(jmsMessage, fsPluginOutQueue);
+        LOG.debug("send message: [{}] to fsPluginSendQueue for file: [{}]", jmsMessage, fileName);
+        jmsExtService.sendMessageToQueue(jmsMessage, fsPluginSendQueue);
     }
 
 }

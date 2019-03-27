@@ -17,16 +17,16 @@ import org.springframework.stereotype.Service;
  * @since 4.1
  */
 @Service
-public class FSOutMessageListenerContainer implements PluginMessageListenerContainer {
+public class FSSendMessageListenerContainer implements PluginMessageListenerContainer {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSOutMessageListenerContainer.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessageListenerContainer.class);
 
     @Autowired
     protected ApplicationContext applicationContext;
 
     @Override
-    public MessageListenerContainer createDefaultMessageListenerContainer(DomainDTO domain) {
-        LOG.debug("Creating the FSOutMessageListenerContainer for domain [{}]", domain);
+    public MessageListenerContainer createMessageListenerContainer(DomainDTO domain) {
+        LOG.debug("Creating the FSSendMessageListenerContainer  for domain [{}]", domain);
         return (DefaultMessageListenerContainer) applicationContext.getBean("fsPluginOutContainer", domain);
     }
 }
