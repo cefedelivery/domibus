@@ -89,7 +89,7 @@ public class FSSendMessagesService {
         }
     }
 
-    private void sendMessages(String domain) {
+    protected void sendMessages(String domain) {
         if(domibusConfigurationExtService.isMultiTenantAware()) {
             if(domain == null) {
                 domain = DEFAULT_DOMAIN;
@@ -258,7 +258,7 @@ public class FSSendMessagesService {
      * @param processableFile
      * @param domain
      */
-    private void sendJMSMessageToOutQueue(final FileObject processableFile, final String domain) {
+    protected void sendJMSMessageToOutQueue(final FileObject processableFile, final String domain) {
 
         String fileName;
         try {

@@ -63,7 +63,7 @@ public class FSProcessFileService {
         }
     }
 
-    private void renameProcessedFile(FileObject processableFile, String messageId) {
+    protected void renameProcessedFile(FileObject processableFile, String messageId) {
         String newFileName = FSFileNameHelper.deriveFileName(processableFile.getName().getBaseName(), messageId);
 
         try {
