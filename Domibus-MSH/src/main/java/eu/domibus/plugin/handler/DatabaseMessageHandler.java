@@ -389,11 +389,12 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             }
             String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
-            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
             if (to == null) {
                 to = messageValidations(userMessage, pModeKey, backendName);
             }
+
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             if (userMessage.getMpc() == null) {
                 fillMpc(userMessage, legConfiguration, to);
             }

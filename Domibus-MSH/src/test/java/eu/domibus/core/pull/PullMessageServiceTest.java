@@ -4,6 +4,7 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
@@ -12,6 +13,7 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.dozer.inject.Inject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +33,9 @@ public class PullMessageServiceTest {
 
     @Injectable
     private MessagingLockDao messagingLockDao;
+
+    @Injectable
+    MpcService mpcService;
 
     @Injectable
     private UserMessageLogService userMessageLogService;

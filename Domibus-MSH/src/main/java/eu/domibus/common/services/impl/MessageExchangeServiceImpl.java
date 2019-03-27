@@ -254,11 +254,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 partyId = identifiers.iterator().next().getPartyId();
             }
         }
-        // TODO - IOANA add property
-        boolean allowEmptyInitiator = true;
-
-        if (partyId == null && allowEmptyInitiator) {
-            partyId = mpc.substring(mpc.indexOf("EORI/") + "EORY/".length());
+        if (partyId == null && pullMessageService.allowDynamicInitiatorInPullProcess()) {
+            partyId = mpcService.extractInitiator(mpc);
         }
         if (partyId == null) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
@@ -278,7 +275,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpc);
             if (CollectionUtils.isEmpty(processes)) {
                 LOG.info("No process corresponds to mpc:[{}]", mpc);
-                mpc = mpc.substring(0, mpc.indexOf("/EORI"));
+                mpc = mpcService.extractBaseMpc(mpc);
                 processes = pModeProvider.findPullProcessByMpc(mpc);
             }
             if (LOG.isDebugEnabled()) {
