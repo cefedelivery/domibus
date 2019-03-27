@@ -38,10 +38,11 @@ public class DObject {
 
 	public boolean isPresent() {
 		try {
-			return wait.forElementToBeVisible(element).isDisplayed();
+			((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
 		} catch (Exception e) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean isEnabled() throws Exception {
@@ -53,10 +54,13 @@ public class DObject {
 	}
 
 	public String getText() throws Exception {
-		if (isPresent()) {
-			return element.getText().trim();
+		if (!isPresent()) {
+			throw new Exception("Element not present");
 		}
-		throw new Exception("Element not present");
+		if(!element.isDisplayed()){
+			((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
+		}
+		return element.getText().trim();
 	}
 
 	public void click() throws Exception {

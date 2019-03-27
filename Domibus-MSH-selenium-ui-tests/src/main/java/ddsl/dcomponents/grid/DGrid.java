@@ -5,6 +5,7 @@ import ddsl.dcomponents.popups.EditModal;
 import ddsl.dobjects.DButton;
 import ddsl.dobjects.DObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -65,9 +66,7 @@ public class DGrid extends DComponent {
 	protected ArrayList<String> getColumnNames() throws Exception {
 		ArrayList<String> columnNames = new ArrayList<>();
 		for (int i = 0; i < gridHeaders.size(); i++) {
-//			columnNames.add(new DObject(driver, gridHeaders.get(i)).getText());
-			System.out.println(i);
-			columnNames.add(new DObject(driver, gridHeaders.get(i)).getAttribute("innerText"));
+			columnNames.add(new DObject(driver, gridHeaders.get(i)).getText());
 		}
 		return columnNames;
 	}

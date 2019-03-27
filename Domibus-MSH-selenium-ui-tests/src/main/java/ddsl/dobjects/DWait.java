@@ -35,7 +35,7 @@ public class DWait {
 	}
 
 	public WebElement forElementToBeVisible(WebElement element) {
-		return webDriverWait.until(ExpectedConditions.visibilityOf(element));
+		return webDriverWait.until(ExpectedConditions.visibilityOf(element) );
 	}
 
 	public void forElementToBeEnabled(WebElement element) {
