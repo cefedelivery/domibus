@@ -89,7 +89,7 @@ public class PullMessageServiceTest {
                 result = partyId;
             }
         };
-        pullService.addPullMessageLock(partyIdExtractor, null, null);
+        pullService.addPullMessageLock(partyIdExtractor, "", null);
         new Verifications() {{
             MessagingLock messagingLock = new MessagingLock();
             // messagingLockDao.releaseLock(messagingLock = withCapture());

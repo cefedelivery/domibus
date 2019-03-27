@@ -1,6 +1,7 @@
 package eu.domibus.common.validators;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Process;
@@ -8,6 +9,7 @@ import eu.domibus.common.services.impl.PullProcessStatus;
 import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -59,7 +61,7 @@ public class ProcessValidatorTest {
         List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1]}", "responderParties{[name:resp1]}"),
                 PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1]}", "responderParties{[name:resp1]}"));
         ProcessValidator processValidator = new ProcessValidator();
-        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(processes);
+        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(new HashSet<>(processes));
         assertEquals(1, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(TOO_MANY_PROCESSES));
     }
@@ -74,7 +76,7 @@ public class ProcessValidatorTest {
     @Test
     public void checkNoProcess() throws Exception {
         ProcessValidator processValidator = new ProcessValidator();
-        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(Lists.<Process>newArrayList());
+        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(Sets.<Process>newHashSet());
         assertEquals(1, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(NO_PROCESSES));
     }
@@ -105,10 +107,9 @@ public class ProcessValidatorTest {
         }
     }
 
-
     private Set<PullProcessStatus> getProcessStatuses(Process process) {
         ProcessValidator processValidator = new ProcessValidator();
-        return processValidator.verifyPullProcessStatus(Lists.newArrayList(process));
+        return processValidator.verifyPullProcessStatus(Sets.newHashSet(process));
     }
 
 }

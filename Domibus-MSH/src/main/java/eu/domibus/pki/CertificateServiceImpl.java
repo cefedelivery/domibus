@@ -462,6 +462,12 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         final Set<String> allSubject = subjectMap.keySet();
+        // TODO IOANA take the fix from Thomas
+        if (allSubject.size() == 1) {
+            final String leafSubjet = allSubject.iterator().next();
+            LOG.debug("Not an issuer:[{}]", leafSubjet);
+            return subjectMap.get(leafSubjet);
+        }
         //There should always be one more subject more than issuers. Indeed the root CA has the same value as issuer and subject.
         allSubject.removeAll(issuerSet);
         //the unique entry in the set is the leaf.

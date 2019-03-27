@@ -71,10 +71,19 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
         final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
         message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
-        Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-        Validate.notNull(receiverParty, "Initiator party was not found");
+        String encryptionUsername = null;
+        try {
+            Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+            if(receiverParty != null) {
+                encryptionUsername = receiverParty.getName();
+            }
+        } catch (ConfigurationException exc) {
+            LOG.info("Initiator party was not found, will be extracted from pModeKey.");
+        }
+        if(encryptionUsername == null) {
+            encryptionUsername = pModeProvider.getReceiverPartyNameFromPModeKey(pModeKey);
+        }
 
-        final String encryptionUsername = receiverParty.getName();
         message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 

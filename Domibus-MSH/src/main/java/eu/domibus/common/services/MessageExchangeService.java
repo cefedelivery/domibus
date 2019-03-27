@@ -41,6 +41,7 @@ public interface MessageExchangeService {
 
     /**
      * Load pmode and find pull process in order to initialize pull request.
+     *
      * @param mpc the mpc of the exchange
      */
     void initiatePullRequest(final String mpc);
@@ -84,4 +85,10 @@ public interface MessageExchangeService {
     void verifyReceiverCertificate(final LegConfiguration legConfiguration, String receiverName);
 
     void verifySenderCertificate(LegConfiguration legConfiguration, String receiverName);
+
+    boolean forcePullOnMpc(String mpc);
+
+    String extractInitiator(String mpc);
+
+    String extractBaseMpc(String mpc);
 }

@@ -9,6 +9,7 @@ import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
+import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -301,7 +303,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             } else {
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
-                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
+                pullMessageService.addPullMessageLock(new PartyExtractor(to), pModeKey, userMessageLog);
             }
 
 
@@ -373,13 +375,28 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             Messaging message = ebMS3Of.createMessaging();
             message.setUserMessage(userMessage);
 
-            MessageExchangeConfiguration userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
-            Party to = messageValidations(userMessage, pModeKey, backendName);
+            MessageExchangeConfiguration userMessageExchangeConfiguration;
 
+            Party to = null;
+            MessageStatus messageStatus = null;
+            if (messageExchangeService.forcePullOnMpc(userMessage.getMpc())) {
+                // UserMesages submited with the optional mpc attribute are
+                // meant for pulling (if the configuration property is enabled)
+                userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING, true);
+                to = createNewParty(userMessage.getMpc());
+                messageStatus = MessageStatus.READY_TO_PULL;
+            } else {
+                userMessageExchangeConfiguration = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            }
+            String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
-            fillMpc(userMessage, legConfiguration, to);
+            if (to == null) {
+                to = messageValidations(userMessage, pModeKey, backendName);
+            }
+            if (userMessage.getMpc() == null) {
+                fillMpc(userMessage, legConfiguration, to);
+            }
 
             payloadProfileValidator.validate(message, pModeKey);
             propertyProfileValidator.validate(message, pModeKey);
@@ -392,7 +409,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 ex.setMshRole(MSHRole.SENDING);
                 throw ex;
             }
-            MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+            if (messageStatus == null) {
+                messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+            }
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
                     MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
@@ -402,7 +421,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             } else {
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
-                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
+                pullMessageService.addPullMessageLock(new PartyExtractor(to), pModeKey, userMessageLog);
             }
 
 
@@ -467,4 +486,18 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         userMessage.setMpc(mpc);
     }
 
+    protected Party createNewParty(String mpc) {
+        if (mpc == null) {
+            return null;
+        }
+        Party party = new Party();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId(messageExchangeService.extractInitiator(mpc));
+        party.setIdentifiers(new HashSet<Identifier>() {{
+            add(identifier);
+        }});
+        party.setName(messageExchangeService.extractInitiator(mpc));
+
+        return party;
+    }
 }

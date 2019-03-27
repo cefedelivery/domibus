@@ -13,9 +13,22 @@ public class MessageExchangeConfiguration {
     private final String service;
     private final String action;
     private final String leg;
+    private final String mpc;
     private final String pmodeKey;
     private final String reversePmodeKey;
-    public final static String PMODEKEY_SEPARATOR="_pMK_SEP_";
+    public final static String PMODEKEY_SEPARATOR = "_pMK_SEP_";
+
+    public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg, final String mpc) {
+        this.agreementName = agreementName;
+        this.senderParty = senderParty;
+        this.receiverParty = receiverParty;
+        this.service = service;
+        this.action = action;
+        this.mpc = mpc;
+        this.leg = leg;
+        this.pmodeKey = senderParty + PMODEKEY_SEPARATOR + receiverParty + PMODEKEY_SEPARATOR + service + PMODEKEY_SEPARATOR + action + PMODEKEY_SEPARATOR + agreementName + PMODEKEY_SEPARATOR + leg;
+        this.reversePmodeKey = receiverParty + PMODEKEY_SEPARATOR + senderParty + PMODEKEY_SEPARATOR + service + PMODEKEY_SEPARATOR + action + PMODEKEY_SEPARATOR + agreementName + PMODEKEY_SEPARATOR + leg;
+    }
 
     public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
         this.agreementName = agreementName;
@@ -24,8 +37,9 @@ public class MessageExchangeConfiguration {
         this.service = service;
         this.action = action;
         this.leg = leg;
-        this.pmodeKey=senderParty + PMODEKEY_SEPARATOR + receiverParty + PMODEKEY_SEPARATOR+ service + PMODEKEY_SEPARATOR+ action + PMODEKEY_SEPARATOR+ agreementName + PMODEKEY_SEPARATOR+ leg;
-        this.reversePmodeKey=receiverParty+ PMODEKEY_SEPARATOR + senderParty+ PMODEKEY_SEPARATOR+ service + PMODEKEY_SEPARATOR+ action + PMODEKEY_SEPARATOR+ agreementName + PMODEKEY_SEPARATOR+ leg;
+        this.mpc = null;
+        this.pmodeKey = senderParty + PMODEKEY_SEPARATOR + receiverParty + PMODEKEY_SEPARATOR + service + PMODEKEY_SEPARATOR + action + PMODEKEY_SEPARATOR + agreementName + PMODEKEY_SEPARATOR + leg;
+        this.reversePmodeKey = receiverParty + PMODEKEY_SEPARATOR + senderParty + PMODEKEY_SEPARATOR + service + PMODEKEY_SEPARATOR + action + PMODEKEY_SEPARATOR + agreementName + PMODEKEY_SEPARATOR + leg;
     }
 
     public String getAgreementName() {
@@ -60,6 +74,10 @@ public class MessageExchangeConfiguration {
         return reversePmodeKey;
     }
 
+    public String getMpc() {
+        return mpc;
+    }
+
     @Override
     public String toString() {
         return "MessageExchangeConfiguration{" +
@@ -68,6 +86,7 @@ public class MessageExchangeConfiguration {
                 ", receiverParty='" + receiverParty + '\'' +
                 ", service='" + service + '\'' +
                 ", action='" + action + '\'' +
+                ", mpc='" + mpc + '\'' +
                 ", leg='" + leg + '\'' +
                 ", pmodeKey='" + pmodeKey + '\'' +
                 ", reversePmodeKey='" + reversePmodeKey + '\'' +
@@ -87,6 +106,7 @@ public class MessageExchangeConfiguration {
         if (!receiverParty.equalsIgnoreCase(that.receiverParty)) return false;
         if (!service.equalsIgnoreCase(that.service)) return false;
         if (!action.equalsIgnoreCase(that.action)) return false;
+        if (!mpc.equalsIgnoreCase(that.mpc)) return false;
         if (!leg.equalsIgnoreCase(that.leg)) return false;
         return pmodeKey.equalsIgnoreCase(that.pmodeKey);
     }
@@ -98,6 +118,7 @@ public class MessageExchangeConfiguration {
         result = 31 * result + receiverParty.hashCode();
         result = 31 * result + service.hashCode();
         result = 31 * result + action.hashCode();
+        result = 31 * result + mpc.hashCode();
         result = 31 * result + leg.hashCode();
         result = 31 * result + pmodeKey.hashCode();
         return result;

@@ -8,13 +8,16 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Mep;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.impl.PullProcessStatus;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.BackendConnector;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +33,9 @@ public class ProcessValidator {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(ProcessValidator.class);
 
+    @Autowired
+    PullMessageService pullMessageService;
+
     /**
      * In the case of pull process some restrictions are applied to the configuration.
      * This method validate that the configuration is in sync with the restrictions.
@@ -40,21 +46,22 @@ public class ProcessValidator {
 
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = PModeException.class)
     public void validatePullProcess(List<Process> pullProcesses) {
-        Set<PullProcessStatus> pullProcessStatuses = verifyPullProcessStatus(pullProcesses);
+        Set<Process> processes = new HashSet<>(pullProcesses);
+        Set<PullProcessStatus> pullProcessStatuses = verifyPullProcessStatus(processes);
         if (!uniqueCorrectlyConfiguredPullProcess(pullProcessStatuses)) {
             LOG.warn("There is a misconfiguration with pull processes:");
-            for (Process process : pullProcesses) {
+            for (Process process : processes) {
                 LOG.warn("Process name:" + process.getName());
             }
             throw new PModeException(DomibusCoreErrorCode.DOM_003, createWarningMessage(pullProcessStatuses));
         }
     }
 
-    Set<PullProcessStatus> verifyPullProcessStatus(List<Process> pullProcesses) {
+    Set<PullProcessStatus> verifyPullProcessStatus(Set<Process> pullProcesses) {
         Set<PullProcessStatus> pullProcessStatuses = new HashSet<>();
         pullProcessStatuses.add(checkOnlyOnePullProcess(pullProcesses));
         if (pullProcesses.size() == 1) {
-            Process process = pullProcesses.get(0);
+            Process process = pullProcesses.iterator().next();
             pullProcessStatuses.add(checkMpcConfiguration(process));
             pullProcessStatuses.add(checkLegConfiguration(process));
             pullProcessStatuses.add(checkResponderConfiguration(process));
@@ -85,7 +92,7 @@ public class ProcessValidator {
     }
 
 
-    private PullProcessStatus checkOnlyOnePullProcess(final List<Process> pullProcesses) {
+    private PullProcessStatus checkOnlyOnePullProcess(final Set<Process> pullProcesses) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
         if (pullProcesses.size() > 1) {
             status = TOO_MANY_PROCESSES;
@@ -95,7 +102,34 @@ public class ProcessValidator {
         return status;
     }
 
-    private PullProcessStatus checkMpcConfiguration(final Process process) {
+    protected PullProcessStatus checkMpcConfiguration(final Process process) {
+        if (pullMessageService.allowMultipleLegsInPullProcess()) {
+            return checkMpcConfigurationSameSecurityPolicy(process);
+        } else {
+            return checkMpcConfigurationOneLegPerMpc(process);
+        }
+    }
+
+    protected PullProcessStatus checkMpcConfigurationSameSecurityPolicy(final Process process) {
+        PullProcessStatus status = ONE_MATCHING_PROCESS;
+        // when there are multiple legs with the same mpc in a pull process, all legs must have the same security policy
+        HashMap<String, String> mpcsSecurityMapping = new HashMap<>();
+        for (LegConfiguration legConfiguration : process.getLegs()) {
+            String mpc = legConfiguration.getDefaultMpc().getQualifiedName();
+            String securityPolicyName = legConfiguration.getSecurity().getName();
+            if (mpcsSecurityMapping.containsKey(mpc) &&
+                    !mpcsSecurityMapping.get(mpc).equals(securityPolicyName)) {
+                LOG.warn("Different security policies configured in legs authorized with the same mpc in a oneway pull process [{}].", process.getName());
+                status = MULTIPLE_LEGS_DIFFERENT_SECURITY;
+                break;
+            }
+            mpcsSecurityMapping.put(mpc, securityPolicyName);
+        }
+        return status;
+    }
+
+
+    protected PullProcessStatus checkMpcConfigurationOneLegPerMpc(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
         Multiset<String> mpcs = HashMultiset.create();
         for (LegConfiguration legConfiguration : process.getLegs()) {
@@ -123,6 +157,11 @@ public class ProcessValidator {
 
     private PullProcessStatus checkResponderConfiguration(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
+
+        if (pullMessageService.allowDynamicInitiatorInPullProcess()) {
+            return status;
+        }
+
         if (process.getInitiatorParties().size() > 1) {
             LOG.warn("Pull process should only have one responder configured for mpc");
             status = TOO_MANY_RESPONDER;
