@@ -2,6 +2,7 @@ package ddsl.dcomponents.grid;
 
 import ddsl.dcomponents.DComponent;
 import ddsl.dcomponents.popups.EditModal;
+import ddsl.dobjects.DButton;
 import ddsl.dobjects.DObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -9,8 +10,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import org.openqa.selenium.support.pagefactory.DefaultElementLocatorFactory;
 import pages.plugin_users.PluginUserModal;
+import utils.PROPERTIES;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +29,7 @@ public class DGrid extends DComponent {
 	public DGrid(WebDriver driver, WebElement container) {
 		super(driver);
 		log.info("init grid ...");
-		PageFactory.initElements(new DefaultElementLocatorFactory(container), this);
+		PageFactory.initElements(new AjaxElementLocatorFactory(container, PROPERTIES.TIMEOUT), this);
 	}
 
 	@FindBy(css = "span.datatable-header-cell-wrapper > span")
@@ -35,11 +38,18 @@ public class DGrid extends DComponent {
 	@FindBy(css = "datatable-body-row > div.datatable-row-center.datatable-row-group")
 	protected List<WebElement> gridRows;
 
-
 	protected By cellSelector = By.tagName("datatable-body-cell");
 
+	@FindBy(id = "saveascsvbutton_id")
+	protected WebElement downloadCSVButton;
+
+	//	------------------------------------------------
 	public Pagination getPagination() {
 		return new Pagination(driver);
+	}
+
+	public DButton getDownloadCSVButton() {
+		return new DButton(driver, downloadCSVButton);
 	}
 
 	public boolean isPresent() {
@@ -55,7 +65,9 @@ public class DGrid extends DComponent {
 	protected ArrayList<String> getColumnNames() throws Exception {
 		ArrayList<String> columnNames = new ArrayList<>();
 		for (int i = 0; i < gridHeaders.size(); i++) {
-			columnNames.add(new DObject(driver, gridHeaders.get(i)).getText());
+//			columnNames.add(new DObject(driver, gridHeaders.get(i)).getText());
+			System.out.println(i);
+			columnNames.add(new DObject(driver, gridHeaders.get(i)).getAttribute("innerText"));
 		}
 		return columnNames;
 	}
@@ -128,6 +140,7 @@ public class DGrid extends DComponent {
 	public void scrollToAndSelect(String columnName, String value) throws Exception {
 		int index = scrollTo(columnName, value);
 		selectRow(index);
+		wait.forXMillis(300);
 	}
 
 	public HashMap<String, String> getRowInfo(int rowNumber) throws Exception {

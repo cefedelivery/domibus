@@ -20,16 +20,17 @@ import java.util.List;
 
 public class TestServicePgTest extends BaseTest {
 
-	protected void login(HashMap<String, String> user) throws Exception {
-		LoginPage loginPage = new LoginPage(driver);
-		loginPage.login(user);
-		new DomibusPage(driver).getSidebar().getPageLnk(DOMIBUS_PAGES.TEST_SERVICE).click();
-	}
+//	protected DomibusPage login(HashMap<String, String> user) throws Exception {
+//		LoginPage loginPage = new LoginPage(driver);
+//		loginPage.login(user);
+//		new DomibusPage(driver).getSidebar().getPageLnk(DOMIBUS_PAGES.TEST_SERVICE).click();
+//		return null;
+//	}
 
 	@Test(description = "TS-1", groups = {"multiTenancy", "singleTenancy"})
 	public void openWindow() throws Exception {
 		SoftAssert soft = new SoftAssert();
-		login(data.getAdminUser());
+		login(data.getAdminUser()).getSidebar().gGoToPage(DOMIBUS_PAGES.TEST_SERVICE);
 		TestServicePage page = new TestServicePage(driver);
 
 		soft.assertTrue(page.isLoaded(), "Page shows all desired elements");
@@ -39,6 +40,7 @@ public class TestServicePgTest extends BaseTest {
 		}
 
 		rest.uploadPMode("pmode-invalid_process.xml", null);
+		page.wait.forXMillis(500);
 		page.refreshPage();
 		soft.assertTrue(page.invalidConfigurationState(), "Page shows invalid configuration state (2)");
 
@@ -50,7 +52,7 @@ public class TestServicePgTest extends BaseTest {
 		SoftAssert soft = new SoftAssert();
 		rest.uploadPMode("pmode-blue.xml", null);
 
-		login(data.getAdminUser());
+		login(data.getAdminUser()).getSidebar().gGoToPage(DOMIBUS_PAGES.TEST_SERVICE);
 		TestServicePage page = new TestServicePage(driver);
 
 		soft.assertTrue(page.isLoaded(), "Page shows all desired elements");
@@ -67,7 +69,7 @@ public class TestServicePgTest extends BaseTest {
 		SoftAssert soft = new SoftAssert();
 		rest.uploadPMode("pmode-blue.xml", null);
 
-		login(data.getAdminUser());
+		login(data.getAdminUser()).getSidebar().gGoToPage(DOMIBUS_PAGES.TEST_SERVICE);
 		TestServicePage page = new TestServicePage(driver);
 
 		page.getPartySelector().selectOptionByText("domibus-blue");

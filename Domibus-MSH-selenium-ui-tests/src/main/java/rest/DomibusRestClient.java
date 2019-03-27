@@ -426,13 +426,15 @@ public class DomibusRestClient {
 	}
 
 
-	public void uploadPMode(String pmodeFilePath, String domain) {
+	public void uploadPMode(String pmodeFilePath, String domain) throws Exception {
 		switchDomain(domain);
 
 		HashMap<String, String> fields = new HashMap<>();
 		fields.put("description", "automatic red");
-		requestPOSTFile(resource.path(RestServicePaths.PMODE), pmodeFilePath, fields);
-
+		ClientResponse response = requestPOSTFile(resource.path(RestServicePaths.PMODE), pmodeFilePath, fields);
+		if(response.getStatus() != 200){
+			throw new Exception("Could not upload PMODE file!!!");
+		}
 	}
 
 	public boolean isPmodeUploaded(String domain) throws Exception {

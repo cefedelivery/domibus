@@ -2,6 +2,7 @@ package utils.soap_client;
 
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.BackendService11;
+import utils.PROPERTIES;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -23,8 +24,7 @@ public class DomibusSOAPClient {
 
 //	private static final Log LOG = LogFactory.getLog(WebserviceExample.class);
 
-	//	private static final String DEFAULT_WEBSERVICE_LOCATION = PROPERTIES.UI_BASE_URL + "/services/backend?wsdl";
-	private static final String DEFAULT_WEBSERVICE_LOCATION = "http://localhost:8080/domibus/services/backend?wsdl";
+	private static final String DEFAULT_WEBSERVICE_LOCATION = PROPERTIES.UI_BASE_URL + "/services/backend?wsdl";
 	private String wsdl;
 
 

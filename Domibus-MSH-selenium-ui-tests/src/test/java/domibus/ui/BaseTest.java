@@ -1,15 +1,21 @@
 package domibus.ui;
 
 import ddsl.dcomponents.DomibusPage;
+import ddsl.enums.DOMIBUS_PAGES;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
+import pages.login.LoginPage;
+import pages.plugin_users.PluginUsersPage;
 import rest.DomibusRestClient;
 import utils.DriverManager;
 import utils.PROPERTIES;
 import utils.TestDataProvider;
 import utils.customReporter.ExcelTestReporter;
+import utils.soap_client.MyMessageSender;
+
+import java.util.HashMap;
 
 /**
  * @author Catalin Comanici
@@ -22,6 +28,7 @@ public class BaseTest {
 	public static WebDriver driver;
 	public static TestDataProvider data = new TestDataProvider();
 	public static DomibusRestClient rest = new DomibusRestClient();
+	public static MyMessageSender messageSender = new MyMessageSender();
 
 	protected final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -64,4 +71,19 @@ public class BaseTest {
 			page.getSandwichMenu().logout();
 		}
 	}
+
+	protected DomibusPage login(HashMap<String, String> user){
+		System.out.println("login started");
+		LoginPage loginPage = new LoginPage(driver);
+		try {
+			loginPage.login(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new DomibusPage(driver);
+	}
+
+
+
+
 }
