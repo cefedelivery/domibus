@@ -75,7 +75,7 @@ public class SplitAndJoinListener implements MessageListener {
                             userMessageService.scheduleSourceMessageRejoin(groupId, sourceMessageFile.getAbsolutePath(), backendName);
                         },
                         () -> {
-                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, "Error while rejoining the message fragments fuke for group [" + groupId + "]");
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, "Error while rejoining the message fragments for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN)) {
