@@ -39,8 +39,9 @@ public class FSProcessFileService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     public void processFile(FileObject processableFile, String domain) throws FileSystemException, JAXBException, MessagingProcessingException {
+        LOG.debug("processFile start for file: {}", processableFile);
 
-        try(FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME);) {
+        try(FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME)) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
                 LOG.debug("Metadata found and valid: [{}]", processableFile.getName());
@@ -62,7 +63,7 @@ public class FSProcessFileService {
         }
     }
 
-    private void renameProcessedFile(FileObject processableFile, String messageId) {
+    protected void renameProcessedFile(FileObject processableFile, String messageId) {
         String newFileName = FSFileNameHelper.deriveFileName(processableFile.getName().getBaseName(), messageId);
 
         try {

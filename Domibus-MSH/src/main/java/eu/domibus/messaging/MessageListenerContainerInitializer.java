@@ -2,9 +2,12 @@ package eu.domibus.messaging;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.ext.delegate.converter.DomainExtConverter;
+import eu.domibus.ext.domain.DomainDTO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jms.listener.AbstractJmsListeningContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ion Perpegel
@@ -25,10 +29,16 @@ public class MessageListenerContainerInitializer {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageListenerContainerInitializer.class);
 
     @Autowired
+    ApplicationContext applicationContext;
+
+    @Autowired
     protected MessageListenerContainerFactory messageListenerContainerFactory;
 
     @Autowired
     protected DomainService domainService;
+
+    @Autowired
+    protected DomainExtConverter domainConverter;
 
     protected List<MessageListenerContainer> instances = new ArrayList<>();
 
@@ -41,6 +51,8 @@ public class MessageListenerContainerInitializer {
             createSplitAndJoinListenerContainer(domain);
             createPullReceiptListenerContainer(domain);
             createRetentionListenerContainer(domain);
+
+            createMessageListenersForPlugins(domain);
         }
     }
 
@@ -54,6 +66,26 @@ public class MessageListenerContainerInitializer {
             } catch (Exception e) {
                 LOG.error("Error while shutting down MessageListenerContainer", e);
             }
+        }
+    }
+
+    /**
+     * It will collect and instantiates all {@link PluginMessageListenerContainer} defined in plugins
+     * @param domain
+     */
+    public void createMessageListenersForPlugins(Domain domain) {
+        DomainDTO domainDTO = domainConverter.convert(domain, DomainDTO.class);
+
+        final Map<String, PluginMessageListenerContainer> beansOfType = applicationContext.getBeansOfType(PluginMessageListenerContainer.class);
+
+        for (Map.Entry<String, PluginMessageListenerContainer> entry : beansOfType.entrySet()) {
+            final String pluginMessageListenerContainerName = entry.getKey();
+            final PluginMessageListenerContainer pluginMessageListenerContainer = entry.getValue();
+
+            MessageListenerContainer instance = pluginMessageListenerContainer.createMessageListenerContainer(domainDTO);
+            instance.start();
+            instances.add(instance);
+            LOG.info("{} initialized for domain [{}]", pluginMessageListenerContainerName, domain);
         }
     }
 
