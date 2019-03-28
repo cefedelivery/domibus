@@ -17,6 +17,7 @@ import eu.domibus.common.model.configuration.Splitting;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.AS4ReceiptService;
+import eu.domibus.common.services.impl.MessageRetentionService;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
@@ -56,6 +57,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -132,6 +134,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Autowired
     protected EbMS3MessageBuilder messageBuilder;
+
+    @Autowired
+    protected MessageRetentionService messageRetentionService;
 
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -418,7 +423,8 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: could not get the MessageExchangeConfiguration", e);
         }
 
-        //TODO EDELIVERY-4089 schedule message fragment deletion
+        final List<String> userMessageIds = userMessageFragments.stream().map(userMessage -> userMessage.getMessageInfo().getMessageId()).collect(Collectors.toList());
+        messageRetentionService.scheduleDeleteMessages(userMessageIds);
 
         EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, errorDetail, sourceMessageId, null);
         ebMS3Exception.setMshRole(MSHRole.RECEIVING);

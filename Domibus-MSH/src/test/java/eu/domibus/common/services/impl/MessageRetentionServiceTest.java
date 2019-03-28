@@ -14,7 +14,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.Queue;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class MessageRetentionServiceTest {
     private Queue retentionMessageQueue;
 
     @Tested
-    MessageRetentionService messageRetentionService;
+    MessageRetentionDefaultService messageRetentionService;
 
     @Test
     public void testDeleteExpiredMessages() {
@@ -60,10 +59,10 @@ public class MessageRetentionServiceTest {
             pModeProvider.getMpcURIList();
             result = mpcs;
 
-            messageRetentionService.getRetentionValue(MessageRetentionService.DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_DOWNLOADED_MAX_DELETE);
+            messageRetentionService.getRetentionValue(MessageRetentionDefaultService.DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_DOWNLOADED_MAX_DELETE);
             result = 10;
 
-            messageRetentionService.getRetentionValue(MessageRetentionService.DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_NOT_DOWNLOADED_MAX_DELETE);
+            messageRetentionService.getRetentionValue(MessageRetentionDefaultService.DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_NOT_DOWNLOADED_MAX_DELETE);
             result = 20;
         }};
 

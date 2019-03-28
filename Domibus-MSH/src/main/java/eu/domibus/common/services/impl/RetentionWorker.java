@@ -21,9 +21,8 @@ public class RetentionWorker extends DomibusQuartzJobBean {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetentionWorker.class);
 
-
     @Autowired
-    private MessageRetentionService messageRetentionService;
+    protected MessageRetentionService messageRetentionService;
 
     @Autowired
     private ConfigurationDAO configurationDAO;
