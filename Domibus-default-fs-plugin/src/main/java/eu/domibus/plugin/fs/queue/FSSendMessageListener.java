@@ -49,7 +49,7 @@ public class FSSendMessageListener implements MessageListener {
             return;
         }
 
-        if (StringUtils.isNoneBlank(domain, fileName)) {
+        if (StringUtils.isNotBlank(fileName)) {
             FileObject fileObject = null;
             try {
                 FileSystemManager fileSystemManager = VFS.getManager();
@@ -71,7 +71,7 @@ public class FSSendMessageListener implements MessageListener {
                 fsSendMessagesService.processFileSafely(fileObject, domain);
             }
         } else {
-            LOG.error("Error while consuming JMS message: [{}] Domain or fileName empty.", message);
+            LOG.error("Error while consuming JMS message: [{}] fileName empty.", message);
         }
     }
 }
