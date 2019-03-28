@@ -71,9 +71,11 @@ public class SplitAndJoinListener implements MessageListener {
                 final Domain currentDomain = domainContextProvider.getCurrentDomain();
                 domainTaskExecutor.submitLongRunningTask(
                         () -> {
-                            //TODO EDELIVERY-4089
                             final File sourceMessageFile = splitAndJoinService.rejoinMessageFragments(groupId);
                             userMessageService.scheduleSourceMessageRejoin(groupId, sourceMessageFile.getAbsolutePath(), backendName);
+                        },
+                        () -> {
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, "Error while rejoining the message fragments fuke for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN)) {
@@ -83,8 +85,10 @@ public class SplitAndJoinListener implements MessageListener {
                 final Domain currentDomain = domainContextProvider.getCurrentDomain();
                 domainTaskExecutor.submitLongRunningTask(
                         () -> {
-                            //TODO EDELIVERY-4089
                             splitAndJoinService.rejoinSourceMessage(groupId, sourceMessageFile, backendName);
+                        },
+                        () -> {
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, "Error while rejoining the SourceMessage for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_RECEIPT)) {

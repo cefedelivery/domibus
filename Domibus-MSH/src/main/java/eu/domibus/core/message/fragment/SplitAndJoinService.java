@@ -59,4 +59,5 @@ public interface SplitAndJoinService {
 
     void sendSourceMessageReceipt(String sourceMessageId, String pModeKey);
 
+    void splitAndJoinReceiveFailed(String groupId, String errorDetail);
 }

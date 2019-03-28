@@ -6,6 +6,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -27,10 +28,7 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
-import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import eu.domibus.ebms3.sender.SplitAndJoinException;
-import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
+import eu.domibus.ebms3.sender.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.PolicyService;
@@ -132,6 +130,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     @Autowired
     protected AS4ReceiptService as4ReceiptService;
 
+    @Autowired
+    protected EbMS3MessageBuilder messageBuilder;
+
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
@@ -211,17 +212,13 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             legConfiguration = pModeProvider.getLegConfiguration(sourcePmodeKey);
             sourceRequest.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, sourcePmodeKey);
         } catch (EbMS3Exception | SOAPException e) {
-            //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
-            LOG.error("Error getting the pmodeKey", e);
-            return;
+            throw new SplitAndJoinException("Error getting the pmodeKey", e);
         }
 
         try {
             userMessageHandlerService.handlePayloads(sourceRequest, sourceMessaging.getUserMessage());
         } catch (EbMS3Exception | SOAPException | TransformerException e) {
-            //TODO return a signal error to C2 and notify the backend EDELIVERY-4089
-            LOG.error("Error handling payloads", e);
-            return;
+            throw new SplitAndJoinException("Error handling payloads", e);
         }
 
         messagingService.storePayloads(sourceMessaging, MSHRole.RECEIVING, legConfiguration, backendName);
@@ -234,19 +231,24 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Override
     public void sendSourceMessageReceipt(String sourceMessageId, String pModeKey) {
-        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-        final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-        final Policy policy = policyService.getPolicy(legConfiguration);
         SOAPMessage receiptMessage = null;
         try {
             receiptMessage = as4ReceiptService.generateReceipt(sourceMessageId, false);
         } catch (EbMS3Exception e) {
-            LOG.error("Error generating the source message receipt", e);
+            throw new SplitAndJoinException("Error generating the source message receipt", e);
         }
+        sendSignalMessage(receiptMessage, pModeKey);
+
+    }
+
+    protected void sendSignalMessage(SOAPMessage soapMessage, String pModeKey) {
+        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+        final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+        final Policy policy = policyService.getPolicy(legConfiguration);
+
         try {
-            mshDispatcher.dispatch(receiptMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
+            mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
         } catch (EbMS3Exception e) {
-            LOG.error("Error dispatching SourceMessage receipt", e);
             throw new SplitAndJoinException("Error dispatching SourceMessage receipt", e);
         }
     }
@@ -271,10 +273,15 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     public File rejoinMessageFragments(String groupId) {
         LOG.debug("Rejoining the SourceMessage for group [{}]", groupId);
 
-        final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
+        if (messageGroupEntity == null) {
+            throw new SplitAndJoinException("Could not rejoin fragments: could not find group [" + groupId + "]");
+        }
+
+        final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
+
         if (messageGroupEntity.getFragmentCount() != userMessageFragments.size()) {
-            throw new SplitAndJoinException("Could not rejoin fragments: number of fragments found do not correspond with the total fragment count");
+            throw new SplitAndJoinException("Could not rejoin fragments: number of fragments found [" + userMessageFragments.size() + "] do not correspond with the total fragment count [" + messageGroupEntity.getFragmentCount() + "]");
         }
 
         List<File> fragmentFilesInOrder = new ArrayList<>();
@@ -363,7 +370,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Override
     public void splitAndJoinSendFailed(String groupId) {
-        LOG.debug("SplitAndJoin sending failed");
+        LOG.debug("SplitAndJoin sending failed for group [{}]", groupId);
 
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
         if (messageGroupEntity == null) {
@@ -380,6 +387,50 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         final List<UserMessage> groupUserMessages = messagingDao.findUserMessageByGroupId(groupId);
         groupUserMessages.stream().forEach(userMessage -> userMessageService.scheduleUserMessageFragmentFailed(userMessage.getMessageInfo().getMessageId()));
+    }
+
+    @Override
+    public void splitAndJoinReceiveFailed(String groupId, String errorDetail) {
+        LOG.debug("SplitAndJoin receiving failed for group [{}]", groupId);
+
+        final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
+        if (messageGroupEntity == null) {
+            LOG.warn("Group not found [{}]: could not handle splitAndJoinReceiveFailed", groupId);
+            return;
+        }
+
+        LOG.debug("Marking the group [{}] as rejected", groupId);
+        messageGroupEntity.setRejected(true);
+        messageGroupDao.update(messageGroupEntity);
+
+        final String sourceMessageId = messageGroupEntity.getSourceMessageId();
+
+        final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
+        if (userMessageFragments == null || userMessageFragments.isEmpty()) {
+            throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: no message fragments found");
+        }
+
+        final UserMessage messageFragment = userMessageFragments.iterator().next();
+        MessageExchangeConfiguration userMessageExchangeContext = null;
+        try {
+            userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(messageFragment, MSHRole.RECEIVING);
+        } catch (EbMS3Exception e) {
+            throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: could not get the MessageExchangeConfiguration", e);
+        }
+
+        //TODO EDELIVERY-4089 schedule message fragment deletion
+
+        EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, errorDetail, sourceMessageId, null);
+        ebMS3Exception.setMshRole(MSHRole.RECEIVING);
+        SOAPMessage soapMessage = null;
+        try {
+            soapMessage = messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfoError());
+        } catch (EbMS3Exception e) {
+            throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]", e);
+        }
+        sendSignalMessage(soapMessage, userMessageExchangeContext.getReversePmodeKey());
+
+
     }
 
     protected File compressSourceMessage(String fileName) {

@@ -168,7 +168,7 @@ public class EbMS3MessageBuilder {
         return message;
     }
 
-    protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) throws EbMS3Exception {
+    protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) {
         final SOAPMessage message;
         try {
             message = this.messageFactory.createMessage();
