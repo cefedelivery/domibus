@@ -46,7 +46,7 @@ public class DomainCryptoServiceInterceptor extends ServiceInterceptor {
             return e;
         } else {
             LOG.trace("Unknown exception:[{}] converted to CryptoException", e);
-            return new CryptoException(e.getMessage(), e);
+            return new CryptoException(e);
         }
     }
 

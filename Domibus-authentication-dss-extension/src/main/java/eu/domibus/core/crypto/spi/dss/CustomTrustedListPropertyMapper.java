@@ -35,9 +35,9 @@ import java.util.Map;
  * Load multiple OtherTrustedList objects based on properties with the following format:
  */
 @Component
-public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTrustedList> {
+public class CustomTrustedListPropertyMapper extends PropertyGroupMapper<OtherTrustedList> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OtherTrustedListPropertyMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CustomTrustedListPropertyMapper.class);
 
     private static final String CUSTOM_TRUSTED_LIST_URL_PROPERTY = "domibus.dss.custom.trusted.list.url";
 
@@ -49,9 +49,9 @@ public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTru
 
     private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.dss.custom.trusted.list.country.code";
 
-    public OtherTrustedListPropertyMapper(final DomibusPropertyExtService domibusPropertyExtService,
-                                          final DomainContextExtService domainContextExtService,
-                                          final Environment environment) {
+    public CustomTrustedListPropertyMapper(final DomibusPropertyExtService domibusPropertyExtService,
+                                           final DomainContextExtService domainContextExtService,
+                                           final Environment environment) {
         super(domibusPropertyExtService,
                 domainContextExtService, environment);
     }
@@ -67,22 +67,23 @@ public class OtherTrustedListPropertyMapper extends PropertyGroupMapper<OtherTru
     }
 
     @Override
-    OtherTrustedList transForm(Map<String, ImmutablePair<String, String>> keyValues) {
+    OtherTrustedList transform(Map<String, ImmutablePair<String, String>> keyValues) {
         OtherTrustedList otherTrustedList = new OtherTrustedList();
+        String customListKeystorePath = keyValues.get(CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY).getRight();
+        String customListKeystoreType = keyValues.get(CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY).getRight();
+        String customListKeystorePassword = keyValues.get(CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY).getRight();
+        String customListUrl = keyValues.get(CUSTOM_TRUSTED_LIST_URL_PROPERTY).getRight();
+        String customListCountryCode = keyValues.get(CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY).getRight();
         try {
-            String customListKeystorePath = keyValues.get(CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY).getRight();
-            String customListKeystoreType = keyValues.get(CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY).getRight();
-            String customListKeystorePassword = keyValues.get(CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY).getRight();
-            String customListUrl = keyValues.get(CUSTOM_TRUSTED_LIST_URL_PROPERTY).getRight();
-            String customListCountryCode = keyValues.get(CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY).getRight();
-
             otherTrustedList.setTrustStore(
                     new KeyStoreCertificateSource(new File(customListKeystorePath), customListKeystoreType, customListKeystorePassword));
             otherTrustedList.setUrl(customListUrl);
             otherTrustedList.setCountryCode(customListCountryCode);
+            LOG.debug("Custom trusted list with keystore path:[{}] and type:[{}], URL:[{}], customListCountryCode:[{}] will be added to DSS", customListKeystorePath, customListKeystoreType, customListUrl, customListCountryCode);
+            return otherTrustedList;
         } catch (IOException e) {
-            LOG.error("Error while loading custom trust list", e);
+            LOG.error("Error while configuring custom trusted list with keystore path:[{}],type:[{}] ", customListKeystorePath, customListKeystoreType, e);
+            return null;
         }
-        return otherTrustedList;
     }
 }

@@ -42,6 +42,7 @@
             <url-pattern>/testservice</url-pattern>
             <url-pattern>/changePassword</url-pattern>
             <url-pattern>/logging</url-pattern>
+            <url-pattern>/login</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description>Ensures that the principal is authenticated</description>

@@ -45,7 +45,7 @@ public class ValidationConstraintPropertyMapper extends PropertyGroupMapper<Cons
     }
 
     @Override
-    ConstraintInternal transForm(Map<String, ImmutablePair<String, String>> keyValues) {
+    ConstraintInternal transform(Map<String, ImmutablePair<String, String>> keyValues) {
         if (keyValues.isEmpty()) {
             throw new IllegalStateException("Constraints are mandatory.");
         }

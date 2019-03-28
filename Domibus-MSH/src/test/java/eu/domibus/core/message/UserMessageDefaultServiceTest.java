@@ -1,10 +1,10 @@
 package eu.domibus.core.message;
 
+import com.google.common.collect.Lists;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
@@ -20,10 +20,12 @@ import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.messaging.DispatchMessageCreator;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.NotificationListener;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -63,6 +65,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private Queue sendPullReceiptQueue;
+
+    @Injectable
+    private Queue retentionMessageQueue;
 
     @Injectable
     private UserMessageLogDao userMessageLogDao;
@@ -470,7 +475,27 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testDeleteMessageWhenNoNotificationListenerIsFound(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testDeleteMessaged(@Mocked final NotificationListener notificationListener1) throws Exception {
+        final String messageId = "1";
+        final String queueName = "wsQueue";
+
+        final List<NotificationListener> notificationListeners = new ArrayList<>();
+        notificationListeners.add(notificationListener1);
+
+        new Expectations(userMessageDefaultService) {{
+            backendNotificationService.getNotificationListenerServices(); result = notificationListeners;
+            notificationListener1.getBackendNotificationQueue().getQueueName(); result = queueName;
+        }};
+
+        userMessageDefaultService.deleteMessage(messageId);
+
+        new Verifications() {{
+            jmsManager.consumeMessage(queueName, messageId);
+        }};
+    }
+
+    @Test
+    public void marksTheUserMessageAsDeleted() throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
@@ -486,30 +511,63 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testDeleteMessaged(@Mocked final NotificationListener notificationListener1) throws Exception {
+    public void clearsSignalMessagesReferencingTheMessageIdOfTheMessageBeingDeleted(@Injectable SignalMessage signalMessage) {
         final String messageId = "1";
-        final String queueName = "wsQueue";
 
-        final List<NotificationListener> notificationListeners = new ArrayList<>();
-        notificationListeners.add(notificationListener1);
-
-        new Expectations(userMessageDefaultService) {{
-            userMessageDefaultService.handleSignalMessageDelete(messageId);
-
-            backendNotificationService.getNotificationListenerServices();
-            result = notificationListeners;
-
-            notificationListener1.getBackendNotificationQueue().getQueueName();
-            result = queueName;
+        new Expectations() {{
+            signalMessageDao.findSignalMessagesByRefMessageId(messageId); result = Lists.newArrayList(signalMessage);
         }};
 
-        userMessageDefaultService.deleteMessage(messageId);
+        userMessageDefaultService.handleSignalMessageDelete(messageId);
 
         new Verifications() {{
-            messagingDao.clearPayloadData(messageId);
-            userMessageLogService.setMessageAsDeleted(messageId);
+            signalMessageDao.clear(signalMessage);
+        }};
+    }
 
-            jmsManager.consumeMessage(queueName, messageId);
+    @Test
+    public void doesNotClearAnySignalMessagesWhenNoSignalMessagesFoundReferencingTheMessageIdOfTheMessageBeingDeleted() throws Exception {
+        final String messageId = "1";
+
+        new Expectations() {{
+            signalMessageDao.findSignalMessagesByRefMessageId(messageId); result = Lists.<SignalMessage>newArrayList();
+        }};
+
+        userMessageDefaultService.handleSignalMessageDelete(messageId);
+
+        new Verifications() {{
+            signalMessageDao.clear((SignalMessage) any); times = 0;
+        }};
+    }
+
+    @Test
+    public void marksSignalMessagesAsDeletedWhenReferencingTheMessageIdOfTheMessageBeingDeleted() {
+        final String messageId = "1";
+        final String signalMessageId = "signalMessageId";
+
+        new Expectations() {{
+            signalMessageDao.findSignalMessageIdsByRefMessageId(messageId); result = Lists.newArrayList(signalMessageId);
+        }};
+
+        userMessageDefaultService.handleSignalMessageDelete(messageId);
+
+        new Verifications() {{
+            userMessageLogService.setMessageAsDeleted(signalMessageId);
+        }};
+    }
+
+    @Test
+    public void doesNotMarkAnySignalMessagesAsDeletedWhenNoSignalMessagesIdentifiersFoundReferencingTheMessageIdOfTheMessageBeingDeleted() throws Exception {
+        final String messageId = "1";
+
+        new Expectations() {{
+            signalMessageDao.findSignalMessageIdsByRefMessageId(messageId); result = Lists.<String>newArrayList();
+        }};
+
+        userMessageDefaultService.handleSignalMessageDelete(messageId);
+
+        new Verifications() {{
+            userMessageLogService.setMessageAsDeleted(anyString); times = 0;
         }};
     }
 

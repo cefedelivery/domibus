@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * @author Thomas Dussart
+ * @author Cosmin Baciu
  * @see org.apache.wss4j.common.crypto.CryptoBase
- * @since 4.1
+ * @since 4.0
  * <p>
  * Same methods as CryptoBase defined in the IAM api. Will be used as a delegate by core DomainCryptoService
  */

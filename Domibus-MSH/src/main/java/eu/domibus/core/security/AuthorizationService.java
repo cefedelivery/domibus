@@ -5,9 +5,10 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.spi.AuthorizationServiceSpi;
+import eu.domibus.core.crypto.spi.PullRequestPmodeData;
+import eu.domibus.core.crypto.spi.model.AuthorizationError;
 import eu.domibus.core.crypto.spi.model.AuthorizationException;
-import eu.domibus.core.crypto.spi.model.PullRequestMapping;
-import eu.domibus.core.crypto.spi.model.UserMessageMapping;
+import eu.domibus.core.crypto.spi.model.UserMessagePmodeData;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -24,7 +25,6 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING;
@@ -83,14 +83,14 @@ public class AuthorizationService {
             return;
         }
         final CertificateTrust certificateTrust = getCertificateTrust(request);
-        final Map<PullRequestMapping, String> pullRequestMapping;
+        final PullRequestPmodeData pullRequestPmodeData;
         try {
-            pullRequestMapping = pModeProvider.getPullRequestMapping(pullRequest);
+            pullRequestPmodeData = pModeProvider.getPullRequestMapping(pullRequest);
         } catch (EbMS3Exception e) {
             throw new AuthorizationException(e);
         }
         getAuthorizationService().authorize(certificateTrust.getTrustChain(), certificateTrust.getSigningCertificate(),
-                domainCoreConverter.convert(pullRequest, PullRequestDTO.class), pullRequestMapping);
+                domainCoreConverter.convert(pullRequest, PullRequestDTO.class), pullRequestPmodeData);
     }
 
     public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) {
@@ -98,14 +98,14 @@ public class AuthorizationService {
             return;
         }
         final CertificateTrust certificateTrust = getCertificateTrust(request);
-        final Map<UserMessageMapping, String> userMessageMapping;
+        final UserMessagePmodeData userMessagePmodeData;
         try {
-            userMessageMapping = pModeProvider.getUserMessageMapping(userMessage);
+            userMessagePmodeData = pModeProvider.getUserMessagePmodeData(userMessage);
         } catch (EbMS3Exception e) {
             throw new AuthorizationException(e);
         }
         getAuthorizationService().authorize(certificateTrust.getTrustChain(), certificateTrust.getSigningCertificate(),
-                domainCoreConverter.convert(userMessage, UserMessageDTO.class), userMessageMapping);
+                domainCoreConverter.convert(userMessage, UserMessageDTO.class), userMessagePmodeData);
 
     }
 
@@ -127,8 +127,7 @@ public class AuthorizationService {
         X509Certificate leafCertificate = (X509Certificate) certificateService.extractLeafCertificateFromChain(x509Certificates);
         final List<X509Certificate> signingCertificateTrustChain = Lists.newArrayList(x509Certificates);
         signingCertificateTrustChain.remove(leafCertificate);
-        final CertificateTrust certificateTrust = new CertificateTrust(leafCertificate, signingCertificateTrustChain);
-        return certificateTrust;
+        return new CertificateTrust(leafCertificate, signingCertificateTrustChain);
     }
 
     private List<X509Certificate> getCertificatesFromSoapMessage(SOAPMessage request) {
@@ -136,7 +135,7 @@ public class AuthorizationService {
         try {
             certificateChainValue = (String) request.getProperty(CertificateExchangeType.getValue());
         } catch (SOAPException e) {
-            throw new IllegalStateException(String.
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_OTHER, String.
                     format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
         }
         return certificateService.deserializeCertificateChainFromPemFormat(certificateChainValue);
@@ -148,16 +147,15 @@ public class AuthorizationService {
         try {
             certificateExchangeTypeValue = (String) request.getProperty(CertificateExchangeType.getKey());
         } catch (SOAPException e) {
-            throw new IllegalStateException(String.
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_OTHER, String.
                     format("At this stage, the property:[%s] of the soap message should contain a certificate", CertificateExchangeType.getValue()), e);
         }
 
         try {
             return CertificateExchangeType.valueOf(certificateExchangeTypeValue);
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(String.format("Invalid certificate exchange type:[%s]", certificateExchangeTypeValue));
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_OTHER, String.format("Invalid certificate exchange type:[%s]", certificateExchangeTypeValue), e);
         }
     }
-
 
 }

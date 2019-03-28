@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {SecurityService} from './security/security.service';
-import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
+import {Router, RouterOutlet, RoutesRecognized} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
 import {Http} from '@angular/http';
 import {DomainService} from './security/domain.service';
@@ -17,6 +17,7 @@ export class AppComponent implements OnInit {
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? 'menu-expanded' : 'menu-collapsed';
   extAuthProviderEnabled: boolean = false;
+  extAuthProvideRedirectTo: string;
 
   @ViewChild(RouterOutlet)
   outlet: RouterOutlet;
@@ -30,10 +31,33 @@ export class AppComponent implements OnInit {
                private domibusInfoService: DomibusInfoService) {
 
     this.domainService.setAppTitle();
+
+    /* ugly but necessary: intercept ECAS redirect */
+    this.router.events.subscribe(event => {
+      if (event instanceof RoutesRecognized) {
+        if (event.url.indexOf('?ticket=ST') !== -1) {
+          let route = event.state.root.firstChild;
+          this.extAuthProvideRedirectTo = '/' + route.url;
+        }
+      }
+    });
   }
 
   async ngOnInit () {
     this.extAuthProviderEnabled = await this.domibusInfoService.isExtAuthProviderEnabled();
+    if (this.extAuthProviderEnabled) {
+      const user = await this.securityService.getCurrentUserFromServer();
+      if (user) {
+        this.securityService.updateCurrentUser(user);
+        this.domainService.setAppTitle();
+      }
+      if (this.extAuthProvideRedirectTo) {
+        const success = await this.router.navigate([this.extAuthProvideRedirectTo]);
+        if (success) {
+          console.log('redirect to: ' + this.extAuthProvideRedirectTo + ' done');
+        }
+      }
+    }
 
     this.httpEventService.subscribe((error) => {
       if (error && (error.status === 403 || error.status === 401)) {
@@ -47,19 +71,8 @@ export class AppComponent implements OnInit {
         this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']);
       });
 
-    /* ugly but necessary: intercept ECAS redirect
-     */
-    this.router.events.subscribe(async event => {
-      if (event instanceof NavigationEnd) {
-         if (event.url.indexOf('?ticket=ST') !== -1) {
-          if (this.extAuthProviderEnabled) {
-            await this.securityService.login_extauthprovider();
-            this.router.navigate(['/']);
-          }
-        }
-      }
-    });
   }
+
 
   isAdmin (): boolean {
     return this.securityService.isCurrentUserAdmin();

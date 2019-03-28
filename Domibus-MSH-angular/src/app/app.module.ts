@@ -26,10 +26,8 @@ import {LoginComponent} from "./security/login/login.component";
 import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
 import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
-import {AuthenticatedGuard} from "./common/guards/authenticated.guard";
-import {AuthorizedGuard} from "./common/guards/authorized.guard";
+import {AuthenticatedAuthorizedGuard} from "./common/guards/authenticated-authorized.guard";
 import {routing} from "./app.routes";
-import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./common/http/extended-http-client";
 import {HttpEventService} from "./common/http/http.event.service";
 import {SecurityService} from "./security/security.service";
@@ -40,7 +38,6 @@ import {AlertService} from "./common/alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./common/footer/footer.component";
 import {DomibusInfoService} from "./common/appinfo/domibusinfo.service";
-import {AuthorizedAdminGuard} from "./common/guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {UserComponent} from "./user/user.component";
@@ -111,7 +108,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     FooterComponent,
     CurrentPModeComponent,
     PModeArchiveComponent,
-    IsAuthorized,
     TruststoreComponent,
     PmodeUploadComponent,
     PmodeViewComponent,
@@ -206,9 +202,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MdTooltipModule
   ],
   providers: [
-    AuthenticatedGuard,
-    AuthorizedGuard,
-    AuthorizedAdminGuard,
+    AuthenticatedAuthorizedGuard,
     DirtyGuard,
     DefaultPasswordGuard,
     AuthExternalProviderGuard,
