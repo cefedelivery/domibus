@@ -124,7 +124,7 @@ public class SamplePModeTestIT {
     @Test
     public void testUnmarshal_PreventXxeAttack() {
         try {
-            readPMode("src/test/resources/pmodes/domibus-pmode-red-xxe-attack.xml");
+            readPMode("src/test/resources/pmodes/domibus-pmode-red-xxe-vulnerability.xml");
             fail("Should have prevented the external entity since DTDs should be disabled");
         } catch (Exception e) {
             Throwable cause = ExceptionUtils.getRootCause(e);
