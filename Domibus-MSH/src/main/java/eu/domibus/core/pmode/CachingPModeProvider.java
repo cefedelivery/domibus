@@ -510,7 +510,8 @@ public class CachingPModeProvider extends PModeProvider {
         if (processes == null) {
             return Lists.newArrayList();
         }
-        return processes;
+        // return list with no duplicates
+        return Lists.newArrayList(new HashSet<>(processes));
     }
 
     @Override
