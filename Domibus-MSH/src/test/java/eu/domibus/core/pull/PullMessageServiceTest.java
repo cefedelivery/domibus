@@ -1,6 +1,7 @@
 package eu.domibus.core.pull;
 
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -13,7 +14,6 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.dozer.inject.Inject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +66,9 @@ public class PullMessageServiceTest {
 
     @Injectable
     private UIReplicationSignalService uiReplicationSignalService;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Test
     @Ignore

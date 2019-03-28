@@ -171,7 +171,7 @@ public class IncomingPullRequestHandlerTest {
             result = pullContext;
 
 
-            messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
+            messageExchangeService.retrieveReadyToPullUserMessageId(pullRequest.getMpc(), pullContext.getInitiator());
             result = messageId;
 
         }};
@@ -180,7 +180,7 @@ public class IncomingPullRequestHandlerTest {
             messageExchangeService.extractProcessOnMpc(mpcQualifiedName);
             times = 1;
 
-            messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
+            messageExchangeService.retrieveReadyToPullUserMessageId(pullRequest.getMpc(), pullContext.getInitiator());
             times = 1;
 
             pullRequestHandler.handlePullRequest(messageId, pullContext);

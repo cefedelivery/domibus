@@ -3,6 +3,7 @@ package eu.domibus.util;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,6 +24,7 @@ public class DateUtilImplTest {
     private DateUtilImpl dateUtilImpl;
 
     @Test
+    @Ignore
     public void convertsIso8601ValuesToDates() {
         // Given
         String value = "2020-02-29T11:53:37";
@@ -36,6 +38,7 @@ public class DateUtilImplTest {
     }
 
     @Test
+    @Ignore
     public void convertsIso8601ValuesToDates_EpochZulu() {
         // Given
         String value = "1970-01-01T00:00:00Z";

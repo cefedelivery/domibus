@@ -131,9 +131,9 @@ public class PModeDao extends PModeProvider {
             //this is the normal call for a push.
             return findLegNameMepBindingAgnostic(agreementName, senderParty, receiverParty, service, action);
         } catch (EbMS3Exception e) {
-            return findLegNameMepBindingAgnostic(agreementName, receiverParty, senderParty, service, action);
+            // TODO IOANA !!!! verify
+            return findPullLegName(agreementName, senderParty, receiverParty, service, action, null);
         }
-
     }
 
     public String findLegNameMepBindingAgnostic(String agreementName, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception {

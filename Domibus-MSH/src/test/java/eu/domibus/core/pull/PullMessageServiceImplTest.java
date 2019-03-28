@@ -212,7 +212,7 @@ public class PullMessageServiceImplTest {
         final String mpc = "mpc";
         final Date staledDate = new Date();
         final LegConfiguration legConfiguration = new LegConfiguration();
-        new Expectations(pullMessageService) {{
+        new NonStrictExpectations(pullMessageService) {{
             partyIdExtractor.getPartyId();
             result = partyId;
             messageLog.getMessageId();
