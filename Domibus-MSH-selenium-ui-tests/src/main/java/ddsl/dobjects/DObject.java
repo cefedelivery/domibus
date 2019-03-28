@@ -7,7 +7,6 @@ import org.openqa.selenium.WebElement;
 
 /**
  * @author Catalin Comanici
-
  * @version 4.1
  */
 
@@ -38,7 +37,8 @@ public class DObject {
 
 	public boolean isPresent() {
 		try {
-			((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
+			wait.forElementToBe(element);
+			((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", element);
 		} catch (Exception e) {
 			return false;
 		}
@@ -57,10 +57,9 @@ public class DObject {
 		if (!isPresent()) {
 			throw new Exception("Element not present");
 		}
-		if(!element.isDisplayed()){
-			((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();", element);
-		}
-		return element.getText().trim();
+		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", element);
+		String text = ((JavascriptExecutor) driver).executeScript("return arguments[0].textContent;", element).toString();
+		return text.trim();
 	}
 
 	public void click() throws Exception {
@@ -71,7 +70,6 @@ public class DObject {
 			throw new Exception("Not enabled");
 		}
 	}
-
 
 	public String getAttribute(String attributeName) throws Exception {
 		if (isPresent()) {

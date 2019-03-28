@@ -35,7 +35,7 @@ public class DWait {
 	}
 
 	public WebElement forElementToBeVisible(WebElement element) {
-		return webDriverWait.until(ExpectedConditions.visibilityOf(element) );
+		return webDriverWait.until(ExpectedConditions.visibilityOf(element));
 	}
 
 	public void forElementToBeEnabled(WebElement element) {
@@ -57,5 +57,15 @@ public class DWait {
 		} catch (Exception e) {
 		}
 	}
+
+	public void forElementToBe(WebElement element) {
+		int secs = 0;
+		while (secs < PROPERTIES.TIMEOUT * 10) {
+			try { if (null != element.getText()) {	break;	}	} catch (Exception e) { }
+			try {Thread.sleep(100);} catch (InterruptedException e) {}
+			secs++;
+		}
+	}
+
 
 }

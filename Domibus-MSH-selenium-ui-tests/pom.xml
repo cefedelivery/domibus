@@ -128,7 +128,7 @@
 
 	<profiles>
 		<profile>
-			<id>local_MT</id>
+			<id>local</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>

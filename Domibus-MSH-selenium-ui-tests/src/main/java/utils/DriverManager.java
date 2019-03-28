@@ -1,5 +1,6 @@
 package utils;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -20,7 +21,12 @@ public class DriverManager {
 //		WebDriver driver = new FirefoxDriver();
 //		driver.manage().window().maximize();
 //		return driver;
-		return new ChromeDriver();
+
+		WebDriver driver = new ChromeDriver();
+		((JavascriptExecutor)driver).executeScript("document.body.style.zoom = '10%';");
+		driver.manage().window().maximize();
+
+		return driver;
 	}
 
 
