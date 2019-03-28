@@ -65,7 +65,6 @@ public class FSSendMessageListener implements MessageListener {
             //check if the file is not already processed
             if (FSFileNameHelper.isProcessed(fileObject)) {
                 LOG.info("File already processed: [{}]", fileObject);
-                return;
             } else {
                 //process the file
                 LOG.debug("now send the file: {}", fileObject);
