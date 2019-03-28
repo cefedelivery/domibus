@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="BE1234567890">
+    <mpcs>
+        <mpc name="MPC_eu_ics2_c2t_eori" qualifiedName="urn:fdc:ec.europa.eu:2019:eu_ics2_c2t/EORI/BE1234567890"
+             enabled="true" default="true" retention_downloaded="600" retention_undownloaded="600"/>
+        <mpc name="MPC_eu_ics2_c2t" qualifiedName="urn:fdc:ec.europa.eu:2019:eu_ics2_c2t" enabled="true" default="true"
+             retention_downloaded="600" retention_undownloaded="600"/>
+        <mpc name="MPC_eu_ics2_t2c" qualifiedName="urn:fdc:ec.europa.eu:2019:eu_ics2_t2c" enabled="true" default="true"
+             retention_downloaded="600" retention_undownloaded="600"/>
+    </mpcs>
+    <businessProcesses>
+        <roles>
+            <role name="traderRole" value="Trader"/>
+            <role name="customsRole" value="Customs"/>
+        </roles>
+        <parties>
+            <partyIdTypes>
+                <partyIdType name="authorityType"
+                             value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:eu-customs:authority"/>
+                <partyIdType name="EORIType"
+                             value="urn:oasis:names:tc:ebcore:partyid-type:unregistered:eu-customs:EORI"/>
+            </partyIdTypes>
+            <party name="sti-taxud" endpoint="http://localhost:8180/domibus/services/msh" allowChunking="false">
+                <identifier partyId="sti-taxud" partyIdType="authorityType"/>
+            </party>
+            <party name="BE1234567890" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
+                <identifier partyId="BE1234567890" partyIdType="EORIType"/>
+            </party>
+        </parties>
+        <meps>
+            <mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+            <binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+            <binding name="pull" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
+        </meps>
+        <properties>
+            <property name="originalSenderProperty" key="originalSender" datatype="string" required="true"/>
+            <property name="finalRecipientProperty" key="finalRecipient" datatype="string" required="true"/>
+            <propertySet name="eDeliveryPropertySet">
+                <propertyRef property="finalRecipientProperty"/>
+                <propertyRef property="originalSenderProperty"/>
+            </propertySet>
+        </properties>
+        <payloadProfiles>
+            <payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
+            <payloadProfile name="MessageProfile" maxSize="40894464">
+                <attachment name="businessContentPayload"/>
+            </payloadProfile>
+        </payloadProfiles>
+        <securities>
+            <security name="eDeliveryAS4Policy_BST_PKIP" policy="eDeliveryAS4Policy_BST_PKIP.xml"
+                      signatureMethod="RSA_SHA256"/>
+        </securities>
+        <errorHandlings>
+            <errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false"
+                           businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
+        </errorHandlings>
+        <agreements>
+            <agreement name="agreementV1.0" value="EU-ICS2-TI-V1.0" type=""/>
+        </agreements>
+        <services>
+            <service name="t2c" value="eu_ics2_t2c"/>
+            <service name="c2t" value="eu_ics2_c2t"/>
+        </services>
+        <actions>
+            <action name="IE3F10" value="IE3F10"/>
+            <!-- tc2 -->
+            <action name="IE3F11" value="IE3F11"/>
+            <!-- tc2 -->
+            <action name="IE3R01" value="IE3R01"/>
+            <action name="IE3R07" value="IE3R07"/>
+        </actions>
+        <as4>
+            <receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
+            <reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+        </as4>
+        <legConfigurations>
+            <legConfiguration name="push_c2t_IE3R01" service="c2t" action="IE3R01" defaultMpc="MPC_eu_ics2_c2t"
+                              reliability="AS4Reliability" security="eDeliveryAS4Policy_BST_PKIP"
+                              receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="push_c2t_IE3R07" service="c2t" action="IE3R07" defaultMpc="MPC_eu_ics2_c2t"
+                              reliability="AS4Reliability" security="eDeliveryAS4Policy_BST_PKIP"
+                              receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="push_t2c_IE3F10" service="t2c" action="IE3F10" defaultMpc="MPC_eu_ics2_t2c"
+                              reliability="AS4Reliability" security="eDeliveryAS4Policy_BST_PKIP"
+                              receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="push_t2c_IE3F11" service="t2c" action="IE3F11" defaultMpc="MPC_eu_ics2_t2c"
+                              reliability="AS4Reliability" security="eDeliveryAS4Policy_BST_PKIP"
+                              receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pull_c2t_IE3R01" service="c2t" action="IE3R01" defaultMpc="MPC_eu_ics2_c2t_eori"
+                              reliability="AS4Reliability" security="eDeliveryAS4Policy_BST_PKIP"
+                              receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="pull_c2t_IE3R07" service="c2t" action="IE3R07" defaultMpc="MPC_eu_ics2_c2t_eori"
+                              reliability="AS4Reliability" security="eDeliveryAS4Policy_BST_PKIP"
+                              receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet"
+                              payloadProfile="MessageProfile" errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+        </legConfigurations>
+        <process name="pullC2TProcess" agreement="agreementV1.0" mep="oneway" binding="pull" initiatorRole="traderRole"
+                 responderRole="customsRole">
+            <initiatorParties>
+                <initiatorParty name="BE1234567890"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="sti-taxud"/>
+            </responderParties>
+            <legs>
+                <leg name="pull_c2t_IE3R01"/>
+                <leg name="pull_c2t_IE3R07"/>
+            </legs>
+        </process>
+        <process name="pushC2TProcess" agreement="agreementV1.0" mep="oneway" binding="push" initiatorRole="customsRole"
+                 responderRole="traderRole">
+            <initiatorParties>
+                <initiatorParty name="sti-taxud"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="BE1234567890"/>
+            </responderParties>
+            <legs>
+                <leg name="push_c2t_IE3R01"/>
+                <leg name="push_c2t_IE3R07"/>
+            </legs>
+        </process>
+        <process name="pushT2CProcess" agreement="agreementV1.0" mep="oneway" binding="push" initiatorRole="traderRole"
+                 responderRole="customsRole">
+            <initiatorParties>
+                <initiatorParty name="BE1234567890"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="sti-taxud"/>
+            </responderParties>
+            <legs>
+                <leg name="push_t2c_IE3F10"/>
+                <leg name="push_t2c_IE3F11"/>
+            </legs>
+        </process>
+    </businessProcesses>
+</db:configuration>
