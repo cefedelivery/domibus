@@ -173,6 +173,9 @@
                         <resource>
                             <directory>src/main/webapp</directory>
                             <filtering>true</filtering>
+                            <includes>
+                                <include>**/jboss-deployment-structure.xml</include>
+                            </includes>
                         </resource>
                     </webResources>
                 </configuration>
