@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs.queue;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.plugin.fs.FSFileNameHelper;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -21,8 +22,8 @@ import javax.jms.MessageListener;
 /**
  * FS Plugin Send Queue message listener
  *
- * @since 4.1
  * @author Catalin Enache
+ * @since 4.1
  */
 @Service("fsSendMessageListener")
 public class FSSendMessageListener implements MessageListener {
@@ -37,7 +38,8 @@ public class FSSendMessageListener implements MessageListener {
     public void onMessage(Message message) {
         LOG.debug("received message on fsPluginSendQueue");
 
-        String domain, fileName;
+        String domain;
+        String fileName;
         try {
             domain = message.getStringProperty(MessageConstants.DOMAIN);
             fileName = message.getStringProperty(MessageConstants.FILE_NAME);
@@ -48,23 +50,29 @@ public class FSSendMessageListener implements MessageListener {
         }
 
         if (StringUtils.isNoneBlank(domain, fileName)) {
-            FileObject fileObject  = null;
+            FileObject fileObject = null;
             try {
                 FileSystemManager fileSystemManager = VFS.getManager();
                 fileObject = fileSystemManager.resolveFile(fileName);
                 if (!fileObject.exists()) {
-                    LOG.error("File does not exist: {}", fileName);
+                    LOG.error("File does not exist: [{}]", fileName);
                     return;
                 }
             } catch (FileSystemException e) {
                 LOG.error("Error occurred while trying to access the file to be sent: " + fileName, e);
             }
 
-            //send the file
-            LOG.debug("now send the file: {}", fileObject);
-            fsSendMessagesService.processFileSafely(fileObject, domain);
+            //check if the file is not already processed
+            if (FSFileNameHelper.isProcessed(fileObject)) {
+                LOG.info("File already processed: [{}]", fileObject);
+                return;
+            } else {
+                //process the file
+                LOG.debug("now send the file: {}", fileObject);
+                fsSendMessagesService.processFileSafely(fileObject, domain);
+            }
+        } else {
+            LOG.error("Error while consuming JMS message: [{}] Domain or fileName empty.", message);
         }
-
-
     }
 }

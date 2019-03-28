@@ -253,7 +253,7 @@ public class FSSendMessagesService {
     }
 
     /**
-     * Put a JMS message to FS Plugin Out queue
+     * Put a JMS message to FS Plugin Send queue
      *
      * @param processableFile
      * @param domain
