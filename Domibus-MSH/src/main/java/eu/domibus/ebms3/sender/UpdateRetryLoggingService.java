@@ -92,7 +92,7 @@ public class UpdateRetryLoggingService {
             messageFailed(userMessage, userMessageLog);
 
             if (userMessage.isUserMessageFragment()) {
-                userMessageService.scheduleSplitAndJoinGroupFailed(userMessage.getMessageFragment().getGroupId(), userMessageLog.getBackend());
+                userMessageService.scheduleMessageFragmentSendFailed(userMessage.getMessageFragment().getGroupId(), userMessageLog.getBackend());
             }
         }
         uiReplicationSignalService.messageChange(userMessageLog.getMessageId());

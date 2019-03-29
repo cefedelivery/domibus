@@ -284,12 +284,12 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
-    public void scheduleSplitAndJoinGroupFailed(String groupId, String backendName) {
+    public void scheduleMessageFragmentSendFailed(String groupId, String backendName) {
         LOG.debug("Scheduling marking the group [{}] as failed", groupId);
 
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()
-                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SPLIT_AND_JOIN_SEND_FAILED)
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_MESSAGE_FRAGMENT_SEND_FAILED)
                 .property(UserMessageService.MSG_GROUP_ID, groupId)
                 .property(UserMessageService.MSG_BACKEND_NAME, backendName)
                 .build();
@@ -298,11 +298,17 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void scheduleUserMessageFragmentFailed(String messageId) {
+        final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+        if (MessageStatus.SEND_ENQUEUED != messageStatus) {
+            LOG.debug("UserMessage fragment [{}] was not scheduled to be marked as failed: status is [{}]", messageId, messageStatus);
+            return;
+        }
+
         LOG.debug("Scheduling marking the UserMessage fragment [{}] as failed", messageId);
 
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()
-                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_USER_MESSAGE_FRAGMENT_FAILED)
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SET_MESSAGE_FRAGMENT_AS_FAILED)
                 .property(UserMessageService.MSG_USER_MESSAGE_ID, messageId)
                 .build();
         jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);

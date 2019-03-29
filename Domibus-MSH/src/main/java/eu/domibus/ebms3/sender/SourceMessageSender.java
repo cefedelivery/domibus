@@ -119,10 +119,8 @@ public class SourceMessageSender implements MessageSender {
             }
 
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
-            final SOAPMessage responseMessage = mshDispatcher.dispatchLocal(userMessage, soapMessage, legConfiguration);
-            if (responseMessage != null) {
-                reliabilityCheck = ReliabilityChecker.CheckResult.OK;
-            }
+            mshDispatcher.dispatchLocal(userMessage, soapMessage, legConfiguration);
+            reliabilityCheck = ReliabilityChecker.CheckResult.OK;
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);

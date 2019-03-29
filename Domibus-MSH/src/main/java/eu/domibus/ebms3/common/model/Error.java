@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
@@ -247,5 +249,19 @@ public class Error extends AbstractBaseEntity {
      */
     public void setShortDescription(final String value) {
         this.shortDescription = value;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("description", description)
+                .append("errorDetail", errorDetail)
+                .append("category", category)
+                .append("refToMessageInError", refToMessageInError)
+                .append("errorCode", errorCode)
+                .append("origin", origin)
+                .append("severity", severity)
+                .append("shortDescription", shortDescription)
+                .toString();
     }
 }

@@ -4,6 +4,7 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class IncomingMessageHandlerDefaultFactory implements IncomingMessageHand
     @Autowired
     protected IncomingUserMessageReceiptHandler incomingUserMessageReceiptHandler;
 
+    @Autowired
+    protected IncomingSignalErrorHandler incomingSignalErrorHandler;
+
     @Override
     public IncomingMessageHandler getMessageHandler(SOAPMessage request, Messaging messaging) {
         final SignalMessage signalMessage = messaging.getSignalMessage();
@@ -47,6 +51,9 @@ public class IncomingMessageHandlerDefaultFactory implements IncomingMessageHand
                     LOG.trace("Using incomingMessagePullReceiptHandler");
                     return incomingMessagePullReceiptHandler;
                 }
+            } else if (CollectionUtils.isNotEmpty(signalMessage.getError())) {
+                LOG.trace("Using incomingSignalErrorHandler");
+                return incomingSignalErrorHandler;
             } else {
                 LOG.warn("No incoming message handler found");
                 return null;

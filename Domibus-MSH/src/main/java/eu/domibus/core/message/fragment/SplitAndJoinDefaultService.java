@@ -25,6 +25,7 @@ import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.AttachmentCleanupService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -394,9 +395,23 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     }
 
     @Override
-    public void splitAndJoinSendFailed(String groupId) {
-        LOG.debug("SplitAndJoin sending failed for group [{}]", groupId);
+    public void messageFragmentSendFailed(final String groupId) {
+        LOG.debug("SplitAndJoin message fragment failed for group [{}]", groupId);
 
+        sendSplitAndJoinFailed(groupId);
+
+        final List<UserMessage> groupUserMessages = messagingDao.findUserMessageByGroupId(groupId);
+        groupUserMessages.stream().forEach(userMessage -> userMessageService.scheduleUserMessageFragmentFailed(userMessage.getMessageInfo().getMessageId()));
+    }
+
+    @Override
+    public void handleSourceMessageSignalError(String messageId, Error error) {
+        LOG.debug("SplitAndJoin handleSourceMessageSignalError for message [{}] and error [{}]", messageId, error);
+
+        sendSplitAndJoinFailed(messageId);
+    }
+
+    protected void sendSplitAndJoinFailed(final String groupId) {
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
         if (messageGroupEntity == null) {
             LOG.warn("Group not found [{}]: could't clear SplitAndJoin messages for group", groupId);
@@ -409,9 +424,6 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         final UserMessage sourceUserMessage = messagingDao.findUserMessageByMessageId(messageGroupEntity.getSourceMessageId());
         setSourceMessageAsFailed(sourceUserMessage);
-
-        final List<UserMessage> groupUserMessages = messagingDao.findUserMessageByGroupId(groupId);
-        groupUserMessages.stream().forEach(userMessage -> userMessageService.scheduleUserMessageFragmentFailed(userMessage.getMessageInfo().getMessageId()));
     }
 
     @Transactional

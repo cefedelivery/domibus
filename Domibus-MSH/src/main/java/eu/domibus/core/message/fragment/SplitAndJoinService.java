@@ -1,6 +1,7 @@
 package eu.domibus.core.message.fragment;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.UserMessage;
 
 import javax.xml.soap.SOAPMessage;
@@ -57,7 +58,9 @@ public interface SplitAndJoinService {
 
     void setUserMessageFragmentAsFailed(String messageId);
 
-    void splitAndJoinSendFailed(final String groupId);
+    void messageFragmentSendFailed(final String groupId);
+
+    void handleSourceMessageSignalError(final String messageId, final Error error);
 
     void sendSourceMessageReceipt(String sourceMessageId, String pModeKey);
 

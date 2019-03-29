@@ -96,10 +96,10 @@ public class SplitAndJoinListener implements MessageListener {
                 final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
 
                 splitAndJoinService.sendSourceMessageReceipt(sourceMessageId, pModeKey);
-            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SPLIT_AND_JOIN_SEND_FAILED)) {
+            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_MESSAGE_FRAGMENT_SEND_FAILED)) {
                 final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
-                splitAndJoinService.splitAndJoinSendFailed(groupId);
-            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_USER_MESSAGE_FRAGMENT_FAILED)) {
+                splitAndJoinService.messageFragmentSendFailed(groupId);
+            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SET_MESSAGE_FRAGMENT_AS_FAILED)) {
                 final String messageId = message.getStringProperty(UserMessageService.MSG_USER_MESSAGE_ID);
                 splitAndJoinService.setUserMessageFragmentAsFailed(messageId);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SEND_SIGNAL_ERROR)) {

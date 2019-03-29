@@ -109,7 +109,7 @@ public class RetryService {
             updateRetryLoggingService.messageFailed(userMessage, userMessageLog);
 
             if (userMessage.isUserMessageFragment()) {
-                userMessageService.scheduleSplitAndJoinGroupFailed(userMessage.getMessageFragment().getGroupId(), userMessageLog.getBackend());
+                userMessageService.scheduleMessageFragmentSendFailed(userMessage.getMessageFragment().getGroupId(), userMessageLog.getBackend());
             }
             return true;
         }
