@@ -3,7 +3,6 @@ package eu.domibus.plugin.fs.queue;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.plugin.fs.FSFileNameHelper;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -55,21 +54,16 @@ public class FSSendMessageListener implements MessageListener {
                 FileSystemManager fileSystemManager = VFS.getManager();
                 fileObject = fileSystemManager.resolveFile(fileName);
                 if (!fileObject.exists()) {
-                    LOG.error("File does not exist: [{}]", fileName);
+                    LOG.warn("File does not exist: [{}] discard the JMS message", fileName);
                     return;
                 }
             } catch (FileSystemException e) {
                 LOG.error("Error occurred while trying to access the file to be sent: " + fileName, e);
             }
 
-            //check if the file is not already processed
-            if (FSFileNameHelper.isProcessed(fileObject)) {
-                LOG.info("File already processed: [{}]", fileObject);
-            } else {
-                //process the file
-                LOG.debug("now send the file: {}", fileObject);
-                fsSendMessagesService.processFileSafely(fileObject, domain);
-            }
+            //process the file
+            LOG.debug("now send the file: {}", fileObject);
+            fsSendMessagesService.processFileSafely(fileObject, domain);
         } else {
             LOG.error("Error while consuming JMS message: [{}] fileName empty.", message);
         }
