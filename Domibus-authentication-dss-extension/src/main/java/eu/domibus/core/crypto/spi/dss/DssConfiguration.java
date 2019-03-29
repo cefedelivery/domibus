@@ -105,13 +105,13 @@ public class DssConfiguration {
     private String dssRefreshCronExpression;
 
     @Value("${domibus.authentication.dss.enable.custom.trusted.list.for.multitenant}")
-    private String enableDssCustomTrustedListForMultiTenant;
+    private boolean enableDssCustomTrustedListForMultiTenant;
 
     @Value("${domibus.authentication.dss.exception.on.missing.revocation.data}")
-    private String enableExceptionOnMissingRevocationData;
+    private boolean enableExceptionOnMissingRevocationData;
 
     @Value("${domibus.authentication.dss.check.revocation.for.untrusted.chains}")
-    private String checkRevocationForUntrustedChain;
+    private boolean checkRevocationForUntrustedChain;
 
     @Bean
     public TrustedListsCertificateSource trustedListSource() {
@@ -133,8 +133,8 @@ public class DssConfiguration {
         certificateVerifier.setTrustedCertSource(trustedListSource);
         certificateVerifier.setDataLoader(dataLoader);
 
-        certificateVerifier.setExceptionOnMissingRevocationData(Boolean.parseBoolean(enableExceptionOnMissingRevocationData));
-        certificateVerifier.setCheckRevocationForUntrustedChains(Boolean.parseBoolean(checkRevocationForUntrustedChain));
+        certificateVerifier.setExceptionOnMissingRevocationData(enableExceptionOnMissingRevocationData);
+        certificateVerifier.setCheckRevocationForUntrustedChains(checkRevocationForUntrustedChain);
 
         return certificateVerifier;
     }
@@ -188,7 +188,7 @@ public class DssConfiguration {
         final boolean multiTenant = domibusConfigurationExtService.isMultiTenantAware();
         final List<OtherTrustedList> otherTrustedLists = new CustomTrustedListPropertyMapper(domibusPropertyExtService, domainContextExtService, environment).map();
         if (multiTenant && !otherTrustedLists.isEmpty()) {
-            if (Boolean.parseBoolean(enableDssCustomTrustedListForMultiTenant)) {
+            if (enableDssCustomTrustedListForMultiTenant) {
                 LOG.warn("Configured custom trusted lists are shared by all tenants.");
             } else {
                 LOG.info("In multi-tenant configuration custom DSS trusted list are shared. Therefore they are deactivated by default. Please adapt property:[domibus.enable.dss.custom.trusted.list.for.multitenant] to change that behavior");

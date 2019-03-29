@@ -25,9 +25,9 @@ import java.util.Map;
 public class ValidationConstraintPropertyMapper extends PropertyGroupMapper<ConstraintInternal> {
 
 
-    private static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_NAME = "domibus.dss.default.constraint.name";
+    private static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_NAME = "domibus.authentication.dss.default.constraint.name";
 
-    private static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_STATUS = "domibus.dss.default.constraint.status";
+    private static final String DOMIBUS_DSS_DEFAULT_CONSTRAINT_STATUS = "domibus.authentication.dss.default.constraint.status";
 
 
     public ValidationConstraintPropertyMapper(final DomibusPropertyExtService domibusPropertyExtService,
