@@ -167,47 +167,22 @@ public class CachingPModeProvider extends PModeProvider {
         ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(
                 MessageExchangePattern.ONE_WAY_PULL.getUri(), senderParty, receiverParty);
         List<Process> processes = this.getConfiguration().getBusinessProcesses().getProcesses();
-        processes = processes.stream().filter(process1 -> matchAgreement(process1, agreementName))
-                .filter(process2 -> MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process2.getMepBinding().getValue()))
-                .filter(process3 -> matchInitiator(process3, processTypePartyExtractor))
-                .filter(process4 -> matchResponder(process4, processTypePartyExtractor)).collect(Collectors.toList());
+        processes = processes.stream().filter(process -> matchAgreement(process, agreementName))
+                .filter(process -> MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process.getMepBinding().getValue()))
+                .filter(process -> matchInitiator(process, processTypePartyExtractor))
+                .filter(process -> matchResponder(process, processTypePartyExtractor)).collect(Collectors.toList());
 
         processes.stream().forEach(process -> candidates.addAll(process.getLegs()));
-//        for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
-//            if (!MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process.getMepBinding().getValue())) {
-//                continue;
-//            }
-//            if (!matchAgreement(process, agreementName)) {
-//                continue;
-//            }
-//            final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(
-//                    process.getMepBinding().getValue(), senderParty, receiverParty);
-//            if (!matchInitiator(process, processTypePartyExtractor)) {
-//                continue;
-//            }
-//            if (!matchResponder(process, processTypePartyExtractor)) {
-//                continue;
-//            }
-//
-//            candidates.addAll(process.getLegs());
-//        }
         if (candidates.isEmpty()) {
             LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
         }
-        String name = candidates.stream()
+        String pullLegName = candidates.stream()
                 .filter(candidate -> candidateMatches(candidate, service, action, mpc))
                 .findFirst()
                 .get().getName();
-//        for (final LegConfiguration candidate : candidates) {
-//            if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service)
-//                    && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)
-//                    && StringUtils.equalsIgnoreCase(candidate.getDefaultMpc().getQualifiedName(), mpc)) {
-//                return candidate.getName();
-//            }
-//        }
-        if (name != null) {
-            return name;
+        if (pullLegName != null) {
+            return pullLegName;
         }
         LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
