@@ -16,6 +16,8 @@ public interface SplitAndJoinService {
 
     void createUserFragmentsFromSourceFile(String sourceMessageFileName, SOAPMessage sourceMessageRequest, UserMessage userMessage, String contentTypeString, boolean compression);
 
+    void sendSignalError(String messageId, String ebMS3ErrorCode, String errorDetail, String pmodeKey);
+
     /**
      * Checks if the leg is configured to use SplitAndJoin
      *
@@ -59,5 +61,6 @@ public interface SplitAndJoinService {
 
     void sendSourceMessageReceipt(String sourceMessageId, String pModeKey);
 
-    void splitAndJoinReceiveFailed(String groupId, String errorDetail);
+    void splitAndJoinReceiveFailed(String groupId, final String sourceMessageId, String errorDetail);
+
 }

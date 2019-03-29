@@ -16,6 +16,8 @@ public interface UserMessageService {
     String COMMAND_SOURCE_MESSAGE_REJOIN_FILE = "SourceMessageRejoinFile";
     String COMMAND_SPLIT_AND_JOIN_SEND_FAILED = "SplitAndJoinSendFailed";
     String COMMAND_USER_MESSAGE_FRAGMENT_FAILED = "UserMessageFragmentFailed";
+    String COMMAND_SEND_SIGNAL_ERROR = "SendSignalError";
+
 
     String MSG_SOURCE_MESSAGE_FILE = "SourceMessageFile";
     String MSG_TYPE = "messageType";
@@ -23,6 +25,8 @@ public interface UserMessageService {
     String MSG_BACKEND_NAME = "backendName";
     String MSG_SOURCE_MESSAGE_ID = "sourceMessageId";
     String MSG_USER_MESSAGE_ID = "userMessageId";
+    String MSG_EBMS3_ERROR_CODE = "ebms3ErrorCode";
+    String MSG_EBMS3_ERROR_DETAIL = "ebms3ErrorDetail";
 
     String PULL_RECEIPT_REF_TO_MESSAGE_ID = "pullReceiptRefToMessageId";
 
@@ -61,6 +65,8 @@ public interface UserMessageService {
     void scheduleSending(String messageId, Long delay);
 
     void scheduleSending(String messageId, int retryCount);
+
+    void scheduleSendingSignalError(String messageId, String errorCode, String errorDetail, String pmodeKey);
 
     /**
      * Schedule the sending of the asynchronous Pull Receipt

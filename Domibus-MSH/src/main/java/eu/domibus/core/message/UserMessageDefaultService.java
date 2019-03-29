@@ -349,6 +349,21 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
+    public void scheduleSendingSignalError(String messageId, String ebMS3ErrorCode, String errorDetail, String pmodeKey) {
+        LOG.debug("Scheduling sending the Signal error for message [{}]", messageId);
+
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SEND_SIGNAL_ERROR)
+                .property(UserMessageService.MSG_USER_MESSAGE_ID, messageId)
+                .property(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey)
+                .property(UserMessageService.MSG_EBMS3_ERROR_CODE, ebMS3ErrorCode)
+                .property(UserMessageService.MSG_EBMS3_ERROR_DETAIL, errorDetail)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
     public void scheduleSendingPullReceipt(String messageId, String pmodeKey) {
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()

@@ -138,12 +138,14 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     @Autowired
     protected MessageRetentionService messageRetentionService;
 
+    @Autowired
+    protected MessageGroupService messageGroupService;
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public void createUserFragmentsFromSourceFile(String sourceMessageFileName, SOAPMessage sourceMessageRequest, UserMessage userMessage, String contentTypeString, boolean compression) {
         MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
-        messageGroupEntity.setGroupId(UUID.randomUUID().toString());
+        messageGroupEntity.setGroupId(userMessage.getMessageInfo().getMessageId());
         File sourceMessageFile = new File(sourceMessageFileName);
         messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
         if (compression) {
@@ -228,8 +230,11 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         messagingService.storePayloads(sourceMessaging, MSHRole.RECEIVING, legConfiguration, backendName);
 
+        final String sourceMessageId = sourceMessaging.getUserMessage().getMessageInfo().getMessageId();
+        messageGroupService.setSourceMessageId(sourceMessageId, groupId);
+
         incomingSourceMessageHandler.processMessage(sourceRequest, sourceMessaging);
-        userMessageService.scheduleSourceMessageReceipt(sourceMessaging.getUserMessage().getMessageInfo().getMessageId(), userMessageExchangeContext.getReversePmodeKey());
+        userMessageService.scheduleSourceMessageReceipt(sourceMessageId, userMessageExchangeContext.getReversePmodeKey());
 
         LOG.debug("Finished rejoining SourceMessage for group [{}]", groupId);
     }
@@ -244,6 +249,21 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         }
         sendSignalMessage(receiptMessage, pModeKey);
 
+    }
+
+    @Override
+    public void sendSignalError(String messageId, String ebMS3ErrorCode, String errorDetail, String pmodeKey) {
+        final ErrorCode.EbMS3ErrorCode errorCode = ErrorCode.EbMS3ErrorCode.findErrorCodeBy(ebMS3ErrorCode);
+
+        EbMS3Exception ebMS3Exception = new EbMS3Exception(errorCode, errorDetail, messageId, null);
+        ebMS3Exception.setMshRole(MSHRole.RECEIVING);
+        SOAPMessage soapMessage = null;
+        try {
+            soapMessage = messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfoError());
+        } catch (EbMS3Exception e) {
+            throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + messageId + "]", e);
+        }
+        sendSignalMessage(soapMessage, pmodeKey);
     }
 
     protected void sendSignalMessage(SOAPMessage soapMessage, String pModeKey) {
@@ -394,8 +414,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         groupUserMessages.stream().forEach(userMessage -> userMessageService.scheduleUserMessageFragmentFailed(userMessage.getMessageInfo().getMessageId()));
     }
 
+    @Transactional
     @Override
-    public void splitAndJoinReceiveFailed(String groupId, String errorDetail) {
+    public void splitAndJoinReceiveFailed(final String groupId, final String sourceMessageId, final String errorDetail) {
         LOG.debug("SplitAndJoin receiving failed for group [{}]", groupId);
 
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
@@ -408,35 +429,26 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         messageGroupEntity.setRejected(true);
         messageGroupDao.update(messageGroupEntity);
 
-        final String sourceMessageId = messageGroupEntity.getSourceMessageId();
-
         final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
         if (userMessageFragments == null || userMessageFragments.isEmpty()) {
             throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: no message fragments found");
         }
 
-        final UserMessage messageFragment = userMessageFragments.iterator().next();
-        MessageExchangeConfiguration userMessageExchangeContext = null;
-        try {
-            userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(messageFragment, MSHRole.RECEIVING);
-        } catch (EbMS3Exception e) {
-            throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: could not get the MessageExchangeConfiguration", e);
-        }
-
         final List<String> userMessageIds = userMessageFragments.stream().map(userMessage -> userMessage.getMessageInfo().getMessageId()).collect(Collectors.toList());
         messageRetentionService.scheduleDeleteMessages(userMessageIds);
 
-        EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, errorDetail, sourceMessageId, null);
-        ebMS3Exception.setMshRole(MSHRole.RECEIVING);
-        SOAPMessage soapMessage = null;
-        try {
-            soapMessage = messageBuilder.buildSOAPFaultMessage(ebMS3Exception.getFaultInfoError());
-        } catch (EbMS3Exception e) {
-            throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]", e);
+        if (StringUtils.isNotEmpty(sourceMessageId)) {
+            LOG.debug("Scheduling sending the Signal error for SourceMessage [{}]", sourceMessageId);
+
+            final UserMessage messageFragment = userMessageFragments.iterator().next();
+            MessageExchangeConfiguration userMessageExchangeContext = null;
+            try {
+                userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(messageFragment, MSHRole.RECEIVING);
+            } catch (EbMS3Exception e) {
+                throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: could not get the MessageExchangeConfiguration", e);
+            }
+            userMessageDefaultService.scheduleSendingSignalError(sourceMessageId, ErrorCode.EbMS3ErrorCode.EBMS_0004.getCode().getErrorCode().getErrorCodeName(), errorDetail, userMessageExchangeContext.getReversePmodeKey());
         }
-        sendSignalMessage(soapMessage, userMessageExchangeContext.getReversePmodeKey());
-
-
     }
 
     protected File compressSourceMessage(String fileName) {

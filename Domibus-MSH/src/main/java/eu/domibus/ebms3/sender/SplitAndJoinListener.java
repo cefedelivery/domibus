@@ -75,7 +75,7 @@ public class SplitAndJoinListener implements MessageListener {
                             userMessageService.scheduleSourceMessageRejoin(groupId, sourceMessageFile.getAbsolutePath(), backendName);
                         },
                         () -> {
-                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, "Error while rejoining the message fragments for group [" + groupId + "]");
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, groupId, "Error while rejoining the message fragments for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN)) {
@@ -88,7 +88,7 @@ public class SplitAndJoinListener implements MessageListener {
                             splitAndJoinService.rejoinSourceMessage(groupId, sourceMessageFile, backendName);
                         },
                         () -> {
-                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, "Error while rejoining the SourceMessage for group [" + groupId + "]");
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, groupId, "Error while rejoining the SourceMessage for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_RECEIPT)) {
@@ -102,6 +102,13 @@ public class SplitAndJoinListener implements MessageListener {
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_USER_MESSAGE_FRAGMENT_FAILED)) {
                 final String messageId = message.getStringProperty(UserMessageService.MSG_USER_MESSAGE_ID);
                 splitAndJoinService.setUserMessageFragmentAsFailed(messageId);
+            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SEND_SIGNAL_ERROR)) {
+                final String messageId = message.getStringProperty(UserMessageService.MSG_USER_MESSAGE_ID);
+                final String ebms3ErrorCode = message.getStringProperty(UserMessageService.MSG_EBMS3_ERROR_CODE);
+                final String ebms3ErrorDetail = message.getStringProperty(UserMessageService.MSG_EBMS3_ERROR_DETAIL);
+                final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+
+                splitAndJoinService.sendSignalError(messageId, ebms3ErrorCode, ebms3ErrorDetail, pModeKey);
             } else {
                 LOG.error("Unrecognized message type [{}]", messageType);
             }
