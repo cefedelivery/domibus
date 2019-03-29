@@ -2,7 +2,6 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.common.MessageStatus;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.vfs2.FileObject;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -59,24 +58,6 @@ public class FSFileNameHelper {
      */
     public static boolean isProcessed(final String fileName) {
         return PROCESSED_FILE_PATTERN.matcher(fileName).find();
-    }
-
-    /**
-     * Checks if a given file name has been derived from any message Id.
-     * In practice checks if the filename contains an underscore followed by a
-     * message Id.
-     * @param fileObject the file to test the filename
-     * @return true, if the file name has been derived from a message Id
-     */
-    public static boolean isProcessed(final FileObject fileObject) {
-        if (null == fileObject) {
-            return false;
-        }
-        final String baseName = fileObject.getName().getBaseName();
-        if (StringUtils.isEmpty(baseName)) {
-            return false;
-        }
-        return PROCESSED_FILE_PATTERN.matcher(baseName).find();
     }
 
     /**
