@@ -47,70 +47,70 @@ public class DssConfiguration {
 
     private static final String NONE = "NONE";
 
-    @Value("${domibus.official.journal.content.keystore.type}")
+    @Value("${domibus.authentication.dss.official.journal.content.keystore.type}")
     private String keystoreType;
 
-    @Value("${domibus.official.journal.content.keystore.path}")
+    @Value("${domibus.authentication.dss.official.journal.content.keystore.path}")
     private String keystorePath;
 
-    @Value("${domibus.official.journal.content.keystore.password}")
+    @Value("${domibus.authentication.dss.official.journal.content.keystore.password}")
     private String keystorePassword;
 
-    @Value("${domibus.current.official.journal.url}")
+    @Value("${domibus.authentication.dss.current.official.journal.url}")
     private String currentOjUrl;
 
-    @Value("${domibus.current.lotl.url}")
+    @Value("${domibus.authentication.dss.current.lotl.url}")
     private String currentLotlUrl;
 
-    @Value("${domibus.lotl.country.code}")
+    @Value("${domibus.authentication.dss.lotl.country.code}")
     private String lotlCountryCode;
 
-    @Value("${domibus.lotl.root.scheme.info.uri}")
+    @Value("${domibus.authentication.dss.lotl.root.scheme.info.uri}")
     private String lotlSchemeUri;
 
-    @Value("${domibus.dss.cache.path}")
+    @Value("${domibus.authentication.dss.cache.path}")
     private String dssCachePath;
 
-    @Value("${domibus.dss.proxy.https.host:NONE}")
+    @Value("${domibus.authentication.dss.proxy.https.host:NONE}")
     private String proxyHttpsHost;
 
-    @Value("${domibus.dss.proxy.https.port:0}")
+    @Value("${domibus.authentication.dss.proxy.https.port:0}")
     private int proxyHttpsPort;
 
-    @Value("${domibus.dss.proxy.https.user:NONE}")
+    @Value("${domibus.authentication.dss.proxy.https.user:NONE}")
     private String proxyHttpsUser;
 
-    @Value("${domibus.dss.proxy.https.password:NONE}")
+    @Value("${domibus.authentication.dss.proxy.https.password:NONE}")
     private String proxyHttpsPassword;
 
-    @Value("${domibus.dss.proxy.https.excludedHosts:NONE}")
+    @Value("${domibus.authentication.dss.proxy.https.excludedHosts:NONE}")
     private String proxyHttpsExcludedHosts;
 
-    @Value("${domibus.dss.proxy.http.host:NONE}")
+    @Value("${domibus.authentication.dss.proxy.http.host:NONE}")
     private String proxyHttpHost;
 
-    @Value("${domibus.dss.proxy.http.port:0}")
+    @Value("${domibus.authentication.dss.proxy.http.port:0}")
     private int proxyHttpPort;
 
-    @Value("${domibus.dss.proxy.http.user:NONE}")
+    @Value("${domibus.authentication.dss.proxy.http.user:NONE}")
     private String proxyHttpUser;
 
-    @Value("${domibus.dss.proxy.http.password:NONE}")
+    @Value("${domibus.authentication.dss.proxy.http.password:NONE}")
     private String proxyHttpPassword;
 
-    @Value("${domibus.dss.proxy.http.excludedHosts:NONE}")
+    @Value("${domibus.authentication.dss.proxy.http.excludedHosts:NONE}")
     private String proxyHttpExcludedHosts;
 
-    @Value("${domibus.dss.refresh.cron}")
+    @Value("${domibus.authentication.dss.refresh.cron}")
     private String dssRefreshCronExpression;
 
-    @Value("${domibus.enable.dss.custom.trusted.list.for.multitenant}")
+    @Value("${domibus.authentication.dss.enable.custom.trusted.list.for.multitenant}")
     private String enableDssCustomTrustedListForMultiTenant;
 
-    @Value("${domibus.dss.exception.on.missing.revocation.data}")
+    @Value("${domibus.authentication.dss.exception.on.missing.revocation.data}")
     private String enableExceptionOnMissingRevocationData;
 
-    @Value("${domibus.dss.check.revocation.for.untrusted.chains}")
+    @Value("${domibus.authentication.dss.check.revocation.for.untrusted.chains}")
     private String checkRevocationForUntrustedChain;
 
     @Bean

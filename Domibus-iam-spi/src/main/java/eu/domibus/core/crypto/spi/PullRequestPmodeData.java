@@ -16,4 +16,8 @@ public class PullRequestPmodeData {
     public PullRequestPmodeData(String mpcName) {
         this.mpcName = mpcName;
     }
+
+    public String getMpcName() {
+        return mpcName;
+    }
 }
