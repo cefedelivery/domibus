@@ -31,15 +31,7 @@ public class MessageExchangeConfiguration {
     }
 
     public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
-        this.agreementName = agreementName;
-        this.senderParty = senderParty;
-        this.receiverParty = receiverParty;
-        this.service = service;
-        this.action = action;
-        this.leg = leg;
-        this.mpc = null;
-        this.pmodeKey = senderParty + PMODEKEY_SEPARATOR + receiverParty + PMODEKEY_SEPARATOR + service + PMODEKEY_SEPARATOR + action + PMODEKEY_SEPARATOR + agreementName + PMODEKEY_SEPARATOR + leg;
-        this.reversePmodeKey = receiverParty + PMODEKEY_SEPARATOR + senderParty + PMODEKEY_SEPARATOR + service + PMODEKEY_SEPARATOR + action + PMODEKEY_SEPARATOR + agreementName + PMODEKEY_SEPARATOR + leg;
+        this(agreementName, senderParty, receiverParty, service, action, leg, null);
     }
 
     public String getAgreementName() {

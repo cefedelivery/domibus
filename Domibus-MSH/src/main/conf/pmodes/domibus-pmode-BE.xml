@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Sample pMode configuration for a Trader (BE1234567890) in the context of TAPAS project -->
 <db:configuration xmlns:db="http://domibus.eu/configuration" party="BE1234567890">
     <mpcs>
         <mpc name="MPC_eu_ics2_c2t_eori" qualifiedName="urn:fdc:ec.europa.eu:2019:eu_ics2_c2t/EORI/BE1234567890"

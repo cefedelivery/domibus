@@ -49,9 +49,9 @@ public class ProcessValidator {
         Set<Process> processes = new HashSet<>(pullProcesses);
         Set<PullProcessStatus> pullProcessStatuses = verifyPullProcessStatus(processes);
         if (!uniqueCorrectlyConfiguredPullProcess(pullProcessStatuses)) {
-            LOG.warn("There is a misconfiguration with pull processes:");
+            LOG.error("There is a misconfiguration with pull processes:");
             for (Process process : processes) {
-                LOG.warn("Process name:" + process.getName());
+                LOG.error("Process name:" + process.getName());
             }
             throw new PModeException(DomibusCoreErrorCode.DOM_003, createWarningMessage(pullProcessStatuses));
         }
@@ -110,25 +110,45 @@ public class ProcessValidator {
         }
     }
 
+    /**
+     * Verifies the mpc configured in the process's legs
+     * Multiple legs configured with the same mpc are allowed as long as they have the same security policy.
+     *
+     * @param process the process to be checked.
+     * @return the resulted status
+     */
     protected PullProcessStatus checkMpcConfigurationSameSecurityPolicy(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
         // when there are multiple legs with the same mpc in a pull process, all legs must have the same security policy
         HashMap<String, String> mpcsSecurityMapping = new HashMap<>();
         for (LegConfiguration legConfiguration : process.getLegs()) {
-            String mpc = legConfiguration.getDefaultMpc().getQualifiedName();
-            String securityPolicyName = legConfiguration.getSecurity().getName();
-            if (mpcsSecurityMapping.containsKey(mpc) &&
-                    !mpcsSecurityMapping.get(mpc).equals(securityPolicyName)) {
+            if(mpcExistsWithDifferentSecurityPolicy(legConfiguration, mpcsSecurityMapping)) {
                 LOG.warn("Different security policies configured in legs authorized with the same mpc in a oneway pull process [{}].", process.getName());
                 status = MULTIPLE_LEGS_DIFFERENT_SECURITY;
                 break;
             }
-            mpcsSecurityMapping.put(mpc, securityPolicyName);
+            mpcsSecurityMapping.put(legConfiguration.getDefaultMpc().getQualifiedName(), legConfiguration.getSecurity().getName());
         }
         return status;
     }
 
+    protected boolean mpcExistsWithDifferentSecurityPolicy(LegConfiguration legConfiguration, HashMap<String, String> mpcsSecurityMapping) {
+        String mpc = legConfiguration.getDefaultMpc().getQualifiedName();
+        String securityPolicyName = legConfiguration.getSecurity().getName();
+        if (mpcsSecurityMapping.containsKey(mpc) &&
+                !mpcsSecurityMapping.get(mpc).equals(securityPolicyName)) {
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * Verifies the mpc configured in the process's legs.
+     * Multiple legs configured with the same mpc are not allowed.
+     *
+     * @param process the process to be checked.
+     * @return the resulted status
+     */
     protected PullProcessStatus checkMpcConfigurationOneLegPerMpc(final Process process) {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
         Multiset<String> mpcs = HashMultiset.create();
@@ -159,6 +179,8 @@ public class ProcessValidator {
         PullProcessStatus status = ONE_MATCHING_PROCESS;
 
         if (pullMessageService.allowDynamicInitiatorInPullProcess()) {
+            LOG.debug("There is no need for a verification of the number of " +
+                    "initiators because the property thate allows dynamic initiator in pull process is enabled");
             return status;
         }
 

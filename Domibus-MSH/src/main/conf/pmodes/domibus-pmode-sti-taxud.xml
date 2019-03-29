@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Sample pMode configuration for the Customs(sti-taxud) in the context of TAPAS project -->
 <db:configuration xmlns:db="http://domibus.eu/configuration" party="sti-taxud">
     <mpcs>
         <mpc name="MPC_eu_ics2_c2t"

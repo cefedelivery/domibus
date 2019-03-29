@@ -43,7 +43,6 @@ public class Submission {
     private String mpc;
 
 
-
     /**
      * Getter for mpc
      * <p>
@@ -53,7 +52,6 @@ public class Submission {
      *
      * @return a string identifying the Message Partition Chanel
      */
-
     public String getMpc() {
         return mpc;
     }

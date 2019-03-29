@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -104,7 +105,10 @@ public class CachingPModeProvider extends PModeProvider {
     /**
      * The match means that either has an Agreement and its name matches the Agreement name found previously
      * or it has no Agreement configured and the Agreement name was not indicated in the submitted message.
-     **/
+     *
+     * @param process       the process containing the agreement
+     * @param agreementName the agreement name
+     */
     protected boolean matchAgreement(Process process, String agreementName) {
         return (process.getAgreement() != null && StringUtils.equalsIgnoreCase(process.getAgreement().getName(), agreementName)
                 || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
@@ -116,7 +120,10 @@ public class CachingPModeProvider extends PModeProvider {
     /**
      * The match means that either there is no initiator and it is allowed
      * by configuration OR the initiator name matches
-     **/
+     *
+     * @param process                   the process containing the initiators
+     * @param processTypePartyExtractor the extractor that provides the senderParty
+     */
     protected boolean matchInitiator(final Process process, final ProcessTypePartyExtractor processTypePartyExtractor) {
         if (CollectionUtils.isEmpty(process.getInitiatorParties())) {
             if (pullMessageService.allowDynamicInitiatorInPullProcess()) {
@@ -134,9 +141,13 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     /**
-     * Responder is always required for this method to return true
-     **/
+     * The match requires that the responder exists in the process
+     *
+     * @param process                   the process containing the responder
+     * @param processTypePartyExtractor the extractor that provides the receiverParty
+     */
     protected boolean matchResponder(final Process process, final ProcessTypePartyExtractor processTypePartyExtractor) {
+        //Responder is always required for this method to return true
         if (CollectionUtils.isEmpty(process.getResponderParties())) {
             return false;
         }
@@ -153,42 +164,68 @@ public class CachingPModeProvider extends PModeProvider {
     protected String findPullLegName(final String agreementName, final String senderParty,
                                      final String receiverParty, final String service, final String action, final String mpc) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
-        for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
-            if (!MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process.getMepBinding().getValue())) {
-                continue;
-            }
-            if (!matchAgreement(process, agreementName)) {
-                continue;
-            }
-            final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(
-                    process.getMepBinding().getValue(), senderParty, receiverParty);
-            if (!matchInitiator(process, processTypePartyExtractor)) {
-                continue;
-            }
-            if (!matchResponder(process, processTypePartyExtractor)) {
-                continue;
-            }
+        ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(
+                MessageExchangePattern.ONE_WAY_PULL.getUri(), senderParty, receiverParty);
+        List<Process> processes = this.getConfiguration().getBusinessProcesses().getProcesses();
+        processes = processes.stream().filter(process1 -> matchAgreement(process1, agreementName))
+                .filter(process2 -> MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process2.getMepBinding().getValue()))
+                .filter(process3 -> matchInitiator(process3, processTypePartyExtractor))
+                .filter(process4 -> matchResponder(process4, processTypePartyExtractor)).collect(Collectors.toList());
 
-            candidates.addAll(process.getLegs());
-        }
+        processes.stream().forEach(process -> candidates.addAll(process.getLegs()));
+//        for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+//            if (!MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process.getMepBinding().getValue())) {
+//                continue;
+//            }
+//            if (!matchAgreement(process, agreementName)) {
+//                continue;
+//            }
+//            final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(
+//                    process.getMepBinding().getValue(), senderParty, receiverParty);
+//            if (!matchInitiator(process, processTypePartyExtractor)) {
+//                continue;
+//            }
+//            if (!matchResponder(process, processTypePartyExtractor)) {
+//                continue;
+//            }
+//
+//            candidates.addAll(process.getLegs());
+//        }
         if (candidates.isEmpty()) {
             LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
         }
-        for (final LegConfiguration candidate : candidates) {
-            if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service)
-                    && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)
-                    && StringUtils.equalsIgnoreCase(candidate.getDefaultMpc().getQualifiedName(), mpc)) {
-                return candidate.getName();
-            }
+        String name = candidates.stream()
+                .filter(candidate -> candidateMatches(candidate, service, action, mpc))
+                .findFirst()
+                .get().getName();
+//        for (final LegConfiguration candidate : candidates) {
+//            if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service)
+//                    && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)
+//                    && StringUtils.equalsIgnoreCase(candidate.getDefaultMpc().getQualifiedName(), mpc)) {
+//                return candidate.getName();
+//            }
+//        }
+        if (name != null) {
+            return name;
         }
         LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
         throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
     }
 
+    protected boolean candidateMatches(LegConfiguration candidate, String service, String action, String mpc) {
+        if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service)
+                && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)
+                && StringUtils.equalsIgnoreCase(candidate.getDefaultMpc().getQualifiedName(), mpc)) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     //FIXME: only works for the first leg, as sender=initiator
-    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty,
+                                 final String service, final String action) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(process.getMepBinding().getValue(), senderParty, receiverParty);

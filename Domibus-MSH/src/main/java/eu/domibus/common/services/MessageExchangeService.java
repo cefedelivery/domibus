@@ -86,9 +86,18 @@ public interface MessageExchangeService {
 
     void verifySenderCertificate(LegConfiguration legConfiguration, String receiverName);
 
+    /**
+     * See {@link eu.domibus.core.mpc.MpcService#forcePullOnMpc(String)}
+     */
     boolean forcePullOnMpc(String mpc);
 
+    /**
+     * See {@link eu.domibus.core.mpc.MpcService#extractInitiator(String)}
+     */
     String extractInitiator(String mpc);
 
+    /**
+     * See {@link eu.domibus.core.mpc.MpcService#extractBaseMpc(String)}
+     */
     String extractBaseMpc(String mpc);
 }

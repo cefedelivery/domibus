@@ -131,7 +131,6 @@ public class PModeDao extends PModeProvider {
             //this is the normal call for a push.
             return findLegNameMepBindingAgnostic(agreementName, senderParty, receiverParty, service, action);
         } catch (EbMS3Exception e) {
-            // TODO IOANA !!!! verify
             return findPullLegName(agreementName, senderParty, receiverParty, service, action, null);
         }
     }

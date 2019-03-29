@@ -32,6 +32,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.jdbc.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,6 +132,33 @@ public class MessageExchangeServiceImplTest {
         });
         Validate.isTrue(filter.size() == 1);
         return filter.iterator().next();
+    }
+
+    @Test
+    public void testGetPartyId() throws Exception {
+        String mpc = "mpcValue";
+        String expectedPartyId = "BE1234567890";
+        when(pullMessageService.allowDynamicInitiatorInPullProcess()).thenReturn(true);
+        when(mpcService.extractInitiator(mpc)).thenReturn(expectedPartyId);
+
+        String partyId = messageExchangeService.getPartyId(mpc, new Party());
+        assertEquals(expectedPartyId, partyId);
+
+        Party party = Mockito.mock(Party.class);
+        when(party.getIdentifiers()).thenReturn(null);
+
+        partyId = messageExchangeService.getPartyId(mpc, party);
+        assertEquals(expectedPartyId, partyId);
+
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        partyId = messageExchangeService.getPartyId(null, party);
+        assertEquals("party1", partyId);
     }
 
     @Test

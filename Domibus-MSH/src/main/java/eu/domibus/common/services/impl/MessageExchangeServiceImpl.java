@@ -46,6 +46,7 @@ import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
@@ -247,21 +248,29 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
-        String partyId = null;
-        if (initiator != null) {
-            Set<Identifier> identifiers = initiator.getIdentifiers();
-            if (!CollectionUtils.isEmpty(identifiers)) {
-                partyId = identifiers.iterator().next().getPartyId();
-            }
-        }
-        if (partyId == null && pullMessageService.allowDynamicInitiatorInPullProcess()) {
-            partyId = mpcService.extractInitiator(mpc);
-        }
+        String partyId = getPartyId(mpc, initiator);
+
         if (partyId == null) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
             return null;
         }
         return pullMessageService.getPullMessageId(partyId, mpc);
+    }
+
+    protected String getPartyId(String mpc, Party initiator) {
+        String partyId = null;
+        if (initiator != null && initiator.getIdentifiers() != null) {
+            try {
+                partyId = initiator.getIdentifiers().stream().findFirst().get().getPartyId();
+            } catch (NoSuchElementException e) {
+                LOG.debug("Could not get partyId from initiator party");
+            }
+        }
+        if (partyId == null && pullMessageService.allowDynamicInitiatorInPullProcess()) {
+            LOG.debug("Extract partyId from mpc [{}]" , mpc);
+            partyId = mpcService.extractInitiator(mpc);
+        }
+        return partyId;
     }
 
     /**
@@ -274,7 +283,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             final Party gatewayParty = pModeProvider.getGatewayParty();
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpc);
             if (CollectionUtils.isEmpty(processes)) {
-                LOG.info("No process corresponds to mpc:[{}]", mpc);
+                LOG.debug("No process corresponds to mpc:[{}]", mpc);
                 mpc = mpcService.extractBaseMpc(mpc);
                 processes = pModeProvider.findPullProcessByMpc(mpc);
             }

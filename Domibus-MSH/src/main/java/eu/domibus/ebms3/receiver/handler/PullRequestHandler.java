@@ -100,11 +100,16 @@ public class PullRequestHandler {
             leg = pullContext.filterLegOnMpc();
             try {
                 String initiatorPartyName = null;
+                final String mpc = userMessage.getMpc();
                 if (pullContext.getInitiator() != null) {
+                    LOG.debug("Get initiator from pull context");
                     initiatorPartyName = pullContext.getInitiator().getName();
-                } else if (initiatorPartyName == null && messageExchangeService.forcePullOnMpc(userMessage.getMpc())) {
-                    initiatorPartyName = messageExchangeService.extractInitiator(userMessage.getMpc());
+                } else if (initiatorPartyName == null && messageExchangeService.forcePullOnMpc(mpc)) {
+                    LOG.debug("Extract initiator from mpc");
+                    initiatorPartyName = messageExchangeService.extractInitiator(mpc);
                 }
+                LOG.info("Initiator is [{}]", initiatorPartyName);
+
                 messageExchangeService.verifyReceiverCertificate(leg, initiatorPartyName);
                 messageExchangeService.verifySenderCertificate(leg, pullContext.getResponder().getName());
                 leg = pullContext.filterLegOnMpc();

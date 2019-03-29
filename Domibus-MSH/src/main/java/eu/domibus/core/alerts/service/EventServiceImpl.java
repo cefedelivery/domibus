@@ -183,13 +183,19 @@ public class EventServiceImpl implements EventService {
         try {
             String receiverPartyName = null;
             if (mpcService.forcePullOnMpc(userMessage.getMpc())) {
+                LOG.debug("Find UserMessage exchange context (pull context)");
                 userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING, true);
+                LOG.debug("Extract receiverPartyName from mpc");
                 receiverPartyName = mpcService.extractInitiator(userMessage.getMpc());
             } else {
+                LOG.debug("Find UserMessage exchange context");
                 userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.valueOf(role));
+                LOG.debug("Get receiverPartyName from exchange context pModeKey");
                 receiverPartyName = pModeProvider.getReceiverParty(userMessageExchangeContext.getPmodeKey()).getName();
             }
+
             final Party senderParty = pModeProvider.getSenderParty(userMessageExchangeContext.getPmodeKey());
+            LOG.info("Create error log with receiverParty name: [{}], senderParty name: [{}]", receiverPartyName, senderParty);
             event.addStringKeyValue(FROM_PARTY.name(), senderParty.getName());
             event.addStringKeyValue(TO_PARTY.name(), receiverPartyName);
             StringBuilder errors = new StringBuilder();

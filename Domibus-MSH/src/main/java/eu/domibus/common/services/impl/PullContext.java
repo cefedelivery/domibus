@@ -46,10 +46,10 @@ public class PullContext {
     }
 
     public Party getInitiator() {
-        if (CollectionUtils.isNotEmpty(process.getInitiatorParties())) {
-            return process.getInitiatorParties().iterator().next();
+        if (CollectionUtils.isEmpty(process.getInitiatorParties())) {
+            return null;
         }
-        return null;
+        return process.getInitiatorParties().iterator().next();
     }
 
     public String getMpcQualifiedName() {

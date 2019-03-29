@@ -1,5 +1,6 @@
 package eu.domibus.plugin.handler;
 
+import com.google.common.collect.Sets;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
@@ -494,9 +495,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         Party party = new Party();
         Identifier identifier = new Identifier();
         identifier.setPartyId(messageExchangeService.extractInitiator(mpc));
-        party.setIdentifiers(new HashSet<Identifier>() {{
-            add(identifier);
-        }});
+        party.setIdentifiers(Sets.newHashSet(identifier));
         party.setName(messageExchangeService.extractInitiator(mpc));
 
         return party;
