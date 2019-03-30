@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.ebms3.common.model.Messaging;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ public class ReceiptLegConfigurationFactory extends AbstractMessageLegConfigurat
     @Override
     protected LegConfigurationExtractor getConfiguration(SoapMessage soapMessage, Messaging messaging) {
         ReceiptLegConfigurationExtractor receiptLegConfigurationExtractor=null;
-        if (messaging.getSignalMessage().getReceipt() != null) {
+        if (messaging.getSignalMessage().getReceipt() != null || CollectionUtils.isNotEmpty(messaging.getSignalMessage().getError())) {
             receiptLegConfigurationExtractor = new ReceiptLegConfigurationExtractor(soapMessage, messaging);
         }
         return receiptLegConfigurationExtractor;
