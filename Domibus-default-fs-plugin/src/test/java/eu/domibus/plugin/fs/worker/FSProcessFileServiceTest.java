@@ -126,9 +126,9 @@ public class FSProcessFileServiceTest {
         fsProcessFileService.processFile(contentFile, domain);
 
         new VerificationsInOrder(1) {{
-            String newFileName;
-            fsFilesManager.renameFile(contentFile, newFileName = withCapture());
-            Assert.assertEquals("content_" + messageId + ".xml", newFileName);
+            FSMessage message = null;
+            backendFSPlugin.submit(message = withCapture());
+            Assert.assertEquals(message.getPayloads().size(), 1);
         }};
     }
 
