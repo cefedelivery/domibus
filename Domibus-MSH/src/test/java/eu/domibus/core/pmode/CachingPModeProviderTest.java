@@ -17,6 +17,8 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.configuration.Role;
+import eu.domibus.core.mpc.MpcService;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
@@ -101,6 +103,12 @@ public class CachingPModeProviderTest {
 
     @Injectable
     SignalService signalService;
+
+    @Injectable
+    private MpcService mpcService;
+
+    @Injectable
+    PullMessageService pullMessageService;
 
     @Tested
     CachingPModeProvider cachingPModeProvider;

@@ -15,6 +15,10 @@ Domibus 4.1
 - Allow PayloadInfo with one PartInfo (one payload) as input in the message metadata.xml of the FS plugin
 - Added sendPullReceiptQueue for sending the asynchronous pull receipt
 - Added domibus.ui.support.team.name and domibus.ui.support.team.email properties for Support Team information on GUI
+- Allow pull processes with multiple legs configured with the same mpc (enforce same security policy)
+- Allow pull processes with 0 or multiple initiators
+- Allow pulling based on mpc containing the initiator
+- Save message for pulling when mpc attribute is provided
 Domibus 4.0.2
 - Improved the logging in the Default JMS Plugin
 - Allow sending an XML payload in the Soap body
