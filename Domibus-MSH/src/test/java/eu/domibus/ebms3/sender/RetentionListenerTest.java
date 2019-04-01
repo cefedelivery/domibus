@@ -20,6 +20,7 @@ import javax.jms.Message;
 
 /**
  * @author Sebastian-Ion TINCU
+ * @since 4.1
  */
 @RunWith(JMockit.class)
 public class RetentionListenerTest {

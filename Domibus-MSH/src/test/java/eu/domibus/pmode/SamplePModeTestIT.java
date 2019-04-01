@@ -1,6 +1,6 @@
 package eu.domibus.pmode;
 
-import com.google.common.io.Files;
+import com.ctc.wstx.exc.WstxParsingException;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.model.configuration.Mpc;
@@ -9,6 +9,8 @@ import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created by Cosmin Baciu on 16-Sep-16.
@@ -41,8 +44,7 @@ public class SamplePModeTestIT {
 
         @Bean
         public XMLUtil xmlUtil() {
-            XMLUtilImpl xmlUtil = new XMLUtilImpl();
-            return xmlUtil;
+            return new XMLUtilImpl();
         }
 
         @Bean
@@ -82,11 +84,10 @@ public class SamplePModeTestIT {
 
     protected eu.domibus.common.model.configuration.Configuration  readPMode(String location) throws Exception {
         File pmodeFile = new File(location);
-        InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + location);
-        String pmodeContent = FileUtils.readFileToString(pmodeFile);
+        String pmodeContent = FileUtils.readFileToString(pmodeFile, "UTF-8");
         pmodeContent = StringUtils.replaceEach(pmodeContent, new String[]{"<red_hostname>", "<blue_hostname>"}, new String[]{"red_hostname", "blue_hostname"});
 
-        UnmarshallerResult unmarshal = xmlUtil.unmarshal(false, jaxbContext, IOUtils.toInputStream(pmodeContent), null);
+        UnmarshallerResult unmarshal = xmlUtil.unmarshal(false, jaxbContext, IOUtils.toInputStream(pmodeContent, "UTF-8"), null);
         return unmarshal.getResult();
     }
 
@@ -120,7 +121,15 @@ public class SamplePModeTestIT {
         assertNotNull(configuration2.getBusinessProcesses());
     }
 
-    private InputStream getXsdStream() {
-        return getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
+    @Test
+    public void testUnmarshal_PreventXxeAttack() {
+        try {
+            readPMode("src/test/resources/pmodes/domibus-pmode-red-xxe-vulnerability.xml");
+            fail("Should have prevented the external entity since DTDs should be disabled");
+        } catch (Exception e) {
+            Throwable cause = ExceptionUtils.getRootCause(e);
+            Assert.assertTrue("Should have thrown the correct exception indicating the XML entity is unknown",
+                    cause instanceof WstxParsingException && cause.getMessage().startsWith("Undeclared general entity \"xxe\""));
+        }
     }
 }

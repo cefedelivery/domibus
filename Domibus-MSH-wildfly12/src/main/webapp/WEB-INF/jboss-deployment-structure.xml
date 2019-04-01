@@ -19,7 +19,7 @@
         </dependencies>
 
         <resources>
-            <resource-root path="WEB-INF/lib/bcprov-jdk15on-1.58.jar" use-physical-code-source="true"/>
+            <resource-root path="WEB-INF/lib/bcprov-jdk15on-${bouncycastle.version}.jar" use-physical-code-source="true"/>
         </resources>
 
         <exclusions>
