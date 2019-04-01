@@ -121,6 +121,14 @@ public class FSFilesManager {
         return file.resolveFile(PARENT_RELATIVE_PATH + siblingName);
     }
 
+    public boolean hasLockFile(FileObject file) throws FileSystemException {
+        final FileObject lockFile = resolveSibling(file, FSFileNameHelper.getLockFilename(file));
+        LOG.debug("Checking if lock file exists [{}]", file.getName().getURI());
+        final boolean exists = lockFile.exists();
+        LOG.debug("Lock file [{}] exists? [{}]", file.getName().getURI(), exists);
+        return exists;
+    }
+
     public FileObject createLockFile(FileObject file) throws FileSystemException {
         final FileObject lockFile = resolveSibling(file, FSFileNameHelper.getLockFilename(file));
         LOG.debug("Creating lock file for [{}]", file.getName().getBaseName());

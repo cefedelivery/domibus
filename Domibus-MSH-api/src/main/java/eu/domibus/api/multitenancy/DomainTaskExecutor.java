@@ -16,7 +16,20 @@ public interface DomainTaskExecutor {
 
     void submit(Runnable task, Domain domain);
 
+    /**
+     * Submits a long running task to be executed for a specific domain
+     *
+     * @param task The task to be executed
+     * @param errorHandler The error handler to be executed in case errors are thrown while running the task
+     * @param domain The domain for which the task is executed
+     */
     void submitLongRunningTask(Runnable task, Runnable errorHandler, Domain domain);
 
+    /**
+     * Submits a long running task to be executed for a specific domain
+     *
+     * @param task The task to be executed
+     * @param domain The domain for which the task is executed
+     */
     void submitLongRunningTask(Runnable task, Domain domain);
 }

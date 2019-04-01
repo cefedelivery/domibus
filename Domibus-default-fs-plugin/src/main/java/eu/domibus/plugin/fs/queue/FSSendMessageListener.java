@@ -3,7 +3,7 @@ package eu.domibus.plugin.fs.queue;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.plugin.fs.FSFileNameHelper;
+import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -33,6 +33,9 @@ public class FSSendMessageListener implements MessageListener {
     @Autowired
     private FSSendMessagesService fsSendMessagesService;
 
+    @Autowired
+    protected FSFilesManager fsFilesManager;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void onMessage(Message message) {
@@ -58,7 +61,7 @@ public class FSSendMessageListener implements MessageListener {
                     LOG.warn("File does not exist: [{}] discard the JMS message", fileName);
                     return;
                 }
-                if (FSFileNameHelper.hasLockFile(fileObject)) {
+                if (fsFilesManager.hasLockFile(fileObject)) {
                     LOG.debug("Skipping file [{}]: it has a lock file associated", fileName);
                     return;
                 }

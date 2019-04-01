@@ -88,16 +88,6 @@ public class FSFileNameHelper {
     }
 
     /**
-     * Checks if for given file there is a lock file created
-     * @param file
-     * @return
-     */
-    public static boolean hasLockFile(final FileObject file) {
-        final String lockFilename = getLockFilename(file);
-        return isLockFile(lockFilename);
-    }
-
-    /**
      * Derives a new file name from the given file name and a message Id.
      * In practice, for a given file name {@code filename.ext} and message Id
      * {@code messageId} generates a new file name of the form {@code filename_messageId.ext}.

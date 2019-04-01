@@ -25,11 +25,14 @@ import java.io.InputStream;
 @RunWith(JMockit.class)
 public class FSSendMessageListenerTest {
 
+    @Tested
+    FSSendMessageListener fsSendMessageListener;
+
     @Injectable
     private FSSendMessagesService fsSendMessagesService;
 
-    @Tested
-    FSSendMessageListener fsSendMessageListener;
+    @Injectable
+    FSFilesManager fsFilesManager;
 
     private FileObject rootDir;
     private FileObject outgoingFolder;

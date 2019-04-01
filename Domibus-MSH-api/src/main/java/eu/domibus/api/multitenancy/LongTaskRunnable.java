@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Wrapper for the Runnable class to be executed. Catches any exception and logs it.
+ * Wrapper for the Runnable class to be executed. Catches any exception and executes the error handler if defined.
  *
  * @author Cosmin Baciu
  * @since 4.1
