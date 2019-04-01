@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<web-fragment version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd">
+<web-fragment version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd">
 
     <distributable/>
 
@@ -65,7 +67,12 @@
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>eu.domibus.common.metrics.MetricsServletContextListener</listener-class>
+    </listener>
+
     <!-- Apache CXF Servlet and mapping -->
+
     <servlet>
         <servlet-name>CXF</servlet-name>
         <servlet-class>org.apache.cxf.transport.servlet.CXFServlet
@@ -77,6 +84,20 @@
         <servlet-name>CXF</servlet-name>
         <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
+
+    <!-- Metrics -->
+
+    <servlet>
+        <servlet-name>metrics</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.AdminServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>metrics</servlet-name>
+        <url-pattern>/metrics/*</url-pattern>
+    </servlet-mapping>
+
+    <!--Resources-->
+
     <resource-ref>
         <description>DB Connection</description>
         <res-ref-name>ds/DomibusDS</res-ref-name>

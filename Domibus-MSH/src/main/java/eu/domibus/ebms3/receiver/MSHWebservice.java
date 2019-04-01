@@ -1,10 +1,10 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.metrics.Counter;
+import eu.domibus.common.metrics.Timer;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.receiver.handler.IncomingMessageHandler;
 import eu.domibus.ebms3.receiver.handler.IncomingMessageHandlerFactory;
@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
@@ -36,6 +34,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
 
+    private static final String INCOMING_MESSAGES = "incoming_messages";
+
     @Autowired
     protected MessageUtil messageUtil;
 
@@ -44,6 +44,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
+    @Timer(INCOMING_MESSAGES)
+    @Counter(INCOMING_MESSAGES)
     public SOAPMessage invoke(final SOAPMessage request) {
         Messaging messaging = messageUtil.getMessage(request);
 

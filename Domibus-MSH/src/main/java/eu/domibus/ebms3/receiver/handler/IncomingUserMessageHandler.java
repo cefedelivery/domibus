@@ -1,6 +1,8 @@
 package eu.domibus.ebms3.receiver.handler;
 
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.metrics.Counter;
+import eu.domibus.common.metrics.Timer;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.logging.DomibusLogger;
@@ -24,7 +26,11 @@ public class IncomingUserMessageHandler extends AbstractIncomingMessageHandler {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(IncomingUserMessageHandler.class);
 
+    private static final String INCOMING_USER_MESSAGE = "incoming_user_message";
+
     @Override
+    @Timer(INCOMING_USER_MESSAGE)
+    @Counter(INCOMING_USER_MESSAGE)
     protected SOAPMessage processMessage(LegConfiguration legConfiguration, String pmodeKey, SOAPMessage request, Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         LOG.debug("Processing UserMessage");
         return userMessageHandlerService.handleNewUserMessage(legConfiguration, pmodeKey, request, messaging, testMessage);
