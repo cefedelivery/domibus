@@ -35,7 +35,7 @@ public enum DomibusCoreErrorCode {
      */
     DOM_006("006"),
     /**
-     * Invaid message exception
+     * Invalid message exception
      */
     DOM_007("007")
     ;
