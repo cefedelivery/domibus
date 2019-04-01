@@ -7,7 +7,7 @@ package eu.domibus.api.message;
 public interface UserMessageLogService {
 
     //TODO create a UserMessageLog business object and pass it to the save method
-    void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String action, String service, Boolean sourceMessage, Boolean messageFragment);
+    void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String service, String action, Boolean sourceMessage, Boolean messageFragment);
 
     void setMessageAsDeleted(String messageId);
 
