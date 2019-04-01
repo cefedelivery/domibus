@@ -111,4 +111,41 @@ public class FSSendMessageListenerTest {
             maxTimes = 0;
         }};
     }
+
+    @Test
+    public void test_onMessage_FileLockAlreadExists(final @Mocked FileSystemManager fileSystemManager,
+                                                    final @Mocked Message message,
+                                                    final @Mocked FileObject file) throws Exception {
+        final String domain = null;
+        final String fileName = "ram:" + contentFile.getURL().getFile() + "bla";
+
+
+        new Expectations(fsSendMessageListener) {{
+            message.getStringProperty(MessageConstants.DOMAIN);
+            result = domain;
+
+            fsSendMessageListener.getVFSManager();
+            result = fileSystemManager;
+
+            message.getStringProperty(MessageConstants.FILE_NAME);
+            result = fileName;
+
+            fileSystemManager.resolveFile(fileName);
+            result = file;
+
+            file.exists();
+            result = true;
+
+            fsFilesManager.hasLockFile(file);
+            result = true;
+        }};
+
+        //tested method
+        fsSendMessageListener.onMessage(message);
+
+        new Verifications() {{
+            fsSendMessagesService.processFileSafely((FileObject) any, anyString);
+            maxTimes = 0;
+        }};
+    }
 }

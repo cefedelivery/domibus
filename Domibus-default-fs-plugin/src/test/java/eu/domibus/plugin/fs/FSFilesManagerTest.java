@@ -1,49 +1,39 @@
 package eu.domibus.plugin.fs;
 
+import eu.domibus.plugin.fs.exception.FSSetUpException;
+import mockit.*;
+import mockit.integration.junit4.JMockit;
+import org.apache.commons.vfs2.*;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.activation.DataHandler;
-
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.VFS;
-import org.junit.Assert;
 import org.junit.runner.RunWith;
 
-import eu.domibus.plugin.fs.exception.FSSetUpException;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
-import mockit.Verifications;
-import mockit.integration.junit4.JMockit;
+import javax.activation.DataHandler;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 @RunWith(JMockit.class)
 public class FSFilesManagerTest {
-    
+
     @Tested
     private FSFilesManager instance;
-    
+
     @Injectable
     private FSPluginProperties fsPluginProperties;
-    
+
     private FileObject rootDir;
 
     @Injectable
     private FileObject mockedRootDir;
-    
+
     @Before
     public void setUp() throws FileSystemException {
         String location = "ram:///FSFilesManagerTest";
         String sampleFolderName = "samplefolder";
-        
+
         FileSystemManager fsManager = VFS.getManager();
         rootDir = fsManager.resolveFile(location);
         rootDir.createFolder();
@@ -62,7 +52,7 @@ public class FSFilesManagerTest {
 
         rootDir.resolveFile("targetfolder1/targetfolder2").createFolder();
     }
-    
+
     @After
     public void tearDown() throws FileSystemException {
         rootDir.deleteAll();
@@ -76,7 +66,7 @@ public class FSFilesManagerTest {
         String domain = "domain";
         String user = "user";
         String password = "password";
-        
+
         FileObject result = instance.getEnsureRootLocation(location, domain, user, password);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
@@ -85,7 +75,7 @@ public class FSFilesManagerTest {
     @Test
     public void testGetEnsureRootLocation() throws Exception {
         String location = "ram:///FSFilesManagerTest";
-        
+
         FileObject result = instance.getEnsureRootLocation(location);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
@@ -94,9 +84,9 @@ public class FSFilesManagerTest {
     @Test
     public void testGetEnsureChildFolder() throws Exception {
         String folderName = "samplefolder";
-        
+
         FileObject result = instance.getEnsureChildFolder(rootDir, folderName);
-        
+
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
         Assert.assertEquals(FileType.FOLDER, result.getType());
@@ -120,7 +110,7 @@ public class FSFilesManagerTest {
     @Test
     public void testFindAllDescendantFiles() throws Exception {
         FileObject[] files = instance.findAllDescendantFiles(rootDir);
-        
+
         Assert.assertNotNull(files);
         Assert.assertEquals(6, files.length);
         Assert.assertEquals("ram:///FSFilesManagerTest/file1", files[0].getName().getURI());
@@ -134,7 +124,7 @@ public class FSFilesManagerTest {
     @Test
     public void testGetDataHandler() throws Exception {
         DataHandler result = instance.getDataHandler(rootDir);
-        
+
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getDataSource());
     }
@@ -142,7 +132,7 @@ public class FSFilesManagerTest {
     @Test
     public void testResolveSibling() throws Exception {
         FileObject result = instance.resolveSibling(rootDir, "siblingdir");
-        
+
         Assert.assertNotNull(result);
         Assert.assertEquals("ram:///siblingdir", result.getName().getURI());
     }
@@ -150,11 +140,11 @@ public class FSFilesManagerTest {
     @Test
     public void testRenameFile() throws Exception {
         FileObject file = rootDir.resolveFile("toberenamed");
-        
+
         long beforeMillis = System.currentTimeMillis();
         FileObject result = instance.renameFile(file, "renamed");
         long afterMillis = System.currentTimeMillis();
-        
+
         Assert.assertNotNull(result);
         Assert.assertEquals("ram:///FSFilesManagerTest/renamed", result.getName().getURI());
         Assert.assertTrue(result.exists());
@@ -168,16 +158,16 @@ public class FSFilesManagerTest {
         new Expectations(instance) {{
             fsPluginProperties.getLocation("DOMAIN1");
             result = "ram:///FSFilesManagerTest/samplefolder";
-            
+
             fsPluginProperties.getUser("DOMAIN1");
             result = "user";
-            
+
             fsPluginProperties.getPassword("DOMAIN1");
             result = "secret";
         }};
-        
+
         FileObject result = instance.setUpFileSystem("DOMAIN1");
-        
+
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
         Assert.assertEquals("ram:///FSFilesManagerTest/samplefolder", result.getName().getURI());
@@ -189,9 +179,9 @@ public class FSFilesManagerTest {
             fsPluginProperties.getLocation(null);
             result = "ram:///FSFilesManagerTest";
         }};
-        
+
         FileObject result = instance.setUpFileSystem(null);
-        
+
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
         Assert.assertEquals("ram:///FSFilesManagerTest", result.getName().getURI());
@@ -201,23 +191,23 @@ public class FSFilesManagerTest {
     public void testDeleteFile() throws Exception {
         FileObject file = rootDir.resolveFile("tobedeleted");
         boolean result = instance.deleteFile(file);
-        
+
         Assert.assertTrue(result);
         Assert.assertFalse(file.exists());
     }
 
     @Test
     public void testCloseAll(@Mocked final FileObject file1,
-            @Mocked final FileObject file2,
-            @Mocked final FileObject file3) throws FileSystemException {
-        
+                             @Mocked final FileObject file2,
+                             @Mocked final FileObject file3) throws FileSystemException {
+
         new Expectations(1, instance) {{
             file2.close();
             result = new FileSystemException("Test-forced exception");
         }};
-        
-        instance.closeAll(new FileObject[] { file1, file2, file3 });
-        
+
+        instance.closeAll(new FileObject[]{file1, file2, file3});
+
         new Verifications(1) {{
             file1.close();
             file2.close();
@@ -229,11 +219,11 @@ public class FSFilesManagerTest {
     public void testMoveFile() throws Exception {
         FileObject file = rootDir.resolveFile("tobemoved");
         FileObject targetFile = rootDir.resolveFile("targetfolder1/targetfolder2/moved");
-        
+
         long beforeMillis = System.currentTimeMillis();
         instance.moveFile(file, targetFile);
         long afterMillis = System.currentTimeMillis();
-        
+
         Assert.assertTrue(targetFile.exists());
         Assert.assertTrue(targetFile.getContent().getLastModifiedTime() >= beforeMillis);
         Assert.assertTrue(targetFile.getContent().getLastModifiedTime() <= afterMillis);
@@ -242,7 +232,7 @@ public class FSFilesManagerTest {
     @Test
     public void testCreateFile() throws Exception {
         try {
-            instance.createFile(rootDir,  "tobecreated", "withcontent");
+            instance.createFile(rootDir, "tobecreated", "withcontent");
         } catch (FileSystemException e) {
             if ("File closed.".equals(e.getMessage())) {
                 // unit test workaround, file is being closed twice
@@ -253,5 +243,54 @@ public class FSFilesManagerTest {
 
         Assert.assertTrue(rootDir.resolveFile("tobecreated").exists());
     }
-    
+
+
+    @Test
+    public void hasLockFile(@Injectable FileObject file,
+                            @Injectable final FileObject lockFile) throws FileSystemException {
+        new Expectations(instance) {{
+            instance.resolveSibling(file, anyString);
+            result = lockFile;
+
+            lockFile.exists();
+            result = true;
+        }};
+
+        final boolean hasLockFile = instance.hasLockFile(file);
+
+        Assert.assertTrue(hasLockFile);
+    }
+
+    @Test
+    public void createLockFile(@Injectable FileObject file,
+                               @Injectable final FileObject lockFile) throws FileSystemException {
+        new Expectations(instance) {{
+            instance.resolveSibling(file, anyString);
+            result = lockFile;
+        }};
+
+        instance.createLockFile(file);
+
+        new Verifications() {{
+            lockFile.createFile();
+        }};
+    }
+
+    @Test
+    public void deleteLockFile(@Injectable FileObject file,
+                               @Injectable final FileObject lockFile) throws FileSystemException {
+        new Expectations(instance) {{
+            instance.resolveSibling(file, anyString);
+            result = lockFile;
+
+            lockFile.exists();
+            result = true;
+        }};
+
+        instance.deleteLockFile(file);
+
+        new Verifications() {{
+            lockFile.delete();
+        }};
+    }
 }

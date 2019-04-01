@@ -1,13 +1,19 @@
 package eu.domibus.plugin.fs;
 
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.integration.junit4.JMockit;
+import org.apache.commons.vfs2.FileObject;
 import org.junit.Assert;
 import org.junit.Test;
 
 import eu.domibus.common.MessageStatus;
+import org.junit.runner.RunWith;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
+@RunWith(JMockit.class)
 public class FSFileNameHelperTest {
     
     public FSFileNameHelperTest() {
@@ -186,5 +192,19 @@ public class FSFileNameHelperTest {
 
         Assert.assertEquals("smb://example.org/fs_plugin_data/OUTDOMAIN/SENT/OUTGOING", result);
     }
+
+
+    @Test
+    public void testGetLockFilename(@Injectable FileObject file) {
+        final String filename = "invoice.pdf";
+        new Expectations() {{
+            file.getName().getBaseName();
+            this.result = filename;
+        }};
+
+        final String lockFilename = FSFileNameHelper.getLockFilename(file);
+        Assert.assertEquals(lockFilename, filename + ".lock");
+    }
+
     
 }

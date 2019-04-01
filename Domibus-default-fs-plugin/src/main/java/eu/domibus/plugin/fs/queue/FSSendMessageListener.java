@@ -55,7 +55,7 @@ public class FSSendMessageListener implements MessageListener {
         if (StringUtils.isNotBlank(fileName)) {
             FileObject fileObject = null;
             try {
-                FileSystemManager fileSystemManager = VFS.getManager();
+                FileSystemManager fileSystemManager = getVFSManager();
                 fileObject = fileSystemManager.resolveFile(fileName);
                 if (!fileObject.exists()) {
                     LOG.warn("File does not exist: [{}] discard the JMS message", fileName);
@@ -77,5 +77,9 @@ public class FSSendMessageListener implements MessageListener {
         } else {
             LOG.error("Error while consuming JMS message: [{}] fileName empty.", message);
         }
+    }
+
+    protected FileSystemManager getVFSManager() throws FileSystemException {
+        return VFS.getManager();
     }
 }
