@@ -3,6 +3,7 @@ package eu.domibus.plugin.fs.queue;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.plugin.fs.FSFileNameHelper;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -57,6 +58,12 @@ public class FSSendMessageListener implements MessageListener {
                     LOG.warn("File does not exist: [{}] discard the JMS message", fileName);
                     return;
                 }
+                if (FSFileNameHelper.hasLockFile(fileObject)) {
+                    LOG.debug("Skipping file [{}]: it has a lock file associated", fileName);
+                    return;
+                }
+
+
             } catch (FileSystemException e) {
                 LOG.error("Error occurred while trying to access the file to be sent: " + fileName, e);
             }
