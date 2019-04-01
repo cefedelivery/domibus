@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Locale;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -59,6 +58,9 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
     @Override
     public MapMessage transformFromSubmission(final Submission submission, final MapMessage messageOut) {
         try {
+            if (submission.getMpc() != null) {
+                messageOut.setStringProperty(MPC, submission.getMpc());
+            }
             messageOut.setStringProperty(ACTION, submission.getAction());
             messageOut.setStringProperty(SERVICE, submission.getService());
             messageOut.setStringProperty(SERVICE_TYPE, submission.getServiceType());
@@ -189,6 +191,10 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
     public Submission transformToSubmission(final MapMessage messageIn) {
         final Submission target = new Submission();
         try {
+            String mpc = trim(messageIn.getStringProperty(MPC));
+            if (!isEmpty(mpc)) {
+                target.setMpc(mpc);
+            }
             target.setMessageId(trim(messageIn.getStringProperty(MESSAGE_ID)));
 
             setTargetFromPartyIdAndFromPartyType(messageIn, target);

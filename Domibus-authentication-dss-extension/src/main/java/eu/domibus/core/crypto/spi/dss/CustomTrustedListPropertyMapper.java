@@ -39,15 +39,15 @@ public class CustomTrustedListPropertyMapper extends PropertyGroupMapper<OtherTr
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomTrustedListPropertyMapper.class);
 
-    private static final String CUSTOM_TRUSTED_LIST_URL_PROPERTY = "domibus.dss.custom.trusted.list.url";
+    private static final String CUSTOM_TRUSTED_LIST_URL_PROPERTY = "domibus.authentication.dss.custom.trusted.list.url";
 
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY = "domibus.dss.custom.trusted.list.keystore.type";
+    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_TYPE_PROPERTY = "domibus.authentication.dss.custom.trusted.list.keystore.type";
 
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY = "domibus.dss.custom.trusted.list.keystore.path";
+    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PATH_PROPERTY = "domibus.authentication.dss.custom.trusted.list.keystore.path";
 
-    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY = "domibus.dss.custom.trusted.list.keystore.password";
+    private static final String CUSTOM_TRUSTED_LIST_KEYSTORE_PASSWORD_PROPERTY = "domibus.authentication.dss.custom.trusted.list.keystore.password";
 
-    private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.dss.custom.trusted.list.country.code";
+    private static final String CUSTOM_TRUSTED_LIST_COUNTRY_CODE_PROPERTY = "domibus.authentication.dss.custom.trusted.list.country.code";
 
     public CustomTrustedListPropertyMapper(final DomibusPropertyExtService domibusPropertyExtService,
                                            final DomainContextExtService domainContextExtService,

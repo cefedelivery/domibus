@@ -179,6 +179,10 @@ public class Process extends AbstractBaseEntity {
         return this.name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Set<Party> getInitiatorParties() {
         return this.initiatorParties;
     }

@@ -183,7 +183,7 @@ public class IncomingPullReceiptHandlerTest {
             messagingDao.findUserMessageByMessageId(messageId);
             result = userMessage;
 
-            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING, true);
             result = messageConfiguration;
 
             messageConfiguration.getPmodeKey();
@@ -204,7 +204,7 @@ public class IncomingPullReceiptHandlerTest {
         new Verifications() {{
             messagingDao.findUserMessageByMessageId(messageId);
             times = 1;
-            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING, true);
             times = 1;
             pModeProvider.getLegConfiguration(pModeKey);
             times = 1;

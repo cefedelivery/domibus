@@ -70,10 +70,10 @@ public class AuthorizationService {
         }
 
         if (authorizationServiceList.size() > 1) {
-            throw new IllegalStateException(String.format("More than one authorization service provider for identifier:[%s]", authorizationServiceIndentifier));
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_MODULE_CONFIGURATION_ISSUE, String.format("More than one authorization service provider for identifier:[%s]", authorizationServiceIndentifier));
         }
         if (authorizationServiceList.isEmpty()) {
-            throw new IllegalStateException(String.format("No authorisation service provider found for given identifier:[%s]", authorizationServiceIndentifier));
+            throw new AuthorizationException(AuthorizationError.AUTHORIZATION_MODULE_CONFIGURATION_ISSUE, String.format("No authorisation service provider found for given identifier:[%s]", authorizationServiceIndentifier));
         }
         return authorizationServiceList.get(0);
     }
@@ -93,17 +93,15 @@ public class AuthorizationService {
                 domainCoreConverter.convert(pullRequest, PullRequestDTO.class), pullRequestPmodeData);
     }
 
-    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) {
+    public void authorizeUserMessage(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception {
         if (!isAuthorizationEnabled(request)) {
             return;
         }
         final CertificateTrust certificateTrust = getCertificateTrust(request);
         final UserMessagePmodeData userMessagePmodeData;
-        try {
-            userMessagePmodeData = pModeProvider.getUserMessagePmodeData(userMessage);
-        } catch (EbMS3Exception e) {
-            throw new AuthorizationException(e);
-        }
+
+        userMessagePmodeData = pModeProvider.getUserMessagePmodeData(userMessage);
+
         getAuthorizationService().authorize(certificateTrust.getTrustChain(), certificateTrust.getSigningCertificate(),
                 domainCoreConverter.convert(userMessage, UserMessageDTO.class), userMessagePmodeData);
 

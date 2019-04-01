@@ -48,6 +48,7 @@ public class FSMessageTransformer
     @Override
     public FSMessage transformFromSubmission(final Submission submission, final FSMessage messageOut) {
         UserMessage metadata = objectFactory.createUserMessage();
+        metadata.setMpc(submission.getMpc());
         metadata.setPartyInfo(getPartyInfoFromSubmission(submission));
         metadata.setCollaborationInfo(getCollaborationInfoFromSubmission(submission));
         metadata.setMessageProperties(getMessagePropertiesFromSubmission(submission));
@@ -67,7 +68,7 @@ public class FSMessageTransformer
     public Submission transformToSubmission(final FSMessage messageIn) {
         UserMessage metadata = messageIn.getMetadata();
         Submission submission = new Submission();
-
+        submission.setMpc(metadata.getMpc());
         setPartyInfoToSubmission(submission, metadata.getPartyInfo());
         setCollaborationInfoToSubmission(submission, metadata.getCollaborationInfo());
         setMessagePropertiesToSubmission(submission, metadata.getMessageProperties());

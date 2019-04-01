@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @since 3.3
  */
 @Component
- class MessageLegConfigurationVisitor {
+class MessageLegConfigurationVisitor {
     @Autowired
     private PModeProvider pModeProvider;
     @Autowired
@@ -19,14 +19,17 @@ import org.springframework.stereotype.Component;
     @Autowired
     private MessagingDao messagingDao;
 
-    void visit(UserMessageLegConfigurationExtractor userMessagePolicyInSetup){
+    void visit(UserMessageLegConfigurationExtractor userMessagePolicyInSetup) {
         userMessagePolicyInSetup.setpModeProvider(pModeProvider);
     }
-    void visit(PullRequestLegConfigurationExtractor signalMessagePolicyInSetup){
+
+    void visit(PullRequestLegConfigurationExtractor signalMessagePolicyInSetup) {
         signalMessagePolicyInSetup.setMessageExchangeService(messageExchangeService);
     }
-    void visit(ReceiptLegConfigurationExtractor receiptMessagePolicyInSetup){
+
+    void visit(ReceiptLegConfigurationExtractor receiptMessagePolicyInSetup) {
         receiptMessagePolicyInSetup.setMessagingDao(messagingDao);
         receiptMessagePolicyInSetup.setpModeProvider(pModeProvider);
+        receiptMessagePolicyInSetup.setMessageExchangeService(messageExchangeService);
     }
 }

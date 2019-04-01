@@ -38,7 +38,7 @@ public class AuthorizationServiceInterceptor extends ServiceInterceptor {
                 switch (a.getAuthorizationError()) {
                     case INVALID_FORMAT:
                         LOG.error("Invalid incoming message format during authorization:[{}]", a.getMessage());
-                        return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, a.getMessage(), a.getMessageId(), a.getCause());
+                        return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, a.getMessage(), a.getMessageId(), null);
                     case AUTHORIZATION_REJECTED:
                         LOG.error("Authorization for incoming message was not granted:[{}]", a.getMessage());
                         return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0001:Authorization to access the targeted application refused to sender.", a.getMessageId(), null);

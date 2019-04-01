@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver.handler;
 
+import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.core.security.AuthorizationService;
@@ -43,8 +44,24 @@ public class IncomingPullRequestHandler implements IncomingMessageHandler {
 
     protected SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
-        PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
+        PullContext pullContext;
+        String mpc = pullRequest.getMpc();
+        try {
+            LOG.debug("Extract process on MPC [{}]", mpc);
+            pullContext = messageExchangeService.extractProcessOnMpc(mpc);
+        } catch (PModeException pme) {
+            LOG.debug("No process for mpc [{}]", mpc);
+            if (messageExchangeService.forcePullOnMpc(pullRequest.getMpc())) {
+                LOG.debug("Extract base mpc");
+                mpc = messageExchangeService.extractBaseMpc(pullRequest.getMpc());
+                LOG.debug("Trying base mpc [{}]", mpc);
+                pullContext = messageExchangeService.extractProcessOnMpc(mpc);
+            } else {
+                throw pme;
+            }
+        }
+        LOG.debug("Retrieve ready to pull User message for mpc: [{}]", pullRequest.getMpc());
+        String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullRequest.getMpc(), pullContext.getInitiator());
         return pullRequestHandler.handlePullRequest(messageId, pullContext);
     }
 }
