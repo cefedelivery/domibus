@@ -1,14 +1,14 @@
 package eu.domibus.ebms3.sender;
 
-import com.google.common.collect.Lists;
-import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthRole;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.core.message.UserMessageDefaultService;
-import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.messaging.MessageConstants;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
@@ -20,6 +20,7 @@ import javax.jms.Message;
 
 /**
  * @author Sebastian-Ion TINCU
+ * @since 4.1
  */
 @RunWith(JMockit.class)
 public class RetentionListenerTest {
@@ -31,13 +32,22 @@ public class RetentionListenerTest {
     private UserMessageDefaultService userMessageDefaultService;
 
     @Injectable
+    private AuthUtils authUtils;
+
+    @Injectable
+    private DomainContextProvider domainContextProvider;
+
+    @Mocked
     private Message message;
 
     @Test
-    public void deletesMessagesByTheirMessageIdentifiers() throws JMSException {
+    public void onMessage_deletesMessage(@Mocked DomibusLogger domibusLogger) throws JMSException {
         // Given
+        String messageId = "messageId";
+
         new Expectations() {{
-           message.getStringProperty(MessageConstants.MESSAGE_ID); result = "messageId";
+            message.getStringProperty(MessageConstants.MESSAGE_ID); result = messageId;
+            domibusLogger.putMDC(anyString, anyString);
         }};
 
         // When
@@ -45,7 +55,24 @@ public class RetentionListenerTest {
 
         // Then
         new Verifications() {{
-           userMessageDefaultService.deleteMessage("messageId");
+            domainContextProvider.setCurrentDomain(anyString);
+            userMessageDefaultService.deleteMessage(messageId);
+        }};
+    }
+
+    @Test
+    public void onMessage_addsAuthentication(@Mocked DomibusLogger domibusLogger) {
+        // Given
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed(); result = false;
+        }};
+
+        // When
+        retentionListener.onMessage(message);
+
+        // Then
+        new Verifications() {{
+            authUtils.setAuthenticationToSecurityContext(anyString, anyString, AuthRole.ROLE_ADMIN);
         }};
     }
 }
