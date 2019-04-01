@@ -50,23 +50,67 @@ public interface UserMessageService {
 
     void scheduleSending(String messageId);
 
+    /**
+     * Schedules the handling of the MessageFragment send failed event
+     *
+     * @param groupId
+     * @param backendName
+     */
     void scheduleMessageFragmentSendFailed(String groupId, String backendName);
 
-    void scheduleSourceMessageSending(String messageId);
-
+    /**
+     * Schedules the marking of the UserMessageFragment as failed
+     *
+     * @param messageId
+     */
     void scheduleUserMessageFragmentFailed(String messageId);
 
+    /**
+     * Schedules the sending of the SourceMessage
+     *
+     * @param messageId
+     */
+    void scheduleSourceMessageSending(String messageId);
+
+    /**
+     * Schedules the rejoining of the SourceMessage file
+     *
+     * @param groupId
+     * @param backendName
+     */
     void scheduleSourceMessageRejoinFile(String groupId, String backendName);
 
+    /**
+     * Schedules the rejoining of the SourceMessage
+     *
+     * @param groupId
+     * @param file
+     * @param backendName
+     */
     void scheduleSourceMessageRejoin(String groupId, String file, String backendName);
 
+    /**
+     * Schedules the sending of the SourceMessage receipt
+     *
+     * @param messageId
+     * @param pmodeKey
+     */
     void scheduleSourceMessageReceipt(String messageId, String pmodeKey);
+
+    /**
+     * Schedules the sending of the Signal error in case a SourceMessage fails to be rejoined
+     *
+     * @param messageId
+     * @param errorCode
+     * @param errorDetail
+     * @param pmodeKey
+     */
+    void scheduleSendingSignalError(String messageId, String errorCode, String errorDetail, String pmodeKey);
 
     void scheduleSending(String messageId, Long delay);
 
     void scheduleSending(String messageId, int retryCount);
 
-    void scheduleSendingSignalError(String messageId, String errorCode, String errorDetail, String pmodeKey);
 
     /**
      * Schedule the sending of the asynchronous Pull Receipt
