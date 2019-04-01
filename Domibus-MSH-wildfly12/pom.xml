@@ -46,6 +46,7 @@
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
         <!-- End Domibus modules -->
 
@@ -66,12 +67,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- ActiveMQ -->
