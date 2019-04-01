@@ -1,6 +1,9 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.ErrorCode;
@@ -14,7 +17,9 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.MessageGroupDao;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
@@ -155,6 +160,20 @@ public class UserMessageHandlerServiceTest {
     @Injectable
     protected AS4ReceiptService as4ReceiptService;
 
+    @Injectable
+    DomainTaskExecutor domainTaskExecutor;
+
+    @Injectable
+    DomainContextProvider domainContextProvider;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    SplitAndJoinService splitAndJoinService;
+
+    @Injectable
+    StorageProvider storageProvider;
 
 
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";

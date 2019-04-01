@@ -3,6 +3,7 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -67,6 +68,9 @@ public class UpdateRetryLoggingServiceTest {
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    UserMessageService userMessageService;
 
     @Before
     public void setupExpectations() {

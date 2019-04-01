@@ -16,6 +16,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.core.message.fragment.MessageGroupDao;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.core.replication.UIReplicationSignalService;
@@ -26,12 +27,15 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.NotificationListener;
+import eu.domibus.plugin.handler.DatabaseMessageHandler;
+import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.inject.Inject;
 import javax.jms.Queue;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -112,6 +116,15 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     protected UIReplicationSignalService uiReplicationSignalService;
+
+    @Injectable
+    MessageGroupDao messageGroupDao;
+
+    @Injectable
+    UserMessageFactory userMessageFactory;
+
+    @Injectable
+    DatabaseMessageHandler databaseMessageHandler;
 
 
     @Test

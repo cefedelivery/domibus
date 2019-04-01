@@ -23,14 +23,16 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
+import eu.domibus.core.pmode.PModeDefaultService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.core.pmode.PModeProvider;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.DuplicateMessageException;
@@ -39,7 +41,10 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.messaging.PModeMismatchException;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,7 +82,7 @@ public class DatabaseMessageHandlerTest {
     private static final String ACTION = "TC2Leg1";
     private static final String LEG = "pushTestcase1tc2Action";
 
-    private String pModeKey = GREEN+ MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+    private String pModeKey = GREEN + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
             RED + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
             SERVICE + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
             ACTION + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
@@ -155,6 +160,12 @@ public class DatabaseMessageHandlerTest {
 
     @Injectable
     SplitAndJoinService splitAndJoinService;
+
+    @Injectable
+    StorageProvider storageProvider;
+
+    @Injectable
+    protected PModeDefaultService pModeDefaultService;
 
 
     protected Property createProperty(String name, String value, String type) {
@@ -377,7 +388,8 @@ public class DatabaseMessageHandlerTest {
             result = MessageStatus.NOT_FOUND;
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            ;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -512,7 +524,8 @@ public class DatabaseMessageHandlerTest {
 
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            ;
 
             // Here the configuration of the access point is supposed to be BLUE!
             Party confParty = new Party();
@@ -770,7 +783,8 @@ public class DatabaseMessageHandlerTest {
             result = MessageStatus.NOT_FOUND;
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
+            result = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
+            ;
 
             Party sender = new Party();
             sender.setName(GREEN);
@@ -875,6 +889,7 @@ public class DatabaseMessageHandlerTest {
         }};
 
     }
+
     @Test
     public void testDownloadMessageOK() throws Exception {
 
@@ -1143,7 +1158,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            dmh.validateOriginalUser((UserMessage)any, anyString, (List<String>)any);
+            dmh.validateOriginalUser((UserMessage) any, anyString, (List<String>) any);
             result = new AccessDeniedException("");
         }};
 

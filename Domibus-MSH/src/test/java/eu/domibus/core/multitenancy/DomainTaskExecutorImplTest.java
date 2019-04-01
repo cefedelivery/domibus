@@ -53,7 +53,7 @@ public class DomainTaskExecutorImplTest {
             result = new InterruptedException();
         }};
 
-        domainTaskExecutor.submitRunnable(taskExecutor, submitRunnable, false, DomainTaskExecutorImpl.DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
+        domainTaskExecutor.submitRunnable(taskExecutor, submitRunnable, true, DomainTaskExecutorImpl.DEFAULT_WAIT_TIMEOUT, TimeUnit.SECONDS);
 
         new Verifications() {{
             taskExecutor.submit(submitRunnable);
