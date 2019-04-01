@@ -93,19 +93,19 @@ public class FSSendMessagesService {
     }
 
     protected void sendMessages(String domain) {
-        if(domibusConfigurationExtService.isMultiTenantAware()) {
-            if(domain == null) {
+        if (domibusConfigurationExtService.isMultiTenantAware()) {
+            if (domain == null) {
                 domain = DEFAULT_DOMAIN;
             }
 
             String authenticationUser = fsPluginProperties.getAuthenticationUser(domain);
-            if(authenticationUser == null) {
+            if (authenticationUser == null) {
                 LOG.error("Authentication User not defined for domain [{}]", domain);
                 return;
             }
 
             String authenticationPassword = fsPluginProperties.getAuthenticationPassword(domain);
-            if(authenticationPassword == null) {
+            if (authenticationPassword == null) {
                 LOG.error("Authentication Password not defined for domain [{}]", domain);
                 return;
             }
@@ -116,12 +116,12 @@ public class FSSendMessagesService {
         FileObject[] contentFiles = null;
         final String domainCode = domain;
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-                FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
+             FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
 
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
             LOG.trace("{}", contentFiles);
 
-            List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
+            List<FileObject> processableFiles = filterProcessableFiles(contentFiles, domainCode);
             LOG.debug("Processable files [{}]", processableFiles);
 
             processableFiles.parallelStream().forEach(file -> sendJMSMessageToOutQueue(file, domainCode));
@@ -139,6 +139,7 @@ public class FSSendMessagesService {
 
     /**
      * process the file - to be called by JMS message listener
+     *
      * @param processableFile
      * @param domain
      */
@@ -156,7 +157,7 @@ public class FSSendMessagesService {
             errorMessage = buildErrorMessage("Error processing file. Skipped it. Error message is: " + ex.getMessage()).toString();
             LOG.error(errorMessage, ex);
         } finally {
-            if(errorMessage != null) {
+            if (errorMessage != null) {
                 handleSendFailedMessage(processableFile, domain, errorMessage);
             }
         }
@@ -164,7 +165,7 @@ public class FSSendMessagesService {
 
     public void handleSendFailedMessage(FileObject processableFile, String domain, String errorMessage) {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain)) {
-             if (processableFile != null) {
+            if (processableFile != null) {
                 String baseName = processableFile.getName().getBaseName();
                 String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ERROR_EXTENSION;
 
@@ -206,18 +207,18 @@ public class FSSendMessagesService {
             sb.append("errorCode: ").append(errorCode).append(LS);
         }
         sb.append("errorDetail: ").append(errorDetail).append(LS);
-        if(messageId != null) {
+        if (messageId != null) {
             sb.append("messageInErrorId: ").append(messageId).append(LS);
         }
-        if(mshRole != null) {
+        if (mshRole != null) {
             sb.append("mshRole: ").append(mshRole).append(LS);
         } else {
             sb.append("mshRole: ").append(MSHRole.SENDING).append(LS);
         }
-        if(notified != null) {
+        if (notified != null) {
             sb.append("notified: ").append(notified).append(LS);
         }
-        if(timestamp != null) {
+        if (timestamp != null) {
             sb.append("timestamp: ").append(timestamp).append(LS);
         } else {
             sb.append("timestamp: ").append(LocalDateTime.now()).append(LS);
@@ -227,7 +228,7 @@ public class FSSendMessagesService {
     }
 
 
-    private List<FileObject> filterProcessableFiles(FileObject[] files) {
+    private List<FileObject> filterProcessableFiles(FileObject[] files, String domainCode) {
         List<FileObject> filteredFiles = new LinkedList<>();
 
         // locked file names
@@ -248,7 +249,7 @@ public class FSSendMessagesService {
                     // exclude locked files:
                     && !lockedFileNames.stream().anyMatch(fname -> fname.equals(baseName))
                     // exclude files that are (or could be) in use by other processes:
-                    && canReadFileSafely(file)) {
+                    && canReadFileSafely(file, domainCode)) {
 
                 filteredFiles.add(file);
             }
@@ -258,7 +259,7 @@ public class FSSendMessagesService {
     }
 
 
-    protected boolean canReadFileSafely(FileObject fileObject) {
+    protected boolean canReadFileSafely(FileObject fileObject, String domainCode) {
         String filePath = fileObject.getName().getPath();
 
         // firstly try to lock the file
@@ -280,7 +281,7 @@ public class FSSendMessagesService {
         // it is probable that some process is still writing in the file
 
         try {
-            long delta = 25000L; // 25s // TODO read from fs-plugin.properties
+            long delta = fsPluginProperties.getSendDelay(domainCode);
             long fileTime = fileObject.getContent().getLastModifiedTime();
             long currentTime = new java.util.Date().getTime();
             if (fileTime > currentTime - delta) {
@@ -305,7 +306,7 @@ public class FSSendMessagesService {
 
         String fileName;
         try {
-             fileName = processableFile.getURL().getFile();
+            fileName = processableFile.getURL().getFile();
         } catch (FileSystemException e) {
             LOG.error("Exception while getting filename: ", e);
             return;
