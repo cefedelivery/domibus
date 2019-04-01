@@ -27,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.Queue;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -236,20 +239,60 @@ public class FSSendMessagesService {
 
         for (FileObject file : files) {
             String baseName = file.getName().getBaseName();
-            
+
             if (!StringUtils.equals(baseName, METADATA_FILE_NAME)
                     && !FSFileNameHelper.isAnyState(baseName)
                     && !FSFileNameHelper.isProcessed(baseName)
                     // exclude lock files:
                     && !FSFileNameHelper.isLockFile(baseName)
                     // exclude locked files:
-                    && !lockedFileNames.stream().anyMatch(fname -> fname.equals(baseName))) {
+                    && !lockedFileNames.stream().anyMatch(fname -> fname.equals(baseName))
+                    // exclude files that are (or could be) in use by other processes:
+                    && canReadFileSafely(file)) {
 
                 filteredFiles.add(file);
             }
         }
 
         return filteredFiles;
+    }
+
+
+    protected boolean canReadFileSafely(FileObject fileObject) {
+        String filePath = fileObject.getName().getPath();
+
+        // firstly try to lock the file
+        // if this fails, it means that another process has an explicit lock on the file
+
+        try (RandomAccessFile raf = new RandomAccessFile(filePath, "rw");
+             FileChannel fileChannel = raf.getChannel();
+             FileLock lock = fileChannel.tryLock(0, 0, true)) {
+            if (lock == null) {
+                LOG.debug("Could not acquire lock on file [{}] ", filePath);
+                return false;
+            }
+        } catch (Exception e) {
+            LOG.debug("Could not acquire lock on file [{}] ", filePath, e);
+            return false; // something else went wrong
+        }
+
+        // if the file timestamp is very recent,
+        // it is probable that some process is still writing in the file
+
+        try {
+            long delta = 25000L; // 25s // TODO read from fs-plugin.properties
+            long fileTime = fileObject.getContent().getLastModifiedTime();
+            long currentTime = new java.util.Date().getTime();
+            if (fileTime > currentTime - delta) {
+                LOG.debug("Could not read file [{}] because it is too recent: [{}] ms", filePath, currentTime - fileTime);
+                return false;
+            }
+        } catch (FileSystemException e) {
+            LOG.warn("Could not determine file date for file [{}] ", filePath, e);
+            return false;
+        }
+
+        return true;
     }
 
     /**
