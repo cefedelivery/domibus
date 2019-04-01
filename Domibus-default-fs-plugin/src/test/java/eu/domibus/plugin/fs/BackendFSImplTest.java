@@ -11,6 +11,7 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.worker.FSProcessFileService;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
@@ -77,6 +78,9 @@ public class BackendFSImplTest {
 
     @Injectable
     private MessageExtService messageExtService;
+
+    @Injectable
+    protected FSProcessFileService fsProcessFileService;
 
     @Injectable
     String name = "fsplugin";
