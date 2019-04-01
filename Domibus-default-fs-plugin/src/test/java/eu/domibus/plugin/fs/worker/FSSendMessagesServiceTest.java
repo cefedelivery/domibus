@@ -3,11 +3,14 @@ package eu.domibus.plugin.fs.worker;
 
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
+import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.fs.*;
+import eu.domibus.plugin.fs.BackendFSImpl;
+import eu.domibus.plugin.fs.FSFilesManager;
+import eu.domibus.plugin.fs.FSPluginProperties;
+import eu.domibus.plugin.fs.FSTestHelper;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
-import eu.domibus.plugin.fs.vfs.FileObjectDataSource;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.IOUtils;
@@ -17,18 +20,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
+import javax.jms.Queue;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
- * @author FERNANDES Henrique, GONCALVES Bruno
+ * @author FERNANDES Henrique, GONCALVES Bruno, Catalin Enache
  */
 @RunWith(JMockit.class)
 public class FSSendMessagesServiceTest {
@@ -53,6 +54,13 @@ public class FSSendMessagesServiceTest {
 
     @Injectable
     private FSMultiTenancyService fsMultiTenancyService;
+
+    @Injectable
+    private JMSExtService jmsExtService;
+
+    @Injectable
+    @Qualifier("fsPluginSendQueue")
+    private Queue fsPluginSendQueue;
 
     @Tested
     @Injectable
@@ -102,94 +110,109 @@ public class FSSendMessagesServiceTest {
     }
 
     @Test
-    public void testSendMessages() throws MessagingProcessingException, FileSystemException, FSSetUpException {
-        new Expectations(1, instance) {{
+    public void test_SendMessages_Root_Domain1() {
+        final String domain1 = "DOMAIN1";
+        new Expectations(instance) {{
             fsPluginProperties.getDomains();
-            result = Collections.emptyList();
+            result = Collections.singletonList(domain1);
 
-            fsPluginProperties.getPayloadId(null);
-            result = "cid:message";
+            fsMultiTenancyService.verifyDomainExists(domain1);
+            result = true;
 
-            fsFilesManager.setUpFileSystem(null);
+        }};
+
+        //tested method
+        instance.sendMessages();
+
+        new FullVerifications(instance) {{
+            instance.sendMessages(null);
+
+            instance.sendMessages(domain1);
+        }};
+    }
+
+    @Test
+    public void testSendMessages_RootDomain_NoMultitenancy() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+        final String domain = null; //root
+        new Expectations(1, instance) {{
+            domibusConfigurationExtService.isMultiTenantAware();
+            result = false;
+
+            fsFilesManager.setUpFileSystem(domain);
             result = rootDir;
 
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             result = outgoingFolder;
 
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            result = new FileObject[] { metadataFile, contentFile };
-
-            fsFilesManager.resolveSibling(contentFile, "metadata.xml");
-            result = metadataFile;
-
-            fsFilesManager.getDataHandler(contentFile);
-            result = new DataHandler(new FileObjectDataSource(contentFile));
-
-            backendFSPlugin.submit(with(new Delegate<FSMessage>() {
-                void delegate(FSMessage message) throws IOException {
-                    Assert.assertNotNull(message);
-                    Assert.assertNotNull(message.getPayloads());
-                    FSPayload fsPayload = message.getPayloads().get("cid:message");
-                    Assert.assertNotNull(fsPayload);
-                    Assert.assertNotNull(fsPayload.getDataHandler());
-                    Assert.assertNotNull(message.getMetadata());
-
-                    DataSource dataSource = fsPayload.getDataHandler().getDataSource();
-                    Assert.assertNotNull(dataSource);
-                    Assert.assertEquals("content.xml", dataSource.getName());
-                    Assert.assertTrue(
-                            IOUtils.contentEquals(dataSource.getInputStream(), contentFile.getContent().getInputStream())
-                    );
-
-                    Assert.assertEquals(metadata, message.getMetadata());
-                }
-            }));
-            result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
+            result = new FileObject[]{metadataFile, contentFile};
         }};
 
-        instance.sendMessages();
+        //tested method
+        instance.sendMessages(domain);
 
         new VerificationsInOrder(1) {{
-            fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
+            FileObject fileActual;
+            String domainActual;
+            instance.sendJMSMessageToOutQueue(fileActual = withCapture(), domainActual = withCapture());
+            Assert.assertEquals(contentFile, fileActual);
+            Assert.assertEquals(domain, domainActual);
+        }};
+    }
+
+    @Test
+    public void test_SendMessages_RootDomain_Multitenancy() throws FileSystemException, FSSetUpException {
+        final String domain = null; //root
+        final String domainDefault = FSSendMessagesService.DEFAULT_DOMAIN;
+        new Expectations(1, instance) {{
+            domibusConfigurationExtService.isMultiTenantAware();
+            result = true;
+
+            fsPluginProperties.getAuthenticationUser(domainDefault);
+            result = "user1";
+
+            fsPluginProperties.getAuthenticationPassword(domainDefault);
+            result = "pass1";
+
+            fsFilesManager.setUpFileSystem(domainDefault);
+            result = rootDir;
+
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
+            result = outgoingFolder;
+
+            fsFilesManager.findAllDescendantFiles(outgoingFolder);
+            result = new FileObject[]{metadataFile, contentFile};
+        }};
+
+        //tested method
+        instance.sendMessages(domain);
+
+        new VerificationsInOrder(1) {{
+            authenticationExtService.basicAuthenticate(anyString, anyString);
+
+            FileObject fileActual;
+            String domainActual;
+            instance.sendJMSMessageToOutQueue(fileActual = withCapture(), domainActual = withCapture());
+            Assert.assertEquals(contentFile, fileActual);
+            Assert.assertEquals(domainDefault, domainActual);
         }};
     }
 
     @Test
     public void testSendMessages_Domain1() throws MessagingProcessingException, FileSystemException {
+        final String domain1 = "DOMAIN1";
         new Expectations(1, instance) {{
             domibusConfigurationExtService.isMultiTenantAware();
             result = true;
 
-            fsMultiTenancyService.verifyDomainExists("DOMAIN1");
-            result = true;
-
-            List domains = new ArrayList<String>();
-            domains.add("default");
-            domains.add("DOMAIN1");
-
-            fsPluginProperties.getDomains();
-            result = domains;
-
-            fsPluginProperties.getPayloadId("DOMAIN1");
-            result = "cid:message";
-
-            fsFilesManager.setUpFileSystem("DOMAIN1");
+            fsFilesManager.setUpFileSystem(domain1);
             result = rootDir;
 
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
             result = outgoingFolder;
 
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            result = new FileObject[] { metadataFile, contentFile };
-
-            fsFilesManager.resolveSibling(contentFile, "metadata.xml");
-            result = metadataFile;
-
-            fsFilesManager.getDataHandler(contentFile);
-            result = new DataHandler(new FileObjectDataSource(contentFile));
-
-            domibusConfigurationExtService.isMultiTenantAware();
-            result = true;
+            result = new FileObject[]{metadataFile, contentFile};
 
             fsPluginProperties.getAuthenticationUser(anyString);
             result = "user1";
@@ -197,46 +220,27 @@ public class FSSendMessagesServiceTest {
             fsPluginProperties.getAuthenticationPassword(anyString);
             result = "pass1";
 
-            backendFSPlugin.submit(with(new Delegate<FSMessage>() {
-                void delegate(FSMessage message) throws IOException {
-                    Assert.assertNotNull(message);
-                    Assert.assertNotNull(message.getPayloads());
-                    FSPayload fsPayload = message.getPayloads().get("cid:message");
-                    Assert.assertNotNull(fsPayload);
-                    Assert.assertNotNull(fsPayload.getDataHandler());
-                    Assert.assertNotNull(message.getMetadata());
-
-                    DataSource dataSource = fsPayload.getDataHandler().getDataSource();
-                    Assert.assertNotNull(dataSource);
-                    Assert.assertEquals("content.xml", dataSource.getName());
-                    Assert.assertTrue(
-                            IOUtils.contentEquals(dataSource.getInputStream(), contentFile.getContent().getInputStream())
-                    );
-
-                    Assert.assertEquals(metadata, message.getMetadata());
-                }
-            }));
-            result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
         }};
 
-        instance.sendMessages();
+        instance.sendMessages(domain1);
 
-       new Verifications()  {{
-           fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
+        new Verifications() {{
+            authenticationExtService.basicAuthenticate(anyString, anyString);
+
+            FileObject fileActual;
+            String domainActual;
+            instance.sendJMSMessageToOutQueue(fileActual = withCapture(), domainActual = withCapture());
+            Assert.assertEquals(contentFile, fileActual);
+            Assert.assertEquals(domain1, domainActual);
         }};
     }
 
     @Test
     public void testSendMessages_Domain1_BadConfiguration() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+        final String domain1 = "DOMAIN1";
         new Expectations(1, instance) {{
             domibusConfigurationExtService.isMultiTenantAware();
             result = true;
-
-            fsMultiTenancyService.verifyDomainExists("DOMAIN1");
-            result = true;
-
-            fsPluginProperties.getDomains();
-            result = Collections.singletonList("DOMAIN1");
 
             fsPluginProperties.getAuthenticationUser(anyString);
             result = "user1";
@@ -248,91 +252,14 @@ public class FSSendMessagesServiceTest {
             result = new FSSetUpException("Test-forced exception");
         }};
 
-        instance.sendMessages();
+        instance.sendMessages(domain1);
 
         new Verifications() {{
-            backendFSPlugin.submit(withAny(new FSMessage(null, null)));
+            authenticationExtService.basicAuthenticate(anyString, anyString);
+
+            instance.sendJMSMessageToOutQueue((FileObject)any, anyString);
             maxTimes = 0;
         }};
-    }
-
-    @Test()
-    public void testSendMessages_MetaDataException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
-        new Expectations(1, instance) {{
-            fsPluginProperties.getDomains();
-            result = Collections.emptyList();
-
-            fsFilesManager.setUpFileSystem(null);
-            result = rootDir;
-
-            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
-            result = outgoingFolder;
-
-            fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            result = new FileObject[] { contentFile };
-
-            fsFilesManager.resolveSibling(contentFile, "metadata.xml");
-            result = rootDir.resolveFile("nonexistent_file");
-        }};
-
-        instance.sendMessages();
-
-        new Verifications() {{
-            backendFSPlugin.submit(withAny(new FSMessage(null, null)));
-            maxTimes = 0;
-        }};
-    }
-
-    @Test
-    public void testSendMessages_RenameException() throws MessagingProcessingException, FileSystemException, FSSetUpException {
-        new Expectations(1, instance) {{
-            fsPluginProperties.getDomains();
-            result = Collections.emptyList();
-
-            fsPluginProperties.getPayloadId(null);
-            result = "cid:message";
-
-            fsFilesManager.setUpFileSystem(null);
-            result = rootDir;
-
-            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
-            result = outgoingFolder;
-
-            fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            result = new FileObject[] { metadataFile, contentFile };
-
-            fsFilesManager.resolveSibling(contentFile, "metadata.xml");
-            result = metadataFile;
-
-            fsFilesManager.getDataHandler(contentFile);
-            result = new DataHandler(new FileObjectDataSource(contentFile));
-
-            backendFSPlugin.submit(with(new Delegate<FSMessage>() {
-                 void delegate(FSMessage message) throws IOException {
-                     Assert.assertNotNull(message);
-                     Assert.assertNotNull(message.getPayloads());
-                     FSPayload fsPayload = message.getPayloads().get("cid:message");
-                     Assert.assertNotNull(fsPayload);
-                     Assert.assertNotNull(fsPayload.getDataHandler());
-                     Assert.assertNotNull(message.getMetadata());
-
-                     DataSource dataSource = fsPayload.getDataHandler().getDataSource();
-                     Assert.assertNotNull(dataSource);
-                     Assert.assertEquals("content.xml", dataSource.getName());
-                     Assert.assertTrue(
-                             IOUtils.contentEquals(dataSource.getInputStream(), contentFile.getContent().getInputStream())
-                     );
-
-                     Assert.assertEquals(metadata, message.getMetadata());
-                 }
-            }));
-            result = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
-
-            fsFilesManager.renameFile(contentFile, "content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
-            result = new FileSystemException("Test-forced exception");
-        }};
-
-        instance.sendMessages();
     }
 
 }
