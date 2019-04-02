@@ -6,9 +6,7 @@ import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.usermessage.UserMessageService;
-import eu.domibus.common.ErrorCode;
-import eu.domibus.common.ErrorResult;
-import eu.domibus.common.MSHRole;
+import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -19,14 +17,15 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.MessageGroupDao;
+import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
@@ -54,7 +53,10 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.*;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -66,15 +68,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.junit.Assert.fail;
+
 /**
  * @author Thomas Dussart
  * @author Catalin Enache
  * @since 3.3
  */
 @RunWith(JMockit.class)
-public class UserMessageHandlerServiceTest {
+public class UserMessageHandlerServiceImplTest {
 
-    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(UserMessageHandlerServiceTest.class);
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(UserMessageHandlerServiceImplTest.class);
 
     @Tested
     UserMessageHandlerServiceImpl userMessageHandlerService;
@@ -211,7 +215,7 @@ public class UserMessageHandlerServiceTest {
         try {
             userMessageHandlerService.checkCharset(messaging);
         } catch (Exception e) {
-            Assert.fail("No exception was expected!! Should have been handled successfully");
+            fail("No exception was expected!! Should have been handled successfully");
         }
     }
 
@@ -232,7 +236,7 @@ public class UserMessageHandlerServiceTest {
 
         try {
             userMessageHandlerService.checkCharset(messaging);
-            Assert.fail("EBMS3Exception was expected!!");
+            fail("EBMS3Exception was expected!!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0003, e.getErrorCode());
         }
@@ -393,7 +397,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             Assert.assertNotNull(partInfo.getPayloadDatahandler());
         } catch (EbMS3Exception | SOAPException | TransformerException e) {
-            Assert.fail("No Errors expected in happy flow!");
+            fail("No Errors expected in happy flow!");
         }
     }
 
@@ -492,7 +496,7 @@ public class UserMessageHandlerServiceTest {
 
         try {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
-            Assert.fail("Expecting error that - More than one Partinfo referencing the soap body found!");
+            fail("Expecting error that - More than one Partinfo referencing the soap body found!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0003, e.getErrorCode());
         }
@@ -562,7 +566,7 @@ public class UserMessageHandlerServiceTest {
         }};
         try {
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, null, "");
-            Assert.fail("Exception for compression failure expected!");
+            fail("Exception for compression failure expected!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0303, e.getErrorCode());
         }
@@ -616,7 +620,7 @@ public class UserMessageHandlerServiceTest {
             Assert.assertNotNull(partInfo.getPayloadDatahandler());
             Assert.assertEquals(attachmentPart2.getDataHandler(), partInfo.getPayloadDatahandler());
         } catch (EbMS3Exception | SOAPException | TransformerException e) {
-            Assert.fail("No Errors expected in happy flow!");
+            fail("No Errors expected in happy flow!");
         }
     }
 
@@ -655,11 +659,11 @@ public class UserMessageHandlerServiceTest {
 
         try {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
-            Assert.fail("Expected Ebms3 exception that no matching payload was found!");
+            fail("Expected Ebms3 exception that no matching payload was found!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0011, e.getErrorCode());
         } catch (SOAPException | TransformerException e) {
-            Assert.fail("Expected Ebms3 exception that no matching payload was found!");
+            fail("Expected Ebms3 exception that no matching payload was found!");
         }
 
     }
@@ -969,6 +973,231 @@ public class UserMessageHandlerServiceTest {
         return result;
     }
 
+    @Test
+    public void testHandleIncomingSourceMessage(@Injectable final LegConfiguration legConfiguration,
+                                                @Injectable final String pmodeKey,
+                                                @Injectable final SOAPMessage request,
+                                                @Injectable final Messaging messaging,
+                                                @Injectable BackendFilter backendFilter
+    ) throws SOAPException, TransformerException, EbMS3Exception, IOException {
 
+        boolean selfSending = false;
+        boolean messageExists = false;
+        boolean testMessage = false;
+        String backendName = "mybackend";
 
+        new Expectations(userMessageHandlerService) {{
+            backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+            result = backendFilter;
+
+            backendFilter.getBackendName();
+            result = backendName;
+
+            userMessageHandlerService.persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, backendName);
+        }};
+
+        userMessageHandlerService.handleIncomingSourceMessage(legConfiguration, pmodeKey, request, messaging, selfSending, messageExists, testMessage);
+
+        new Verifications() {{
+            backendNotificationService.notifyMessageReceived(backendFilter, messaging.getUserMessage());
+        }};
+    }
+
+    @Test
+    public void testPersistReceivedSourceMessage(@Injectable final LegConfiguration legConfiguration,
+                                                 @Injectable final String pmodeKey,
+                                                 @Injectable final SOAPMessage request,
+                                                 @Injectable final Messaging messaging,
+                                                 @Injectable final UserMessage userMessage,
+                                                 @Injectable MessageFragmentType messageFragmentType) throws EbMS3Exception {
+        String backendName = "mybackend";
+
+        new Expectations(userMessageHandlerService) {{
+            messaging.getUserMessage();
+            result = userMessage;
+
+            userMessageHandlerService.saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName, userMessage);
+        }};
+
+        userMessageHandlerService.persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName);
+
+        new Verifications() {{
+            userMessage.setSplitAndJoin(true);
+        }};
+    }
+
+    @Test
+    public void testSaveReceivedMessage(@Injectable final LegConfiguration legConfiguration,
+                                        @Injectable final String pmodeKey,
+                                        @Injectable final SOAPMessage request,
+                                        @Injectable final Messaging messaging,
+                                        @Injectable final UserMessage userMessage,
+                                        @Injectable Party to) throws EbMS3Exception {
+        String backendName = "mybackend";
+        String messageId = "123";
+        String service = "myservice";
+        String action = "myaction";
+        String endpoint = "http://local";
+
+        new Expectations() {{
+            userMessage.getMessageInfo().getMessageId();
+            result = messageId;
+
+            userMessage.getCollaborationInfo().getService().getValue();
+            result = service;
+
+            userMessage.getCollaborationInfo().getAction();
+            result = action;
+
+            userMessage.isSourceMessage();
+            result = true;
+
+            userMessage.isUserMessageFragment();
+            result = false;
+
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = to;
+
+            to.getEndpoint();
+            result = endpoint;
+
+            legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
+            result = true;
+
+            userMessage.getMpc();
+            result = Ebms3Constants.DEFAULT_MPC;
+        }};
+
+        userMessageHandlerService.saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, null, backendName, userMessage);
+
+        new Verifications() {{
+            payloadProfileValidator.validate(messaging, pmodeKey);
+            times = 1;
+
+            propertyProfileValidator.validate(messaging, pmodeKey);
+            times = 1;
+
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration, backendName);
+
+            userMessageLogService.save(
+                    messageId,
+                    MessageStatus.RECEIVED.toString(),
+                    NotificationStatus.REQUIRED.toString(),
+                    MSHRole.RECEIVING.toString(),
+                    0,
+                    Ebms3Constants.DEFAULT_MPC,
+                    backendName,
+                    endpoint,
+                    service,
+                    action, true, false);
+        }};
+
+    }
+
+    @Test
+    public void testHandleMessageFragmentWithGroupAlreadyExisting(@Injectable UserMessage userMessage,
+                                          @Injectable MessageFragmentType messageFragmentType,
+                                          @Injectable MessageGroupEntity messageGroupEntity) throws EbMS3Exception {
+        new Expectations(userMessageHandlerService) {{
+            messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
+            result = messageGroupEntity;
+
+            userMessageHandlerService.validateUserMessageFragment(userMessage, messageGroupEntity, messageFragmentType);
+            userMessageHandlerService.addPartInfoFromFragment(userMessage, messageFragmentType);
+        }};
+
+        userMessageHandlerService.handleMessageFragment(userMessage, messageFragmentType);
+
+        new Verifications() {{
+            messageGroupDao.create(messageGroupEntity);
+            times = 0;
+
+            userMessageHandlerService.validateUserMessageFragment(userMessage, messageGroupEntity, messageFragmentType);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testHandleMessageFragmentWithGroupAlreadyExisting(@Injectable UserMessage userMessage,
+                                                                  @Injectable MessageFragmentType messageFragmentType) throws EbMS3Exception {
+        new Expectations(userMessageHandlerService) {{
+            messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
+            result = null;
+
+            userMessageHandlerService.validateUserMessageFragment(userMessage, null, messageFragmentType);
+            userMessageHandlerService.addPartInfoFromFragment(userMessage, messageFragmentType);
+        }};
+
+        userMessageHandlerService.handleMessageFragment(userMessage, messageFragmentType);
+
+        new Verifications() {{
+            messageGroupDao.create((MessageGroupEntity) any);
+
+            userMessageHandlerService.validateUserMessageFragment(userMessage, null, messageFragmentType);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testValidateUserMessageFragmentWithDatabaseStorage(@Injectable UserMessage userMessage,
+                                                @Injectable MessageFragmentType messageFragmentType,
+                                                @Injectable MessageGroupEntity messageGroupEntity)  {
+        new Expectations() {{
+            storageProvider.savePayloadsInDatabase();
+            result = true;
+        }};
+
+        try {
+            userMessageHandlerService.validateUserMessageFragment(userMessage, messageGroupEntity, messageFragmentType);
+            fail("Not possible to use SplitAndJoin with database payloads");
+        } catch (EbMS3Exception e) {
+            Assert.assertEquals(e.getErrorCode(), ErrorCode.EbMS3ErrorCode.EBMS_0002);
+        }
+    }
+
+    @Test
+    public void testValidateUserMessageFragmentWithRejectedGroup(@Injectable UserMessage userMessage,
+                                                                   @Injectable MessageFragmentType messageFragmentType,
+                                                                   @Injectable MessageGroupEntity messageGroupEntity)  {
+        new Expectations() {{
+            storageProvider.savePayloadsInDatabase();
+            result = false;
+
+            messageGroupEntity.getRejected();
+            result = true;
+        }};
+
+        try {
+            userMessageHandlerService.validateUserMessageFragment(userMessage, messageGroupEntity, messageFragmentType);
+        } catch (EbMS3Exception e) {
+            Assert.assertEquals(e.getErrorCode(), ErrorCode.EbMS3ErrorCode.EBMS_0040);
+        }
+    }
+
+    @Test
+    public void testValidateUserMessageFragmentWithWrongFragmentsCount(@Injectable UserMessage userMessage,
+                                                                 @Injectable MessageFragmentType messageFragmentType,
+                                                                 @Injectable MessageGroupEntity messageGroupEntity)  {
+
+        long totalFragmentCount = 5;
+        new Expectations() {{
+            storageProvider.savePayloadsInDatabase();
+            result = false;
+
+            messageGroupEntity.getRejected();
+            result = false;
+
+            messageGroupEntity.getFragmentCount();
+            result = totalFragmentCount;
+
+            messageFragmentType.getFragmentCount();
+            result = 7;
+        }};
+
+        try {
+            userMessageHandlerService.validateUserMessageFragment(userMessage, messageGroupEntity, messageFragmentType);
+        } catch (EbMS3Exception e) {
+            Assert.assertEquals(e.getErrorCode(), ErrorCode.EbMS3ErrorCode.EBMS_0048);
+        }
+    }
 }

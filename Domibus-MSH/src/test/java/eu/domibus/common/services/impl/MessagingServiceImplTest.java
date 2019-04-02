@@ -1,5 +1,6 @@
-package eu.domibus.common.services;
+package eu.domibus.common.services.impl;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -11,22 +12,16 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.services.impl.CompressionService;
-import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PartInfo;
-import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessagingUtils;
 import eu.domibus.xml.XMLUtilImpl;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,21 +38,25 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Ioana Dragusanu
+ * @author Cosmin Baciu
  * @since 3.3
  */
 
 @RunWith(JMockit.class)
-public class MessagingServiceTest {
+public class MessagingServiceImplTest {
 
     public static final String validHeaderFilePath = "target/test-classes/eu/domibus/services/validMessaging.xml";
     public static final String validContentFilePath = "target/test-classes/eu/domibus/services/validContent.payload";
     public static final String STORAGE_PATH = "target/test-classes/eu/domibus/services/";
 
     @Tested
-    MessagingService messagingService = new MessagingServiceImpl();
+    MessagingServiceImpl messagingService;
 
     @Injectable
     MessagingDao messagingDao;
@@ -94,6 +93,174 @@ public class MessagingServiceTest {
 
     @Injectable
     UserMessageLogDao userMessageLogDao;
+
+    @Test
+    public void testStoreOutgoingPayloadToDatabase(@Injectable UserMessage userMessage,
+                                                   @Injectable PartInfo partInfo,
+                                                   @Injectable LegConfiguration legConfiguration,
+                                                   @Injectable String backendName) throws IOException, EbMS3Exception {
+        new Expectations(messagingService) {{
+            storageProvider.savePayloadsInDatabase();
+            result = true;
+
+            messagingService.saveOutgoingPayloadToDatabase(partInfo, userMessage, legConfiguration, backendName);
+        }};
+
+
+        messagingService.storeOutgoingPayload(partInfo, userMessage, legConfiguration, backendName);
+
+        new Verifications() {{
+            messagingService.saveOutgoingPayloadToDatabase(partInfo, userMessage, legConfiguration, backendName);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testSaveIncomingPayloadToDisk(@Injectable PartInfo partInfo,
+                                              @Injectable Storage storage,
+                                              @Mocked File file,
+                                              @Injectable InputStream inputStream,
+                                              @Mocked UUID uuid) throws IOException {
+
+        String path = "/home/invoice.pdf";
+        new Expectations(messagingService) {{
+            new File((File) any, anyString);
+            result = file;
+
+            file.getAbsolutePath();
+            result = path;
+
+            partInfo.getPayloadDatahandler().getInputStream();
+            result = inputStream;
+
+            messagingService.saveIncomingFileToDisk(file, inputStream);
+        }};
+
+        messagingService.saveIncomingPayloadToDisk(partInfo, storage);
+
+        new Verifications() {{
+            messagingService.saveIncomingFileToDisk(file, inputStream);
+            times = 1;
+
+            partInfo.setFileName(path);
+        }};
+    }
+
+    @Test
+    public void testSaveIncomingPayloadToDatabase(@Injectable PartInfo partInfo,
+                                                  @Injectable Storage storage,
+                                                  @Mocked IOUtils ioUtils,
+                                                  @Injectable InputStream inputStream) throws IOException {
+        final byte[] binaryData = "test".getBytes();
+
+        new Expectations(messagingService) {{
+            partInfo.getPayloadDatahandler().getInputStream();
+            result = inputStream;
+
+            IOUtils.toByteArray(inputStream);
+            result = binaryData;
+        }};
+
+        messagingService.saveIncomingPayloadToDatabase(partInfo);
+
+        new Verifications() {{
+            partInfo.setBinaryData(binaryData);
+            partInfo.setLength(binaryData.length);
+            partInfo.setFileName(null);
+        }};
+    }
+
+    @Test
+    public void testStoreIncomingPayloadToDatabase(@Injectable UserMessage userMessage,
+                                                   @Injectable PartInfo partInfo) throws IOException {
+        new Expectations(messagingService) {{
+            storageProvider.savePayloadsInDatabase();
+            result = true;
+
+            messagingService.saveIncomingPayloadToDatabase(partInfo);
+        }};
+
+
+        messagingService.storeIncomingPayload(partInfo, userMessage);
+
+        new Verifications() {{
+            messagingService.saveIncomingPayloadToDatabase(partInfo);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void testStoreIncomingPayloadToFileSystem(@Injectable UserMessage userMessage,
+                                                     @Injectable PartInfo partInfo,
+                                                     @Injectable Storage storage) throws IOException {
+        new Expectations(messagingService) {{
+            storageProvider.savePayloadsInDatabase();
+            result = false;
+
+            storageProvider.getCurrentStorage();
+            result = storage;
+
+            messagingService.saveIncomingPayloadToDisk(partInfo, storage);
+        }};
+
+
+        messagingService.storeIncomingPayload(partInfo, userMessage);
+
+        new Verifications() {{
+            messagingService.saveIncomingPayloadToDisk(partInfo, storage);
+            times = 1;
+        }};
+    }
+
+
+    @Test
+    public void testStoreSourceMessagePayloads(@Injectable Messaging messaging,
+                                               @Injectable MSHRole mshRole,
+                                               @Injectable LegConfiguration legConfiguration,
+                                               @Injectable String backendName) {
+
+        String messageId = "123";
+        new Expectations(messagingService) {{
+            messaging.getUserMessage().getMessageInfo().getMessageId();
+            result = messageId;
+
+            messagingService.storePayloads(messaging, mshRole, legConfiguration, backendName);
+        }};
+
+        messagingService.storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
+
+        new Verifications() {{
+            userMessageService.scheduleSourceMessageSending(messageId);
+        }};
+    }
+
+    @Test
+    public void testScheduleSourceMessagePayloads(@Injectable final Messaging messaging,
+                                                  @Injectable final Domain domain,
+                                                  @Injectable final PayloadInfo payloadInfo,
+                                                  @Injectable final PartInfo partInfo) {
+
+
+        List<PartInfo> partInfos = new ArrayList<>();
+        partInfos.add(partInfo);
+
+        new Expectations() {{
+            messaging.getUserMessage().getPayloadInfo();
+            result = payloadInfo;
+
+            payloadInfo.getPartInfo();
+            result = partInfos;
+
+            partInfo.getLength();
+            result = 20 * MessagingServiceImpl.BYTES_IN_MB;
+
+            domibusPropertyProvider.getLongDomainProperty(domain, MessagingServiceImpl.PROPERTY_PAYLOADS_SCHEDULE_THRESHOLD);
+            result = 15;
+        }};
+
+        final boolean scheduleSourceMessagePayloads = messagingService.scheduleSourceMessagePayloads(messaging, domain);
+        Assert.assertTrue(scheduleSourceMessagePayloads);
+    }
 
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
@@ -168,7 +335,7 @@ public class MessagingServiceTest {
         Assert.assertFalse("A CompressionException should have been raised before", true);
     }
 
-    private Messaging createMessaging (InputStream inputStream) throws XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
+    private Messaging createMessaging(InputStream inputStream) throws XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
         XMLUtil xmlUtil = new XMLUtilImpl();
         JAXBContext jaxbContext = JAXBContext.newInstance(Messaging.class);
         JAXBElement root = xmlUtil.unmarshal(true, jaxbContext, inputStream, null).getResult();
@@ -192,7 +359,7 @@ public class MessagingServiceTest {
 
         PartInfo partInfo = getOnePartInfo(validMessaging);
         partInfo.setPayloadDatahandler(dh);
-        if(isCompressed) {
+        if (isCompressed) {
             Property property = new Property();
             property.setName(CompressionService.COMPRESSION_PROPERTY_KEY);
             property.setValue(CompressionService.COMPRESSION_PROPERTY_VALUE);

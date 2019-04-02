@@ -34,6 +34,7 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Ioana Dragusanu
+ * @author Cosmin Baciu
  * @since 3.3
  */
 @Service
@@ -43,7 +44,7 @@ public class MessagingServiceImpl implements MessagingService {
     public static final String PAYLOAD_EXTENSION = ".payload";
     public static final String MIME_TYPE_APPLICATION_UNKNOWN = "application/unknown";
     public static final String PROPERTY_PAYLOADS_SCHEDULE_THRESHOLD = "domibus.dispatcher.splitAndJoin.payloads.schedule.threshold";
-    private static Long BYTES_IN_MB = 1048576L;
+    protected static Long BYTES_IN_MB = 1048576L;
 
 
     @Autowired

@@ -336,7 +336,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         return saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName, userMessage);
     }
 
-    protected String persistReceivedSourceMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
+    protected String persistReceivedSourceMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws EbMS3Exception {
         LOG.info("Persisting received SourceMessage");
         UserMessage userMessage = messaging.getUserMessage();
         userMessage.setSplitAndJoin(true);
