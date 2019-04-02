@@ -17,6 +17,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.message.fragment.MessageGroupDao;
+import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.core.replication.UIReplicationSignalService;
@@ -26,6 +27,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.messaging.DispatchMessageCreator;
+import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.plugin.transformer.impl.UserMessageFactory;
@@ -126,6 +128,61 @@ public class UserMessageDefaultServiceTest {
     @Injectable
     DatabaseMessageHandler databaseMessageHandler;
 
+    @Test
+    public void createMessagingForFragment(@Injectable UserMessage sourceMessage,
+                                           @Injectable MessageGroupEntity messageGroupEntity,
+                                           @Injectable UserMessage userMessageFragment) throws MessagingProcessingException {
+        String messageId = "123";
+        String backendName = "mybackend";
+
+        List<String> fragmentFiles = new ArrayList<>();
+        final String fragment1 = "fragment1";
+        fragmentFiles.add(fragment1);
+
+        new Expectations() {{
+            userMessageFactory.createUserMessageFragment(sourceMessage, messageGroupEntity, 1L, fragment1);
+            result = userMessageFragment;
+        }};
+
+        userMessageDefaultService.createMessagingForFragment(sourceMessage, messageGroupEntity, backendName, fragment1, 1);
+
+        new Verifications() {{
+            userMessageFactory.createUserMessageFragment(sourceMessage, messageGroupEntity, 1L, fragment1);
+            databaseMessageHandler.submitMessageFragment(userMessageFragment, backendName);
+        }};
+    }
+
+    @Test
+    public void createMessageFragments(@Injectable UserMessage sourceMessage,
+                                       @Injectable MessageGroupEntity messageGroupEntity
+                                       ) throws MessagingProcessingException {
+        String messageId = "123";
+        String backendName = "mybackend";
+
+        List<String> fragmentFiles = new ArrayList<>();
+        final String fragment1 = "fragment1";
+        fragmentFiles.add(fragment1);
+
+
+        new Expectations(userMessageDefaultService) {{
+            sourceMessage.getMessageInfo().getMessageId();
+            result = messageId;
+
+            userMessageLogDao.findBackendForMessageId(messageId);
+            result = backendName;
+
+
+            userMessageDefaultService.createMessagingForFragment(sourceMessage, messageGroupEntity, backendName, anyString, anyInt);
+        }};
+
+        userMessageDefaultService.createMessageFragments(sourceMessage, messageGroupEntity, fragmentFiles);
+
+        new Verifications() {{
+            messageGroupDao.create(messageGroupEntity);
+
+            userMessageDefaultService.createMessagingForFragment(sourceMessage, messageGroupEntity, backendName, fragment1, 1);
+        }};
+    }
 
     @Test
     public void testGetFinalRecipient(@Injectable final UserMessage userMessage) throws Exception {
