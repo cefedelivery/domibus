@@ -47,6 +47,8 @@ public class FSPluginProperties {
 
     private static final String OUT_QUEUE_CONCURRENCY = "out.queue.concurrency";
 
+    private static final String SEND_DELAY = "messages.send.delay";
+
     private static final String USER = "messages.user";
 
     private static final String PAYLOAD_ID = "messages.payload.id";
@@ -277,6 +279,15 @@ public class FSPluginProperties {
      */
     public String getMessageOutQueueConcurrency(final String domain) {
         return getDomainProperty(domain, OUT_QUEUE_CONCURRENCY, "5-10");
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return delay value in milliseconds
+     */
+    public Integer getSendDelay(String domain) {
+        String value = getDomainProperty(domain, SEND_DELAY, null);
+        return getInteger(value, 2000);
     }
 
     /**
