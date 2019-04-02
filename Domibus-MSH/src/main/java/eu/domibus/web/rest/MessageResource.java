@@ -22,7 +22,6 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -50,7 +49,10 @@ public class MessageResource {
 
     @RequestMapping(path = "/restore", method = RequestMethod.PUT)
     public void resend(@RequestParam(value = "messageId", required = true) String messageId) {
-        userMessageService.restoreFailedMessage(messageId);
+
+        //either restore failed message or resend send enqueued message
+        userMessageService.resendFailedOrSendEnqueuedMessage(messageId);
+
         auditService.addMessageResentAudit(messageId);
     }
 

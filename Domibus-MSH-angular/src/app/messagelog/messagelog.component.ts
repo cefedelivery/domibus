@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {Http, URLSearchParams, Response} from '@angular/http';
+import {Http, Response, URLSearchParams} from '@angular/http';
 import {MessageLogResult} from './messagelogresult';
 import {Observable} from 'rxjs';
 import {AlertService} from '../common/alert/alert.service';
@@ -379,11 +379,12 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
   }
 
   isResendButtonEnabledAction(row): boolean {
-    return !row.deleted && row.messageStatus === 'SEND_FAILURE';
+    return !row.deleted && (row.messageStatus === 'SEND_FAILURE' || row.messageStatus === 'SEND_ENQUEUED');
   }
 
   isResendButtonEnabled() {
-    if (this.selected && this.selected.length == 1 && !this.selected[0].deleted && this.selected[0].messageStatus === 'SEND_FAILURE')
+    if (this.selected && this.selected.length == 1 && !this.selected[0].deleted &&
+      (this.selected[0].messageStatus === 'SEND_FAILURE' || this.selected[0].messageStatus === 'SEND_ENQUEUED'))
       return true;
 
     return false;

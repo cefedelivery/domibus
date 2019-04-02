@@ -1,6 +1,6 @@
 {
   "/rest/**": {
-    "target": "http://localhost:8090/",
+    "target": "http://localhost:8090/domibus",
     "changeOrigin": true,
     "secure": false,
     "logLevel": "debug"
