@@ -46,6 +46,7 @@
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
             <version>${project.version}</version>
+            <!-- keep the scope compile to override parent pom behavior -->
             <scope>compile</scope>
         </dependency>
         <!-- End Domibus modules -->
