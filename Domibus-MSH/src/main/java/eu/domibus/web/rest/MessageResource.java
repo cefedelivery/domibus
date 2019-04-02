@@ -50,7 +50,6 @@ public class MessageResource {
     @RequestMapping(path = "/restore", method = RequestMethod.PUT)
     public void resend(@RequestParam(value = "messageId", required = true) String messageId) {
 
-        //either restore failed message or resend send enqueued message
         userMessageService.resendFailedOrSendEnqueuedMessage(messageId);
 
         auditService.addMessageResentAudit(messageId);
