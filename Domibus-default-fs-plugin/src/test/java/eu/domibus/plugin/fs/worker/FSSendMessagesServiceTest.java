@@ -146,6 +146,9 @@ public class FSSendMessagesServiceTest {
 
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[]{metadataFile, contentFile};
+
+            instance.canReadFileSafely((FileObject)any, anyString);
+            result = true;
         }};
 
         //tested method
@@ -182,6 +185,9 @@ public class FSSendMessagesServiceTest {
 
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[]{metadataFile, contentFile};
+
+            instance.canReadFileSafely((FileObject)any, anyString);
+            result = true;
         }};
 
         //tested method
@@ -220,6 +226,8 @@ public class FSSendMessagesServiceTest {
             fsPluginProperties.getAuthenticationPassword(anyString);
             result = "pass1";
 
+            instance.canReadFileSafely((FileObject)any, anyString);
+            result = true;
         }};
 
         instance.sendMessages(domain1);
