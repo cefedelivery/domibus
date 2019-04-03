@@ -62,9 +62,7 @@ public class JMSSelectorUtilImpl implements JMSSelectorUtil {
             selector.append(selector.length() > 0 ? " and " : "");
             selector.append(selectorClause);
         }
-//        if (selector.length() == 0) {
-//            selector.append("true");
-//        }
+
         return selector.toString().trim();
     }
 }

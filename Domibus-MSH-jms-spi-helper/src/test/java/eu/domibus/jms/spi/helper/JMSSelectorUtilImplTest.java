@@ -40,5 +40,18 @@ public class JMSSelectorUtilImplTest {
         criteria.put("selectorClause", "JMSMessageID = 'myMessageId'");
         String selector = selectorUtil.getSelector(criteria);
         Assert.assertEquals("JMSType='myType' and JMSTimestamp>=123 and JMSTimestamp<=456 and JMSMessageID = 'myMessageId'", selector);
+
+        criteria = new HashMap<String, Object>();
+        criteria.put("JMSType", "my'Type'e'");
+        criteria.put("JMSTimestamp_from", 123L);
+        criteria.put("JMSTimestamp_to", 456L);
+        criteria.put("selectorClause", "JMSMessageID = 'myMessageId'");
+        selector = selectorUtil.getSelector(criteria);
+        Assert.assertEquals("JMSType='my''Type''e''' and JMSTimestamp>=123 and JMSTimestamp<=456 and JMSMessageID = 'myMessageId'", selector);
+        //test even number of apostrophes in the string
+        Assert.assertEquals(0, selector.replaceAll("[^']", "").length() % 2);
+
     }
+
+
 }
