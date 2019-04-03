@@ -232,6 +232,19 @@ public class UserMessageDefaultService implements UserMessageService {
         scheduleSending(messageId);
     }
 
+    @Override
+    public void resendFailedOrSendEnqueuedMessage(String messageId) {
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        if (userMessageLog == null) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
+        }
+        if (MessageStatus.SEND_ENQUEUED == userMessageLog.getMessageStatus()) {
+            sendEnqueuedMessage(messageId);
+        } else {
+            restoreFailedMessage(messageId);
+        }
+    }
+
     protected Integer getMaxAttemptsConfiguration(final String messageId) {
         final LegConfiguration legConfiguration = pModeService.getLegConfiguration(messageId);
         Integer result = 1;

@@ -169,9 +169,9 @@ public class FSMessageTransformer
     }
 
     /*
-    * Additional PartProperties are accepted for each payload.
-    * This method extracts all properties that are not MimeType and FileName.
-    */
+     * Additional PartProperties are accepted for each payload.
+     * This method extracts all properties that are not MimeType and FileName.
+     */
     protected List<Property> extractAdditionalPropertyListFromMetadata(UserMessage metadata) {
         PartProperties partProperties = extractPartPropertiesFromMetadata(metadata);
         if (partProperties == null) {
@@ -239,27 +239,23 @@ public class FSMessageTransformer
     protected PayloadInfo getPayloadInfoFromSubmission(Submission submission) {
         final PayloadInfo payloadInfo = new PayloadInfo();
 
-        if (submission.getPayloads() == null || submission.getPayloads().size() != 1) {
-            throw new FSPluginException("FS plugin can only handle one payload per message");
+        for (Submission.Payload submissionPayload : submission.getPayloads()) {
+            final PartInfo partInfo = new PartInfo();
+            partInfo.setHref(submissionPayload.getContentId());
+            final PartProperties partProperties = new PartProperties();
+            for (final Submission.TypedProperty payloadProperty : submissionPayload.getPayloadProperties()) {
+                final Property property = new Property();
+                property.setName(payloadProperty.getKey());
+                property.setValue(payloadProperty.getValue());
+                property.setType(payloadProperty.getType());
+                LOG.debug("Adding property name:[{}] type:[{}] value:[{}] to payload [{}]", property.getName(),
+                        property.getType(), property.getValue(), submissionPayload.getContentId());
+                partProperties.getProperty().add(property);
+            }
+
+            partInfo.setPartProperties(partProperties);
+            payloadInfo.getPartInfo().add(partInfo);
         }
-
-        final Submission.Payload submissionPayload = submission.getPayloads().iterator().next();
-        final PartInfo partInfo = new PartInfo();
-        partInfo.setHref(submissionPayload.getContentId());
-        final PartProperties partProperties = new PartProperties();
-        for (final Submission.TypedProperty payloadProperty : submissionPayload.getPayloadProperties()) {
-            final Property property = new Property();
-            property.setName(payloadProperty.getKey());
-            property.setValue(payloadProperty.getValue());
-            property.setType(payloadProperty.getType());
-            LOG.debug("Adding property name:[{}] type:[{}] value:[{}] to payload [{}]", property.getName(),
-                    property.getType(), property.getValue(), submissionPayload.getContentId());
-            partProperties.getProperty().add(property);
-        }
-
-        partInfo.setPartProperties(partProperties);
-        payloadInfo.getPartInfo().add(partInfo);
-
         return payloadInfo;
     }
 

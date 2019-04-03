@@ -43,6 +43,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -637,6 +638,71 @@ public class UserMessageDefaultServiceTest {
 
         new Verifications() {{
             userMessageLogService.setMessageAsDeleted(anyString); times = 0;
+        }};
+    }
+
+    @Test
+    public void test_ResendFailedOrSendEnqueuedMessage_StatusSendEnqueued(final @Mocked UserMessageLog userMessageLog) {
+        final String messageId = UUID.randomUUID().toString();
+
+        new Expectations(userMessageDefaultService) {{
+            userMessageLogDao.findByMessageId(messageId);
+            result = userMessageLog;
+
+            userMessageLog.getMessageStatus();
+            result = MessageStatus.SEND_ENQUEUED;
+        }};
+
+        //tested method
+        userMessageDefaultService.resendFailedOrSendEnqueuedMessage(messageId);
+
+        new FullVerifications(userMessageDefaultService) {{
+            String messageIdActual;
+            userMessageDefaultService.sendEnqueuedMessage(messageIdActual = withCapture());
+            Assert.assertEquals(messageId, messageIdActual);
+        }};
+    }
+
+    @Test
+    public void test_ResendFailedOrSendEnqueuedMessage_StatusFailed(final @Mocked UserMessageLog userMessageLog) {
+        final String messageId = UUID.randomUUID().toString();
+
+        new Expectations(userMessageDefaultService) {{
+            userMessageLogDao.findByMessageId(messageId);
+            result = userMessageLog;
+
+            userMessageLog.getMessageStatus();
+            result = MessageStatus.SEND_FAILURE;
+        }};
+
+        //tested method
+        userMessageDefaultService.resendFailedOrSendEnqueuedMessage(messageId);
+
+        new FullVerifications(userMessageDefaultService) {{
+            String messageIdActual;
+            userMessageDefaultService.restoreFailedMessage(messageIdActual = withCapture());
+            Assert.assertEquals(messageId, messageIdActual);
+        }};
+    }
+
+    @Test
+    public void test_ResendFailedOrSendEnqueuedMessage_MessageNotFound(final @Mocked UserMessageLog userMessageLog) {
+        final String messageId = UUID.randomUUID().toString();
+
+        new Expectations(userMessageDefaultService) {{
+            userMessageLogDao.findByMessageId(messageId);
+            result = null;
+        }};
+
+        try {
+            //tested method
+            userMessageDefaultService.resendFailedOrSendEnqueuedMessage(messageId);
+            Assert.fail("Exception expected");
+        } catch (Exception e) {
+            Assert.assertEquals(UserMessageException.class, e.getClass());
+        }
+
+        new FullVerifications(userMessageDefaultService) {{
         }};
     }
 
