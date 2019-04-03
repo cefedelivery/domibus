@@ -55,6 +55,8 @@ public class PullMessageSender {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullMessageSender.class);
 
+    private static final String OUTGOING_PULL_REQUEST = "outgoing_pull_request";
+
     @Autowired
     protected MessageUtil messageUtil;
 
@@ -96,8 +98,8 @@ public class PullMessageSender {
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @Transactional(propagation = Propagation.REQUIRED)
     //@TODO unit test this method.
-    @Timer("outgoing_pull_request")
-    @Counter("outgoing_pull_request")
+    @Timer(OUTGOING_PULL_REQUEST)
+    @Counter(OUTGOING_PULL_REQUEST)
     public void processPullRequest(final Message map) {
         if (domibusInitializationHelper.isNotReady()) {
             return;

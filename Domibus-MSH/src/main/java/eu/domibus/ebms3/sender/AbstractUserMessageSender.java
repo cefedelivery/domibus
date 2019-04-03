@@ -37,6 +37,8 @@ import java.sql.Timestamp;
  */
 public abstract class AbstractUserMessageSender implements MessageSender {
 
+    private static final String OUTGOING_USER_MESSAGE = "outgoing_user_message";
+
     @Autowired
     protected PModeProvider pModeProvider;
 
@@ -68,8 +70,8 @@ public abstract class AbstractUserMessageSender implements MessageSender {
     protected UserMessageLogDao userMessageLogDao;
 
     @Override
-    @Timer("outgoing_user_message")
-    @Counter("outgoing_user_message")
+    @Timer(OUTGOING_USER_MESSAGE)
+    @Counter(OUTGOING_USER_MESSAGE)
     public void sendMessage(final UserMessage userMessage) {
         String messageId = userMessage.getMessageInfo().getMessageId();
 
