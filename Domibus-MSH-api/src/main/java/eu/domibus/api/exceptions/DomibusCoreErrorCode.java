@@ -33,7 +33,12 @@ public enum DomibusCoreErrorCode {
     /**
      * Proxy related exception.
      */
-    DOM_006("006");
+    DOM_006("006"),
+    /**
+     * Invalid message exception
+     */
+    DOM_007("007")
+    ;
 
     private final String errorCode;
 

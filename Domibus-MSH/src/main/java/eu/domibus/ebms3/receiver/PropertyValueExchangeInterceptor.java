@@ -2,7 +2,6 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
-import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -28,11 +27,11 @@ public class PropertyValueExchangeInterceptor extends AbstractSoapInterceptor {
 
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-
         final SOAPMessage jaxwsMessage = message.getContent(javax.xml.soap.SOAPMessage.class);
         try {
             jaxwsMessage.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, message.getContextualProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY));
-
+            jaxwsMessage.setProperty(CertificateExchangeType.getKey(), message.getContextualProperty(CertificateExchangeType.getKey()));
+            jaxwsMessage.setProperty(CertificateExchangeType.getValue(), message.getContextualProperty(CertificateExchangeType.getValue()));
         } catch (final SOAPException e) {
             PropertyValueExchangeInterceptor.LOG.error("", e);
         }

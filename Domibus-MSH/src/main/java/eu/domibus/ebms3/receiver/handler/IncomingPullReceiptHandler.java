@@ -117,7 +117,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
 
         try {
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
-            String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING, true).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);

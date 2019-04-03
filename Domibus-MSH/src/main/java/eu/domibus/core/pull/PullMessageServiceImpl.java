@@ -3,6 +3,7 @@ package eu.domibus.core.pull;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
@@ -12,6 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
@@ -25,7 +27,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,13 @@ public class PullMessageServiceImpl implements PullMessageService {
     private static final String CURRENT_TIME = "current_time";
 
     protected static final String PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE = "pull.extra.number.of.attempt.time.for.expiration.date";
+
+    protected static final String DOMIBUS_PULL_DYNAMIC_INITIATOR = "domibus.pull.dynamic.initiator";
+
+    protected static final String DOMIBUS_PULL_MULTIPLE_LEGS = "domibus.pull.multiple_legs";
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private UserMessageLogService userMessageLogService;
@@ -80,8 +88,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     private UIReplicationSignalService uiReplicationSignalService;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private java.util.Properties domibusProperties;
+    protected MpcService mpcService;
 
     private Integer extraNumberOfAttemptTimeForExpirationDate;
 
@@ -207,25 +214,34 @@ public class PullMessageServiceImpl implements PullMessageService {
      */
     @Override
     @Transactional
-    public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, final UserMessage userMessage,
+    public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, final String pModeKey,
                                    final MessageLog messageLog) {
-        MessagingLock messagingLock = prepareMessagingLock(partyIdExtractor, userMessage, messageLog);
+        MessagingLock messagingLock = prepareMessagingLock(partyIdExtractor, pModeKey, messageLog);
         messagingLockDao.save(messagingLock);
     }
 
-    private MessagingLock prepareMessagingLock(PartyIdExtractor partyIdExtractor, UserMessage
-            userMessage, MessageLog messageLog) {
-        String partyId = partyIdExtractor.getPartyId();
-        final String messageId = messageLog.getMessageId();
-        final String mpc = messageLog.getMpc();
-        LOG.trace("Saving message lock with partyID:[{}], mpc:[{}]", partyId, mpc);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, final UserMessage userMessage,
+                                   final MessageLog messageLog) {
         final String pmodeKey; // FIXME: This does not work for signalmessages
         try {
             pmodeKey = this.pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
         } catch (EbMS3Exception e) {
-            throw new PModeException(DomibusCoreErrorCode.DOM_001, "Could not get the PMode key for message [" + messageId + "]", e);
+            throw new PModeException(DomibusCoreErrorCode.DOM_001, "Could not get the PMode key for message [" + messageLog.getMessageId() + "]", e);
         }
-        final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
+        addPullMessageLock(partyIdExtractor, pmodeKey, messageLog);
+    }
+
+    private MessagingLock prepareMessagingLock(PartyIdExtractor partyIdExtractor, String pModeKey, MessageLog messageLog) {
+        String partyId = partyIdExtractor.getPartyId();
+        final String messageId = messageLog.getMessageId();
+        final String mpc = messageLog.getMpc();
+        LOG.trace("Saving message lock with partyID:[{}], mpc:[{}]", partyId, mpc);
+        final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pModeKey);
         final Date staledDate = updateRetryLoggingService.getMessageExpirationDate(messageLog, legConfiguration);
 
         return new MessagingLock(
@@ -234,7 +250,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 mpc,
                 messageLog.getReceived(),
                 staledDate,
-                messageLog.getNextAttempt()==null?new Date():messageLog.getNextAttempt(),
+                messageLog.getNextAttempt() == null ? new Date() : messageLog.getNextAttempt(),
                 messageLog.getSendAttempts(),
                 messageLog.getSendAttemptsMax());
     }
@@ -261,8 +277,9 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * This method is called when a message has been pulled successfully.
+     *
      * @param legConfiguration processing information for the message
-     * @param userMessageLog the user message
+     * @param userMessageLog   the user message
      */
     protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
@@ -298,7 +315,8 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * Check if the message can be sent again: there is time and attempts left
-     * @param userMessageLog the message
+     *
+     * @param userMessageLog   the message
      * @param legConfiguration processing information for the message
      * @return true if the message can be sent again
      */
@@ -454,4 +472,13 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     }
 
+    @Override
+    public boolean allowMultipleLegsInPullProcess() {
+        return domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_PULL_MULTIPLE_LEGS);
+    }
+
+    @Override
+    public boolean allowDynamicInitiatorInPullProcess() {
+        return domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_PULL_DYNAMIC_INITIATOR);
+    }
 }

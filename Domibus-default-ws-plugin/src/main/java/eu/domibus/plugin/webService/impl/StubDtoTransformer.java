@@ -42,6 +42,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
      */
     public UserMessage transformFromSubmission(final Submission submission) {
         final UserMessage result = new UserMessage();
+        result.setMpc(submission.getMpc());
         this.generateCollaborationInfo(submission, result);
         this.generateMessageInfo(submission, result);
         this.generatePartyInfo(submission, result);
@@ -158,6 +159,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         LOG.debug("Entered method: transformFromMessaging(final UserMessage messaging)");
 
         final Submission result = new Submission();
+        result.setMpc(messaging.getMpc());
 
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
         result.setAction(trim(collaborationInfo.getAction()));

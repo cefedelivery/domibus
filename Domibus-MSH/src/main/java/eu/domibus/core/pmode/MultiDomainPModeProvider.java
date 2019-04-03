@@ -91,8 +91,18 @@ public class MultiDomainPModeProvider extends PModeProvider {
     }
 
     @Override
+    protected String findPullLegName(String agreementRef, String senderParty, String receiverParty, String service, String action, String mpc) throws EbMS3Exception {
+        return getCurrentPModeProvider().findPullLegName(agreementRef, senderParty, receiverParty, service, action, mpc);
+    }
+
+    @Override
     protected String findActionName(String action) throws EbMS3Exception {
         return getCurrentPModeProvider().findActionName(action);
+    }
+
+    @Override
+    protected Mpc findMpc(String mpcValue) throws EbMS3Exception {
+        return getCurrentPModeProvider().findMpc(mpcValue);
     }
 
     @Override
@@ -105,6 +115,10 @@ public class MultiDomainPModeProvider extends PModeProvider {
         return getCurrentPModeProvider().findPartyName(partyId);
     }
 
+    @Override
+    public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole, final boolean isPull) throws EbMS3Exception {
+        return getCurrentPModeProvider().findUserMessageExchangeContext(userMessage, mshRole, isPull);
+    }
 
     @Override
     public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
@@ -292,7 +306,7 @@ public class MultiDomainPModeProvider extends PModeProvider {
     }
 
     @Override
-    protected String getReceiverPartyNameFromPModeKey(String pModeKey) {
+    public String getReceiverPartyNameFromPModeKey(String pModeKey) {
         return getCurrentPModeProvider().getReceiverPartyNameFromPModeKey(pModeKey);
     }
 

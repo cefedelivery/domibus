@@ -17,6 +17,7 @@ import eu.domibus.core.alerts.model.persist.AbstractEventProperty;
 import eu.domibus.core.alerts.model.persist.StringEventProperty;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -25,6 +26,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.Queue;
 import java.text.ParseException;
@@ -70,6 +72,8 @@ public class EventServiceImplTest {
     @Injectable
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
+    @Injectable
+    protected MpcService mpcService;
 
     @Test
     public void enqueueMessageEvent() {

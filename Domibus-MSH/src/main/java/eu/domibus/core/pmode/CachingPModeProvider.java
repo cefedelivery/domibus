@@ -8,13 +8,16 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
+import eu.domibus.ebms3.common.model.MessageExchangePattern;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.XmlProcessingException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -37,6 +41,10 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Autowired
     private ProcessPartyExtractorProvider processPartyExtractorProvider;
+
+    @Autowired
+    PullMessageService pullMessageService;
+
     //pull processes cache.
     private Map<Party, List<Process>> pullProcessesByInitiatorCache = new HashMap<>();
 
@@ -94,10 +102,105 @@ public class CachingPModeProvider extends PModeProvider {
         }
     }
 
+    /**
+     * The match means that either has an Agreement and its name matches the Agreement name found previously
+     * or it has no Agreement configured and the Agreement name was not indicated in the submitted message.
+     *
+     * @param process       the process containing the agreement
+     * @param agreementName the agreement name
+     */
+    protected boolean matchAgreement(Process process, String agreementName) {
+        return (process.getAgreement() != null && StringUtils.equalsIgnoreCase(process.getAgreement().getName(), agreementName)
+                || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() == null)
+                // Please notice that this is only for backward compatibility and will be removed ASAP!
+                || (StringUtils.equalsIgnoreCase(agreementName, OPTIONAL_AND_EMPTY) && process.getAgreement() != null && StringUtils.isEmpty(process.getAgreement().getValue()))
+        );
+    }
+
+    /**
+     * The match means that either there is no initiator and it is allowed
+     * by configuration OR the initiator name matches
+     *
+     * @param process                   the process containing the initiators
+     * @param processTypePartyExtractor the extractor that provides the senderParty
+     */
+    protected boolean matchInitiator(final Process process, final ProcessTypePartyExtractor processTypePartyExtractor) {
+        if (CollectionUtils.isEmpty(process.getInitiatorParties())) {
+            if (pullMessageService.allowDynamicInitiatorInPullProcess()) {
+                return true;
+            }
+            return false;
+        }
+
+        for (final Party party : process.getInitiatorParties()) {
+            if (StringUtils.equalsIgnoreCase(party.getName(), processTypePartyExtractor.getSenderParty())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The match requires that the responder exists in the process
+     *
+     * @param process                   the process containing the responder
+     * @param processTypePartyExtractor the extractor that provides the receiverParty
+     */
+    protected boolean matchResponder(final Process process, final ProcessTypePartyExtractor processTypePartyExtractor) {
+        //Responder is always required for this method to return true
+        if (CollectionUtils.isEmpty(process.getResponderParties())) {
+            return false;
+        }
+
+        for (final Party party : process.getResponderParties()) {
+            if (StringUtils.equalsIgnoreCase(party.getName(), processTypePartyExtractor.getReceiverParty())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected String findPullLegName(final String agreementName, final String senderParty,
+                                     final String receiverParty, final String service, final String action, final String mpc) throws EbMS3Exception {
+        final List<LegConfiguration> candidates = new ArrayList<>();
+        ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(
+                MessageExchangePattern.ONE_WAY_PULL.getUri(), senderParty, receiverParty);
+        List<Process> processes = this.getConfiguration().getBusinessProcesses().getProcesses();
+        processes = processes.stream().filter(process -> matchAgreement(process, agreementName))
+                .filter(process -> MessageExchangePattern.ONE_WAY_PULL.getUri().equals(process.getMepBinding().getValue()))
+                .filter(process -> matchInitiator(process, processTypePartyExtractor))
+                .filter(process -> matchResponder(process, processTypePartyExtractor)).collect(Collectors.toList());
+
+        processes.stream().forEach(process -> candidates.addAll(process.getLegs()));
+        if (candidates.isEmpty()) {
+            LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
+        }
+        String pullLegName = candidates.stream()
+                .filter(candidate -> candidateMatches(candidate, service, action, mpc))
+                .findFirst()
+                .get().getName();
+        if (pullLegName != null) {
+            return pullLegName;
+        }
+        LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+    }
+
+    protected boolean candidateMatches(LegConfiguration candidate, String service, String action, String mpc) {
+        if (StringUtils.equalsIgnoreCase(candidate.getService().getName(), service)
+                && StringUtils.equalsIgnoreCase(candidate.getAction().getName(), action)
+                && StringUtils.equalsIgnoreCase(candidate.getDefaultMpc().getQualifiedName(), mpc)) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     //FIXME: only works for the first leg, as sender=initiator
-    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
+    protected String findLegName(final String agreementName, final String senderParty, final String receiverParty,
+                                 final String service, final String action) throws EbMS3Exception {
         final List<LegConfiguration> candidates = new ArrayList<>();
         for (final Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
             final ProcessTypePartyExtractor processTypePartyExtractor = processPartyExtractorProvider.getProcessTypePartyExtractor(process.getMepBinding().getValue(), senderParty, receiverParty);
@@ -145,8 +248,18 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
+    protected Mpc findMpc(final String mpcValue) throws EbMS3Exception {
+        for (final Mpc mpc : this.getConfiguration().getMpcs()) {
+            if (StringUtils.equalsIgnoreCase(mpc.getQualifiedName(), mpcValue)) {
+                return mpc;
+            }
+        }
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching mpc found", null, null);
+    }
+
+    @Override
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
-        if(service == null) {
+        if (service == null) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Service is not found in the message", null, null);
         }
 
@@ -210,7 +323,7 @@ public class CachingPModeProvider extends PModeProvider {
         for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {
             final Set<Identifier> identifiers = party.getIdentifiers();
             for (Identifier identifier : identifiers) {
-                if(StringUtils.equalsIgnoreCase(identifier.getPartyId(), partyIdentifier)) {
+                if (StringUtils.equalsIgnoreCase(identifier.getPartyId(), partyIdentifier)) {
                     return party;
                 }
             }
@@ -383,7 +496,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public boolean isConfigurationLoaded() {
-        if(this.configuration != null) return true;
+        if (this.configuration != null) return true;
         return configurationDAO.configurationExists();
     }
 
@@ -398,7 +511,8 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    public List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration) {
+    public List<Process> findPullProcessesByMessageContext(
+            final MessageExchangeConfiguration messageExchangeConfiguration) {
         return processDao.findPullProcessesByMessageContext(messageExchangeConfiguration);
     }
 
@@ -408,7 +522,8 @@ public class CachingPModeProvider extends PModeProvider {
         if (processes == null) {
             return Lists.newArrayList();
         }
-        return processes;
+        // return list with no duplicates
+        return Lists.newArrayList(new HashSet<>(processes));
     }
 
     @Override
@@ -449,7 +564,8 @@ public class CachingPModeProvider extends PModeProvider {
         return result;
     }
 
-    private List<String> handleLegConfiguration(LegConfiguration legConfiguration, Process process, String service, String action) {
+    private List<String> handleLegConfiguration(LegConfiguration legConfiguration, Process process, String
+            service, String action) {
         List result = new ArrayList<String>();
         if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), service) && StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), action)) {
             handleProcessParties(process, result);

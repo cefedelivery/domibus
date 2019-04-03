@@ -13,7 +13,6 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**

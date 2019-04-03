@@ -1,5 +1,6 @@
 package eu.domibus.spring;
 
+import com.google.common.collect.Sets;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.plugin.PluginException;
 import eu.domibus.logging.DomibusLogger;
@@ -14,6 +15,7 @@ import javax.servlet.ServletContextEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Set;
 
 /**
  * Created by Cosmin Baciu on 6/13/2016.
@@ -28,14 +30,21 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
         String pluginsLocation = servletContext.getInitParameter("pluginsLocation");
+        String extensionsLocation = servletContext.getInitParameter("extensionsLocation");
         if (StringUtils.isEmpty(pluginsLocation)) {
             throw new PluginException(DomibusCoreErrorCode.DOM_001, "pluginsLocation context param should not be empty");
         }
         String resolvedPluginsLocation = new PropertyResolver().getResolvedValue(pluginsLocation);
-        LOG.info("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
+        Set<File> pluginsDirectories = Sets.newHashSet(new File(resolvedPluginsLocation));
+        if (StringUtils.isNotEmpty(extensionsLocation)) {
+            String resolvedExtensionsLocation = new PropertyResolver().getResolvedValue(extensionsLocation);
+            pluginsDirectories.add(new File(resolvedExtensionsLocation));
+            LOG.info("Resolved extension location [{}] to [{}]", extensionsLocation, resolvedExtensionsLocation);
+        }
+        LOG.info("Resolved plugins location [{}] to [{}]", pluginsLocation, resolvedPluginsLocation);
 
         try {
-            pluginClassLoader = new PluginClassLoader(new File(resolvedPluginsLocation), Thread.currentThread().getContextClassLoader());
+            pluginClassLoader = new PluginClassLoader(pluginsDirectories, Thread.currentThread().getContextClassLoader());
         } catch (MalformedURLException e) {
             throw new PluginException(DomibusCoreErrorCode.DOM_001, "Malformed URL Exception", e);
         }
