@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,12 +50,12 @@ public class MetricsConfiguration {
 
     private final Object lock = new Object();
 
-    @PostConstruct
-    public void init() {
-       /* if (configurationLoaded) {
+    /*  @PostConstruct
+      public void init() {
+         *//* if (configurationLoaded) {
             return;
         }
-        configureMetrics();*/
+        configureMetrics();*//*
     }
 
     private void configureMetrics() {
@@ -120,7 +119,7 @@ public class MetricsConfiguration {
         }
     }
 
-
+*/
     @Bean
     public HealthCheckRegistry healthCheckRegistry() {
         return new HealthCheckRegistry();
