@@ -27,6 +27,7 @@ import org.apache.cxf.ws.security.wss4j.StaxSerializer;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDocInfo;
 import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.dom.engine.WSSecurityEngine;
@@ -310,28 +311,51 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         URI valueTypeUri = new URI(tokenReference.getValueType());
         final String uriFragment = uri.getFragment();
         final String valueType = valueTypeUri.getFragment();
-        LOG.debug("Signing binary token uri:[{}] and ValueType:[{}]", uriFragment, uriFragment);
-        NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
-        if (binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
+        LOG.debug("Signing binary token uri:[{}] and ValueType:[{}]", uriFragment, valueType);
+        NodeList binarySecurityTokenElement = securityHeader.getElementsByTagNameNS(WSConstants.WSSE_NS, WSConstants.BINARY_TOKEN_LN);
+        //NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
+        if (LOG.isDebugEnabled()) {
+            Node item = null;
+            if (binarySecurityTokenElement != null) {
+                item = binarySecurityTokenElement.item(0);
+            }
+            LOG.debug("binarySecurityTokenElement:[{}], binarySecurityTokenElement.item:[{}]", binarySecurityTokenElement, item);
+        }
+        if (binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null) {
             return null;
+        }
 
+
+        LOG.debug("binarySecurityTokenElement.length:[{}]", binarySecurityTokenElement.getLength());
         for (int i = 0; i < binarySecurityTokenElement.getLength(); i++) {
             final Node item = binarySecurityTokenElement.item(i);
             final NamedNodeMap attributes = item.getAttributes();
             final int length = attributes.getLength();
+            LOG.debug("item:[{}], item attributes:[{}], attributes length:[{}]", item, attributes, length);
             Node id = null;
             for (int j = 0; j < length; j++) {
                 final Node bstAttribute = attributes.item(j);
+                LOG.debug("bstAttribute:[{}]", bstAttribute);
                 if (ID.equalsIgnoreCase(bstAttribute.getLocalName())) {
                     id = bstAttribute;
                     break;
                 }
             }
+
+            if (LOG.isDebugEnabled()) {
+                if (id != null) {
+                    LOG.debug("id.getNodeValue:[{}], uriFragment:[{}]", id.getNodeValue(), uriFragment);
+                }
+                LOG.debug("id:[{}]", id);
+            }
+
             if (id != null && uriFragment.equalsIgnoreCase(id.getNodeValue())) {
                 String certString = getTextFromElement((Element) item);
                 if (certString == null || certString.isEmpty()) {
+                    LOG.debug("certString:[{}]", certString);
                     return null;
                 }
+                LOG.debug("certificate value type:[{}]", valueType);
                 if (X_509_V_3.equalsIgnoreCase(valueType)) {
                     String certStr = ("-----BEGIN CERTIFICATE-----\n" + certString + "\n-----END CERTIFICATE-----\n");
                     InputStream in = new ByteArrayInputStream(certStr.getBytes());
