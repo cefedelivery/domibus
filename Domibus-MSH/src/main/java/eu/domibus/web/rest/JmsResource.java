@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.core.csv.CsvCustomColumns;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -87,6 +89,11 @@ public class JmsResource {
             String[] ids = messageIds.toArray(new String[0]);
 
             if (request.getAction() == MessagesActionRequestRO.Action.MOVE) {
+
+                Map<String, JMSDestination> destinations = jmsManager.getDestinations();
+                if (!destinations.containsKey(request.getDestination())) {
+                    throw new IllegalArgumentException("Unknown destination");
+                }
                 jmsManager.moveMessages(request.getSource(), request.getDestination(), ids);
 
             } else if (request.getAction() == MessagesActionRequestRO.Action.REMOVE) {
