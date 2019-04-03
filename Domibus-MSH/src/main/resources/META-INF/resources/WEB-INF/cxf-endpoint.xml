@@ -15,17 +15,17 @@
 
     <cxf:bus>
         <cxf:inInterceptors>
-            <ref bean="logInbound" />
+            <ref bean="logInbound"/>
         </cxf:inInterceptors>
         <cxf:outInterceptors>
-            <ref bean="logOutbound" />
+            <ref bean="logOutbound"/>
             <ref bean="attachmentCleanupInterceptor"/>
         </cxf:outInterceptors>
         <cxf:outFaultInterceptors>
             <ref bean="attachmentCleanupInterceptor"/>
         </cxf:outFaultInterceptors>
         <cxf:features>
-            <cxf:logging />
+            <cxf:logging/>
         </cxf:features>
     </cxf:bus>
 
@@ -108,9 +108,9 @@
         </jaxws:inInterceptors>
 
         <jaxws:outInterceptors>
-           <ref bean="clearMDCInterceptor"/>
-           <ref bean="setPolicyOutInterceptorServer"/>
-           <ref bean="saveRawPulledMessageInterceptor"/>
+            <ref bean="clearMDCInterceptor"/>
+            <ref bean="setPolicyOutInterceptorServer"/>
+            <ref bean="saveRawPulledMessageInterceptor"/>
         </jaxws:outInterceptors>
 
         <jaxws:outFaultInterceptors>
@@ -147,12 +147,15 @@
         </jaxws:properties>
     </jaxws:client>
 
-    <bean id="domibusPrepareAttachmentInInterceptor" class="eu.domibus.ebms3.receiver.DomibusPrepareAttachmentInInterceptor"/>
+    <bean id="domibusPrepareAttachmentInInterceptor"
+          class="eu.domibus.ebms3.receiver.DomibusPrepareAttachmentInInterceptor"/>
     <bean id="domibusPrepareAttachmentInterceptor" class="eu.domibus.ebms3.sender.DomibusPrepareAttachmentInterceptor"/>
-    <jaxws:client id="{http://domibus.eu}local-msh-dispatch" name="{http://domibus.eu}local-msh-dispatch" createdFromAPI="true">
+    <jaxws:client id="{http://domibus.eu}local-msh-dispatch" name="{http://domibus.eu}local-msh-dispatch"
+                  createdFromAPI="true">
         <jaxws:outInterceptors>
             <ref bean="domibusPrepareAttachmentInterceptor"/>
-            <bean id="domibusAttachmentOutInterceptorRemoval" class="eu.domibus.ebms3.sender.DomibusAttachmentOutInterceptorRemoval"/>
+            <bean id="domibusAttachmentOutInterceptorRemoval"
+                  class="eu.domibus.ebms3.sender.DomibusAttachmentOutInterceptorRemoval"/>
             <bean id="domibusAttachmentOutInterceptor" class="eu.domibus.ebms3.sender.DomibusAttachmentOutInterceptor"/>
         </jaxws:outInterceptors>
         <jaxws:inInterceptors>

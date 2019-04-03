@@ -2,8 +2,6 @@ package eu.domibus.configuration;
 
 import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;

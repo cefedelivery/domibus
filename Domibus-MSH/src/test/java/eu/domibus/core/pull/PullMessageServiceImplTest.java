@@ -3,6 +3,7 @@ package eu.domibus.core.pull;
 import com.google.common.collect.Lists;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -13,6 +14,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
@@ -64,10 +66,13 @@ public class PullMessageServiceImplTest {
     private PModeProvider pModeProvider;
 
     @Injectable
-    private java.util.Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    @Injectable
+    protected MpcService mpcService;
 
     @Tested
     private PullMessageServiceImpl pullMessageService;
@@ -207,7 +212,7 @@ public class PullMessageServiceImplTest {
         final String mpc = "mpc";
         final Date staledDate = new Date();
         final LegConfiguration legConfiguration = new LegConfiguration();
-        new Expectations(pullMessageService) {{
+        new NonStrictExpectations(pullMessageService) {{
             partyIdExtractor.getPartyId();
             result = partyId;
             messageLog.getMessageId();

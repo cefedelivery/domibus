@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DetailedReport xmlns="http://dss.esig.europa.eu/validation/detailed-report">
+    <Certificate>
+        <Constraint>
+            <Name NameId="BBB_ACCEPT">Is the result of the Basic Building Block acceptable?</Name>
+            <Status>WARNING</Status>
+            <Warning NameId="BBB_ACCEPT_ANS">The result of the Basic Building Block is not acceptable!</Warning>
+        </Constraint>
+        <Constraint Id="EU">
+            <Name NameId="QUAL_TRUSTED_LIST_ACCEPT">Is the trusted list acceptable?</Name>
+            <Status>OK</Status>
+            <AdditionalInfo>Trusted List : EU</AdditionalInfo>
+        </Constraint>
+        <Constraint Id="CUST">
+            <Name NameId="QUAL_TRUSTED_LIST_ACCEPT">Is the trusted list acceptable?</Name>
+            <Status>OK</Status>
+            <AdditionalInfo>Trusted List : CUST</AdditionalInfo>
+        </Constraint>
+        <Conclusion>
+            <Indication>INDETERMINATE</Indication>
+            <Warnings NameId="BBB_ACCEPT_ANS">The result of the Basic Building Block is not acceptable!</Warnings>
+        </Conclusion>
+        <ValidationCertificateQualification DateTime="2018-07-05T10:01:08" ValidationTime="CERTIFICATE_ISSUANCE_TIME"
+                                            CertificateQualification="Cert for eSig">
+            <Constraint>
+                <Name NameId="QUAL_HAS_CAQC">Is the certificate related to a CA/QC?</Name>
+                <Status>NOT OK</Status>
+                <Error NameId="QUAL_HAS_CAQC_ANS">The certificate is not related to a CA/QC!</Error>
+            </Constraint>
+            <Conclusion>
+                <Indication>FAILED</Indication>
+                <Errors NameId="QUAL_HAS_CAQC_ANS">The certificate is not related to a CA/QC!</Errors>
+            </Conclusion>
+        </ValidationCertificateQualification>
+        <ValidationCertificateQualification DateTime="2019-02-25T15:19:58" ValidationTime="VALIDATION_TIME"
+                                            CertificateQualification="Cert for eSig">
+            <Constraint>
+                <Name NameId="QUAL_HAS_CAQC">Is the certificate related to a CA/QC?</Name>
+                <Status>NOT OK</Status>
+                <Error NameId="QUAL_HAS_CAQC_ANS">The certificate is not related to a CA/QC!</Error>
+            </Constraint>
+            <Conclusion>
+                <Indication>FAILED</Indication>
+                <Errors NameId="QUAL_HAS_CAQC_ANS">The certificate is not related to a CA/QC!</Errors>
+            </Conclusion>
+        </ValidationCertificateQualification>
+    </Certificate>
+    <BasicBuildingBlocks Id="6BDFA1594A8B6CE48FE44FF6BB1989AF7F3ABD26C635CA304E8EE9036DFB36D7" Type="CERTIFICATE">
+        <XCV>
+            <Constraint>
+                <Name NameId="BBB_XCV_CCCBB">Can the certificate chain be built till the trust anchor?</Name>
+                <Status>OK</Status>
+            </Constraint>
+            <Constraint Id="6BDFA1594A8B6CE48FE44FF6BB1989AF7F3ABD26C635CA304E8EE9036DFB36D7">
+                <Name NameId="BBB_XCV_SUB">Is the certificate validation concluant ?</Name>
+                <Status>NOT OK</Status>
+                <Error NameId="BBB_XCV_SUB_ANS">The certificate validation is not concluant!</Error>
+            </Constraint>
+            <Conclusion>
+                <Indication>INDETERMINATE</Indication>
+                <SubIndication>TRY_LATER</SubIndication>
+                <Errors NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Errors>
+            </Conclusion>
+            <SubXCV Id="6BDFA1594A8B6CE48FE44FF6BB1989AF7F3ABD26C635CA304E8EE9036DFB36D7" TrustAnchor="false">
+                <Constraint>
+                    <Name NameId="QUAL_UNIQUE_CERT">Is the certificate unique ?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_PSEUDO_USE">Is pseudo used ?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ISNSSC">Is not self-signed certificate?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ICSI">Is the certificate's signature intact?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="ASCCM">Are signature cryptographic constraints met?</Name>
+                    <Status>OK</Status>
+                    <AdditionalInfo>Validation time : 2019-02-25 15:19</AdditionalInfo>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ISCGKU">Has the signer's certificate given key-usage?</Name>
+                    <Status>WARNING</Status>
+                    <Warning NameId="BBB_XCV_ISCGKU_ANS">The signer's certificate has not expected key-usage!</Warning>
+                    <AdditionalInfo>Key usage : digitalSignature, keyEncipherment, dataEncipherment</AdditionalInfo>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_AIA_PRES">Is authority info access present?</Name>
+                    <Status>WARNING</Status>
+                    <Warning NameId="BBB_XCV_AIA_PRES_ANS">Authority info access is not present!</Warning>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_REVOC_PRES">Is revocation info access present?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ICTIVRSC">Is the current time in the validity range of the signer's
+                        certificate?
+                    </Name>
+                    <Status>OK</Status>
+                    <AdditionalInfo>Certificate validity : 2018-07-05 10:01 to 2028-07-02 10:01</AdditionalInfo>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ISCR">Is the certificate not revoked?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ISCOH">Is the certificate on hold?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_RFC">Is the revocation freshness check concluant ?</Name>
+                    <Status>NOT OK</Status>
+                    <Error NameId="BBB_XCV_RFC_ANS">The revocation freshness check is not concluant!</Error>
+                </Constraint>
+                <Conclusion>
+                    <Indication>INDETERMINATE</Indication>
+                    <SubIndication>TRY_LATER</SubIndication>
+                    <Errors NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Errors>
+                </Conclusion>
+                <RFC>
+                    <Constraint>
+                        <Name NameId="BBB_XCV_IRDPFC">Is the revocation data present for the certificate?</Name>
+                        <Status>NOT OK</Status>
+                        <Error NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Error>
+                    </Constraint>
+                    <Conclusion>
+                        <Indication>INDETERMINATE</Indication>
+                        <SubIndication>TRY_LATER</SubIndication>
+                        <Errors NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Errors>
+                    </Conclusion>
+                </RFC>
+            </SubXCV>
+            <SubXCV Id="F225A017FF2D9D2E949F9D57B9F6FB5E3FFA048074C7A81EB49BCEF8D86A053A" TrustAnchor="false">
+                <Constraint>
+                    <Name NameId="BBB_XCV_ICSI">Is the certificate's signature intact?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="ASCCM">Are signature cryptographic constraints met?</Name>
+                    <Status>OK</Status>
+                    <AdditionalInfo>Validation time : 2019-02-25 15:19</AdditionalInfo>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ICTIVRSC">Is the current time in the validity range of the signer's
+                        certificate?
+                    </Name>
+                    <Status>OK</Status>
+                    <AdditionalInfo>Certificate validity : 2018-07-05 10:01 to 2028-07-02 10:01</AdditionalInfo>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ISCR">Is the certificate not revoked?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_ISCOH">Is the certificate on hold?</Name>
+                    <Status>OK</Status>
+                </Constraint>
+                <Constraint>
+                    <Name NameId="BBB_XCV_RFC">Is the revocation freshness check concluant ?</Name>
+                    <Status>NOT OK</Status>
+                    <Error NameId="BBB_XCV_RFC_ANS">The revocation freshness check is not concluant!</Error>
+                </Constraint>
+                <Conclusion>
+                    <Indication>INDETERMINATE</Indication>
+                    <SubIndication>TRY_LATER</SubIndication>
+                    <Errors NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Errors>
+                </Conclusion>
+                <RFC>
+                    <Constraint>
+                        <Name NameId="BBB_XCV_IRDPFC">Is the revocation data present for the certificate?</Name>
+                        <Status>NOT OK</Status>
+                        <Error NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Error>
+                    </Constraint>
+                    <Conclusion>
+                        <Indication>INDETERMINATE</Indication>
+                        <SubIndication>TRY_LATER</SubIndication>
+                        <Errors NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Errors>
+                    </Conclusion>
+                </RFC>
+            </SubXCV>
+            <SubXCV Id="A2BDEE658C25D33BEA82C1D25CDB349B45837071C7FD68C6566A58EBED490D9E" TrustAnchor="true">
+                <Conclusion>
+                    <Indication>PASSED</Indication>
+                </Conclusion>
+            </SubXCV>
+        </XCV>
+        <Conclusion>
+            <Indication>INDETERMINATE</Indication>
+            <SubIndication>TRY_LATER</SubIndication>
+            <Errors NameId="BBB_XCV_IRDPFC_ANS">No revocation data for the certificate</Errors>
+        </Conclusion>
+    </BasicBuildingBlocks>
+    <TLAnalysis CountryCode="EU">
+        <Constraint>
+            <Name NameId="QUAL_TL_FRESH">Is the trusted list fresh ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Constraint>
+            <Name NameId="QUAL_TL_EXP">Is the trusted list not expired ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Constraint>
+            <Name NameId="QUAL_TL_VERSION">Is the trusted list has the expected version ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Constraint>
+            <Name NameId="QUAL_TL_WS">Is the trusted list well signed ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Conclusion>
+            <Indication>PASSED</Indication>
+        </Conclusion>
+    </TLAnalysis>
+    <TLAnalysis CountryCode="CUST">
+        <Constraint>
+            <Name NameId="QUAL_TL_FRESH">Is the trusted list fresh ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Constraint>
+            <Name NameId="QUAL_TL_EXP">Is the trusted list not expired ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Constraint>
+            <Name NameId="QUAL_TL_VERSION">Is the trusted list has the expected version ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Constraint>
+            <Name NameId="QUAL_TL_WS">Is the trusted list well signed ?</Name>
+            <Status>OK</Status>
+        </Constraint>
+        <Conclusion>
+            <Indication>PASSED</Indication>
+        </Conclusion>
+    </TLAnalysis>
+</DetailedReport>

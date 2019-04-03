@@ -1,11 +1,10 @@
 package eu.domibus.core.crypto;
 
 import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
-import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,6 @@ public class DomainCryptoServiceFactoryImpl implements DomainCryptoServiceFactor
 
         return applicationContext.getBean(DomainCryptoServiceImpl.class, domain);
     }
-
-
 
 
 }

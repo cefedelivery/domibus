@@ -43,6 +43,10 @@
         <param-name>pluginsLocation</param-name>
         <param-value>${domibus.config.location}/plugins/lib</param-value>
     </context-param>
+    <context-param>
+        <param-name>extensionsLocation</param-name>
+        <param-value>${domibus.config.location}/extensions/lib</param-value>
+    </context-param>
 
     <!-- Spring Security -->
     <filter>

@@ -32,6 +32,15 @@ public interface PullMessageService {
     void addPullMessageLock(PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog);
 
     /**
+     * When a message arrives in the system, if it is configured to be pulled, some extra information needed for finding
+     * the message later will be extracted and saved in a different place where the message lock will be facilitated.
+     *
+     * @param partyIdExtractor interface allowing to retrieve the initiator information from different context.
+     * @param pModeKey      the pModeKey.
+     * @param messageLog       the message log.
+     */
+    void addPullMessageLock(final PartyIdExtractor partyIdExtractor, final String pModeKey, final MessageLog messageLog);
+    /**
      * When a message has been successfully delivered or marked a failed, its lock counter part item should be removed from
      * the  locking system.
      *
@@ -105,4 +114,9 @@ public interface PullMessageService {
      * @param requestResult the pull request result.
      */
     void releaseLockAfterReceipt(PullRequestResult requestResult);
+
+    boolean allowMultipleLegsInPullProcess();
+
+    boolean allowDynamicInitiatorInPullProcess();
+
 }

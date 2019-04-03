@@ -40,6 +40,34 @@ public class Submission {
     private String agreementRefType;
     private String fromRole;
     private String toRole;
+    private String mpc;
+
+
+    /**
+     * Getter for mpc
+     * <p>
+     * "Message Partition Channels (MPCs) allow for partitioning the flow
+     * of messages from a Sending MSH to a Receiving MSH into several
+     * flows that can be controlled separately and consumed differently."
+     *
+     * @return a string identifying the Message Partition Chanel
+     */
+    public String getMpc() {
+        return mpc;
+    }
+
+    /**
+     * Setter for mpc
+     * <p>
+     * "Message Partition Channels (MPCs) allow for partitioning the flow
+     * of messages from a Sending MSH to a Receiving MSH into several
+     * flows that can be controlled separately and consumed differently."
+     *
+     * @param mpc string identifying the Message Partition Chanel
+     */
+    public void setMpc(String mpc) {
+        this.mpc = mpc;
+    }
 
     /**
      * Getter for action
@@ -66,7 +94,7 @@ public class Submission {
      * @param action a string identifying an operation or an activity within a Service that may support several of these.
      */
     public void setAction(final String action) {
-        if(!StringUtils.hasLength(action)) {
+        if (!StringUtils.hasLength(action)) {
             throw new IllegalArgumentException("action must not be empty");
         }
         this.action = action;
@@ -196,7 +224,7 @@ public class Submission {
      * @param fromRole a string identifying the authorized role of the Party sending
      */
     public void setFromRole(final String fromRole) {
-        if(!StringUtils.hasLength(fromRole)) {
+        if (!StringUtils.hasLength(fromRole)) {
             throw new IllegalArgumentException("from role must not be empty");
         }
         this.fromRole = fromRole;
@@ -284,7 +312,7 @@ public class Submission {
      * @param service a string identifying the service that acts on the message
      */
     public void setService(final String service) {
-        if(!StringUtils.hasLength(service)) {
+        if (!StringUtils.hasLength(service)) {
             throw new IllegalArgumentException("service must not be empty");
         }
         this.service = service;
@@ -386,7 +414,7 @@ public class Submission {
      * for more efficient monitoring, correlating, dispatching and validating functions (even if these are out of scope
      * of ebMS specification) that do not require payload access."
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
-     *
+     * <p>
      * This method allows he adding of a typed property as described in the
      * <a href="https://issues.oasis-open.org/browse/EBXMLMSG-2">ebMS3 errata</a>} Note that submissions containing typed properties
      * might be rejected by ebMS3 gateways that do not support said errata.
@@ -447,7 +475,7 @@ public class Submission {
         this.addPayload(contentId, payloadDatahandler, null, false, null, null);
     }
 
-    public void addPayload(final Payload payload){
+    public void addPayload(final Payload payload) {
         this.payloads.add(payload);
     }
 
@@ -476,7 +504,7 @@ public class Submission {
     /**
      * This method adds one payload to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Payload} elements.
      * In this case it is possible to set all parameters available for a payload.
-     *
+     * <p>
      * <ol>
      * <li><b>contentId:</b> Will be mapped the href attribute of the eb:partInfo element in ebMS described here:
      * This OPTIONAL attribute has a value that is the [RFC2392] Content-ID URI of the payload object
@@ -572,7 +600,7 @@ public class Submission {
         private final String partyIdType;
 
         public Party(final String partyId, final String partyIdType) {
-            if(!StringUtils.hasLength(partyId)) {
+            if (!StringUtils.hasLength(partyId)) {
                 throw new IllegalArgumentException("partyId must not be empty");
             }
             this.partyId = partyId;
@@ -624,7 +652,7 @@ public class Submission {
             this.inBody = inBody;
 
             String tSchemaLocation = schemaLocation;
-            if("".equals(tSchemaLocation)) {
+            if ("".equals(tSchemaLocation)) {
                 LOG.debug("schema location is empty. replacing with null");
                 tSchemaLocation = null;
             }
@@ -682,7 +710,7 @@ public class Submission {
         }
 
         public TypedProperty(String key, String value, String type) {
-            if(!StringUtils.hasLength(key) || !StringUtils.hasLength(value)) {
+            if (!StringUtils.hasLength(key) || !StringUtils.hasLength(value)) {
                 throw new IllegalArgumentException("message properties must have a non-empty name and value (key [" + key + "], value [" + value + "]");
             }
             this.key = key;
@@ -746,12 +774,12 @@ public class Submission {
         private Locale lang;
 
         public Description(Locale lang, String description) {
-            if(!StringUtils.hasLength(description)) {
+            if (!StringUtils.hasLength(description)) {
                 throw new IllegalArgumentException("description must not be empty");
             }
 
             Locale tLang = lang;
-            if(tLang == null) {
+            if (tLang == null) {
                 LOG.warn("no locale for description set. setting to JVM value: " + Locale.getDefault().getLanguage());
                 tLang = Locale.getDefault();
             }

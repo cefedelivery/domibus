@@ -17,6 +17,11 @@ import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemObjectGenerator;
+import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,9 +32,7 @@ import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.xml.bind.DatatypeConverter;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -218,7 +221,7 @@ public class CertificateServiceImpl implements CertificateService {
         final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
 
         LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date between current date and current date + offset[{}]->[{}]",
-                notificationDate, imminentExpirationDelay,  maxDate);
+                notificationDate, imminentExpirationDelay, maxDate);
         certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, today, maxDate).forEach(certificate -> {
             certificate.setAlertImminentNotificationDate(today);
             certificateDao.saveOrUpdate(certificate);
@@ -388,6 +391,91 @@ public class CertificateServiceImpl implements CertificateService {
         }
         return cert;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String serializeCertificateChainIntoPemFormat(List<? extends Certificate> certificates) {
+        StringWriter sw = new StringWriter();
+        for (Certificate certificate : certificates) {
+            try (PemWriter pw = new PemWriter(sw)) {
+                PemObjectGenerator gen = new JcaMiscPEMGenerator(certificate);
+                pw.writeObject(gen);
+            } catch (IOException e) {
+                throw new IllegalArgumentException(String.format("Error while serializing certificates:[%s]", certificate.getType()), e);
+            }
+        }
+        final String certificateChainValue = sw.toString();
+        LOG.debug("Serialized certificates:[{}]", certificateChainValue);
+        return certificateChainValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<X509Certificate> deserializeCertificateChainFromPemFormat(String chain) {
+        List<X509Certificate> certificates = new ArrayList<>();
+        try (PemReader reader = new PemReader(new StringReader(chain))) {
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
+            PemObject o;
+            while ((o = reader.readPemObject()) != null) {
+                if (o.getType().equals("CERTIFICATE")) {
+                    Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
+                    final X509Certificate certificate = (X509Certificate) c;
+                    LOG.debug("Deserialized certificate:[{}]", certificate.getSubjectDN());
+                    certificates.add(certificate);
+                } else {
+                    throw new IllegalArgumentException("Unknown type " + o.getType());
+                }
+            }
+
+        } catch (IOException | CertificateException e) {
+            LOG.error("Error while instantiating certificates from pem", e);
+        }
+        return certificates;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Certificate extractLeafCertificateFromChain(List<? extends Certificate> certificates) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Extracting leaf certificate from chain");
+            for (Certificate certificate : certificates) {
+                LOG.trace("Certificate:[{}]", certificate);
+            }
+        }
+        Set<String> issuerSet = new HashSet<>();
+        Map<String, X509Certificate> subjectMap = new HashMap<>();
+        for (Certificate certificate : certificates) {
+            X509Certificate x509Certificate = (X509Certificate) certificate;
+            final String subjectName = x509Certificate.getSubjectDN().getName();
+            subjectMap.put(subjectName, x509Certificate);
+            final String issuerName = x509Certificate.getIssuerDN().getName();
+            issuerSet.add(issuerName);
+            LOG.debug("Certificate subject:[{}] issuer:[{}]", subjectName, issuerName);
+        }
+
+        final Set<String> allSubject = subjectMap.keySet();
+        //There should always be one more subject more than issuers. Indeed the root CA has the same value as issuer and subject.
+        allSubject.removeAll(issuerSet);
+        //the unique entry in the set is the leaf.
+        if (allSubject.size() == 1) {
+            final String leafSubjet = allSubject.iterator().next();
+            LOG.debug("Not an issuer:[{}]", leafSubjet);
+            return subjectMap.get(leafSubjet);
+        }
+        //In case of unique self-signed certificate, the issuer and the subject are the same.
+        if (certificates.size() == 1) {
+            return certificates.get(0);
+        }
+        LOG.error("Certificate exchange type is X_509_PKIPATHV_1 but no leaf certificate has been found");
+        return null;
+    }
+
 
     public TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException {
         X509Certificate cert = loadCertificateFromString(certificateContent);

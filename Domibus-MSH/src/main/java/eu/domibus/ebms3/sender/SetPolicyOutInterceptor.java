@@ -11,7 +11,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
-import org.apache.commons.lang3.Validate;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.interceptor.Fault;
@@ -71,10 +70,8 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
         final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
         message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
-        Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
-        Validate.notNull(receiverParty, "Initiator party was not found");
 
-        final String encryptionUsername = receiverParty.getName();
+        String encryptionUsername = extractEncryptionUsername(pModeKey);
         message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
         LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 
@@ -86,7 +83,23 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_NOT_FOUND, e, legConfiguration.getSecurity().getPolicy());
             throw new Fault(new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not find policy file " + domibusConfigurationService.getConfigLocation() + "/" + this.pModeProvider.getLegConfiguration(pModeKey).getSecurity(), null, null));
         }
+    }
 
+    protected String extractEncryptionUsername(String pModeKey) {
+        String encryptionUsername = null;
+        try {
+            Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
+            if (receiverParty != null) {
+                encryptionUsername = receiverParty.getName();
+            }
+        } catch (ConfigurationException exc) {
+            LOG.info("Initiator party was not found, will be extracted from pModeKey.");
+        }
+        if (encryptionUsername == null) {
+            encryptionUsername = pModeProvider.getReceiverPartyNameFromPModeKey(pModeKey);
+        }
+
+        return encryptionUsername;
     }
 
 

@@ -1,5 +1,6 @@
 package eu.domibus.plugin.classloader;
 
+import com.google.common.collect.Sets;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.integration.junit4.JMockit;
@@ -39,7 +40,7 @@ public class PluginClassLoaderTest {
         }};
 
 
-        PluginClassLoader pluginClassLoader = new PluginClassLoader(pluginsDir, PluginClassLoaderTest.class.getClassLoader());
+        PluginClassLoader pluginClassLoader = new PluginClassLoader(Sets.newHashSet(pluginsDir), PluginClassLoaderTest.class.getClassLoader());
         URL[] urls = pluginClassLoader.getURLs();
         assertNotNull(urls);
         assertEquals(urls.length, 2);
