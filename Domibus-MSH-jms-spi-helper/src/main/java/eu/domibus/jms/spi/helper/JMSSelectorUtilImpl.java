@@ -40,9 +40,11 @@ public class JMSSelectorUtilImpl implements JMSSelectorUtil {
         StringBuffer selector = new StringBuffer();
         // JMSType
         String jmsType = (String) criteria.get("JMSType");
-        if (!StringUtils.isEmpty(jmsType)) {
+        if (!StringUtils.isBlank(jmsType)) {
             selector.append(selector.length() > 0 ? " and " : "");
-            selector.append("JMSType='").append(jmsType).append("'");
+            selector.append("JMSType='")
+                    .append(jmsType.replaceAll("'","''"))
+                    .append("'");
         }
         // JMSTimestamp
         Long jmsTimestampFrom = (Long) criteria.get("JMSTimestamp_from");
@@ -56,7 +58,7 @@ public class JMSSelectorUtilImpl implements JMSSelectorUtil {
             selector.append("JMSTimestamp<=").append(jmsTimestampTo);
         }
         String selectorClause = (String) criteria.get("selectorClause");
-        if (!StringUtils.isEmpty(selectorClause)) {
+        if (!StringUtils.isBlank(selectorClause)) {
             selector.append(selector.length() > 0 ? " and " : "");
             selector.append(selectorClause);
         }
