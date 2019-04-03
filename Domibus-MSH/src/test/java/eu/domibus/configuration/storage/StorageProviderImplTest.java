@@ -101,7 +101,7 @@ public class StorageProviderImplTest {
             result = null;
         }};
 
-        Assert.assertTrue(storageProvider.savePayloadsInDatabase());
+        Assert.assertTrue(storageProvider.idPayloadsPersistenceInDatabaseConfigured());
     }
 
     @Test
@@ -118,6 +118,6 @@ public class StorageProviderImplTest {
             result = "/home/storage";
         }};
 
-        Assert.assertFalse(storageProvider.savePayloadsInDatabase());
+        Assert.assertFalse(storageProvider.idPayloadsPersistenceInDatabaseConfigured());
     }
 }

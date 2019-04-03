@@ -2,7 +2,6 @@ package eu.domibus.core.message.fragment;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
@@ -16,9 +15,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Splitting;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.AS4ReceiptService;
-import eu.domibus.common.services.impl.MessageRetentionService;
-import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.common.services.impl.*;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.core.message.UserMessageDefaultService;
@@ -160,7 +157,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             LOG.debug("Using [{}] as source message file ", compressSourceMessage);
             sourceMessageFile = compressSourceMessage;
             messageGroupEntity.setCompressedMessageSize(BigInteger.valueOf(compressSourceMessage.length()));
-            messageGroupEntity.setCompressionAlgorithm("application/gzip");
+            messageGroupEntity.setCompressionAlgorithm(CompressionService.COMPRESSION_PROPERTY_VALUE);
         }
 
         messageGroupEntity.setSoapAction(StringUtils.EMPTY);
@@ -468,7 +465,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         LOG.debug("Compressing the source message file [{}] to [{}]", fileName, compressedFileName);
         try (GZIPOutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(compressedFileName)));
              FileInputStream sourceMessageInputStream = new FileInputStream(fileName)) {
-            byte[] buffer = new byte[32 * 1024];
+            byte[] buffer = new byte[MessagingServiceImpl.DEFAULT_BUFFER_SIZE];
             int len;
             while ((len = sourceMessageInputStream.read(buffer)) != -1) {
                 out.write(buffer, 0, len);
@@ -506,12 +503,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     }
 
     protected File getFragmentStorageDirectory() {
-        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        Storage currentStorage = storageProvider.forDomain(currentDomain);
-        LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
-        if (currentStorage == null) {
-            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
-        }
+        final Storage currentStorage = storageProvider.getCurrentStorage();
         if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not store fragment payload. Please configure " + Storage.ATTACHMENT_STORAGE_LOCATION + " when using SplitAndJoin");
         }
@@ -523,7 +515,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
         LOG.debug("Splitting SourceMessage [{}] into [{}] fragments, bytesPerSplit [{}], remainingBytes [{}]", sourceMessageFile, fragmentCount, bytesPerSplit, remainingBytes);
 
-        int maxReadBufferSize = 32 * 1024; //16KB
+        int maxReadBufferSize = MessagingServiceImpl.DEFAULT_BUFFER_SIZE;
         try (RandomAccessFile raf = new RandomAccessFile(sourceMessageFile, "r")) {
             for (int index = 1; index <= fragmentCount; index++) {
                 final String fragmentFileName = getFragmentFileName(storageDirectory, sourceMessageFile.getName(), index);
@@ -536,7 +528,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
                 try (final FileOutputStream outputStream = new FileOutputStream(remainingFragmentFileName);
                      final BufferedOutputStream bw = new BufferedOutputStream(outputStream)) {
-                    readWrite(raf, bw, remainingBytes);
+                    copyToOutputStream(raf, bw, remainingBytes);
                 }
             }
         }
@@ -552,18 +544,18 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
                 long numReads = bytesPerSplit / maxReadBufferSize;
                 long numRemainingRead = bytesPerSplit % maxReadBufferSize;
                 for (int index = 0; index < numReads; index++) {
-                    readWrite(raf, bw, maxReadBufferSize);
+                    copyToOutputStream(raf, bw, maxReadBufferSize);
                 }
                 if (numRemainingRead > 0) {
-                    readWrite(raf, bw, numRemainingRead);
+                    copyToOutputStream(raf, bw, numRemainingRead);
                 }
             } else {
-                readWrite(raf, bw, bytesPerSplit);
+                copyToOutputStream(raf, bw, bytesPerSplit);
             }
         }
     }
 
-    protected void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
+    protected void copyToOutputStream(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
         byte[] buf = new byte[(int) numBytes];
         int val = raf.read(buf);
         if (val != -1) {
@@ -635,7 +627,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     protected void decompressGzip(File input, File output) throws IOException {
         try (GZIPInputStream in = new GZIPInputStream(new FileInputStream(input))) {
             try (FileOutputStream out = new FileOutputStream(output)) {
-                IOUtils.copy(in, out, 32 * 1024);
+                IOUtils.copy(in, out, MessagingServiceImpl.DEFAULT_BUFFER_SIZE);
             }
         }
     }

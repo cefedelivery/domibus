@@ -22,7 +22,8 @@ import java.io.OutputStreamWriter;
 /**
  * This class is responsible for performing complex operations using VFS
  *
- * @author @author FERNANDES Henrique, GONCALVES Bruno
+ * @author FERNANDES Henrique, GONCALVES Bruno
+ * @author Cosmin Baciu
  */
 @Component
 @Transactional(noRollbackFor = FSSetUpException.class)
@@ -121,6 +122,13 @@ public class FSFilesManager {
         return file.resolveFile(PARENT_RELATIVE_PATH + siblingName);
     }
 
+    /**
+     * Checks if a lock file exists for a given file
+     *
+     * @param file The original file for which the lock file is checked
+     * @return true if a lock file exists
+     * @throws FileSystemException On error parsing the path, or on error finding the file.
+     */
     public boolean hasLockFile(FileObject file) throws FileSystemException {
         final FileObject lockFile = resolveSibling(file, FSFileNameHelper.getLockFilename(file));
         LOG.debug("Checking if lock file exists [{}]", file.getName().getURI());
@@ -129,6 +137,13 @@ public class FSFilesManager {
         return exists;
     }
 
+    /**
+     * Creates a lock file associated to a given file. For instance it will create invoice.pdf.lock for a file named invoice.pdf
+     *
+     * @param file The original file for which the  lock file is created
+     * @return the lock file
+     * @throws FileSystemException On error parsing the path, or on error finding the file.
+     */
     public FileObject createLockFile(FileObject file) throws FileSystemException {
         final FileObject lockFile = resolveSibling(file, FSFileNameHelper.getLockFilename(file));
         LOG.debug("Creating lock file for [{}]", file.getName().getBaseName());
@@ -136,6 +151,13 @@ public class FSFilesManager {
         return lockFile;
     }
 
+    /**
+     * Deletes the lock file associated to a given file
+     *
+     * @param file The original file for which the lock file is deleted
+     * @return true if the lock file has been deleted
+     * @throws FileSystemException On error parsing the path, or on error finding the file.
+     */
     public boolean deleteLockFile(FileObject file) throws FileSystemException {
         final FileObject lockFile = resolveSibling(file, FSFileNameHelper.getLockFilename(file));
         if (lockFile.exists()) {

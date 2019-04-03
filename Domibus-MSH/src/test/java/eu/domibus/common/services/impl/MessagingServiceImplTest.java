@@ -100,7 +100,7 @@ public class MessagingServiceImplTest {
                                                    @Injectable LegConfiguration legConfiguration,
                                                    @Injectable String backendName) throws IOException, EbMS3Exception {
         new Expectations(messagingService) {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = true;
 
             messagingService.saveOutgoingPayloadToDatabase(partInfo, userMessage, legConfiguration, backendName);
@@ -174,7 +174,7 @@ public class MessagingServiceImplTest {
     public void testStoreIncomingPayloadToDatabase(@Injectable UserMessage userMessage,
                                                    @Injectable PartInfo partInfo) throws IOException {
         new Expectations(messagingService) {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = true;
 
             messagingService.saveIncomingPayloadToDatabase(partInfo);
@@ -194,7 +194,7 @@ public class MessagingServiceImplTest {
                                                      @Injectable PartInfo partInfo,
                                                      @Injectable Storage storage) throws IOException {
         new Expectations(messagingService) {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = false;
 
             storageProvider.getCurrentStorage();
@@ -275,7 +275,7 @@ public class MessagingServiceImplTest {
     @Test
     public void testStoreValidMessage() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
         new Expectations() {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = true;
         }};
 
@@ -320,7 +320,7 @@ public class MessagingServiceImplTest {
             compressionService.handleCompression(anyString, withAny(new PartInfo()), legConfiguration);
             result = true;
 
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = true;
         }};
 

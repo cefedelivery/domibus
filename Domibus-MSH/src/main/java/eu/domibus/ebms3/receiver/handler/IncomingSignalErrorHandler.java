@@ -47,6 +47,10 @@ public class IncomingSignalErrorHandler implements IncomingMessageHandler {
             return null;
         }
 
+        if(signalMessage.getError().size() > 1) {
+            LOG.warn("More than one error received in the SignalMessage, only the first one will be processed");
+        }
+
         final Error error = signalMessage.getError().iterator().next();
         LOG.debug("Processing Signal with error [{}]", error);
 

@@ -1143,7 +1143,7 @@ public class UserMessageHandlerServiceImplTest {
                                                 @Injectable MessageFragmentType messageFragmentType,
                                                 @Injectable MessageGroupEntity messageGroupEntity)  {
         new Expectations() {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = true;
         }};
 
@@ -1160,7 +1160,7 @@ public class UserMessageHandlerServiceImplTest {
                                                                    @Injectable MessageFragmentType messageFragmentType,
                                                                    @Injectable MessageGroupEntity messageGroupEntity)  {
         new Expectations() {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = false;
 
             messageGroupEntity.getRejected();
@@ -1181,7 +1181,7 @@ public class UserMessageHandlerServiceImplTest {
 
         long totalFragmentCount = 5;
         new Expectations() {{
-            storageProvider.savePayloadsInDatabase();
+            storageProvider.idPayloadsPersistenceInDatabaseConfigured();
             result = false;
 
             messageGroupEntity.getRejected();

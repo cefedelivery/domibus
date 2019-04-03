@@ -57,6 +57,7 @@ import java.util.Map;
  * During download, it manages the user authentication and the AS4 message's reading, data clearing and status update.
  *
  * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
+ * @author Cosmin Baciu
  * @since 3.0
  */
 @Service
@@ -394,7 +395,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             final boolean splitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
             userMessage.setSplitAndJoin(splitAndJoin);
 
-            if (splitAndJoin && storageProvider.savePayloadsInDatabase()) {
+            if (splitAndJoin && storageProvider.idPayloadsPersistenceInDatabaseConfigured()) {
                 LOG.error("SplitAndJoin feature needs payload storage on the file system");
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", userMessage.getMessageInfo().getMessageId(), null);
                 ex.setMshRole(MSHRole.SENDING);

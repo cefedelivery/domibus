@@ -120,7 +120,18 @@ public class ReceiveDeliverMessageJMSIT extends AbstractBackendJMSIT {
         userMessageLog.setMessageType(MessageType.USER_MESSAGE);
         userMessageLog.setMshRole(MSHRole.RECEIVING);
         userMessageLog.setReceived(new Date());
-        userMessageLogService.save(messageId, eu.domibus.common.MessageStatus.RECEIVED.name(), NotificationStatus.REQUIRED.name(), MshRole.RECEIVING.name(), 1, "default", "backendWebservice", "", null, null, null, null);
+        userMessageLogService.save(messageId,
+                eu.domibus.common.MessageStatus.RECEIVED.name(),
+                NotificationStatus.REQUIRED.name(),
+                MshRole.RECEIVING.name(),
+                1,
+                "default",
+                "backendWebservice",
+                "",
+                null,
+                null,
+                null,
+                null);
 
 
         javax.jms.Connection connection = xaJmsConnectionFactory.createConnection("domibus", "changeit");

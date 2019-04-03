@@ -35,7 +35,7 @@ public class IncomingSourceMessageHandler extends AbstractIncomingMessageHandler
     protected SOAPMessage processMessage(LegConfiguration legConfiguration, String pmodeKey, SOAPMessage request, Messaging messaging, boolean testMessage) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         LOG.debug("Processing SourceMessage");
 
-        if (storageProvider.savePayloadsInDatabase()) {
+        if (storageProvider.idPayloadsPersistenceInDatabaseConfigured()) {
             LOG.error("SplitAndJoin feature needs payload storage on the file system");
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
             ex.setMshRole(MSHRole.RECEIVING);

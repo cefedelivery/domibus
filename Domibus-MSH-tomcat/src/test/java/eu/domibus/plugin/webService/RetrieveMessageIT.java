@@ -127,7 +127,18 @@ public class RetrieveMessageIT extends AbstractBackendWSIT {
         userMessageLog.setMessageType(MessageType.USER_MESSAGE);
         userMessageLog.setMshRole(MSHRole.RECEIVING);
         userMessageLog.setReceived(new Date());
-        userMessageLogService.save(sanitazedMessageId, eu.domibus.common.MessageStatus.RECEIVED.name(), NotificationStatus.REQUIRED.name(), MshRole.RECEIVING.name(), 1, "default", "backendWebservice", "", null, null, null, null);
+        userMessageLogService.save(sanitazedMessageId,
+                eu.domibus.common.MessageStatus.RECEIVED.name(),
+                NotificationStatus.REQUIRED.name(),
+                MshRole.RECEIVING.name(),
+                1,
+                "default",
+                "backendWebservice",
+                "",
+                null,
+                null,
+                null,
+                null);
 
         final JmsMessage jmsMessage = new NotifyMessageCreator(sanitazedMessageId, NotificationType.MESSAGE_RECEIVED, new HashMap<>()).createMessage();
         jmsManager.sendMessageToQueue(jmsMessage, WS_NOT_QUEUE);

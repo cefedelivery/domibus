@@ -97,6 +97,12 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         return query.getResultList();
     }
 
+    /**
+     * Finds a UserMessageLog by message id. If the message id is not found it catches the exception raised Hibernate and returns null.
+     *
+     * @param messageId The message id
+     * @return The UserMessageLog
+     */
     public UserMessageLog findByMessageIdSafely(String messageId) {
         try {
             return findByMessageId(messageId);
@@ -106,8 +112,9 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         }
     }
 
-    //TODO do not bubble up DAO specific exceptions; just return null and make sure it is treated accordingly
+
     public UserMessageLog findByMessageId(String messageId) {
+        //TODO do not bubble up DAO specific exceptions; just return null and make sure it is treated accordingly
         TypedQuery<UserMessageLog> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLog.class);
         query.setParameter(STR_MESSAGE_ID, messageId);
         return query.getSingleResult();

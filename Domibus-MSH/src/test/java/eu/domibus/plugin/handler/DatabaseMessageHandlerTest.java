@@ -389,7 +389,6 @@ public class DatabaseMessageHandlerTest {
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             result = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
-            ;
 
             Party sender = new Party();
             sender.setName(GREEN);

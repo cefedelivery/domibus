@@ -62,7 +62,7 @@ public class StorageProviderImpl implements StorageProvider {
     }
 
     @Override
-    public boolean savePayloadsInDatabase() {
+    public boolean idPayloadsPersistenceInDatabaseConfigured() {
         final Storage currentStorage = getCurrentStorage();
         return currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null;
     }

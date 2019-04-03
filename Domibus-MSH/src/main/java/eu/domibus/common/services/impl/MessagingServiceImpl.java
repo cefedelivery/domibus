@@ -44,6 +44,7 @@ public class MessagingServiceImpl implements MessagingService {
     public static final String PAYLOAD_EXTENSION = ".payload";
     public static final String MIME_TYPE_APPLICATION_UNKNOWN = "application/unknown";
     public static final String PROPERTY_PAYLOADS_SCHEDULE_THRESHOLD = "domibus.dispatcher.splitAndJoin.payloads.schedule.threshold";
+    public static final int DEFAULT_BUFFER_SIZE = 32 * 1024;
     protected static Long BYTES_IN_MB = 1048576L;
 
 
@@ -88,6 +89,7 @@ public class MessagingServiceImpl implements MessagingService {
             final Domain currentDomain = domainContextProvider.getCurrentDomain();
 
             if (scheduleSourceMessagePayloads(messaging, currentDomain)) {
+                //stores the payloads asynchronously
                 domainTaskExecutor.submitLongRunningTask(
                         () -> {
                             LOG.debug("Scheduling the SourceMessage saving");
@@ -96,6 +98,7 @@ public class MessagingServiceImpl implements MessagingService {
                         () -> splitAndJoinService.setSourceMessageAsFailed(messaging.getUserMessage()),
                         currentDomain);
             } else {
+                //stores the payloads synchronously
                 storeSourceMessagePayloads(messaging, mshRole, legConfiguration, backendName);
             }
         } else {
@@ -175,7 +178,7 @@ public class MessagingServiceImpl implements MessagingService {
     protected void storeIncomingPayload(PartInfo partInfo, UserMessage userMessage) throws IOException {
         String messageId = userMessage.getMessageInfo().getMessageId();
 
-        if (storageProvider.savePayloadsInDatabase()) {
+        if (storageProvider.idPayloadsPersistenceInDatabaseConfigured()) {
             saveIncomingPayloadToDatabase(partInfo);
         } else {
             if (StringUtils.isBlank(partInfo.getFileName())) {
@@ -218,7 +221,7 @@ public class MessagingServiceImpl implements MessagingService {
     protected void storeOutgoingPayload(PartInfo partInfo, UserMessage userMessage, final LegConfiguration legConfiguration, String backendName) throws IOException, EbMS3Exception {
         String messageId = userMessage.getMessageInfo().getMessageId();
 
-        if (storageProvider.savePayloadsInDatabase()) {
+        if (storageProvider.idPayloadsPersistenceInDatabaseConfigured()) {
             saveOutgoingPayloadToDatabase(partInfo, userMessage, legConfiguration, backendName);
         } else {
             //message fragment files are already saved on the file system
@@ -277,7 +280,7 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected long saveIncomingFileToDisk(File file, InputStream is) throws IOException {
         try (OutputStream fileOutputStream = new FileOutputStream(file)) {
-            final long total = IOUtils.copy(is, fileOutputStream, 32 * 1024);
+            final long total = IOUtils.copy(is, fileOutputStream, DEFAULT_BUFFER_SIZE);
             fileOutputStream.flush();
             LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
             return total;
@@ -318,7 +321,7 @@ public class MessagingServiceImpl implements MessagingService {
                 fileOutputStream = new GZIPOutputStream(fileOutputStream);
             }
 
-            final long total = IOUtils.copy(is, fileOutputStream, 32 * 1024);
+            final long total = IOUtils.copy(is, fileOutputStream, MessagingServiceImpl.DEFAULT_BUFFER_SIZE);
             LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
             return total;
         } finally {
@@ -332,7 +335,7 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected byte[] compress(byte[] binaryData) throws IOException {
         LOG.debug("Compressing binary data");
-        final byte[] buffer = new byte[32 * 1024];
+        final byte[] buffer = new byte[MessagingServiceImpl.DEFAULT_BUFFER_SIZE];
         InputStream sourceStream = new ByteArrayInputStream(binaryData);
         ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
         GZIPOutputStream targetStream = new GZIPOutputStream(compressedContent);

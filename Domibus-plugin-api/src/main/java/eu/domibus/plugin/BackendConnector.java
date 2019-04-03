@@ -15,6 +15,7 @@ import java.util.List;
  * Implementations should extend eu.domibus.plugin.AbstractBackendConnector instead.
  *
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 public interface BackendConnector<U, T> {
 
@@ -100,18 +101,30 @@ public interface BackendConnector<U, T> {
 
     /**
      * This method gets called when an incoming message is rejected by the MSH
+     *
      * @param messageReceiveFailureEvent event containing details about the message receive failure event
      */
     void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent);
 
     /**
      * This method gets called when the status of a User Message changes
+     *
      * @param event event containing details about the message status change event
      */
     void messageStatusChanged(MessageStatusChangeEvent event);
 
+    /**
+     * Notifies the plugins for every payload that has been submitted to C2 but not yet saved
+     *
+     * @param event The event containing the details of the payload submitted event
+     */
     void payloadSubmittedEvent(PayloadSubmittedEvent event);
 
+    /**
+     * Notifies the plugins for every payload that has been saved by C2
+     *
+     * @param event The event containing the details of the payload processed event
+     */
     void payloadProcessedEvent(PayloadProcessedEvent event);
 
 
@@ -146,9 +159,11 @@ public interface BackendConnector<U, T> {
         PULL("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull");
 
         private final String fileMapping;
+
         Mode(String fileMapping) {
-            this.fileMapping=fileMapping;
+            this.fileMapping = fileMapping;
         }
+
         public String getFileMapping() {
             return fileMapping;
         }
@@ -169,8 +184,9 @@ public interface BackendConnector<U, T> {
 
 
         private final String fileMapping;
+
         Mep(String fileMapping) {
-           this.fileMapping = fileMapping;
+            this.fileMapping = fileMapping;
         }
 
         public String getFileMapping() {

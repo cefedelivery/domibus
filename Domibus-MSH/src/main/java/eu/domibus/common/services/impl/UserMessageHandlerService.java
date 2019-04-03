@@ -64,5 +64,13 @@ public interface UserMessageHandlerService {
 
     ErrorResult createErrorResult(EbMS3Exception ebm3Exception);
 
+    /**
+     * Add the payloads from the UserMessage as attachments of the SOAPMessage
+     * @param request The SOAPMessage to which attachments are added
+     * @param userMessage The UserMessage that contains the payloads
+     * @throws EbMS3Exception in case there are validation errors
+     * @throws SOAPException
+     * @throws TransformerException
+     */
     void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException;
 }

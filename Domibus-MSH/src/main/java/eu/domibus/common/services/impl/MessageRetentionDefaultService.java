@@ -55,7 +55,7 @@ public class MessageRetentionDefaultService implements MessageRetentionService {
 
 
     /**
-     * Deletes the expired messages(downloaded or not) using the configured limits
+     * {@inheritDoc}
      */
     @Override
     @Transactional
@@ -111,7 +111,7 @@ public class MessageRetentionDefaultService implements MessageRetentionService {
 
     @Override
     public void scheduleDeleteMessages(List<String> messageIds) {
-        if(CollectionUtils.isEmpty(messageIds)) {
+        if (CollectionUtils.isEmpty(messageIds)) {
             LOG.debug("No message to be scheduled for deletion");
             return;
         }

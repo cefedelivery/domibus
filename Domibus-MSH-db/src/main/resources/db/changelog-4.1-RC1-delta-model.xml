@@ -136,8 +136,8 @@
         </createIndex>
 
         <addColumn tableName="TB_MESSAGE_LOG">
-            <column name="SOURCE_MESSAGE" type="BOOLEAN"/>
-            <column name="MESSAGE_FRAGMENT" type="BOOLEAN"/>
+            <column name="SOURCE_MESSAGE" type="BOOLEAN" remarks="true if the message is a SourceMessage"/>
+            <column name="MESSAGE_FRAGMENT" type="BOOLEAN" remarks="true if the message is a message fragment"/>
         </addColumn>
 
         <createTable tableName="TB_MESSAGE_FRAGMENT">

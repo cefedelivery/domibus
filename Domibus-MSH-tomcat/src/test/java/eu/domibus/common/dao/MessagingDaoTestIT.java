@@ -63,7 +63,7 @@ public class MessagingDaoTestIT extends AbstractIT{
         secondMessage.setId(null);
         messagingDao.create(firstMessage);
         //@thom fix this late because their is a weird contraint exception here.
-    //    messagingDao.create(secondMessage);
+
         UserMessageLogEntityBuilder umlBuilder = UserMessageLogEntityBuilder.create()
                 .setMessageId(messageInfo.getMessageId())
                 .setMessageStatus(MessageStatus.READY_TO_PULL)

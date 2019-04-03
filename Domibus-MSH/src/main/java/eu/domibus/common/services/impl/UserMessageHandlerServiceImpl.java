@@ -160,22 +160,26 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         checkCharset(messaging);
 
         LOG.debug("Message duplication status:{}", messageExists);
-        if (!messageExists) {
-            if (testMessage) {
-                // ping messages are only stored and not notified to the plugins
-                persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, null);
-            } else {
-                final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
-                String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
+        if (messageExists) {
+            LOG.debug("No handling required: message already exists");
+            return;
+        }
+        LOG.debug("Handling incoming SourceMessage [{}]", messageId);
 
-                persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, backendName);
+        if (testMessage) {
+            // ping messages are only stored and not notified to the plugins
+            persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, null);
+        } else {
+            final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+            String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
 
-                try {
-                    backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-                } catch (SubmissionValidationException e) {
-                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
-                }
+            persistReceivedSourceMessage(request, legConfiguration, pmodeKey, messaging, null, backendName);
+
+            try {
+                backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
+            } catch (SubmissionValidationException e) {
+                LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
             }
         }
     }
@@ -336,6 +340,17 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         return saveReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName, userMessage);
     }
 
+    /**
+     * Persists the incoming SourceMessage
+     * @param request
+     * @param legConfiguration
+     * @param pmodeKey
+     * @param messaging
+     * @param messageFragmentType
+     * @param backendName
+     * @return
+     * @throws EbMS3Exception
+     */
     protected String persistReceivedSourceMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws EbMS3Exception {
         LOG.info("Persisting received SourceMessage");
         UserMessage userMessage = messaging.getUserMessage();
@@ -422,7 +437,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
     }
 
     protected void validateUserMessageFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, MessageFragmentType messageFragmentType) throws EbMS3Exception {
-        if (storageProvider.savePayloadsInDatabase()) {
+        if (storageProvider.idPayloadsPersistenceInDatabaseConfigured()) {
             LOG.error("SplitAndJoin feature needs payload storage on the file system");
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0002, "SplitAndJoin feature needs payload storage on the file system", userMessage.getMessageInfo().getMessageId(), null);
             ex.setMshRole(MSHRole.RECEIVING);

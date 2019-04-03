@@ -1,7 +1,7 @@
 package eu.domibus.api.multitenancy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 /**
  * Wrapper for the Runnable class to be executed. Catches any exception and executes the error handler if defined.
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LongTaskRunnable implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LongTaskRunnable.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LongTaskRunnable.class);
 
     protected Runnable runnable;
     protected Runnable errorHandler;
