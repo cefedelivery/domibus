@@ -8,6 +8,8 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.metrics.Counter;
+import eu.domibus.common.metrics.Timer;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
@@ -94,6 +96,8 @@ public class PullMessageSender {
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @Transactional(propagation = Propagation.REQUIRED)
     //@TODO unit test this method.
+    @Timer("outgoing_pull_request")
+    @Counter("outgoing_pull_request")
     public void processPullRequest(final Message map) {
         if (domibusInitializationHelper.isNotReady()) {
             return;

@@ -75,6 +75,10 @@
         <listener-class>eu.domibus.common.metrics.MetricsServletContextListener</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>eu.domibus.common.metrics.HealthCheckServletContextListener</listener-class>
+    </listener>
+
     <!-- Apache CXF Servlet and mapping -->
 
     <servlet>

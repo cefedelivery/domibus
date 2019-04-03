@@ -110,6 +110,30 @@
             <pattern>${encoderPattern}</pattern>
         </encoder>
     </appender>
+
+    <appender name="statistic_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/statistic.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>STATISTIC</marker>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>NEUTRAL</onMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.home}/logs/statistics-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${statisticsPattern}</pattern>
+        </encoder>
+    </appender>
+
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
         <encoder>
@@ -120,6 +144,10 @@
     <logger name="eu.domibus" level="INFO">
         <appender-ref ref="security_file"/>
         <appender-ref ref="business_file"/>
+    </logger>
+
+    <logger name="eu.domibus.statistic" level="INFO" additivity="false">
+        <appender-ref ref="statistic_file"/>
     </logger>
 
     <logger name="com.atomikos" level="ERROR">

@@ -9,6 +9,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.metrics.Counter;
+import eu.domibus.common.metrics.Timer;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
@@ -66,6 +68,8 @@ public abstract class AbstractUserMessageSender implements MessageSender {
     protected UserMessageLogDao userMessageLogDao;
 
     @Override
+    @Timer("outgoing_user_message")
+    @Counter("outgoing_user_message")
     public void sendMessage(final UserMessage userMessage) {
         String messageId = userMessage.getMessageInfo().getMessageId();
 

@@ -1,10 +1,12 @@
 package eu.domibus.common.metrics;
 
+import com.codahale.metrics.MetricRegistry;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -22,13 +24,15 @@ public class MetricsAspect {
 
     static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MetricsAspect.class);
 
+    @Autowired
+    private MetricRegistry metricRegistry;
     @Around("@annotation(timer)")
     public Object surroundWithATimer(ProceedingJoinPoint pjp, Timer timer) throws Throwable {
         com.codahale.metrics.Timer.Context context = null;
         final Class<?> clazz = timer.clazz();
         final String timerName = timer.value();
         LOG.trace("adding a timer with name:[{}] in class:[{}]", timerName, clazz.getName());
-        com.codahale.metrics.Timer methodTimer = Metrics.METRIC_REGISTRY.timer(getMetricsName(clazz, timerName + "_timer"));
+        com.codahale.metrics.Timer methodTimer = metricRegistry.timer(getMetricsName(clazz, timerName + "_timer"));
         try {
             context = methodTimer.time();
             return pjp.proceed();
@@ -44,7 +48,7 @@ public class MetricsAspect {
         final Class<?> clazz = counter.clazz();
         final String counterName = counter.value();
         LOG.trace("adding a timer with name:[{}] in class:[{}]", counterName, clazz.getName());
-        com.codahale.metrics.Counter methodCounter = Metrics.METRIC_REGISTRY.counter(getMetricsName(clazz, counterName + "_counter"));
+        com.codahale.metrics.Counter methodCounter = metricRegistry.counter(getMetricsName(clazz, counterName + "_counter"));
         try {
             methodCounter.inc();
             return pjp.proceed();
