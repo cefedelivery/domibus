@@ -3,8 +3,6 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.metrics.Counter;
-import eu.domibus.common.metrics.Timer;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.receiver.handler.IncomingMessageHandler;
 import eu.domibus.ebms3.receiver.handler.IncomingMessageHandlerFactory;
@@ -31,10 +29,7 @@ import javax.xml.ws.soap.SOAPBinding;
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class MSHWebservice implements Provider<SOAPMessage> {
 
-
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHWebservice.class);
-
-    private static final String INCOMING_MESSAGES = "incoming_messages";
 
     @Autowired
     protected MessageUtil messageUtil;
@@ -44,8 +39,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
-    @Timer(INCOMING_MESSAGES)
-    @Counter(INCOMING_MESSAGES)
     public SOAPMessage invoke(final SOAPMessage request) {
         Messaging messaging = messageUtil.getMessage(request);
 
