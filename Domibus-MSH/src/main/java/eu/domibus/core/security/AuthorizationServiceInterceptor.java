@@ -47,7 +47,7 @@ public class AuthorizationServiceInterceptor extends ServiceInterceptor {
                         LOG.error("Technical issue with the authorization module:[{}]", a.getMessage());
                         return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0003:Technical issue.", a.getMessageId(), null);
                     case AUTHORIZATION_CONNECTION_REJECTED:
-                        LOG.error("Connection credential to Authorization was rejeted:[{}]", a.getMessage());
+                        LOG.error("Connection credential to Authorization was rejected:[{}]", a.getMessage());
                         return new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "A0002:Technical issue.", a.getMessageId(), null);
                     default:
                         LOG.warn("Unknown authorization error:[{}]", a.getAuthorizationError());
