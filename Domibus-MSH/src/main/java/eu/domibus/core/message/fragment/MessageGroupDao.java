@@ -34,7 +34,7 @@ public class MessageGroupDao extends BasicDao<MessageGroupEntity> {
         }
     }
 
-    public List<MessageGroupEntity> findReceivedNonExpiredOrRejected() {
+    public List<MessageGroupEntity> findOngoingReceivedNonExpiredOrRejected() {
         TypedQuery<MessageGroupEntity> query = this.em.createNamedQuery("MessageGroupEntity.findReceivedNonExpiredOrRejected", MessageGroupEntity.class);
         return query.getResultList();
     }

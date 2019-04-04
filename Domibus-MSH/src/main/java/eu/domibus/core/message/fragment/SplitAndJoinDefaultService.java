@@ -416,7 +416,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Override
     public void handleExpiredMessages() {
-        final List<MessageGroupEntity> receivedNonExpiredOrRejected = messageGroupDao.findReceivedNonExpiredOrRejected();
+        final List<MessageGroupEntity> receivedNonExpiredOrRejected = messageGroupDao.findOngoingReceivedNonExpiredOrRejected();
         final List<MessageGroupEntity> expiredGroups = getExpiredGroups(receivedNonExpiredOrRejected);
 
         if (CollectionUtils.isEmpty(expiredGroups)) {
