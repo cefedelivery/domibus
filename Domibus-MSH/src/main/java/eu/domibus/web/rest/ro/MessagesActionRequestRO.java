@@ -1,5 +1,7 @@
 package eu.domibus.web.rest.ro;
 
+import eu.domibus.web.rest.validators.NotBlacklisted;
+
 import java.util.List;
 
 /**
@@ -7,10 +9,15 @@ import java.util.List;
  */
 public class MessagesActionRequestRO {
 
+    @NotBlacklisted
     private String source;
+
     private String type;
     private String content;
+
+    @NotBlacklisted
     private String destination;
+
     private Action action;
     private List<String> selectedMessages;
 
