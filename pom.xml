@@ -91,6 +91,11 @@
         <dss.version>5.4</dss.version>
         <!--Statistics properties -->
         <metrics.version>4.0.2</metrics.version>
+        <!--Uumds properties-->
+        <nimbus-jose-jwt.version>5.4</nimbus-jose-jwt.version>
+        <!--Please keep those two dependencies version aligned with transitive dependency-->
+        <json-smart.version>2.3</json-smart.version>
+        <ehcache.version>2.10.5</ehcache.version>
     </properties>
 
     <!-- Where to deploy the binaries -->
@@ -653,6 +658,30 @@
                 <version>${dss.version}</version>
             </dependency>
 
+            <!--UUMDS extension -->
+
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus-jose-jwt.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.minidev</groupId>
+                        <artifactId>json-smart</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json-smart.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.sf.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>${ehcache.version}</version>
+            </dependency>
             <!-- Test dependencies -->
             <dependency>
                 <groupId>org.springframework</groupId>
