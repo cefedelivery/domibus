@@ -14,6 +14,7 @@
             <system export="true">
                 <paths>
                     <path name="com/sun/org/apache/xerces/internal/jaxp/datatype"/>
+                    <path name="com/sun/org/apache/xerces/internal/jaxp/validation"/>
                 </paths>
             </system>
         </dependencies>
