@@ -25,7 +25,7 @@ public class DefaultAuthorizationServiceSpiImpl implements AuthorizationServiceS
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAuthorizationServiceSpiImpl.class);
 
-    protected static final String DEFAULT_IAM_AUTHORIZATION_IDENTIFIER = "DEFAULT_IAM_AUTHORIZATION_SPI";
+    protected static final String DEFAULT_IAM_AUTHORIZATION_IDENTIFIER = "DEFAULT_AUTHORIZATION_SPI";
 
     /**
      * {@inheritDoc}

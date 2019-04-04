@@ -128,6 +128,6 @@ public class DomibusDssCryptoSpi extends AbstractCryptoServiceSpi {
 
     @Override
     public String getIdentifier() {
-        return "DSS_CRYPTO_PROVIDER";
+        return "DSS_AUTHENTICATION_SPI";
     }
 }

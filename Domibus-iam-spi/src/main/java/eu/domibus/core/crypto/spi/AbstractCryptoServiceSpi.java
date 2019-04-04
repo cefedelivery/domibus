@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractCryptoServiceSpi implements DomainCryptoServiceSpi {
 
-    public static final String DEFAULT_IAM_AUTHENTICATION_SPI = "DEFAULT_IAM_AUTHENTICATION_SPI";
+    public static final String DEFAULT_AUTHENTICATION_SPI = "DEFAULT_AUTHENTICATION_SPI";
 
     private DomainCryptoServiceSpi defaultDomainCryptoService;
 
