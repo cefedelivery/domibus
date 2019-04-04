@@ -2,6 +2,7 @@ package eu.domibus.web.rest.ro;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.domibus.web.rest.JmsResource;
+import eu.domibus.web.rest.validators.NotBlacklisted;
 
 import java.util.Date;
 
@@ -10,8 +11,11 @@ import java.util.Date;
  */
 public class MessagesRequestRO {
 
+    @NotBlacklisted
     private String source;
+    @NotBlacklisted
     private String jmsType;
+
     private Date fromDate;
     private Date toDate;
     private String selector;
