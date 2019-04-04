@@ -1038,7 +1038,7 @@
         <profile>
             <id>dss-extension</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>Domibus-authentication-dss-extension</module>
