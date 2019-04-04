@@ -206,7 +206,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     private Integer getIntegerInternal(String propertyName, String customValue) {
-        if(customValue != null) {
+        if (customValue != null) {
             try {
                 return Integer.valueOf(customValue);
             } catch (final NumberFormatException e) {
@@ -263,10 +263,16 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         return getBooleanInternal(propertyName, optionalDomainValue);
     }
 
+    @Override
+    public boolean containsDomainPropertyKey(Domain domain, String propertyName) {
+        final String domainPropertyName = getPropertyName(domain, propertyName);
+        return domibusProperties.containsKey(domainPropertyName);
+    }
+
     private Boolean getBooleanInternal(String propertyName, String customValue) {
-        if(customValue != null) {
+        if (customValue != null) {
             Boolean customBoolean = BooleanUtils.toBooleanObject(customValue);
-            if(customBoolean != null) {
+            if (customBoolean != null) {
                 return customBoolean;
             }
             LOGGER.warn("Could not parse the property [{}] custom value [{}] to a boolean value", propertyName, customValue);
@@ -283,7 +289,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     private <T> T checkDefaultValue(String propertyName, T defaultValue) {
-        if(defaultValue == null) {
+        if (defaultValue == null) {
             throw new IllegalStateException("The default property [" + propertyName + "] is required but was either not found inside the default properties or found having an invalid value");
         }
         LOGGER.debug("Found the property [{}] default value [{}]", propertyName, defaultValue);

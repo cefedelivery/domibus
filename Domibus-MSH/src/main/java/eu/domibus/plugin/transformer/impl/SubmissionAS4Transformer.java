@@ -21,13 +21,12 @@ public class SubmissionAS4Transformer {
 
     public UserMessage transformFromSubmission(final Submission submission) {
         final UserMessage result = new UserMessage();
+        result.setMpc(submission.getMpc());
         this.generateCollaborationInfo(submission, result);
         this.generateMessageInfo(submission, result);
         this.generatePartyInfo(submission, result);
         this.generatePayload(submission, result);
         this.generateMessageProperties(submission, result);
-
-        //TODO: set mpc from pmode
 
         return result;
     }
@@ -135,6 +134,7 @@ public class SubmissionAS4Transformer {
             return result;
         }
 
+        result.setMpc(messaging.getMpc());
         final CollaborationInfo collaborationInfo = messaging.getCollaborationInfo();
         result.setAction(collaborationInfo.getAction());
         result.setService(messaging.getCollaborationInfo().getService().getValue());

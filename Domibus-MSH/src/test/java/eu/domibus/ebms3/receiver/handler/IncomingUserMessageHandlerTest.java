@@ -15,6 +15,7 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.AttachmentCleanupService;
+import eu.domibus.core.security.AuthorizationService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.TimestampDateFormatter;
@@ -161,6 +162,9 @@ public class IncomingUserMessageHandlerTest {
 
     @Injectable
     AttachmentCleanupService attachmentCleanupService;
+
+    @Injectable
+    AuthorizationService authorizationService;
 
 
     /**

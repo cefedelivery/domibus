@@ -16,7 +16,6 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
-import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
@@ -87,7 +86,6 @@ public class PullRequestHandler {
     }
 
 
-
     @Transactional
     public SOAPMessage handleRequest(String messageId, PullContext pullContext) {
         LegConfiguration leg = null;
@@ -101,7 +99,18 @@ public class PullRequestHandler {
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             leg = pullContext.filterLegOnMpc();
             try {
-                messageExchangeService.verifyReceiverCertificate(leg, pullContext.getInitiator().getName());
+                String initiatorPartyName = null;
+                final String mpc = userMessage.getMpc();
+                if (pullContext.getInitiator() != null) {
+                    LOG.debug("Get initiator from pull context");
+                    initiatorPartyName = pullContext.getInitiator().getName();
+                } else if (initiatorPartyName == null && messageExchangeService.forcePullOnMpc(mpc)) {
+                    LOG.debug("Extract initiator from mpc");
+                    initiatorPartyName = messageExchangeService.extractInitiator(mpc);
+                }
+                LOG.info("Initiator is [{}]", initiatorPartyName);
+
+                messageExchangeService.verifyReceiverCertificate(leg, initiatorPartyName);
                 messageExchangeService.verifySenderCertificate(leg, pullContext.getResponder().getName());
                 leg = pullContext.filterLegOnMpc();
                 soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);

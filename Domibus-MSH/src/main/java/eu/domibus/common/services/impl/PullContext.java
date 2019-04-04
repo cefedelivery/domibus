@@ -5,6 +5,7 @@ import com.google.common.collect.Collections2;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
@@ -28,7 +29,6 @@ public class PullContext {
         Validate.notNull(process);
         Validate.notNull(responder);
         Validate.notNull(mpcQualifiedName);
-        Validate.isTrue(process.getInitiatorParties().size() == 1);
         this.process = process;
         this.mpcQualifiedName = mpcQualifiedName;
         this.responder = responder;
@@ -46,6 +46,9 @@ public class PullContext {
     }
 
     public Party getInitiator() {
+        if (CollectionUtils.isEmpty(process.getInitiatorParties())) {
+            return null;
+        }
         return process.getInitiatorParties().iterator().next();
     }
 
@@ -68,7 +71,6 @@ public class PullContext {
             return filter.iterator().next();
         } else throw new IllegalArgumentException("Method should be called after correct context setup.");
     }
-
 
 
 }

@@ -17,6 +17,8 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.configuration.DefaultDomibusConfigurationService;
 import eu.domibus.core.crypto.DomibusPropertyProviderImpl;
+import eu.domibus.core.mpc.MpcService;
+import eu.domibus.core.mpc.MpcServiceImpl;
 import eu.domibus.core.multitenancy.DomainContextProviderImpl;
 import eu.domibus.core.multitenancy.DomainServiceImpl;
 import eu.domibus.core.multitenancy.dao.DomainDao;
@@ -178,6 +180,11 @@ public class PModeDaoTestIT {
         @Bean
         public SignalService signalService() {
             return new SignalServiceImpl();
+        }
+
+        @Bean
+        public MpcService mpcService() {
+            return new MpcServiceImpl();
         }
     }
 
