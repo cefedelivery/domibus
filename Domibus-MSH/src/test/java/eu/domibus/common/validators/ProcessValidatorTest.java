@@ -1,13 +1,22 @@
 package eu.domibus.common.validators;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.impl.PullProcessStatus;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.test.util.PojoInstaciatorUtil;
+import mockit.Injectable;
+import mockit.NonStrictExpectations;
+import mockit.Tested;
+import mockit.integration.junit4.JMockit;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,8 +28,26 @@ import static org.junit.Assert.assertTrue;
  * @author Thomas Dussart
  * @since 3.3
  */
-
+@RunWith(JMockit.class)
 public class ProcessValidatorTest {
+
+    @Tested
+    ProcessValidator processValidator;
+
+    @Injectable
+    PullMessageService pullMessageService;
+
+    @Before
+    public void init() {
+        new NonStrictExpectations() {{
+            pullMessageService.allowDynamicInitiatorInPullProcess();
+            result = false;
+
+            pullMessageService.allowMultipleLegsInPullProcess();
+            result = false;
+        }};
+    }
+
     @Test
     public void checkProcessValidityWithMoreThanOneLegAndDifferentResponder() throws Exception {
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1];[name:leg2]}");
@@ -56,10 +83,12 @@ public class ProcessValidatorTest {
 
     @Test
     public void checkTooManyProcesses() throws Exception {
-        List<Process> processes = Lists.newArrayList(PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1]}", "responderParties{[name:resp1]}"),
-                PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg1]}", "responderParties{[name:resp1]}"));
-        ProcessValidator processValidator = new ProcessValidator();
-        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(processes);
+        Process p1 = PojoInstaciatorUtil.instanciate(Process.class, "p1", "mep[name:oneway]", "legs{[name:leg1]}", "responderParties{[name:resp1]}");
+        //p1.setName("p1");
+        Process p2 = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "legs{[name:leg2]}", "responderParties{[name:resp2]}");
+        p2.setName("p2");
+        List<Process> processes = Lists.newArrayList(p1, p2);
+        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(new HashSet<>(processes));
         assertEquals(1, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(TOO_MANY_PROCESSES));
     }
@@ -73,15 +102,13 @@ public class ProcessValidatorTest {
 
     @Test
     public void checkNoProcess() throws Exception {
-        ProcessValidator processValidator = new ProcessValidator();
-        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(Lists.<Process>newArrayList());
+        Set<PullProcessStatus> pullProcessStatuses = processValidator.verifyPullProcessStatus(Sets.<Process>newHashSet());
         assertEquals(1, pullProcessStatuses.size());
         assertTrue(pullProcessStatuses.contains(NO_PROCESSES));
     }
 
     @Test
     public void createProcessWarningMessage() {
-        ProcessValidator processValidator = new ProcessValidator();
         Process process = PojoInstaciatorUtil.instanciate(Process.class);
         try {
             processValidator.validatePullProcess(Lists.newArrayList(process));
@@ -95,7 +122,6 @@ public class ProcessValidatorTest {
 
     @Test
     public void testOneWayPullOnlySupported() throws EbMS3Exception {
-        ProcessValidator processValidator = new ProcessValidator();
         Process process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:twoway]", "mepBinding[name:pull]", "legs{[name:leg1,defaultMpc[name:test1,qualifiedName:qn1]];[name:leg2,defaultMpc[name:test2,qualifiedName:qn2]]}", "responderParties{[name:resp1]}");
         try {
             processValidator.validatePullProcess(Lists.newArrayList(process));
@@ -105,10 +131,8 @@ public class ProcessValidatorTest {
         }
     }
 
-
     private Set<PullProcessStatus> getProcessStatuses(Process process) {
-        ProcessValidator processValidator = new ProcessValidator();
-        return processValidator.verifyPullProcessStatus(Lists.newArrayList(process));
+        return processValidator.verifyPullProcessStatus(Sets.newHashSet(process));
     }
 
 }

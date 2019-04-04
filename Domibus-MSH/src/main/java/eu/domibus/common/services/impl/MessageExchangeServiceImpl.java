@@ -24,6 +24,7 @@ import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -33,6 +34,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +46,7 @@ import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
@@ -109,6 +112,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private PullMessageService pullMessageService;
 
     @Autowired
+    MpcService mpcService;
+
+    @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
 
@@ -167,7 +173,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
         LOG.trace("Initiating pull requests:");
-        if(pullProcesses.isEmpty()){
+        if (pullProcesses.isEmpty()) {
             LOG.trace("No pull process configured !");
         }
 
@@ -183,7 +189,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
                     for (Party initiatorParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
-                        if(mpc != null && !mpc.equals(mpcQualifiedName)) {
+                        if (mpc != null && !mpc.equals(mpcQualifiedName)) {
                             continue;
                         }
                         //@thom remove the pullcontext from here.
@@ -196,9 +202,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                                 legConfiguration.getService().getName(),
                                 legConfiguration.getAction().getName(),
                                 legConfiguration.getName());
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(messageExchangeConfiguration.toString());
-                        }
+                        LOG.debug("messageExchangeConfiguration:[{}]", messageExchangeConfiguration);
 
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
@@ -244,13 +248,29 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
-        Set<Identifier> identifiers = initiator.getIdentifiers();
-        if (identifiers.size() == 0) {
+        String partyId = getPartyId(mpc, initiator);
+
+        if (partyId == null) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
             return null;
         }
-        String partyId = identifiers.iterator().next().getPartyId();
         return pullMessageService.getPullMessageId(partyId, mpc);
+    }
+
+    protected String getPartyId(String mpc, Party initiator) {
+        String partyId = null;
+        if (initiator != null && initiator.getIdentifiers() != null) {
+            try {
+                partyId = initiator.getIdentifiers().stream().findFirst().get().getPartyId();
+            } catch (NoSuchElementException e) {
+                LOG.debug("Could not get partyId from initiator party");
+            }
+        }
+        if (partyId == null && pullMessageService.allowDynamicInitiatorInPullProcess()) {
+            LOG.debug("Extract partyId from mpc [{}]" , mpc);
+            partyId = mpcService.extractInitiator(mpc);
+        }
+        return partyId;
     }
 
     /**
@@ -259,15 +279,21 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
         try {
+            String mpc = mpcQualifiedName;
             final Party gatewayParty = pModeProvider.getGatewayParty();
-            List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
+            List<Process> processes = pModeProvider.findPullProcessByMpc(mpc);
+            if (CollectionUtils.isEmpty(processes)) {
+                LOG.debug("No process corresponds to mpc:[{}]", mpc);
+                mpc = mpcService.extractBaseMpc(mpc);
+                processes = pModeProvider.findPullProcessByMpc(mpc);
+            }
             if (LOG.isDebugEnabled()) {
                 for (Process process : processes) {
-                    LOG.debug("Process:[{}] correspond to mpc:[{}]", process.getName(), mpcQualifiedName);
+                    LOG.debug("Process:[{}] correspond to mpc:[{}]", process.getName(), mpc);
                 }
             }
             processValidator.validatePullProcess(processes);
-            return new PullContext(processes.get(0), gatewayParty, mpcQualifiedName);
+            return new PullContext(processes.get(0), gatewayParty, mpc);
         } catch (IllegalArgumentException e) {
             throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
         }
@@ -309,18 +335,33 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING)) {
+        if (domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING)) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = multiDomainCertificateProvider.isCertificateChainValid(domainProvider.getCurrentDomain(), receiverName);
                 if (!certificateChainValid) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
-                LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
+                LOG.info("Receiver certificate exists and is valid [{}}]", receiverName);
             } catch (DomibusCertificateException e) {
                 throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, e);
             }
         }
+    }
+
+    @Override
+    public boolean forcePullOnMpc(String mpc) {
+        return mpcService.forcePullOnMpc(mpc);
+    }
+
+    @Override
+    public String extractInitiator(String mpc) {
+        return mpcService.extractInitiator(mpc);
+    }
+
+    @Override
+    public String extractBaseMpc(String mpc) {
+        return mpcService.extractBaseMpc(mpc);
     }
 
     @Override
@@ -330,7 +371,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING)) {
+        if (domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING)) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 X509Certificate certificate = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), senderName);
@@ -340,7 +381,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 if (!certificateService.isCertificateValid(certificate)) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
-                LOG.info("Sender certificate exists and is valid [" + senderName + "]");
+                LOG.info("Sender certificate exists and is valid [{}]", senderName);
             } catch (DomibusCertificateException | KeyStoreException ex) {
                 // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
                 // my opinion is that since the option is enabled, we should validate no matter what => this is an error

@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
@@ -21,6 +22,7 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.ProcessValidator;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.core.pmode.PModeProvider;
@@ -30,11 +32,14 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.jdbc.Expectations;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.TestClass;
 import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.Queue;
 import java.util.ArrayList;
@@ -84,6 +89,9 @@ public class MessageExchangeServiceImplTest {
     @Mock
     private DomainContextProvider domainProvider;
 
+    @Mock
+    MpcService mpcService;
+
     @Spy
     private ProcessValidator processValidator;
 
@@ -110,9 +118,9 @@ public class MessageExchangeServiceImplTest {
 
         when(pModeProvider.getGatewayParty()).thenReturn(correctParty);
         when(configurationDao.configurationExists()).thenReturn(true);
-        //when(configurationDao.read()).thenReturn(configuration);
         List<Process> processes = Lists.newArrayList(process);
         when(pModeProvider.findPullProcessesByInitiator(correctParty)).thenReturn(processes);
+        Mockito.doNothing().when(processValidator).validatePullProcess(Matchers.any(List.class));
     }
 
     private LegConfiguration findLegByName(final String name) {
@@ -124,6 +132,33 @@ public class MessageExchangeServiceImplTest {
         });
         Validate.isTrue(filter.size() == 1);
         return filter.iterator().next();
+    }
+
+    @Test
+    public void testGetPartyId() throws Exception {
+        String mpc = "mpcValue";
+        String expectedPartyId = "BE1234567890";
+        when(pullMessageService.allowDynamicInitiatorInPullProcess()).thenReturn(true);
+        when(mpcService.extractInitiator(mpc)).thenReturn(expectedPartyId);
+
+        String partyId = messageExchangeService.getPartyId(mpc, new Party());
+        assertEquals(expectedPartyId, partyId);
+
+        Party party = Mockito.mock(Party.class);
+        when(party.getIdentifiers()).thenReturn(null);
+
+        partyId = messageExchangeService.getPartyId(mpc, party);
+        assertEquals(expectedPartyId, partyId);
+
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        partyId = messageExchangeService.getPartyId(null, party);
+        assertEquals("party1", partyId);
     }
 
     @Test
@@ -151,6 +186,7 @@ public class MessageExchangeServiceImplTest {
         process = PojoInstaciatorUtil.instanciate(Process.class, "mep[name:oneway]", "mepBinding[name:push]");
         processes.add(process);
         when(pModeProvider.findPullProcessesByMessageContext(messageExchangeConfiguration)).thenReturn(processes);
+        doThrow(new PModeException(DomibusCoreErrorCode.DOM_003, "pMode exception")).when(processValidator).validatePullProcess(Matchers.any(List.class));
         messageExchangeService.getMessageStatus(messageExchangeConfiguration);
     }
 
@@ -219,12 +255,14 @@ public class MessageExchangeServiceImplTest {
     @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoProcess() throws Exception {
         when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(new ArrayList<Process>());
+        doThrow(new PModeException(DomibusCoreErrorCode.DOM_003, "pMode exception")).when(processValidator).validatePullProcess(Matchers.any(List.class));
         messageExchangeService.extractProcessOnMpc("qn1");
     }
 
     @Test(expected = PModeException.class)
     public void extractProcessMpcWithNoToManyProcess() throws Exception {
         when(pModeProvider.findPullProcessByMpc(eq("qn1"))).thenReturn(Lists.newArrayList(new Process(), new Process()));
+        doThrow(new PModeException(DomibusCoreErrorCode.DOM_003, "pMode exception")).when(processValidator).validatePullProcess(Matchers.any(List.class));
         messageExchangeService.extractProcessOnMpc("qn1");
     }
 
