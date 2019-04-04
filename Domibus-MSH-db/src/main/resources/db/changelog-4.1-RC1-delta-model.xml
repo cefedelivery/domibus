@@ -113,6 +113,7 @@
             <column name="GROUP_ID" type="VARCHAR(255)" remarks="The group id">
                 <constraints nullable="false"/>
             </column>
+            <column name="MSH_ROLE" type="VARCHAR(255)" remarks="The role of the MSH"/>
             <column name="SOURCE_MESSAGE_ID" type="VARCHAR(255)" remarks="The SourceMessage id"/>
             <column name="MESSAGE_SIZE" type="BIGINT" remarks="The message size before compression"/>
             <column name="FRAGMENT_COUNT" type="INT" remarks="The message fragment count"/>
@@ -122,6 +123,7 @@
             <column name="SOAP_ACTION" type="VARCHAR(255)" remarks="The Soap action value"/>
             <column name="FK_MESSAGE_HEADER_ID" type="INT" remarks="Foreign key to the TB_MESSAGE_HEADER"/>
             <column name="REJECTED" type="BOOLEAN" remarks="True if the message group has been rejected"/>
+            <column name="EXPIRED" type="BOOLEAN" remarks="True if the message group has expired"/>
         </createTable>
         <createIndex indexName="FK_MG_MH" tableName="TB_MESSAGE_GROUP">
             <column name="FK_MESSAGE_HEADER_ID"/>

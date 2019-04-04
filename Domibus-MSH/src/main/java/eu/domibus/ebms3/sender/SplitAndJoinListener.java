@@ -5,6 +5,7 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
+import eu.domibus.common.ErrorCode;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -75,7 +76,7 @@ public class SplitAndJoinListener implements MessageListener {
                             userMessageService.scheduleSourceMessageRejoin(groupId, sourceMessageFile.getAbsolutePath(), backendName);
                         },
                         () -> {
-                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, groupId, "Error while rejoining the message fragments for group [" + groupId + "]");
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, groupId, ErrorCode.EbMS3ErrorCode.EBMS_0004.getCode().getErrorCode().getErrorCodeName(), "Error while rejoining the message fragments for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_REJOIN)) {
@@ -88,7 +89,7 @@ public class SplitAndJoinListener implements MessageListener {
                             splitAndJoinService.rejoinSourceMessage(groupId, sourceMessageFile, backendName);
                         },
                         () -> {
-                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, groupId, "Error while rejoining the SourceMessage for group [" + groupId + "]");
+                            splitAndJoinService.splitAndJoinReceiveFailed(groupId, groupId, ErrorCode.EbMS3ErrorCode.EBMS_0004.getCode().getErrorCode().getErrorCodeName(), "Error while rejoining the SourceMessage for group [" + groupId + "]");
                         },
                         currentDomain);
             } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SOURCE_MESSAGE_RECEIPT)) {
@@ -109,6 +110,13 @@ public class SplitAndJoinListener implements MessageListener {
                 final String pModeKey = message.getStringProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
 
                 splitAndJoinService.sendSignalError(messageId, ebms3ErrorCode, ebms3ErrorDetail, pModeKey);
+            } else if (StringUtils.equals(messageType, UserMessageService.COMMAND_SPLIT_AND_JOIN_RECEIVE_FAILED)) {
+                final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
+                final String messageId = message.getStringProperty(UserMessageService.MSG_SOURCE_MESSAGE_ID);
+                final String ebms3ErrorCode = message.getStringProperty(UserMessageService.MSG_EBMS3_ERROR_CODE);
+                final String ebms3ErrorDetail = message.getStringProperty(UserMessageService.MSG_EBMS3_ERROR_DETAIL);
+
+                splitAndJoinService.splitAndJoinReceiveFailed(groupId, messageId, ebms3ErrorCode, ebms3ErrorDetail);
             } else {
                 LOG.error("Unrecognized message type [{}]", messageType);
             }

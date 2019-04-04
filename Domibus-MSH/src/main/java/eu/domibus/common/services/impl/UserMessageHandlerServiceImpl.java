@@ -419,6 +419,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
             final MessageHeaderType messageHeader = messageFragmentType.getMessageHeader();
             messageHeaderEntity.setStart(messageHeader.getStart());
             messageHeaderEntity.setBoundary(messageHeader.getBoundary());
+            messageGroupEntity.setMshRole(MSHRole.RECEIVING);
             messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
             messageGroupEntity.setSoapAction(messageFragmentType.getAction());
             messageGroupEntity.setCompressionAlgorithm(messageFragmentType.getCompressionAlgorithm());

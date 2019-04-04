@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 /**
  * @author Cosmin Baciu
@@ -31,5 +32,10 @@ public class MessageGroupDao extends BasicDao<MessageGroupEntity> {
             LOG.trace("Could not found MessageGroupEntity for group [{}]", groupId);
             return null;
         }
+    }
+
+    public List<MessageGroupEntity> findReceivedNonExpiredOrRejected() {
+        TypedQuery<MessageGroupEntity> query = this.em.createNamedQuery("MessageGroupEntity.findReceivedNonExpiredOrRejected", MessageGroupEntity.class);
+        return query.getResultList();
     }
 }

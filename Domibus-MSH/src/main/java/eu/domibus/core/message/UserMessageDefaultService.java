@@ -383,6 +383,21 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
+    public void scheduleSplitAndJoinReceiveFailed(String groupId, String sourceMessageId, String errorCode, String errorDetail) {
+        LOG.debug("Scheduling marking the SplitAndJoin receive failed for group [{}]", groupId);
+
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.COMMAND_SPLIT_AND_JOIN_RECEIVE_FAILED)
+                .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .property(UserMessageService.MSG_SOURCE_MESSAGE_ID, sourceMessageId)
+                .property(UserMessageService.MSG_EBMS3_ERROR_CODE, errorCode)
+                .property(UserMessageService.MSG_EBMS3_ERROR_DETAIL, errorDetail)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, splitAndJoinQueue);
+    }
+
+    @Override
     public void scheduleSendingPullReceipt(String messageId, String pmodeKey) {
         final JmsMessage jmsMessage = JMSMessageBuilder
                 .create()

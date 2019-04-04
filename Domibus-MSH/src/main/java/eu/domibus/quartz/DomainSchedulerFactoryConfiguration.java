@@ -9,6 +9,7 @@ import eu.domibus.core.alerts.job.AlertCleanerJob;
 import eu.domibus.core.alerts.job.AlertCleanerSuperJob;
 import eu.domibus.core.alerts.job.AlertRetryJob;
 import eu.domibus.core.alerts.job.AlertRetrySuperJob;
+import eu.domibus.core.message.fragment.SplitAndJoinExpirationWorker;
 import eu.domibus.core.pull.PullRetryWorker;
 import eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory;
 import eu.domibus.ebms3.puller.MessagePullerJob;
@@ -265,6 +266,27 @@ public class DomainSchedulerFactoryConfiguration {
         return obj;
     }
 
+    @Bean
+    public JobDetailFactoryBean splitAndJoinExpirationJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(SplitAndJoinExpirationWorker.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean splitAndJoinExpirationTrigger() {
+        if (domainContextProvider.getCurrentDomainSafely() == null) {
+            return null;
+        }
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(splitAndJoinExpirationJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.splitAndJoin.receive.expiration.cron"));
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
     /**
      * Sets the triggers only for general schema
      *
@@ -375,7 +397,7 @@ public class DomainSchedulerFactoryConfiguration {
      */
     protected String getTablePrefix(Domain domain) {
         final String databaseSchema = domainService.getDatabaseSchema(domain);
-        if(domibusConfigurationService.isMultiTenantAware() && StringUtils.isEmpty(databaseSchema)) {
+        if (domibusConfigurationService.isMultiTenantAware() && StringUtils.isEmpty(databaseSchema)) {
             throw new IllegalArgumentException("Could not get the database schema for domain [" + domain + "]");
         }
         return getSchemaPrefix(databaseSchema);

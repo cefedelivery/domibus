@@ -1,5 +1,6 @@
 package eu.domibus.core.message.fragment;
 
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -64,6 +65,7 @@ public interface SplitAndJoinService {
 
     void sendSourceMessageReceipt(String sourceMessageId, String pModeKey);
 
-    void splitAndJoinReceiveFailed(String groupId, final String sourceMessageId, String errorDetail);
+    void splitAndJoinReceiveFailed(String groupId, final String sourceMessageId, String ebMS3ErrorCode, String errorDetail);
 
+    void handleExpiredMessages();
 }

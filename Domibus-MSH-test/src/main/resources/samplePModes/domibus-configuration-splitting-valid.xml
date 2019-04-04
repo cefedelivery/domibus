@@ -103,7 +103,7 @@
                        fragmentSize="500"
                        compression="true"
                        compressionAlgorithm="br"
-                       joinInterval="24"/>
+                       joinInterval="1440"/>
         </splittingConfigurations>
         <legConfigurations>
             <legConfiguration name="pushTestcase1tc1Action"

@@ -94,7 +94,7 @@
 			<splitting name="default"
 					   fragmentSize="500"
 					   compression="true"
-					   joinInterval="24"/>
+					   joinInterval="1440"/>
 		</splittingConfigurations>
 		<legConfigurations>
 			<!--

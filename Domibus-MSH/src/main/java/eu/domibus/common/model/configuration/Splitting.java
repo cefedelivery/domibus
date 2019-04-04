@@ -61,9 +61,10 @@ public class Splitting extends AbstractBaseEntity {
     @Column(name = "COMPRESSION_ALGORITHM")
     protected String compressionAlgorithm;
 
+
     @XmlAttribute(name = "joinInterval", required = true)
     @Column(name = "JOIN_INTERVAL")
-    protected int joinInterval;
+    protected int joinInterval; //in minutes
 
     @Override
     public boolean equals(Object o) {

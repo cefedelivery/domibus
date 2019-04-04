@@ -33,6 +33,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.PolicyService;
 import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.attachment.AttachmentDeserializer;
@@ -52,7 +53,11 @@ import javax.xml.transform.TransformerException;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -143,6 +148,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     @Override
     public void createUserFragmentsFromSourceFile(String sourceMessageFileName, SOAPMessage sourceMessageRequest, UserMessage userMessage, String contentTypeString, boolean compression) {
         MessageGroupEntity messageGroupEntity = new MessageGroupEntity();
+        messageGroupEntity.setMshRole(MSHRole.SENDING);
         messageGroupEntity.setGroupId(userMessage.getMessageInfo().getMessageId());
         File sourceMessageFile = new File(sourceMessageFileName);
         messageGroupEntity.setMessageSize(BigInteger.valueOf(sourceMessageFile.length()));
@@ -408,6 +414,68 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         sendSplitAndJoinFailed(messageId);
     }
 
+    @Override
+    public void handleExpiredMessages() {
+        final List<MessageGroupEntity> receivedNonExpiredOrRejected = messageGroupDao.findReceivedNonExpiredOrRejected();
+        final List<MessageGroupEntity> expiredGroups = getExpiredGroups(receivedNonExpiredOrRejected);
+
+        if (CollectionUtils.isEmpty(expiredGroups)) {
+            LOG.trace("No expired groups found");
+            return;
+        }
+        LOG.debug("Found expired groups [{}]", expiredGroups);
+        expiredGroups.stream().forEach(messageGroupEntity -> setGroupAsExpired(messageGroupEntity));
+    }
+
+    protected void setGroupAsExpired(MessageGroupEntity messageGroupEntity) {
+        messageGroupEntity.setExpired(true);
+        messageGroupDao.update(messageGroupEntity);
+        userMessageService.scheduleSplitAndJoinReceiveFailed(messageGroupEntity.getGroupId(), messageGroupEntity.getSourceMessageId(), ErrorCode.EbMS3ErrorCode.EBMS_0051.getCode().getErrorCode().getErrorCodeName(), "Group has expired");
+    }
+
+    protected List<MessageGroupEntity> getExpiredGroups(final List<MessageGroupEntity> receivedNonExpiredOrRejected) {
+        return receivedNonExpiredOrRejected.stream().filter(messageGroupEntity -> isGroupExpired(messageGroupEntity)).collect(Collectors.toList());
+    }
+
+    protected boolean isGroupExpired(MessageGroupEntity messageGroupEntity) {
+        final String groupId = messageGroupEntity.getGroupId();
+        final List<UserMessage> fragments = messagingDao.findUserMessageByGroupId(groupId);
+        if (CollectionUtils.isEmpty(fragments)) {
+            LOG.debug("No fragments found for group [{}]", groupId);
+            return false;
+        }
+
+        fragments.sort(Comparator.comparing(object -> object.getMessageInfo().getTimestamp()));
+        final UserMessage firstReceivedFragment = fragments.stream().findFirst().get();
+        MessageExchangeConfiguration userMessageExchangeContext = null;
+        LegConfiguration legConfiguration = null;
+        try {
+            userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(firstReceivedFragment, MSHRole.RECEIVING);
+            String sourcePmodeKey = userMessageExchangeContext.getPmodeKey();
+            legConfiguration = pModeProvider.getLegConfiguration(sourcePmodeKey);
+        } catch (EbMS3Exception e) {
+            throw new SplitAndJoinException("Error getting the pmodeKey", e);
+        }
+        if (legConfiguration.getSplitting() == null) {
+            LOG.debug("Could no find Splitting configuration");
+            return false;
+        }
+
+        //in minutes
+        final int joinInterval = legConfiguration.getSplitting().getJoinInterval();
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime firstReceivedFragmentTime = new Timestamp(firstReceivedFragment.getMessageInfo().getTimestamp().getTime()).toLocalDateTime();
+
+        LOG.debug("Checking if the (current time [{}] - firstReceivedFragment time [{}]) > join interval [{}]", now, firstReceivedFragmentTime, joinInterval);
+        if (Duration.between(firstReceivedFragmentTime, now).toMinutes() > joinInterval) {
+            LOG.debug("Message group [{}] is expired", groupId);
+            return true;
+        }
+        return false;
+
+    }
+
+
     protected void sendSplitAndJoinFailed(final String groupId) {
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
         if (messageGroupEntity == null) {
@@ -425,7 +493,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
 
     @Transactional
     @Override
-    public void splitAndJoinReceiveFailed(final String groupId, final String sourceMessageId, final String errorDetail) {
+    public void splitAndJoinReceiveFailed(final String groupId, final String sourceMessageId, final String ebMS3ErrorCode, final String errorDetail) {
         LOG.debug("SplitAndJoin receiving failed for group [{}]", groupId);
 
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
@@ -456,7 +524,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             } catch (EbMS3Exception e) {
                 throw new SplitAndJoinException("Error generating the Signal SOAPMessage for SourceMessage [" + sourceMessageId + "]: could not get the MessageExchangeConfiguration", e);
             }
-            userMessageDefaultService.scheduleSendingSignalError(sourceMessageId, ErrorCode.EbMS3ErrorCode.EBMS_0004.getCode().getErrorCode().getErrorCodeName(), errorDetail, userMessageExchangeContext.getReversePmodeKey());
+            userMessageDefaultService.scheduleSendingSignalError(sourceMessageId, ebMS3ErrorCode, errorDetail, userMessageExchangeContext.getReversePmodeKey());
         }
     }
 

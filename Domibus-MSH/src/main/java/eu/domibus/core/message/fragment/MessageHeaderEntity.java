@@ -1,6 +1,7 @@
 package eu.domibus.core.message.fragment;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,5 +37,13 @@ public class MessageHeaderEntity extends AbstractBaseEntity {
 
     public void setStart(String start) {
         this.start = start;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("boundary", boundary)
+                .append("start", start)
+                .toString();
     }
 }

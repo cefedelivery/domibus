@@ -1,7 +1,9 @@
 package eu.domibus.core.message.fragment;
 
+import eu.domibus.common.MSHRole;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -15,12 +17,18 @@ import java.math.BigInteger;
 @Entity
 @Table(name = "TB_MESSAGE_GROUP")
 @NamedQueries({
-        @NamedQuery(name = "MessageGroupEntity.findByGroupId", query = "SELECT c FROM MessageGroupEntity c where c.groupId=:GROUP_ID")
+        @NamedQuery(name = "MessageGroupEntity.findByGroupId", query = "SELECT c FROM MessageGroupEntity c where c.groupId=:GROUP_ID"),
+        @NamedQuery(name = "MessageGroupEntity.findReceivedNonExpiredOrRejected", query = "SELECT c FROM MessageGroupEntity c where c.mshRole = 'RECEIVING' " +
+                "and ( (c.rejected is null or c.rejected=false) or (c.expired is null or c.expired=false) )")
 })
 public class MessageGroupEntity extends AbstractBaseEntity {
 
     @Column(name = "GROUP_ID")
     protected String groupId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MSH_ROLE")
+    private MSHRole mshRole;
 
     @Column(name = "SOURCE_MESSAGE_ID")
     protected String sourceMessageId;
@@ -49,6 +57,9 @@ public class MessageGroupEntity extends AbstractBaseEntity {
 
     @Column(name = "REJECTED")
     protected Boolean rejected;
+
+    @Column(name = "EXPIRED")
+    protected Boolean expired;
 
     public String getGroupId() {
         return groupId;
@@ -122,12 +133,28 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.rejected = rejected;
     }
 
+    public Boolean getExpired() {
+        return expired;
+    }
+
+    public void setExpired(Boolean expired) {
+        this.expired = expired;
+    }
+
     public Long getReceivedFragments() {
         return receivedFragments;
     }
 
     public void setReceivedFragments(Long receivedFragments) {
         this.receivedFragments = receivedFragments;
+    }
+
+    public MSHRole getMshRole() {
+        return mshRole;
+    }
+
+    public void setMshRole(MSHRole mshRole) {
+        this.mshRole = mshRole;
     }
 
     public synchronized void incrementReceivedFragments() {
@@ -137,4 +164,21 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         receivedFragments++;
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("groupId", groupId)
+                .append("mshRole", mshRole)
+                .append("sourceMessageId", sourceMessageId)
+                .append("messageSize", messageSize)
+                .append("fragmentCount", fragmentCount)
+                .append("receivedFragments", receivedFragments)
+                .append("compressionAlgorithm", compressionAlgorithm)
+                .append("compressedMessageSize", compressedMessageSize)
+                .append("soapAction", soapAction)
+                .append("messageHeaderEntity", messageHeaderEntity)
+                .append("rejected", rejected)
+                .append("expired", expired)
+                .toString();
+    }
 }
