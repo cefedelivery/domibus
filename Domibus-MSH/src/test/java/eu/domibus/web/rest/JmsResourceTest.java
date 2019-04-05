@@ -90,6 +90,12 @@ public class JmsResourceTest {
 
     @Test
     public void testActionMove() {
+        SortedMap<String, JMSDestination> dests = new TreeMap<>();
+        dests.put("domibus.queue1", new JMSDestination());
+        new Expectations() {{
+            jmsManager.getDestinations();
+            result = dests;
+        }};
         testAction(MessagesActionRequestRO.Action.MOVE);
     }
 
@@ -105,7 +111,7 @@ public class JmsResourceTest {
         MessagesActionRequestRO request = new MessagesActionRequestRO();
         request.setAction(action);
         request.setSource("source1");
-        request.setDestination("destination1");
+        request.setDestination("domibus.queue1");
         request.setSelectedMessages(selectedMessages);
 
         // When
