@@ -1,6 +1,9 @@
 package eu.domibus.core.message.testservice;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.security.ExplicitTypePermission;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.logging.DomibusLogger;
@@ -18,6 +21,7 @@ import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Cosmin Baciu
@@ -72,9 +76,13 @@ public class TestService {
     }
 
     protected Submission createSubmission(String sender) throws IOException {
-        Resource testservicefile = new ClassPathResource("messages/testservice/testservicemessage.xml");
+        Resource testServiceFile = new ClassPathResource("messages/testservice/testservicemessage.xml");
         XStream xstream = new XStream();
-        Submission submission = (Submission) xstream.fromXML(testservicefile.getInputStream());
+        xstream.addPermission(NoTypePermission.NONE);
+        xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+        xstream.addPermission(new ExplicitTypePermission(new Class[] {List.class, Submission.class, Submission.TypedProperty.class}));
+
+        Submission submission = (Submission) xstream.fromXML(testServiceFile.getInputStream());
         DataHandler payLoadDataHandler = new DataHandler(new ByteArrayDataSource(TEST_PAYLOAD.getBytes(), "text/xml"));
         Submission.TypedProperty objTypedProperty = new Submission.TypedProperty("MimeType", "text/xml");
         Collection<Submission.TypedProperty> listTypedProperty = new ArrayList<>();
