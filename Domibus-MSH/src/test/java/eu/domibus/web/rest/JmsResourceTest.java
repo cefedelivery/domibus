@@ -1,6 +1,5 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
@@ -76,8 +75,8 @@ public class JmsResourceTest {
         jmsMessageList.add(jmsMessage);
 
         new Expectations() {{
-           jmsManager.browseMessages(anyString, anyString, (Date)any, (Date)any, anyString);
-           result = jmsMessageList;
+            jmsManager.browseMessages(anyString, anyString, (Date) any, (Date) any, anyString);
+            result = jmsMessageList;
         }};
 
         // When
@@ -89,7 +88,38 @@ public class JmsResourceTest {
     }
 
     @Test
+    public void testActionMoveNoValidParam() {
+        // Given
+        SortedMap<String, JMSDestination> dests = new TreeMap<>();
+        dests.put("domibus.queue1", new JMSDestination());
+        new Expectations() {{
+            jmsManager.getDestinations();
+            result = dests;
+        }};
+
+        List<String> selectedMessages = new ArrayList<>();
+        selectedMessages.add("message1");
+        MessagesActionRequestRO request = new MessagesActionRequestRO();
+        request.setAction(MessagesActionRequestRO.Action.MOVE);
+        request.setSource("source1");
+        request.setDestination("domibus.queue2");
+        request.setSelectedMessages(selectedMessages);
+
+        // When
+        ResponseEntity<MessagesActionResponseRO> responseEntity = jmsResource.action(request);
+
+        // Then
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
     public void testActionMove() {
+        SortedMap<String, JMSDestination> dests = new TreeMap<>();
+        dests.put("domibus.queue1", new JMSDestination());
+        new Expectations() {{
+            jmsManager.getDestinations();
+            result = dests;
+        }};
         testAction(MessagesActionRequestRO.Action.MOVE);
     }
 
@@ -105,7 +135,7 @@ public class JmsResourceTest {
         MessagesActionRequestRO request = new MessagesActionRequestRO();
         request.setAction(action);
         request.setSource("source1");
-        request.setDestination("destination1");
+        request.setDestination("domibus.queue1");
         request.setSelectedMessages(selectedMessages);
 
         // When
