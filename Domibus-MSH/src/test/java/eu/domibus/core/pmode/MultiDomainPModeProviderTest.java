@@ -7,6 +7,7 @@ import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.dao.ProcessDao;
+import eu.domibus.core.mpc.MpcService;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -57,6 +58,9 @@ public class MultiDomainPModeProviderTest {
 
     @Injectable
     protected SignalService signalService;
+
+    @Injectable
+    protected MpcService mpcService;
 
     @Tested
     MultiDomainPModeProvider multiDomainPModeProvider;

@@ -27,7 +27,7 @@
                      location="classpath:config/application.properties,
                      classpath:config/domibus-default.properties,classpath:config/domibus.properties, file:///${domibus.config.location}/domibus.properties,
                      file:///${domibus.config.location}/*-domibus.properties,
-                     classpath*:config/*-plugin-default.properties,file:///${domibus.config.location}/plugins/config/*-plugin.properties"/>
+                     classpath*:config/*-plugin-default.properties,file:///${domibus.config.location}/plugins/config/*-plugin.properties,file:///${domibus.config.location}/extensions/config/*-extension.properties"/>
 
     <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
 

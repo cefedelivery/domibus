@@ -107,27 +107,32 @@ public class PModeDao extends PModeProvider {
         //nothing to init here
     }
 
+    @Override
+    protected String findPullLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, String mpc) throws EbMS3Exception {
+        //Here we invert the parties to find leg configured for a pull.
+        try {
+            String legNameInPullProcess = findLegNameMepBindingAgnostic(agreementName, receiverParty, senderParty, service, action);
+            //then we verify that the leg is indeed in a pull process.
+            final List<Process> resultList = processDao.findPullProcessByLegName(legNameInPullProcess);
+            //if not pull process found then this is a miss configuration.
+            if (resultList.isEmpty()) {
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
+            }
+            return legNameInPullProcess;
+        } catch (EbMS3Exception e) {
+            LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, e, agreementName, senderParty, receiverParty, service, action);
+            throw e;
+        }
+    }
+
+    @Override
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
         try {
             //this is the normal call for a push.
             return findLegNameMepBindingAgnostic(agreementName, senderParty, receiverParty, service, action);
         } catch (EbMS3Exception e) {
-            //Here we invert the parties to find leg configured for a pull.
-            try {
-                String legNameInPullProcess = findLegNameMepBindingAgnostic(agreementName, receiverParty, senderParty, service, action);
-                //then we verify that the leg is indeed in a pull process.
-                final List<Process> resultList = processDao.findPullProcessByLegName(legNameInPullProcess);
-                //if not pull process found then this is a miss configuration.
-                if (resultList.isEmpty()) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
-                }
-                return legNameInPullProcess;
-            } catch (EbMS3Exception e1) {
-                LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, e, agreementName, senderParty, receiverParty, service, action);
-                throw e1;
-            }
+            return findPullLegName(agreementName, senderParty, receiverParty, service, action, null);
         }
-
     }
 
     public String findLegNameMepBindingAgnostic(String agreementName, String senderParty, String receiverParty, String service, String action) throws EbMS3Exception {
@@ -208,6 +213,11 @@ public class PModeDao extends PModeProvider {
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_ACTION_NOT_FOUND, e, action);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching action found", null, null);
         }
+    }
+
+    @Override
+    protected Mpc findMpc(String mpcValue) throws EbMS3Exception {
+        return null;
     }
 
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
@@ -418,8 +428,8 @@ public class PModeDao extends PModeProvider {
         final List<Process> processByLegName = processDao.findProcessByLegName(legConfiguration.getName());
 
         for (Process process : processByLegName) {
-            for(Party party : process.getResponderParties()) {
-                for(Identifier identifier : party.getIdentifiers()) {
+            for (Party party : process.getResponderParties()) {
+                for (Identifier identifier : party.getIdentifiers()) {
                     result.add(identifier.getPartyId());
                 }
             }

@@ -62,6 +62,7 @@ public class IncomingUserMessageReceiptHandler implements IncomingMessageHandler
 
     @Autowired
     protected ReliabilityService reliabilityService;
+
     @Autowired
     protected MessageUtil messageUtil;
 
