@@ -2,7 +2,9 @@ package eu.domibus.web.rest.validators;
 
 import com.google.common.base.Strings;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import java.util.Arrays;
  */
 @Component
 public class BlacklistValidator implements ConstraintValidator<NotBlacklisted, String> {
+
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(BlacklistValidator.class);
 
     @Autowired
     DomibusPropertyProvider domibusPropertyProvider;
@@ -51,6 +55,7 @@ public class BlacklistValidator implements ConstraintValidator<NotBlacklisted, S
             return !Arrays.stream(blacklist).anyMatch(el -> value.contains(el.toString()));
 
         } catch (Exception e) {
+            LOG.trace("Exception in BlacklistValidator:", e);
             return false;
         }
     }
