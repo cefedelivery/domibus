@@ -23,8 +23,8 @@ public class BlacklistValidator implements ConstraintValidator<NotBlacklisted, S
     DomibusPropertyProvider domibusPropertyProvider;
 
     Character[] blacklist = null;
-    @Override
-    public void initialize(NotBlacklisted attr) {
+
+    public void init() {
         if (blacklist == null) {
             String blacklistValue = domibusPropertyProvider.getProperty("domibus.userInput.blackList");
             if (!Strings.isNullOrEmpty(blacklistValue)) {
@@ -34,7 +34,11 @@ public class BlacklistValidator implements ConstraintValidator<NotBlacklisted, S
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
+    public void initialize(NotBlacklisted attr) {
+        init();
+    }
+
+    public boolean isValid(String value) {
 
         try {
             if (ArrayUtils.isEmpty(blacklist)) {
@@ -49,5 +53,10 @@ public class BlacklistValidator implements ConstraintValidator<NotBlacklisted, S
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        return isValid(value, null);
     }
 }
